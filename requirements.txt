@@ -1,0 +1,10 @@
+Django
+djangorestframework
+djoser
+djangorestframework-simplejwt
+psycopg2-binary
+drf-spectacular
+Pillow
+flake8
+python-dotenv
+django-auditlog
