@@ -1,6 +1,9 @@
 from django.db import models
 from core.abstract.models import AbstractModel
 from hr.step.models import BimaHrInterviewStep
+from core.source.models import BimaCoreSource
+
+
 class BimaHrApplicant(AbstractModel):
     first_name = models.CharField(max_length=28, blank=False)
     last_name = models.CharField(max_length=28, blank=False)
@@ -40,10 +43,9 @@ class BimaHrApplicant(AbstractModel):
     description =models.TextField(max_length=256)
     status = models.SmallIntegerField()
     refuse = models.CharField(max_length=28, blank=False)
-    documents =models.IntegerField()
-    id_source_type =models.IntegerField()
-    Source_name =models.TextField(max_length=256)
-    Score =models.FloatField()
+    id_source_type =models.ForeignKey(BimaCoreSource, on_delete=models.CASCADE)
+    source_name =models.TextField(max_length=256)
+    score =models.FloatField()
     comments =models.TextField(max_length=256)
     steps = models.ForeignKey(BimaHrInterviewStep, on_delete=models.CASCADE)
 
