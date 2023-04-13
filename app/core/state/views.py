@@ -7,4 +7,4 @@ from core.state.serializers import BimaCoreStateSerializer
 class BimaCoreStateViewSet(AbstractViewSet):
     queryset = BimaCoreState.objects.all()
     serializer_class = BimaCoreStateSerializer
-    permission_classes = [IsAdminOrReadOnly]
+    permission_classes = []

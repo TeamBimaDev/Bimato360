@@ -7,4 +7,4 @@ from core.country.serializers import BimaCoreCountrySerializer
 class BimaCoreCountryViewSet(AbstractViewSet):
     queryset = BimaCoreCountry.objects.all()
     serializer_class = BimaCoreCountrySerializer
-    permission_classes = [IsAdminOrReadOnly]
+    permission_classes = []

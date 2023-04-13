@@ -13,6 +13,7 @@ import core.state.admin
 import core.department.admin
 import core.poste.admin
 import core.tags.admin
+import core.source.admin
 import core.country.admin
 import hr.activity_type.admin
 from user.models import User

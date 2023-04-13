@@ -7,4 +7,4 @@ from core.currency.serializers import BimaCoreCurrencySerializer
 class BimaCoreCurrencyViewSet(AbstractViewSet):
     queryset = BimaCoreCurrency.objects.all()
     serializer_class = BimaCoreCurrencySerializer
-    permission_classes = [IsAdminOrReadOnly]
+    permission_classes = []

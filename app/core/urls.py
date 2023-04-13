@@ -13,4 +13,5 @@ urlpatterns = [
     path('department/',include('core.department.urls')),
     path('poste/',include('core.poste.urls')),
     path('tags/',include('core.tags.urls')),
+    path('source/',include('core.source.urls')),
 ]
