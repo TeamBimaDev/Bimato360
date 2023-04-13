@@ -56,3 +56,4 @@ class BimaHrApplicant(AbstractModel):
     class Meta:
         ordering = ['first_name']
         permissions = []
+

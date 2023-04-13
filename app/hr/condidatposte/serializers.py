@@ -4,4 +4,5 @@ from .models import BimaHrCondidatPoste
 class BimaHrCondidatPosteSerializer(AbstractSerializer):
     class Meta:
         model = BimaHrCondidatPoste
-        fields = '__all__'
+        fields = ['expected_salary','proposed_salary' ,'accepted_salary','date','id_candidat','id_poste'
+                                                                                              '']
