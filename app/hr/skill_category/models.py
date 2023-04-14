@@ -6,7 +6,7 @@ class SkillCategory(AbstractModel):
     parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='children')
 
     def __str__(self) -> str:
-        return self.name
+        return f"{self.name, self.id}"
 
 
     class Meta:
