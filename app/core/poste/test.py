@@ -1,8 +1,8 @@
 from django.urls import reverse
 from rest_framework.test import APITestCase, APIClient
 from rest_framework.views import status
-from .models import SkillLevel
-from .serializers import BimaCoreSkillLevelSerializer
+from .models import BimaCorePoste
+from .serializers import BimaCorePostESerializer
 
 
 class MyModelTestCase(APITestCase):
@@ -11,7 +11,8 @@ class MyModelTestCase(APITestCase):
     @staticmethod
     def create_my_model(name):
         if name != "":
-            SkillLevel.objects.create(name=name)
+
+            BimaCorePoste.objects.create(name=name)
 
     def setUp(self):
         self.create_my_model("Test1")
@@ -23,12 +24,13 @@ class MyModelTestCase(APITestCase):
         Test to get all MyModels.
         """
         response = self.client.get(
-            reverse('hr:skilllevel-list')
+            reverse('core:bimacoreposte-list')
         )
-        expected = SkillLevel.objects.all()
-        serialized = BimaCoreSkillLevelSerializer(expected, many=True)
-        print(response.data)
-        print(serialized.data)
+        expected = BimaCorePoste.objects.all()
+        serialized = BimaCorePostESerializer(expected, many=True)
+        print(data)
+
+
         self.assertEqual(response.data, serialized.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -36,24 +38,24 @@ class MyModelTestCase(APITestCase):
         """
         Test to create a new MyModel.
         """
-        data = {"name": "Test4"}
+        data= {"name": "museumar", "description": "vhqjna", "requirements": "nkcxAN", "responsabilités":"N%XN%ZAdxa"}
         response = self.client.post(
-            reverse('hr:skilllevel-list'),
+            reverse('core:bimacoreposte-list'),
             data=data,
             format="json"
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(SkillLevel.objects.count(), 4)
+        self.assertEqual(BimaCorePoste.objects.count(), 4)
 
     def test_get_single_my_model(self):
         """
         Test to get a single MyModel.
         """
-        model = SkillLevel.objects.first()
+        model = BimaCorePoste.objects.first()
         response = self.client.get(
-            reverse('hr:skilllevel-detail', kwargs={"pk": model.id})
+            reverse('core:bimacoreposte-detail', kwargs={"pk": model.id})
         )
-        expected = BimaCoreSkillLevelSerializer(model)
+        expected = BimaCorePostESerializer(model)
         self.assertEqual(response.data, expected.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -62,26 +64,27 @@ class MyModelTestCase(APITestCase):
         """
         Test to update a MyModel.
         """
-        model = SkillLevel.objects.first()
-        data = {"name": "Test1_updated"}
-        print(data)
+        model = BimaCorePoste.objects.first()
+        data = {"name": "museumar", "description": "vhqjna", "requirements": "nkcxAN", "responsabilités": "N%XN%ZAdxa"}
+
         response = self.client.put(
-            reverse('hr:skilllevel-detail', kwargs={"pk": model.id}),
+            reverse('core:bimacoreposte-detail', kwargs={"pk": model.id}),
             data=data,
             format="json"
         )
+        print(response.content)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(SkillLevel.objects.get(pk=model.id).name, "Test1_updated")
+        self.assertEqual(BimaCorePoste.objects.get(pk=model.id).name, "ismail")
 
 
     def test_delete_my_model(self):
         """
         Test to delete a MyModel.
         """
-        model = SkillLevel.objects.first()
+        model = BimaCorePoste.objects.first()
         response = self.client.delete(
-            reverse('hr:skilllevel-detail', kwargs={"pk": model.id})
+            reverse('core:bimacoreposte-detail', kwargs={"pk": model.id})
         )
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
-        self.assertEqual(SkillLevel.objects.count(), 2)
+        self.assertEqual(BimaCorePoste.objects.count(), 2)

@@ -4,13 +4,11 @@ from rest_framework.views import status
 from .models import BimaHrSkill
 from .serializers import BimaHrSkillSerializer
 from hr.skill_category.models import SkillCategory
-from hr.applicant.models import BimaHrApplicant
+
 
 class MyModelTestCase(APITestCase):
     client = APIClient()
     data = {
-        #"id": "ceaa5a5b2d0b4b27a90fe86602c38e1c",
-       # "public_id": "ceaa5a5b-2d0b-4b27-a90f-e86602c38e1c",
         "name": "python",
         "skillcategorys_id": 1,
         "applicant": [
@@ -18,15 +16,11 @@ class MyModelTestCase(APITestCase):
         ]
     }
 
-
     @staticmethod
     def create_my_model(name):
         if name != "":
-            #applicant = BimaHrApplicant.objects.create( first_name =name),applicant=applicant
             category = SkillCategory.objects.create(name=name)
             BimaHrSkill.objects.create(name=name, skillcategorys=category )
-        #assert SkillCategory.objects.count() == 3
-
     def setUp(self):
         self.create_my_model("Test1")
         self.create_my_model("Test2")
@@ -41,17 +35,14 @@ class MyModelTestCase(APITestCase):
         )
         expected = BimaHrSkill.objects.all()
         serialized = BimaHrSkillSerializer(expected, many=True)
-        #self.assertEqual(response.data, serialized.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_create_my_model(self):
-        category = SkillCategory.objects.create(name="testttt")
-        print(category.id)
         data = {
             "name": "python",
-            "skillcategorys_id": category.id
+            "skillcategorys_id": 1,
+            "applicant": []
         }
-        print(data)
 
         response = self.client.post(reverse('hr:bimahrskill-list'), data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -75,26 +66,18 @@ class MyModelTestCase(APITestCase):
         """
         model = BimaHrSkill.objects.first()
         data = {
-            # "id": "ceaa5a5b2d0b4b27a90fe86602c38e1c",
-            # "public_id": "ceaa5a5b-2d0b-4b27-a90f-e86602c38e1c",
-            "name": "python",
+           "id" : model.id,
+            "name": "python test",
             "skillcategorys_id": 1,
-            "applicant": [
-                1
-            ]
         }
-
-
-
 
         response = self.client.put(
             reverse('hr:bimahrskill-detail', kwargs={"pk": model.id}),
-            data=data,
-            format="json"
+            data,
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(BimaHrSkill.objects.get(pk=model.id).name, "Test1_updated")
+        self.assertEqual(BimaHrSkill.objects.get(pk=model.id).name, "python test")
 
 
     def test_delete_my_model(self):
