@@ -12,7 +12,10 @@ class TestUnitaireSource(TestCase):
             'name': 'linkedIn',
             'description': 'par linkedIn',
         }
-
+    def test_create_source(self):
+        url_create = reverse('core:bimacoresource-list')
+        response = self.client.post(url_create, data=self.source_data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
     def test_get_all_sources(self):
         response = self.client.get(reverse('core:bimacoresource-list'))
         sources = BimaCoreSource.objects.all()

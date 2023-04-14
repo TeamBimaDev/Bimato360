@@ -27,7 +27,7 @@ class BimaCoreAddress(AbstractModel):
     parent_id = models.PositiveIntegerField()
     content_object = GenericForeignKey('parent_type', 'parent_id')
     def __str__(self):
-        return f"{self.number ,self.city,self.street,self.postal_code , self.country,self.state}"
+        return f"{self.number ,self.city,self.street,self.zip , self.country,self.state}"
 
     class Meta:
         ordering = ['number']

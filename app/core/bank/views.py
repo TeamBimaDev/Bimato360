@@ -6,7 +6,7 @@ from django.contrib.contenttypes.models import ContentType
 from rest_framework import status
 from rest_framework.response import Response
 from core.address.serializers import BimaCoreAddressSerializer
-
+from django.template.loader import render_to_string
 
 class BimaCoreBankViewSet(AbstractViewSet):
     queryset = BimaCoreBank.objects.all()
@@ -56,13 +56,28 @@ class BimaCoreBankViewSet(AbstractViewSet):
         serializer = BimaCoreAddressSerializer
         return self.list_object(request, public_id=public_id, model=model, serializer=serializer)
     def ajout_address_for_bank(self, request, public_id=None):
-        bank = BimaCoreBank.objects.filter(public_id=public_id)[0]
-        print(bank)
+        bank = BimaCoreBank.objects.filter(public_id=public_id).first()
         bankContentType = ContentType.objects.filter(app_label="core", model="bimacorebank").first()
-        print(bankContentType)
         if not bank:
             return Response({"error": "Bank not found"}, status=status.HTTP_404_NOT_FOUND)
-        for address_data in request.data.get('address', []):
-            self.create_address(address_data,bankContentType, bank.id)
-        return Response({"success": "Addresses added successfully"}, status=status.HTTP_201_CREATED)
+
+        if request.method == 'POST':
+            address_data = {
+                'number': request.POST.get('number'),
+                'street': request.POST.get('street'),
+                'street2': request.POST.get('street2'),
+                'zip': request.POST.get('zip'),
+                'city': request.POST.get('city'),
+                'state': request.POST.get('state'),
+                'country': request.POST.get('country'),
+                'parent_type': bankContentType,
+                'parent_id': bank.id,
+            }
+            for address_data in request.data.get('address', []):
+                self.create_address(address_data, bankContentType, bank.id)
+            return Response({"success": "Address added successfully"}, status=status.HTTP_201_CREATED)
+        else:
+            return Response({"error": "Invalid request method"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+
 
