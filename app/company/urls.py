@@ -7,6 +7,6 @@ router.register('', BimaCompanyViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
-    path('<str:public_id>/addresses/', BimaCompanyViewSet.as_view({'get': 'list_addresses'}),
-         name='company-addresses'),
+    path('<str:public_id>/addresses/', BimaCompanyViewSet.as_view({'get': 'list_addresses'}), name='company-addresses'),
+    path('<str:public_id>/ajoutaddress/', BimaCompanyViewSet.as_view({'get': 'ajout_address_for_bank'}), name='ajout-address-company'),
 ]
