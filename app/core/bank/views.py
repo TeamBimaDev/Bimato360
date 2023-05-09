@@ -6,7 +6,6 @@ from django.contrib.contenttypes.models import ContentType
 from rest_framework import status
 from rest_framework.response import Response
 from core.address.serializers import BimaCoreAddressSerializer
-from django.template.loader import render_to_string
 
 class BimaCoreBankViewSet(AbstractViewSet):
     queryset = BimaCoreBank.objects.all()
