@@ -1,8 +1,8 @@
 from django.urls import reverse
 from rest_framework.test import APITestCase, APIClient
 from rest_framework.views import status
-from .models import BimaHrSkill
-from .serializers import BimaHrSkillSerializer
+from hr.skill.models import BimaHrSkill
+from hr.skill.serializers import BimaHrSkillSerializer
 from hr.skill_category.models import SkillCategory
 
 

@@ -1,8 +1,8 @@
 from django.urls import reverse
 from rest_framework.test import APITestCase, APIClient
 from rest_framework.views import status
-from .models import BimaCoreDepartment
-from .serializers import BimaCoreDepartmentSerializer
+from core.department.models import BimaCoreDepartment
+from core.department.serializers import BimaCoreDepartmentSerializer
 
 
 class MyModelTestCase(APITestCase):
@@ -28,8 +28,6 @@ class MyModelTestCase(APITestCase):
         )
         expected = BimaCoreDepartment.objects.all()
         serialized = BimaCoreDepartmentSerializer(expected, many=True)
-        print(response.data)
-        print(serialized.data)
 
         #self.assertEqual(response.data, serialized.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -72,7 +70,6 @@ class MyModelTestCase(APITestCase):
             data=data,
             format="json"
         )
-        print(response.content)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(BimaCoreDepartment.objects.get(pk=model.id).name, "ismail")

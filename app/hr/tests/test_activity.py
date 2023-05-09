@@ -1,6 +1,6 @@
 
 from django.test import TestCase
-from .models import BimaHrActivity
+from hr.activity.models import BimaHrActivity
 from core.abstract.models import AbstractModel
 from hr.activity_type.models import BimaHrActivityType
 from hr.applicant.models import BimaHrApplicant

@@ -40,3 +40,19 @@ class TestUnitaireContact(TestCase):
             response = self.client.delete(reverse('core:bimacorecontact-detail', args=[self.contact.id]))
             self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
+    def test_update_contact(self):
+        if hasattr(self, 'contact'):
+            updated_contact_data = {
+                "email": "updated_test@gmail.com",
+                "fax": "4132352352355",
+                "mobile": "545425255",
+                "phone": "453252452",
+                "parent_type": contentType.pk,
+                "parent_id": 1,
+            }
+            url_update = reverse('core:bimacorecontact-detail', args=[self.contact.id])
+            response = self.client.put(url_update, data=updated_contact_data, format='json')
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            updated_contact = BimaCoreContact.objects.get(id=self.contact.id)
+            serializer_data = BimaCoreContactserializer(updated_contact).data
+            self.assertEqual(response.data, serializer_data)

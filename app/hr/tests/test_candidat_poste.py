@@ -1,15 +1,12 @@
 from django.urls import reverse
 from rest_framework.test import APITestCase, APIClient
 from rest_framework.views import status
-from .models import BimaHrCondidatPoste
-from .serializers import BimaHrCondidatPosteSerializer
+from hr.condidatposte.models import BimaHrCondidatPoste
+from hr.condidatposte.serializers import BimaHrCondidatPosteSerializer
 
 
 class MyModelTestCase(APITestCase):
     client = APIClient()
-
-
-
 
     @staticmethod
     def create_my_model(expected_salary):

@@ -1,5 +1,5 @@
 from django.test import TestCase
-from .models import BimaHrActivityType
+from hr.activity_type.models import BimaHrActivityType
 from core.abstract.models import AbstractModel
 class MyAbstractModelTestCase(TestCase):
    # def test_my_abstract_model_string_method(self):

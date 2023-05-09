@@ -34,3 +34,14 @@ class TestUnitaireSource(TestCase):
             response = self.client.delete(reverse('core:bimacoresource-detail', args=[self.source.id]))
             self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
+    def test_update_source(self):
+        if hasattr(self, 'source'):
+            updated_source_data = {
+                'name': 'NewName',
+                'description': 'NewDescription',
+            }
+            response = self.client.put(reverse('core:bimacoresource-detail', args=[self.source.id]), data=updated_source_data, format='json')
+            updated_source = BimaCoreSource.objects.get(id=self.source.id)
+            serializer_data = BimaCoreSourceSerializer(updated_source).data
+            self.assertEqual(response.data, serializer_data)
+            self.assertEqual(response.status_code, status.HTTP_200_OK)

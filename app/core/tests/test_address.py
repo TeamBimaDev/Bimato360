@@ -15,7 +15,6 @@ class BimaCoreAddressCreateTestCase(TestCase):
     currency = {}
     country = {}
     state = {}
-    contentType = {}
     def setUp(self):
         client = APIClient()
         self.currency_data = {
@@ -69,7 +68,6 @@ class BimaCoreAddressCreateTestCase(TestCase):
     def test_create_address(self):
         url_create = reverse('core:bimacoreaddress-list')
         response = self.client.post(url_create, data=self.address_data, format='json')
-        print(response.data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(BimaCoreAddress.objects.count(), 1)
         self.assertEqual(BimaCoreAddress.objects.get().number, self.address_data['number'])
@@ -79,3 +77,4 @@ class BimaCoreAddressCreateTestCase(TestCase):
         self.assertEqual(BimaCoreAddress.objects.get().city, self.address_data['city'])
         self.assertEqual(BimaCoreAddress.objects.get().state.pk, self.address_data['state'])
         self.assertEqual(BimaCoreAddress.objects.get().country.pk, self.address_data['country'])
+
