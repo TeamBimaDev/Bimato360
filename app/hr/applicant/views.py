@@ -40,7 +40,7 @@ class BimaHrApplicantViewSet(AbstractViewSet):
             )
             return address
         except ValueError as expError:
-            print(expError)
+            pass
 
     def create_contact(self, contact_data, parent_type, parent_id):
         try:

@@ -20,6 +20,7 @@ urlpatterns = [
     path('api/user/', include('user.urls')),
     path('api/core/', include('core.urls')),
     path('api/hr/', include('hr.urls')),
+    path('api/company/', include('company.urls')),
 ]
 
 if settings.DEBUG:

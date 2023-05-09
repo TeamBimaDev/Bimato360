@@ -26,7 +26,7 @@ class BimaCoreBankViewSet(AbstractViewSet):
             )
             return address
         except ValueError as expError:
-            print(expError)
+            pass
 
     def create(self, request):
         serializer = self.get_serializer(data=request.data)
