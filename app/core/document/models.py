@@ -5,6 +5,7 @@ import os
 import uuid
 from django.apps import apps
 
+
 from core.abstract.models import AbstractModel
 
 
@@ -51,6 +52,7 @@ class BimaCoreDocument(AbstractModel):
     date_file = models.DateTimeField(auto_now_add=True)
     file_path = models.FileField(upload_to=document_file_path)
     file_type = models.CharField(max_length=100, choices=LIST_TYPE_CHOICES)
+
 
     def __str__(self) -> str:
         return self.file_name

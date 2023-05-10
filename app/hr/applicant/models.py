@@ -2,6 +2,7 @@ from django.db import models
 from core.abstract.models import AbstractModel
 from hr.step.models import BimaHrInterviewStep
 from core.source.models import BimaCoreSource
+from company.models import BimaCompany
 
 
 class BimaHrApplicant(AbstractModel):
@@ -48,6 +49,7 @@ class BimaHrApplicant(AbstractModel):
     score =models.FloatField()
     comments =models.TextField(max_length=256)
     steps = models.ForeignKey(BimaHrInterviewStep, on_delete=models.CASCADE)
+    company_id = models.ForeignKey(BimaCompany, on_delete=models.CASCADE)
 
 
 

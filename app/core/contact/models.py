@@ -5,6 +5,7 @@ from core.abstract.models import AbstractModel
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 
+
 class BimaCoreContact(AbstractModel):
     email = models.EmailField(blank=True, null=True)
     fax = models.CharField(max_length=128, blank=False, unique=True)
@@ -22,6 +23,7 @@ class BimaCoreContact(AbstractModel):
     )
     parent_id = models.PositiveIntegerField()
     content_object = GenericForeignKey('parent_type', 'parent_id')
+
 
     def __str__(self) :
         return self.mobile
