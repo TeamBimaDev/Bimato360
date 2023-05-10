@@ -7,7 +7,6 @@ from rest_framework.response import Response
 from core.address.models import BimaCoreAddress
 from core.address.serializers import BimaCoreAddressSerializer
 from core.document.models import BimaCoreDocument
-
 from core.document.serializers import BimaCoreDocumentSerializer
 
 
