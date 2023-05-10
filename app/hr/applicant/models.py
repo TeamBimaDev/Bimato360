@@ -4,6 +4,8 @@ from hr.step.models import BimaHrInterviewStep
 from core.source.models import BimaCoreSource
 from company.models import BimaCompany
 
+from core.post.models import BimaCorePost
+
 
 class BimaHrApplicant(AbstractModel):
     first_name = models.CharField(max_length=28, blank=False)
@@ -50,7 +52,7 @@ class BimaHrApplicant(AbstractModel):
     comments =models.TextField(max_length=256)
     steps = models.ForeignKey(BimaHrInterviewStep, on_delete=models.CASCADE)
     company_id = models.ForeignKey(BimaCompany, on_delete=models.CASCADE)
-
+    applicant_posts = models.ManyToManyField(BimaCorePost, through='BimaHrApplicantPost')
 
 
     def __str__(self):
