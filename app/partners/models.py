@@ -2,7 +2,7 @@ from django.db import models
 
 # Create your models here.
 from core.abstract.models import AbstractModel
-class Bimapartenaires(AbstractModel):
+class BimaPartners(AbstractModel):
     name_supplier=models.BooleanField(blank=True, null=True)
     name_customer =models.BooleanField(blank=True, null=True)
     Email = models.EmailField(blank=True, null=True)

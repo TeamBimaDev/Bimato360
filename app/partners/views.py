@@ -1,13 +1,13 @@
 from django.shortcuts import render
 
 # Create your views here.
-from .models import Bimapartenaires
-from .serializers import BimapartenairesSerializer
+from .models import BimaPartners
+from .serializers import BimaPartnersSerializer
 from core.document.models import BimaCoreDocument
 from core.document.serializers import BimaCoreDocumentSerializer
-class BimapartenairesViewSet(AbstractViewSet):
-    queryset = Bimapartenaires.objects.all()
-    serializer_class = BimapartenairesSerializer
+class BimaPartnersViewSet(AbstractViewSet):
+    queryset = BimaPartners.objects.all()
+    serializer_class = BimaPartnersSerializer
     permission_classes = []
     def list_documents(self, request, public_id=None):
         model = BimaCoreDocument
