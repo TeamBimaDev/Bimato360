@@ -42,7 +42,6 @@ class BimaCompanyViewSet(AbstractViewSet):
                 date_file=document_data['date_file'],
                 file_path=document_data['file_path'],
                 file_type=document_data['file_type'],
-                LIST_TYPE_CHOICES=document_data['LIST_TYPE_CHOICES'],
                 parent_type=parent_type,
                 parent_id=parent_id,
             )
@@ -120,7 +119,6 @@ class BimaCompanyViewSet(AbstractViewSet):
                 'date_file': request.POST.get('date_file'),
                 'file_path': request.POST.get('file_path'),
                 'file_type': request.POST.get('file_type'),
-                'LIST_TYPE_CHOICES': request.POST.get('LIST_TYPE_CHOICES'),
                 'parent_type': companyContentType,
                 'parent_id': company.id,
             }
