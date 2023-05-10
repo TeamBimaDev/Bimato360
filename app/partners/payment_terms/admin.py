@@ -1,3 +1,3 @@
 from django.contrib import admin
-from hr.refuse.models import BimaHrRefuse
-admin.site.register(BimaHrRefuse)
+from partners.payment_terms.models import BimaPartnersPayment
+admin.site.register(BimaPartnersPayment)
