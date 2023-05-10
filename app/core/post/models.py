@@ -1,11 +1,11 @@
 from core.abstract.models import AbstractModel
 from django.db import models
 from core.department.models import BimaCoreDepartment
-class BimaCorePoste(AbstractModel ):
+class BimaCorePost(AbstractModel ):
     name = models.CharField(max_length=255)
-    description = models.TextField()
-    requirements = models.TextField()
-    responsibilities= models.TextField()
+    description = models.TextField(blank=True, null=True)
+    requirements = models.TextField(blank=True, null=True)
+    responsibilities= models.TextField(blank=True, null=True)
     department_id = models.ForeignKey(BimaCoreDepartment, on_delete=models.CASCADE, null=True)
 
 

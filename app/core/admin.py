@@ -11,7 +11,7 @@ import core.currency.admin
 import core.document.admin
 import core.state.admin
 import core.department.admin
-import core.poste.admin
+import core.post.admin
 import core.tags.admin
 import core.source.admin
 import core.country.admin

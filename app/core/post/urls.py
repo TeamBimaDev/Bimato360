@@ -1,9 +1,9 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import BimaCorePosteViewSet
+from .views import BimaCorePostViewSet
 
 router = DefaultRouter()
-router.register('', BimaCorePosteViewSet)
+router.register('', BimaCorePostViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
