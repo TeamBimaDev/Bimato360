@@ -37,8 +37,8 @@ class AuthTokenSerializer(TokenObtainPairSerializer):
     @classmethod
     def get_token(cls, user):
         token = super(AuthTokenSerializer, cls).get_token(user)
-
         # Add custom claims
-        token['username'] = user.username
+        token['name'] = user.name
         token['email'] = user.email
+        token['user_id'] = user.id
         return token
