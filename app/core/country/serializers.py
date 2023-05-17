@@ -1,8 +1,11 @@
 from core.abstract.serializers import AbstractSerializer
 from core.country.models import BimaCoreCountry
 
+from core.currency.serializers import BimaCoreCurrencySerializer
+
 
 class BimaCoreCountrySerializer(AbstractSerializer):
+    currency = BimaCoreCurrencySerializer()
     class Meta:
         model = BimaCoreCountry
         fields = [\

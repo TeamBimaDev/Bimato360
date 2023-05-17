@@ -36,9 +36,6 @@ ALLOWED_HOSTS.extend(
     )
 )
 CORS_ALLOWED_ORIGINS = [
-<<<<<<< Updated upstream
-    "http://127.0.0.1:8000", "http://127.0.0.1", "http://localhost", "http://localhost:8000", "http://localhost:5173", "http://localhost:3000","http://127.0.0.1:5173"
-=======
     "http://127.0.0.1:5173",
     "http://localhost:5173",
     "http://127.0.0.1:3000",
@@ -64,7 +61,6 @@ CORS_ALLOW_HEADERS = [
 'user-agent',
 'x-csrftoken',
 'x-requested-with',
->>>>>>> Stashed changes
 ]
 # Application definition
 
@@ -83,8 +79,7 @@ INSTALLED_APPS = [
     'user',
     'hr',
     'company',
-    'partners',
-    'corsheaders',
+    'partners'
 ]
 
 MIDDLEWARE = [
