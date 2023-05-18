@@ -77,6 +77,9 @@ class BimaCoreBankViewSet(AbstractViewSet):
             return Response({"success": "Address added successfully"}, status=status.HTTP_201_CREATED)
         else:
             return Response({"error": "Invalid request method"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
-
+    def get_object(self):
+        obj = BimaCoreBank.objects.get_object_by_public_id(self.kwargs['pk'])
+        #self.check_object_permissions(self.request, obj)
+        return obj
 
 
