@@ -7,3 +7,6 @@ class BimaCoreTagsViewSet(AbstractViewSet):
     queryset = BimaCoreTags.objects.all()
     serializer_class = BimaCoreTagsserializer
     permission_classes = []
+    def get_object(self):
+        obj = BimaCoreTags.objects.get_object_by_public_id(self.kwargs['pk'])
+        return obj

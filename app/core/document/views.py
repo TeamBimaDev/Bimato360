@@ -16,3 +16,6 @@ class BimaCoreDocumentViewSet(AbstractViewSet):
         response = HttpResponse(BimaCoreDocument.file_path, content_type='image/png')
         response['Content-Disposition'] = f'attachment; filename="{document.file_path}"'
         return response
+    def get_object(self):
+        obj = BimaCoreDocument.objects.get_object_by_public_id(self.kwargs['pk'])
+        return obj

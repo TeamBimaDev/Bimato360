@@ -5,8 +5,8 @@ class BimaCorePost(AbstractModel ):
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
     requirements = models.TextField(blank=True, null=True)
-    responsibilities= models.TextField(blank=True, null=True)
-    department_id = models.ForeignKey(BimaCoreDepartment, on_delete=models.CASCADE, null=True)
+    responsibilities = models.TextField(blank=True, null=True)
+    department = models.ForeignKey(BimaCoreDepartment, on_delete=models.CASCADE, null=True)
 
 
     def __str__(self) -> str:
