@@ -15,12 +15,15 @@ class BimaCoreCountryViewSet(AbstractViewSet):
     permission_classes = []
 
     def create(self, request):
-        currency_id = request.data.get('currency_id')
-        currency = get_object_or_404(BimaCoreCurrency, id=currency_id)
-        serializer = self.get_serializer(data=request.data)
+        currency_public_id = request.data.get('currency')
+        currency = get_object_or_404(BimaCoreCurrency, public_id=currency_public_id)
+        data_to_save = request.data
+        data_to_save['currency_id'] = currency.id
+        serializer = self.get_serializer(data=data_to_save)
         serializer.is_valid(raise_exception=True)
-        serializer.save(currency=currency)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)

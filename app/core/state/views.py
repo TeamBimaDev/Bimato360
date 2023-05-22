@@ -14,12 +14,15 @@ class BimaCoreStateViewSet(AbstractViewSet):
     serializer_class = BimaCoreStateSerializer
     permission_classes = []
     def create(self, request):
-        country_id = request.data.get('country_id')
-        country = get_object_or_404(BimaCoreCountry, id=country_id)
-        serializer = self.get_serializer(data=request.data)
+        country_public_id = request.data.get('country')
+        country = get_object_or_404(BimaCoreCountry, public_id=country_public_id)
+        data_to_save = request.data
+        data_to_save['country_id'] = country.id
+        serializer = self.get_serializer(data=data_to_save)
         serializer.is_valid(raise_exception=True)
-        serializer.save(country=country)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
