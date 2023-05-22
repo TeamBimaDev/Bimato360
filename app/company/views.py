@@ -22,8 +22,8 @@ class BimaCompanyViewSet(AbstractViewSet):
                 street2=address_data['street2'],
                 zip=address_data['zip'],
                 city=address_data['city'],
-                state_id=address_data['state'],
-                country_id=address_data['country'],
+                state_id=address_data['state_id'],
+                country_id=address_data['country_id'],
                 parent_type=parent_type,
                 parent_id=parent_id,
             )

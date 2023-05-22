@@ -19,8 +19,8 @@ class BimaCoreBankViewSet(AbstractViewSet):
                 street2=address_data['street2'],
                 zip=address_data['zip'],
                 city=address_data['city'],
-                state_id=address_data['state'],
-                country_id=address_data['country'],
+                state_id=address_data['state_id'],
+                country_id=address_data['country_id'],
                 parent_type=parent_type,
                 parent_id=parent_id,
             )
@@ -54,29 +54,20 @@ class BimaCoreBankViewSet(AbstractViewSet):
         model = BimaCoreAddress
         serializer = BimaCoreAddressSerializer
         return self.list_object(request, public_id=public_id, model=model, serializer=serializer)
+
     def ajout_address_for_bank(self, request, public_id=None):
         bank = BimaCoreBank.objects.filter(public_id=public_id).first()
         bankContentType = ContentType.objects.filter(app_label="core", model="bimacorebank").first()
         if not bank:
             return Response({"error": "Bank not found"}, status=status.HTTP_404_NOT_FOUND)
 
-        if request.method == 'POST':
-            address_data = {
-                'number': request.POST.get('number'),
-                'street': request.POST.get('street'),
-                'street2': request.POST.get('street2'),
-                'zip': request.POST.get('zip'),
-                'city': request.POST.get('city'),
-                'state': request.POST.get('state'),
-                'country': request.POST.get('country'),
-                'parent_type': bankContentType,
-                'parent_id': bank.id,
-            }
+        else:
             for address_data in request.data.get('address', []):
                 self.create_address(address_data, bankContentType, bank.id)
-            return Response({"success": "Address added successfully"}, status=status.HTTP_201_CREATED)
-        else:
-            return Response({"error": "Invalid request method"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+            return Response({"success": "Address(es) added successfully"}, status=status.HTTP_201_CREATED)
+        return Response({"error": "Invalid request method"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
     def get_object(self):
         obj = BimaCoreBank.objects.get_object_by_public_id(self.kwargs['pk'])
         #self.check_object_permissions(self.request, obj)

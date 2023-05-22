@@ -2,6 +2,7 @@ from core.abstract.views import AbstractViewSet
 from core.address.models import BimaCoreAddress
 from core.address.serializers import BimaCoreAddressSerializer
 from core.country.models import BimaCoreCountry
+from django.contrib.contenttypes.models import ContentType
 from django.shortcuts import get_object_or_404
 from django.db.models.query import prefetch_related_objects
 from rest_framework import status
@@ -16,14 +17,14 @@ class BimaCoreAddressViewSet(AbstractViewSet):
     permission_classes = []
     pagination_class = DefaultPagination
     def create(self, request):
+        addressContentType = ContentType.objects.filter(app_label="core", model="bimacoreaddress").first()
         country_id = request.data.get('country_id')
         state_id = request.data.get('state_id')
         country = get_object_or_404(BimaCoreCountry, id=country_id)
         state = get_object_or_404(BimaCoreState, id=state_id)
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        serializer.save(country=country)
-        serializer.save(state=state)
+        serializer.save(country=country, state=state, parent_type=addressContentType, parent_id=addressContentType.id)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def update(self, request, *args, **kwargs):
