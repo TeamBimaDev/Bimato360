@@ -38,6 +38,6 @@ class BimaCoreAddressSerializer(AbstractSerializer):
     class Meta:
         model = BimaCoreAddress
         fields = [
-            'number', 'street', 'street2', 'zip', 'city', 'state',
+            'id', 'number', 'street', 'street2', 'zip', 'city', 'state',
             'country', 'country_id', 'state_id', 'created', 'updated'
         ]
