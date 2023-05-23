@@ -7,6 +7,8 @@ from core.country.serializers import BimaCoreCountrySerializer
 from django.shortcuts import get_object_or_404
 from django.db.models.query import prefetch_related_objects
 from core.currency.models import BimaCoreCurrency
+from core.state.models import BimaCoreState
+from core.state.serializers import BimaCoreStateSerializer
 
 
 class BimaCoreCountryViewSet(AbstractViewSet):
@@ -44,3 +46,9 @@ class BimaCoreCountryViewSet(AbstractViewSet):
     def get_object(self):
         obj = BimaCoreCountry.objects.get_object_by_public_id(self.kwargs['pk'])
         return obj
+
+    def get_state_by_country(self, request, public_id=None):
+        country = BimaCoreCountry.objects.get_object_by_public_id(self.kwargs['public_id'])
+        states = BimaCoreState.objects.filter(country=country)
+        serializer = BimaCoreStateSerializer(states, many=True)
+        return Response(serializer.data)

@@ -6,13 +6,17 @@ from core.currency.models import BimaCoreCurrency
 
 
 class BimaCoreCountrySerializer(AbstractSerializer):
-    currency = BimaCoreCurrencySerializer(read_only=True)
+    currency =serializers.SerializerMethodField(read_only=True)
     currency_id = serializers.PrimaryKeyRelatedField(
         queryset=BimaCoreCurrency.objects.all(),
         source='currency',
         write_only=True
     )
-
+    def get_currency(self, obj):
+        return {
+            'id': obj.currency.public_id.hex,
+            'name': obj.currency.name,
+        }
     class Meta:
         model = BimaCoreCountry
         fields = [
