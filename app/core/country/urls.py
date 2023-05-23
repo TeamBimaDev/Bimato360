@@ -7,4 +7,6 @@ router.register('', BimaCoreCountryViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
+    path('<str:public_id>/states/', BimaCoreCountryViewSet.as_view({'get': 'get_state_by_country'}), name='State-By-Country'),
+
 ]
