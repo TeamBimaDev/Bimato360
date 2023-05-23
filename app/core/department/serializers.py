@@ -3,8 +3,8 @@ from core.abstract.serializers import AbstractSerializer
 from .models import BimaCoreDepartment
 
 class BimaCoreDepartmentSerializer(AbstractSerializer):
-    parent = serializers.SerializerMethodField()
-    parent_id = serializers.SerializerMethodField()
+    parent = serializers.SerializerMethodField(read_only=True)
+    parent_id = serializers.SerializerMethodField(read_only=True)
 
 
 
@@ -25,4 +25,4 @@ class BimaCoreDepartmentSerializer(AbstractSerializer):
 
     class Meta:
         model = BimaCoreDepartment
-        fields = ('id', 'name', 'description', 'manager', 'parent', 'parent_id')
+        fields = ('id', 'name', 'description','department' ,'manager', 'parent', 'parent_id')
