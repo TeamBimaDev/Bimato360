@@ -11,7 +11,7 @@ class BimaCoreBank(AbstractModel):
     bic = models.CharField(max_length=16, blank=True, null=True)
 
     def __str__(self):
-        return f"{self.name ,self.public_id}"
+        return f"{self.name ,self.public_id, self.id}"
 
     class Meta:
         ordering = ['name']
