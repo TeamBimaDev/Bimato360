@@ -30,9 +30,9 @@ class BimaCoreAddressViewSet(AbstractViewSet):
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
-        data_to_save = request.data
-        country_public_id = request.data.get('country_id')
-        state_public_id = request.data.get('state_id')
+        data_to_save = request.data.copy()  
+        country_public_id = data_to_save.get('country_id')
+        state_public_id = data_to_save.get('state_id')
         country = get_object_or_404(BimaCoreCountry, id=country_public_id)
         state = get_object_or_404(BimaCoreState, id=state_public_id)
         data_to_save['country_id'] = country.id
