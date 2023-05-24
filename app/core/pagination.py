@@ -14,12 +14,14 @@ class DefaultPagination(PageNumberPagination):
         self.max_page_size = self.page_size
 
         filter_params = request.query_params.dict()
-        if filter_params:
-            filter_conditions = Q()
-            for field, value in filter_params.items():
-                field_condition = Q(**{field + '__icontains': value})
-                filter_conditions &= field_condition
-            queryset = queryset.filter(filter_conditions)
+        filtered_params = {k: v for k, v in filter_params.items() if not k.startswith('page')}
+
+        filter_conditions = Q()
+        for field, value in filtered_params.items():
+            field_condition = Q(**{field + '__icontains': value})
+            filter_conditions &= field_condition
+
+        queryset = queryset.filter(filter_conditions)
 
         paginated_queryset = super().paginate_queryset(queryset, request, view)
 
@@ -28,7 +30,7 @@ class DefaultPagination(PageNumberPagination):
         if count % self.page_size > 0:
             total_pages += 1
 
-        page_number = request.query_params.get(self.page_query_param, 1)
+        page_number = int(request.query_params.get(self.page_query_param, 1))
         self.page.number = page_number
         self.page.paginator.count = count
         self.page.paginator.num_pages = total_pages
