@@ -2,7 +2,6 @@ from rest_framework import status
 from rest_framework.response import Response
 from core.abstract.views import AbstractViewSet
 from core.country.models import BimaCoreCountry
-from core.permissions import IsAdminOrReadOnly
 from core.country.serializers import BimaCoreCountrySerializer
 from django.shortcuts import get_object_or_404
 from django.db.models.query import prefetch_related_objects
