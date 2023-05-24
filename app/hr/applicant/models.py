@@ -52,7 +52,7 @@ class BimaHrApplicant(AbstractModel):
     comments =models.TextField(max_length=256)
     steps = models.ForeignKey(BimaHrInterviewStep, on_delete=models.CASCADE)
     company_id = models.ForeignKey(BimaCompany, on_delete=models.CASCADE)
-    applicant_posts = models.ManyToManyField(BimaCorePost, through='BimaHrApplicantPost')
+    applicant_posts = models.ManyToManyField(BimaCorePost, related_name='BimaHrApplicantPost')
 
 
     def __str__(self):

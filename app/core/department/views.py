@@ -6,7 +6,6 @@ from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from django.db.models.query import prefetch_related_objects
 from core.pagination import DefaultPagination
-
 from core.post.models import BimaCorePost
 from core.post.serializers import BimaCorePostSerializer
 
@@ -19,16 +18,22 @@ class BimaCoreDepartmentViewSet(AbstractViewSet):
 
     def create(self, request):
         department_public_id = request.data.get('department')
-        department = get_object_or_404(BimaCoreDepartment, public_id=department_public_id)
-        data_to_save = request.data
-        data_to_save['department_id'] = department.id
-        data_to_save['department'] = department.id
+        department = None
+
+        if department_public_id:
+            department = get_object_or_404(BimaCoreDepartment, public_id=department_public_id)
+
+        data_to_save = request.data.copy()
+
+        if department:
+            data_to_save['department_id'] = department.id
+            data_to_save['department'] = department.id
+
         serializer = self.get_serializer(data=data_to_save)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
-
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
