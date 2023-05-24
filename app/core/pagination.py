@@ -1,19 +1,16 @@
 from rest_framework.pagination import PageNumberPagination
 from django.db.models import Q
 from rest_framework import exceptions
-
 class DefaultPagination(PageNumberPagination):
-    page_size = 1
+    page_size = 2
     page_size_query_param = 'page_size'
     max_page_size = 100
     page_query_param = 'page'
     ordering = '-created_at'
-
     def paginate_queryset(self, queryset, request, view=None):
         self.page_size = self.get_page_size(request)
         self.max_page_size = self.page_size
         filter_param = request.query_params.get('filter')
-
         if filter_param:
             if ':' in filter_param:
                 field_name, value = filter_param.split(':')
@@ -35,5 +32,4 @@ class DefaultPagination(PageNumberPagination):
                 self.page.number = self.page.paginator.num_pages
             else:
                 raise exceptions.NotFound('Page not found.')
-
         return paginated_queryset
