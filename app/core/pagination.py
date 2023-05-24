@@ -7,7 +7,7 @@ class DefaultPagination(PageNumberPagination):
     page_size_query_param = 'page_size'
     max_page_size = 100
     page_query_param = 'page'
-    ordering = '-created_at'
+    default_ordering = '-created_at'
 
     def paginate_queryset(self, queryset, request, view=None):
         self.page_size = self.get_page_size(request)
@@ -18,8 +18,11 @@ class DefaultPagination(PageNumberPagination):
 
         filter_conditions = Q()
         for field, value in filtered_params.items():
-            field_condition = Q(**{field + '__icontains': value})
-            filter_conditions &= field_condition
+            if field == 'ordering':
+                ordering = value
+            else:
+                field_condition = Q(**{field + '__icontains': value})
+                filter_conditions &= field_condition
 
         queryset = queryset.filter(filter_conditions)
 

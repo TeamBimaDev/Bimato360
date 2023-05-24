@@ -18,10 +18,10 @@ class BimaCoreAddressViewSet(AbstractViewSet):
     pagination_class = DefaultPagination
     def create(self, request):
         addressContentType = ContentType.objects.filter(app_label="core", model="bimacoreaddress").first()
-        country_id = request.data.get('country_id')
-        state_id = request.data.get('state_id')
-        country = get_object_or_404(BimaCoreCountry, id=country_id)
-        state = get_object_or_404(BimaCoreState, id=state_id)
+        country_public_id = request.data.get('country')
+        state_public_id = request.data.get('state')
+        country = get_object_or_404(BimaCoreCountry, public_id=country_public_id)
+        state = get_object_or_404(BimaCoreState, public_id=state_public_id)
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save(country=country, state=state, parent_type=addressContentType, parent_id=addressContentType.id)
@@ -31,11 +31,8 @@ class BimaCoreAddressViewSet(AbstractViewSet):
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
         data_to_save = request.data.copy()
-        print(data_to_save)
         country_public_id = data_to_save.get('country')
-        print(country_public_id)
         state_public_id = data_to_save.get('state')
-        print(state_public_id)
         country = get_object_or_404(BimaCoreCountry, public_id=country_public_id)
         state = get_object_or_404(BimaCoreState, public_id=state_public_id)
         data_to_save['country_id'] = country.id
