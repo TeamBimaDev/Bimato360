@@ -31,10 +31,10 @@ class BimaCoreAddressViewSet(AbstractViewSet):
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
         data_to_save = request.data
-        country_public_id = request.data.get('country')
-        state_public_id = request.data.get('state')
-        country = get_object_or_404(BimaCoreCountry, public_id=country_public_id)
-        state = get_object_or_404(BimaCoreState, public_id=state_public_id)
+        country_public_id = request.data.get('country_id')
+        state_public_id = request.data.get('state_id')
+        country = get_object_or_404(BimaCoreCountry, id=country_public_id)
+        state = get_object_or_404(BimaCoreState, id=state_public_id)
         data_to_save['country_id'] = country.id
         data_to_save['state_id'] = state.id
         serializer = self.get_serializer(instance, data=data_to_save, partial=partial)

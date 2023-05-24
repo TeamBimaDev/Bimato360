@@ -7,12 +7,14 @@ from rest_framework.response import Response
 from core.country.models import BimaCoreCountry
 from django.shortcuts import get_object_or_404
 from django.db.models.query import prefetch_related_objects
+from core.pagination import DefaultPagination
 
 
 class BimaCoreStateViewSet(AbstractViewSet):
     queryset = BimaCoreState.objects.all()
     serializer_class = BimaCoreStateSerializer
     permission_classes = []
+    pagination_class = DefaultPagination
     def create(self, request):
         country_public_id = request.data.get('country')
         country = get_object_or_404(BimaCoreCountry, public_id=country_public_id)

@@ -6,10 +6,14 @@ from django.shortcuts import get_object_or_404
 from django.db.models.query import prefetch_related_objects
 from rest_framework import status
 from rest_framework.response import Response
+from core.pagination import DefaultPagination
+
 class BimaCorePostViewSet(AbstractViewSet):
     queryset = BimaCorePost.objects.all()
     serializer_class = BimaCorePostSerializer
     permission_classes = []
+    pagination_class = DefaultPagination
+
     def create(self, request):
         department_id = request.data.get('department_id')
         department = get_object_or_404(BimaCoreDepartment, id=department_id)

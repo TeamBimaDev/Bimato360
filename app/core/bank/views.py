@@ -7,7 +7,7 @@ from rest_framework import status
 from rest_framework.response import Response
 from core.address.serializers import BimaCoreAddressSerializer
 from django.shortcuts import get_object_or_404
-
+from core.pagination import DefaultPagination
 from core.country.models import BimaCoreCountry
 from core.state.models import BimaCoreState
 
@@ -16,8 +16,9 @@ class BimaCoreBankViewSet(AbstractViewSet):
     queryset = BimaCoreBank.objects.all()
     serializer_class = BimaCoreBankSerializer
     permission_classes = []
+    pagination_class = DefaultPagination
     def create_address(self, address_data, parent_type, parent_id):
-        country =  get_object_or_404(BimaCoreCountry, public_id=address_data['country'])
+        country = get_object_or_404(BimaCoreCountry, public_id=address_data['country'])
         state = get_object_or_404(BimaCoreState, public_id=address_data['state'])
 
         try:
@@ -78,5 +79,12 @@ class BimaCoreBankViewSet(AbstractViewSet):
         obj = BimaCoreBank.objects.get_object_by_public_id(self.kwargs['pk'])
         #self.check_object_permissions(self.request, obj)
         return obj
-
+    def update_address_for_bank(self, request, public_id=None, address_id=None):
+        bank = get_object_or_404(BimaCoreBank, public_id=public_id)
+        bankContentType = ContentType.objects.get(app_label="core", model="bimacorebank")
+        address = get_object_or_404(BimaCoreAddress, id=address_id, parent_type=bankContentType, parent_id=bank.id)
+        serializer = BimaCoreAddressSerializer(address, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        updated_address = serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
 

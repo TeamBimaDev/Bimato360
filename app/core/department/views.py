@@ -5,11 +5,13 @@ from rest_framework import status
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from django.db.models.query import prefetch_related_objects
+from core.pagination import DefaultPagination
+
 class BimaCoreDepartmentViewSet(AbstractViewSet):
     queryset = BimaCoreDepartment.objects.all()
     serializer_class = BimaCoreDepartmentSerializer
     permission_classes = []
-
+    pagination_class = DefaultPagination
 
     def create(self, request):
         department_public_id = request.data.get('department')

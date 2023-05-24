@@ -9,13 +9,14 @@ from django.db.models.query import prefetch_related_objects
 from core.currency.models import BimaCoreCurrency
 from core.state.models import BimaCoreState
 from core.state.serializers import BimaCoreStateSerializer
+from core.pagination import DefaultPagination
 
 
 class BimaCoreCountryViewSet(AbstractViewSet):
     queryset = BimaCoreCountry.objects.all()
     serializer_class = BimaCoreCountrySerializer
     permission_classes = []
-
+    pagination_class = DefaultPagination
     def create(self, request):
         currency_public_id = request.data.get('currency')
         currency = get_object_or_404(BimaCoreCurrency, public_id=currency_public_id)
