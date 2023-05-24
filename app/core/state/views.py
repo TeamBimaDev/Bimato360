@@ -16,10 +16,10 @@ class BimaCoreStateViewSet(AbstractViewSet):
     permission_classes = []
     pagination_class = DefaultPagination
     def create(self, request):
-        country_public_id = request.data.get('country')
+        country_public_id = request.data.get(' country')
         country = get_object_or_404(BimaCoreCountry, public_id=country_public_id)
         data_to_save = request.data
-        data_to_save['country_id'] = country.id
+        data_to_save[' country_id'] = country.id
         serializer = self.get_serializer(data=data_to_save)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
