@@ -15,5 +15,5 @@ class BimaCorePostSerializer(AbstractSerializer):
     class Meta:
         model = BimaCorePost
         fields = [
-            'name', 'description', 'requirements', 'responsibilities', 'department', 'department_id', 'created', 'updated'
+            'id', 'name', 'description', 'requirements', 'responsibilities', 'department', 'department_id', 'created', 'updated'
         ]

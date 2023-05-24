@@ -20,7 +20,10 @@ class DefaultPagination(PageNumberPagination):
                 filter_condition = Q(**{field_name + '__icontains': value})
                 queryset = queryset.filter(filter_condition)
             else:
-                filter_condition = Q(country__name__icontains=filter_param) | Q(state__name__icontains=filter_param)
+                filter_condition = (
+                        Q(country__name__icontains=filter_param) |
+                        Q(state__name__icontains=filter_param)
+                )
                 queryset = queryset.filter(filter_condition)
 
         paginated_queryset = super().paginate_queryset(queryset, request, view)
