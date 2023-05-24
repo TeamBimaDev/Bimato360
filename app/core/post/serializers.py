@@ -1,6 +1,5 @@
 from core.abstract.serializers import AbstractSerializer
 from .models import BimaCorePost
-from core.department.serializers import BimaCoreDepartmentSerializer
 from rest_framework import serializers
 from core.department.models import BimaCoreDepartment
 

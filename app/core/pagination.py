@@ -1,5 +1,5 @@
 from rest_framework.pagination import PageNumberPagination
-from django.db.models import
+from django.db.models import Q
 from rest_framework import exceptions
 class DefaultPagination(PageNumberPagination):
     page_size = 2
@@ -12,9 +12,17 @@ class DefaultPagination(PageNumberPagination):
         self.max_page_size = self.page_size
         filter_param = request.query_params.get('filter')
         if filter_param:
-            field_name, value = filter_param.split('=')
-            filter_condition = Q(**{field_name: value})
-            queryset = queryset.filter(filter_condition)
+            if ':' in filter_param:
+                field_name, value = filter_param.split(':')
+                filter_condition = Q(**{field_name + '__icontains': value})
+                queryset = queryset.filter(filter_condition)
+            else:
+                filter_condition = (
+                        Q(country__name__icontains=filter_param) |
+                        Q(state__name__icontains=filter_param)
+                )
+                queryset = queryset.filter(filter_condition)
+
         paginated_queryset = super().paginate_queryset(queryset, request, view)
         self.page.paginator.count = queryset.count()
         self.page.paginator.num_pages = max(1, self.page.paginator.count // self.page_size)
