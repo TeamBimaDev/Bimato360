@@ -30,8 +30,8 @@ class BimaCoreCountryViewSet(AbstractViewSet):
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
-        data_to_save = request.data
-        currency_public_id = request.data.get('currency')
+        data_to_save = request.data.copy()
+        currency_public_id = data_to_save.get('currency')
         currency = get_object_or_404(BimaCoreCurrency, public_id=currency_public_id)
         data_to_save['currency_id'] = currency.id
         serializer = self.get_serializer(instance, data=data_to_save, partial=partial)

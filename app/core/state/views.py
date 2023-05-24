@@ -29,8 +29,8 @@ class BimaCoreStateViewSet(AbstractViewSet):
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
-        data_to_save = request.data
-        country_public_id = request.data.get('country')
+        data_to_save = request.data.copy()
+        country_public_id = data_to_save.get('country')
         country = get_object_or_404(BimaCoreCountry, public_id=country_public_id)
         data_to_save['country_id'] = country.id
         serializer = self.get_serializer(instance, data=data_to_save, partial=partial)
