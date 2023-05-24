@@ -15,12 +15,16 @@ class BimaCorePostViewSet(AbstractViewSet):
     pagination_class = DefaultPagination
 
     def create(self, request):
-        department_id = request.data.get('department_id')
-        department = get_object_or_404(BimaCoreDepartment, id=department_id)
-        serializer = self.get_serializer(data=request.data)
+        department_public_id = request.data.get('department')
+        department = get_object_or_404(BimaCoreDepartment, public_id=department_public_id)
+        data_to_save = request.data
+        data_to_save['department_id'] = department.id
+        serializer = self.get_serializer(data=data_to_save)
         serializer.is_valid(raise_exception=True)
-        serializer.save(department=department)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
 
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
