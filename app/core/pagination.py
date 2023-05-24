@@ -1,6 +1,6 @@
 from rest_framework.pagination import PageNumberPagination
 from django.db.models import Q
-from rest_framework import exceptions
+from rest_framework.response import Response
 
 class DefaultPagination(PageNumberPagination):
     page_size = 2
@@ -39,6 +39,14 @@ class DefaultPagination(PageNumberPagination):
             if total_pages > 0:
                 self.page.number = total_pages
             else:
-                raise exceptions.NotFound('Page not found.')
+                paginated_queryset = []
 
         return paginated_queryset
+
+    def get_paginated_response(self, data):
+        return Response({
+            'count': self.page.paginator.count,
+            'next': self.get_next_link(),
+            'previous': self.get_previous_link(),
+            'results': data
+        })
