@@ -38,10 +38,13 @@ class BimaCoreDepartmentViewSet(AbstractViewSet):
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
         data_to_save = request.data.copy()
-        department_public_id = data_to_save.get('department')
-        department = get_object_or_404(BimaCoreDepartment, public_id=department_public_id)
-        data_to_save['department_id'] = department.id
-        data_to_save['department'] = department.id
+
+        if data_to_save.get('department') :
+            department_public_id = data_to_save.get('department')
+            department = get_object_or_404(BimaCoreDepartment, public_id=department_public_id)
+            data_to_save['department_id'] = department.id
+            data_to_save['department'] = department.id
+
         serializer = self.get_serializer(instance, data=data_to_save, partial=partial)
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
