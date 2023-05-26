@@ -14,18 +14,13 @@ import os
 from datetime import timedelta
 from pathlib import Path
 from dotenv import load_dotenv
+import logging
 
 load_dotenv()
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get('SECRET_KEY', 'changeme')
 
-# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = bool(int(os.environ.get('DEBUG', 1)))
 
 ALLOWED_HOSTS = []
@@ -44,25 +39,24 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:8000"
 ]
 CORS_ALLOW_METHODS = [
-'DELETE',
-'GET',
-'OPTIONS',
-'PATCH',
-'POST',
-'PUT',
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
 ]
 CORS_ALLOW_HEADERS = [
-'accept',
-'accept-encoding',
-'authorization',
-'content-type',
-'dnt',
-'origin',
-'user-agent',
-'x-csrftoken',
-'x-requested-with',
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
 ]
-# Application definition
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -75,6 +69,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'auditlog',
     'drf_spectacular',
+    'logging',
     'core',
     'user',
     'hr',
@@ -87,12 +82,12 @@ MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
+    'common.middlewares.error_handling_middleware.ErrorHandlingMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'auditlog.middleware.AuditlogMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
 ]
 
@@ -184,6 +179,9 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated'
+    ],
+    'DEFAULT_RENDERER_CLASSES': [
+        'common.wrappers.CustomResponseJSONRenderer.CustomResponseJSONRenderer'
     ]
 }
 
@@ -196,4 +194,22 @@ SIMPLE_JWT = {
     'REFRESH_TOKEN_LIFETIME': timedelta(days=15),
     'ROTATE_REFRESH_TOKENS': True,
     'AUTH_HEADER_TYPES': ('JWT',),
+}
+
+logging.basicConfig(level=logging.INFO)
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'file': {
+            'level': 'ERROR',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(BASE_DIR, 'logs', 'django_errors.log')
+        },
+    },
+    'root': {
+        'handlers': ['file'],
+        'level': 'ERROR',
+    },
 }
