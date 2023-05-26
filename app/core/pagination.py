@@ -1,7 +1,8 @@
 from rest_framework.pagination import PageNumberPagination
 from django.db.models import Q
 from rest_framework.response import Response
-
+from rest_framework.exceptions import NotFound
+from django.core.paginator import Page
 class DefaultPagination(PageNumberPagination):
     page_size = 2
     page_size_query_param = 'page_size'
@@ -26,27 +27,38 @@ class DefaultPagination(PageNumberPagination):
 
         queryset = queryset.filter(filter_conditions)
 
-        paginated_queryset = super().paginate_queryset(queryset, request, view)
-
         count = queryset.count()
         total_pages = count // self.page_size
         if count % self.page_size > 0:
             total_pages += 1
 
         page_number = int(request.query_params.get(self.page_query_param, 1))
-        self.page.number = page_number
+        if page_number > total_pages:
+            return []
+
+        self.page = Page(queryset, page_number, self)
         self.page.paginator.count = count
         self.page.paginator.num_pages = total_pages
 
-        if self.page.number > total_pages:
-            if total_pages > 0:
-                self.page.number = total_pages
-            else:
-                paginated_queryset = []
+        if not queryset and page_number == 1:
+            return []
+
+        paginated_queryset = super().paginate_queryset(queryset, request, view)
+
+        if not paginated_queryset and page_number == 1:
+            return []
 
         return paginated_queryset
 
     def get_paginated_response(self, data):
+        if not data:
+            return Response({
+                'count': 0,
+                'next': None,
+                'previous': None,
+                'results': []
+            })
+
         return Response({
             'count': self.page.paginator.count,
             'next': self.get_next_link(),
