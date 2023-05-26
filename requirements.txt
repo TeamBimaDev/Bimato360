@@ -9,3 +9,4 @@ flake8
 python-dotenv
 django-auditlog
 django-cors-headers
+django-debug-toolbar

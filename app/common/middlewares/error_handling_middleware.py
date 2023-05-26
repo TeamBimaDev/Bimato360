@@ -25,11 +25,6 @@ class ErrorHandlingMiddleware:
     def process_exception(self, request, exception):
         error_message = str(exception)
 
-        response_data = {
-            'succeeded': False,
-            'message': error_message,
-        }
-
         if isinstance(exception, (ValidationError,)):
             response_status = HTTP_400_BAD_REQUEST
         elif isinstance(exception, (AuthenticationFailed,)):

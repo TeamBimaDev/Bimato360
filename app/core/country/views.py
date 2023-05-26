@@ -12,7 +12,7 @@ from core.pagination import DefaultPagination
 
 
 class BimaCoreCountryViewSet(AbstractViewSet):
-    queryset = BimaCoreCountry.objects.all()
+    queryset = BimaCoreCountry.objects.select_related('currency').all()
     serializer_class = BimaCoreCountrySerializer
     permission_classes = []
     pagination_class = DefaultPagination
