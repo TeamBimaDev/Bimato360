@@ -11,7 +11,7 @@ from core.pagination import DefaultPagination
 
 
 class BimaCoreStateViewSet(AbstractViewSet):
-    queryset = BimaCoreState.objects.all()
+    queryset = BimaCoreState.objects.select_related('country').all()
     serializer_class = BimaCoreStateSerializer
     permission_classes = []
     pagination_class = DefaultPagination

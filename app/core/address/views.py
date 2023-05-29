@@ -12,7 +12,7 @@ from core.pagination import DefaultPagination
 
 
 class BimaCoreAddressViewSet(AbstractViewSet):
-    queryset = BimaCoreAddress.objects.all()
+    queryset = BimaCoreAddress.objects.select_related('state', 'country').all()
     serializer_class = BimaCoreAddressSerializer
     permission_classes = []
     pagination_class = DefaultPagination

@@ -11,7 +11,7 @@ from core.post.serializers import BimaCorePostSerializer
 
 
 class BimaCoreDepartmentViewSet(AbstractViewSet):
-    queryset = BimaCoreDepartment.objects.all()
+    queryset = BimaCoreDepartment.objects.select_related('department').all()
     serializer_class = BimaCoreDepartmentSerializer
     permission_classes = []
     pagination_class = DefaultPagination

@@ -9,7 +9,7 @@ from rest_framework.response import Response
 from core.pagination import DefaultPagination
 
 class BimaCorePostViewSet(AbstractViewSet):
-    queryset = BimaCorePost.objects.all()
+    queryset = BimaCorePost.objects.select_related('department').all()
     serializer_class = BimaCorePostSerializer
     permission_classes = []
     pagination_class = DefaultPagination
