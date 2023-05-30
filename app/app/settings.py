@@ -63,7 +63,7 @@ INSTALLED_APPS = [
     'user',
     'hr',
     'company',
-    'partners'
+    'erp'
 ]
 
 MIDDLEWARE = [
@@ -71,7 +71,7 @@ MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
-    'common.middlewares.error_handling_middleware.ErrorHandlingMiddleware',
+    # 'common.middlewares.error_handling_middleware.ErrorHandlingMiddleware',
     'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -101,7 +101,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'app.wsgi.application'
 
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -112,7 +111,6 @@ DATABASES = {
         'PORT': os.environ.get('DB_PORT'),
     }
 }
-
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -139,12 +137,9 @@ USE_L10N = True
 
 USE_TZ = True
 
-
 STATIC_URL = '/static/'
 MEDIA_ROOT = '/vol/web/media'
 STATIC_ROOT = '/vol/web/static'
-
-
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
@@ -160,12 +155,12 @@ REST_FRAMEWORK = {
     ],
 
     "DEFAULT_RENDERER_CLASSES": (
-       "common.wrappers.custom_response_json_renderer.CustomResponseJSONRenderer",
-       "rest_framework.renderers.JSONRenderer",
-       "rest_framework.renderers.BrowsableAPIRenderer",
-   ),
-    'EXCEPTION_HANDLER':
-        "common.middlewares.custom_exception_handler.custom_exception_handler",
+        "common.wrappers.custom_response_json_renderer.CustomResponseJSONRenderer",
+        "rest_framework.renderers.JSONRenderer",
+        "rest_framework.renderers.BrowsableAPIRenderer",
+    ),
+    # 'EXCEPTION_HANDLER':
+    #     "common.middlewares.custom_exception_handler.custom_exception_handler",
 }
 
 SPECTACULAR_SETTINGS = {

@@ -1,6 +1,6 @@
 from django.apps import AppConfig
 
 
-class PartnersConfig(AppConfig):
+class ErpConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'partners'
+    name = 'erp'

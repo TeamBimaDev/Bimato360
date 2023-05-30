@@ -7,7 +7,7 @@ from rest_framework import status
 from rest_framework.response import Response
 from core.address.serializers import BimaCoreAddressSerializer
 from core.contact.models import BimaCoreContact
-from core.contact.serializers import BimaCoreContactserializer
+from core.contact.serializers import BimaCoreContactSerializer
 from hr.interview.models import BimaHrInterview
 from core.tags.models import BimaCoreTags
 from hr.interview.serializers import BimaHrInterviewSerializer
@@ -100,7 +100,7 @@ class BimaHrApplicantViewSet(AbstractViewSet):
         return self.list_object(request, public_id=public_id, model=model, serializer=serializer)
     def list_contacts(self, request, public_id=None):
         model = BimaCoreContact
-        serializer = BimaCoreContactserializer
+        serializer = BimaCoreContactSerializer
         return self.list_object(request, public_id=public_id, model=model, serializer=serializer)
     def list_tags(self, request, public_id=None):
         model = BimaCoreTags

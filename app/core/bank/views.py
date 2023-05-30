@@ -39,12 +39,9 @@ class BimaCoreBankViewSet(AbstractViewSet):
 
     def create(self, request):
         serializer = self.get_serializer(data=request.data)
-        print("hhhhhhhhhh")
         serializer.is_valid(raise_exception=True)
         bank = self.perform_create(serializer)
         bankContentType = ContentType.objects.filter(app_label="core", model="bimacorebank").first()
-        if bankContentType:
-                bankContentType_id = bankContentType.id
 
         newBank = get_object_or_404(BimaCoreBank, public_id=serializer.data['public_id'])
         if newBank:

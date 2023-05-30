@@ -21,7 +21,7 @@ urlpatterns = [
     path('api/core/', include('core.urls')),
     path('api/hr/', include('hr.urls')),
     path('api/company/', include('company.urls')),
-    path('api/partners/', include('partners.urls')),
+    path('api/erp/', include('erp.urls')),
     path('__debug__/', include(debug_toolbar.urls)),
 ]
 

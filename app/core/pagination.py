@@ -4,11 +4,11 @@ from rest_framework.response import Response
 from rest_framework.exceptions import NotFound
 from django.core.paginator import Page
 class DefaultPagination(PageNumberPagination):
-    page_size = 2
+    page_size = 15
     page_size_query_param = 'page_size'
     max_page_size = 100
     page_query_param = 'page'
-    default_ordering = '-created_at'
+    default_ordering = '-created'
 
     def paginate_queryset(self, queryset, request, view=None):
         self.page_size = self.get_page_size(request)
@@ -26,6 +26,9 @@ class DefaultPagination(PageNumberPagination):
                 filter_conditions &= field_condition
 
         queryset = queryset.filter(filter_conditions)
+
+        ordering = request.query_params.get('ordering', self.default_ordering)
+        queryset = queryset.order_by(ordering)
 
         count = queryset.count()
         total_pages = count // self.page_size
@@ -51,17 +54,9 @@ class DefaultPagination(PageNumberPagination):
         return paginated_queryset
 
     def get_paginated_response(self, data):
-        if not data:
-            return Response({
-                'count': 0,
-                'next': None,
-                'previous': None,
-                'results': []
-            })
-
         return Response({
             'count': self.page.paginator.count,
             'next': self.get_next_link(),
             'previous': self.get_previous_link(),
-            'results': data
+            'results': data if data else []
         })

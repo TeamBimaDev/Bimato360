@@ -17,10 +17,6 @@ def custom_exception_handler(exc, context):
     # Call REST framework's default exception handler first
     response = exception_handler(exc, context)
     logger = logging.getLogger(__name__)
-    print("test")
-    print(response)
-    print("done")
-    print(context)
 
     error_message = str(exc)
 
