@@ -30,8 +30,9 @@ class BimaErpPartnerViewSet(AbstractViewSet):
         address_data = request.data.get('address_data', [])
         contact_data = request.data.get('contact_data', [])
         document_data = request.data.get('document_data', [])
+        tag_data = request.data.get('tag_data', [])
         post_create_partner.send(sender=self.__class__, instance=new_partner, address_data=address_data,
-                                 contact_data=contact_data, document_data=document_data)
+                                 contact_data=contact_data, document_data=document_data, tag_data=tag_data)
 
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 

@@ -5,6 +5,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.apps import apps
 from core.country.models import BimaCoreCountry
 from core.state.models import BimaCoreState
+from django.shortcuts import get_object_or_404
 
 
 class BimaCoreAddress(AbstractModel):
@@ -42,3 +43,29 @@ class BimaCoreAddress(AbstractModel):
     class Meta:
         ordering = ['number']
         permissions = []
+
+
+def create_address_from_parent_entity(data_address_to_save, parent):
+    for address_data in data_address_to_save:
+        country = get_object_or_404(BimaCoreCountry, public_id=address_data.get('country', ''))
+        state = get_object_or_404(BimaCoreState, public_id=address_data.get('state', ''))
+
+        BimaCoreAddress.objects.create(
+            number=address_data.get('number', ''),
+            street=address_data.get('street', ''),
+            street2=address_data.get('street2', ''),
+            zip=address_data.get('zip', ''),
+            city=address_data.get('city', ''),
+            contact_name=address_data.get('contact_name', ''),
+            contact_phone=address_data.get('contact_phone', ''),
+            contact_email=address_data.get('contact_email', ''),
+            can_send_bill=address_data.get('can_send_bill', ''),
+            can_deliver=address_data.get('can_deliver', ''),
+            latitude=address_data.get('latitude', ''),
+            longitude=address_data.get('longitude', ''),
+            note=address_data.get('note', ''),
+            state_id=state.id,
+            country_id=country.id,
+            parent_type=ContentType.objects.get_for_model(parent),
+            parent_id=parent.id,
+        )

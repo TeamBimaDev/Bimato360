@@ -28,19 +28,19 @@ class TestUnitaireTags(TestCase):
         self.assertEqual(response.data, serializer_data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
     def test_get_single_tags(self):
-        if hasattr(self, 'tags'):
+        if hasattr(self, 'entity_tag'):
             response = self.client.get(reverse('core:bimacoretags-detail', args=[self.tags.id]))
             tags = BimaCoreTags.objects.get(id=self.tags.id)
             serializer_data = BimaCoreTagsserializer(tags).data
             self.assertEqual(response.data, serializer_data)
             self.assertEqual(response.status_code, status.HTTP_200_OK)
     def test_delete_tags(self):
-        if hasattr(self, 'tags'):
+        if hasattr(self, 'entity_tag'):
             response = self.client.delete(reverse('core:bimacoretags-detail', args=[self.tags.id]))
             self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
     def test_update_tags(self):
-        if hasattr(self, 'tags'):
+        if hasattr(self, 'entity_tag'):
             updated_tags_data = {
                 'name': 'NewTag',
                 'id_manager': 2,

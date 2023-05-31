@@ -75,7 +75,6 @@ class BimaCoreBankViewSet(AbstractViewSet):
 
     def get_object(self):
         obj = BimaCoreBank.objects.get_object_by_public_id(self.kwargs['pk'])
-        #self.check_object_permissions(self.request, obj)
         return obj
     def update_address_for_bank(self, request, public_id=None, address_id=None):
         bank = get_object_or_404(BimaCoreBank, public_id=public_id)

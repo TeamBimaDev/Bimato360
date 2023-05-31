@@ -11,16 +11,8 @@ class CompanyType(Enum):
     COMPANY_PARTNERSHIP_LIMITED_BY_SHARES = 'company Partnership limited by shares'
     COOPERATIVE_SOCIETY = 'Cooperative society'
     UNINCORPORATED_JOINT_VENTURE = 'Unincorporated joint venture'
-    JOINT_STOCK_COMPANY='Joint - stock company'
+    JOINT_STOCK_COMPANY = 'Joint - stock company'
 
 
-
-
-
-
-
-
-
-
-
-
+def get_company_type_choices():
+    return [(company_type.name, company_type.value) for company_type in CompanyType]

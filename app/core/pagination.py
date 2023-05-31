@@ -54,9 +54,17 @@ class DefaultPagination(PageNumberPagination):
         return paginated_queryset
 
     def get_paginated_response(self, data):
+        if not data:
+            return Response({
+                'count': 0,
+                'next': None,
+                'previous': None,
+                'results': []
+            })
+
         return Response({
             'count': self.page.paginator.count,
             'next': self.get_next_link(),
             'previous': self.get_previous_link(),
-            'results': data if data else []
+            'results': data
         })
