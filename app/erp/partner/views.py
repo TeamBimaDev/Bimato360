@@ -2,7 +2,6 @@ from core.abstract.views import AbstractViewSet
 from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.response import Response
-
 from erp.partner.models import BimaErpPartner
 from erp.partner.serializers import BimaErpPartnerSerializer
 from core.document.models import BimaCoreDocument
@@ -11,7 +10,6 @@ from core.address.models import BimaCoreAddress
 from core.address.serializers import BimaCoreAddressSerializer
 from core.contact.models import BimaCoreContact
 from core.contact.serializers import BimaCoreContactSerializer
-
 from erp.partner.signals import post_create_partner
 
 

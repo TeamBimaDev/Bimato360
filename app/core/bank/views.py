@@ -8,48 +8,23 @@ from rest_framework.response import Response
 from core.address.serializers import BimaCoreAddressSerializer
 from django.shortcuts import get_object_or_404
 from core.pagination import DefaultPagination
-from core.country.models import BimaCoreCountry
-from core.state.models import BimaCoreState
-
+from core.bank.signals import post_create_bank
 
 class BimaCoreBankViewSet(AbstractViewSet):
     queryset = BimaCoreBank.objects.all()
     serializer_class = BimaCoreBankSerializer
     permission_classes = []
     pagination_class = DefaultPagination
-    def create_address(self, address_data, parent_type, parent_id):
-        country = get_object_or_404(BimaCoreCountry, public_id=address_data['country'])
-        state = get_object_or_404(BimaCoreState, public_id=address_data['state'])
-
-        try:
-            address = BimaCoreAddress.objects.create(
-                number=address_data['number'],
-                street=address_data['street'],
-                street2=address_data['street2'],
-                zip=address_data['zip'],
-                city=address_data['city'],
-                state_id=state.id,
-                country_id=country.id,
-                parent_type=parent_type,
-                parent_id=parent_id,
-            )
-            return address
-        except ValueError as expError:
-            pass
-
-    def create(self, request):
+    def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        bank = self.perform_create(serializer)
-        bankContentType = ContentType.objects.filter(app_label="core", model="bimacorebank").first()
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        new_bank = get_object_or_404(BimaCoreBank, public_id=serializer.data['public_id'])
+        address_data = request.data.get('address_data', [])
+        post_create_bank.send(sender=self.__class__, instance=new_bank, address_data=address_data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
-        newBank = get_object_or_404(BimaCoreBank, public_id=serializer.data['public_id'])
-        if newBank:
-            for address_data in request.data.get('address', []):
-                self.create_address(address_data, bankContentType, newBank.id)
-
-            headers = self.get_success_headers(serializer.data)
-            return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
     def list_object(self, request, public_id=None, model=None, serializer=None):
         bankContentType = ContentType.objects.filter(app_label="core", model="bimacorebank").first()
         if bankContentType:
