@@ -43,7 +43,7 @@ class BimaCoreDocument(AbstractModel):
         return self.file_name
 
     class Meta:
-        ordering = ['-date_file', 'file_name']
+        ordering = ['-created', 'file_name']
         permissions = []
 
 
@@ -53,36 +53,19 @@ def create_document_from_parent_entity(data_document_to_save, parent):
 
 
 def create_single_document(document_data, parent):
-    BimaCoreDocument.objects.create(
-        document_name=document_data.get('document_name', ''),
-        description=document_data.get('description', ''),
-        date_file=document_data.get('date_file', ''),
-        parent_type=ContentType.objects.get_for_model(parent),
-        parent_id=parent.id
-    )
-
-
-def update_single_document(document_data, parent):
     try:
-        item_to_update = BimaCoreDocument.objects.get(public_id=document_data.get('public_id'))
-
-        item_to_update.document_name = document_data.get('document_name', ''),
-        item_to_update.description = document_data.get('description', ''),
-        item_to_update.date_file = document_data.get('date_file', ''),
-        item_to_update.parent_type = ContentType.objects.get_for_model(parent),
-        item_to_update.parent_id = parent.id
-
-        item_to_update.save()
+        BimaCoreDocument.objects.create(
+            document_name=document_data.get('document_name', ''),
+            description=document_data.get('description', ''),
+            date_file=document_data.get('date_file', ''),
+            parent_type=ContentType.objects.get_for_model(parent),
+            parent_id=parent.id
+        )
         return True
-
     except ValidationError as e:
-        error_message = str(e)
-        return {'error': error_message, 'status': status.HTTP_400_BAD_REQUEST}
-    except BimaCoreDocument.DoesNotExist:
-        return {'error': 'Address not found', 'status': status.HTTP_500_INTERNAL_SERVER_ERROR}
+        return {"error": str(e), "status": status.HTTP_400_BAD_REQUEST}
     except Exception as e:
-        error_message = str(e)
-        return {'error': error_message, 'status': status.HTTP_500_INTERNAL_SERVER_ERROR}
+        return {"error": str(e), "status": status.HTTP_500_INTERNAL_SERVER_ERROR}
 
 
 def get_documents_for_parent_entity(parent):

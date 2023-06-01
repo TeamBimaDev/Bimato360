@@ -12,10 +12,11 @@ from core.address.serializers import BimaCoreAddressSerializer
 from core.contact.serializers import BimaCoreContactSerializer
 from core.document.serializers import BimaCoreDocumentSerializer
 
-from core.address.models import BimaCoreAddress, get_addresses_for_parent, update_single_address, create_single_address
-from core.contact.models import create_single_contact, update_single_contact, get_contacts_for_parent_entity
-from core.document.models import create_single_document, update_single_document, get_documents_for_parent_entity
-
+from core.address.models import BimaCoreAddress, get_addresses_for_parent, create_single_address
+from core.contact.models import BimaCoreContact, create_single_contact, \
+    get_contacts_for_parent_entity
+from core.document.models import BimaCoreDocument, create_single_document,  \
+    get_documents_for_parent_entity
 
 
 class BimaErpPartnerViewSet(AbstractViewSet):
@@ -51,17 +52,10 @@ class BimaErpPartnerViewSet(AbstractViewSet):
 
     def create_address(self, request, *args, **kwargs):
         partner = BimaErpPartner.objects.get_object_by_public_id(self.kwargs['public_id'])
-        saved = create_single_address(request, partner)
+        saved = create_single_address(request.data, partner)
         if not saved:
             return Response(saved.error, status=saved.status)
-        return Response(saved.data)
-
-    def update_address(self, request, *args, **kwargs):
-        partner = BimaErpPartner.objects.get_object_by_public_id(self.kwargs['public_id'])
-        saved = update_single_address(request, partner)
-        if not saved:
-            return Response(saved.error, status=saved.status)
-        return Response(saved.data)
+        return Response(saved)
 
     def get_address(self, request, *args, **kwargs):
         partner = BimaErpPartner.objects.get_object_by_public_id(self.kwargs['public_id'])
@@ -77,17 +71,16 @@ class BimaErpPartnerViewSet(AbstractViewSet):
 
     def create_contact(self, request, *args, **kwargs):
         partner = BimaErpPartner.objects.get_object_by_public_id(self.kwargs['public_id'])
-        saved = create_single_contact(request, partner)
+        saved = create_single_contact(request.data, partner)
         if not saved:
             return Response(saved.error, status=saved.status)
-        return Response(saved.data)
+        return Response(saved)
 
-    def update_contact(self, request, *args, **kwargs):
+    def get_contact(self, request, *args, **kwargs):
         partner = BimaErpPartner.objects.get_object_by_public_id(self.kwargs['public_id'])
-        saved = update_single_contact(request, partner)
-        if not saved:
-            return Response(saved.error, status=saved.status)
-        return Response(saved.data)
+        contact = get_object_or_404(BimaCoreContact, public_id=self.kwargs['contact_public_id'], parent_id=partner.id)
+        serialized_contact = BimaCoreContactSerializer(contact)
+        return Response(serialized_contact.data)
 
     def list_documents(self, request, *args, **kwargs):
         partner = BimaErpPartner.objects.get_object_by_public_id(self.kwargs['public_id'])
@@ -97,14 +90,14 @@ class BimaErpPartnerViewSet(AbstractViewSet):
 
     def create_document(self, request, *args, **kwargs):
         partner = BimaErpPartner.objects.get_object_by_public_id(self.kwargs['public_id'])
-        saved = create_single_document(request, partner)
+        saved = create_single_document(request.data, partner)
         if not saved:
             return Response(saved.error, status=saved.status)
-        return Response(saved.data)
+        return Response(saved)
 
-    def update_document(self, request, *args, **kwargs):
+    def get_document(self, request, *args, **kwargs):
         partner = BimaErpPartner.objects.get_object_by_public_id(self.kwargs['public_id'])
-        saved = update_single_document(request, partner)
-        if not saved:
-            return Response(saved.error, status=saved.status)
-        return Response(saved.data)
+        document = get_object_or_404(BimaCoreDocument, public_id=self.kwargs['document_public_id'],
+                                     parent_id=partner.id)
+        serialized_document = BimaCoreContactSerializer(document)
+        return Response(serialized_document.data)

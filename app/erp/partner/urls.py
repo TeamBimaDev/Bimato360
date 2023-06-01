@@ -2,7 +2,6 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from erp.partner.views import BimaErpPartnerViewSet
 
-from core.address.views import BimaCoreAddressViewSet
 
 router = DefaultRouter()
 router.register('', BimaErpPartnerViewSet)
@@ -18,13 +17,13 @@ urlpatterns = [
 
     path('<str:public_id>/contacts/',
          BimaErpPartnerViewSet.as_view({'get': 'list_contacts', 'post': 'create_contact'}), name='partner-contacts'),
-    path('<str:public_id>/contacts/<str:contact_public_id>/', BimaErpPartnerViewSet.as_view({'put': 'update_contact'}),
+    path('<str:public_id>/contacts/<str:contact_public_id>/', BimaErpPartnerViewSet.as_view({'get': 'get_contact'}),
          name='partner-contact'),
 
-    path('<str:public_id>/addresses/',
+    path('<str:public_id>/documents/',
          BimaErpPartnerViewSet.as_view({'get': 'list_documents', 'post': 'create_document'}), name='partner-documents'),
     path('<str:public_id>/documents/<str:document_public_id>/',
-         BimaErpPartnerViewSet.as_view({'put': 'update_document'}),
+         BimaErpPartnerViewSet.as_view({'get': 'get_document'}),
          name='partner-document'),
 
 ]
