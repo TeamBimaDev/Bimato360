@@ -90,10 +90,11 @@ class BimaErpPartnerViewSet(AbstractViewSet):
 
     def create_document(self, request, *args, **kwargs):
         partner = BimaErpPartner.objects.get_object_by_public_id(self.kwargs['public_id'])
-        saved = create_single_document(request.data, partner)
-        if not saved:
-            return Response(saved.error, status=saved.status)
-        return Response(saved)
+        document_data = request.data
+        document_data['file_path'] = request.FILES['file_path']
+        result = BimaCoreDocument.create_document_for_partner(partner, document_data)
+        return Response(result)
+
 
     def get_document(self, request, *args, **kwargs):
         partner = BimaErpPartner.objects.get_object_by_public_id(self.kwargs['public_id'])

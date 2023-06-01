@@ -17,7 +17,8 @@ class BimaCoreDocument(AbstractModel):
         filename = f'{uuid.uuid4()}{ext}'
         self.file_name = filename
         self.file_extension = ext
-        return os.path.join('uploads', 'documents', self.parent_type, filename)
+        app_label = self.parent_type.model
+        return os.path.join('uploads', 'documents', app_label, filename)
 
     document_name = models.CharField(max_length=30)
     description = models.TextField(max_length=255)
@@ -45,6 +46,38 @@ class BimaCoreDocument(AbstractModel):
     class Meta:
         ordering = ['-created', 'file_name']
         permissions = []
+
+    @classmethod
+    def create_document_for_partner(cls, parent, document_data):
+        try:
+            file = document_data['file_path']
+            ext = os.path.splitext(file.name)[1]
+            filename = f'{uuid.uuid4()}{ext}'
+            file_content_type = file.content_type
+            app_label = parent._meta.label
+
+            if not file_content_type:
+                raise ValidationError('Invalid file content type.')
+
+            document = cls(
+                document_name=document_data['document_name'],
+                description=document_data['description'],
+                date_file=document_data['date_file'],
+                file_type=file_content_type,
+                parent_type=ContentType.objects.get_for_model(parent),
+                parent_id=parent.id,
+                file_name=filename,
+                file_extension=ext
+            )
+            document.file_path.save(os.path.join('uploads', 'documents', app_label, filename), file)
+            document.save()
+            return True
+
+        except ValidationError as e:
+            return {"error": str(e), "status": status.HTTP_400_BAD_REQUEST}
+
+        except Exception as e:
+            return {"error": str(e), "status": status.HTTP_500_INTERNAL_SERVER_ERROR}
 
 
 def create_document_from_parent_entity(data_document_to_save, parent):
