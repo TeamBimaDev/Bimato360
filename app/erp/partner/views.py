@@ -1,16 +1,21 @@
 from core.abstract.views import AbstractViewSet
+
 from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.response import Response
+
 from erp.partner.models import BimaErpPartner
 from erp.partner.serializers import BimaErpPartnerSerializer
-from core.document.models import BimaCoreDocument
-from core.document.serializers import BimaCoreDocumentSerializer
-from core.address.models import BimaCoreAddress
-from core.address.serializers import BimaCoreAddressSerializer
-from core.contact.models import BimaCoreContact
-from core.contact.serializers import BimaCoreContactSerializer
 from erp.partner.signals import post_create_partner
+
+from core.address.serializers import BimaCoreAddressSerializer
+from core.contact.serializers import BimaCoreContactSerializer
+from core.document.serializers import BimaCoreDocumentSerializer
+
+from core.address.models import BimaCoreAddress, get_addresses_for_parent, update_single_address, create_single_address
+from core.contact.models import create_single_contact, update_single_contact, get_contacts_for_parent_entity
+from core.document.models import create_single_document, update_single_document, get_documents_for_parent_entity
+
 
 
 class BimaErpPartnerViewSet(AbstractViewSet):
@@ -38,20 +43,68 @@ class BimaErpPartnerViewSet(AbstractViewSet):
         obj = BimaErpPartner.objects.get_object_by_public_id(self.kwargs['pk'])
         return obj
 
-    def list_documents(self, request, public_id=None):
-        model = BimaCoreDocument
-        serializer = BimaCoreDocumentSerializer
-        return self.list_object(request, public_id=public_id, model=model, serializer=serializer)
+    def list_addresses(self, request, *args, **kwargs):
+        partner = BimaErpPartner.objects.get_object_by_public_id(self.kwargs['public_id'])
+        addresses = get_addresses_for_parent(partner)
+        serialized_addresses = BimaCoreAddressSerializer(addresses, many=True)
+        return Response(serialized_addresses.data)
 
-    def list_contact(self, request, public_id=None):
-        model = BimaCoreContact
-        serializer = BimaCoreContactSerializer
-        return self.list_object(request, public_id=public_id, model=model, serializer=serializer)
+    def create_address(self, request, *args, **kwargs):
+        partner = BimaErpPartner.objects.get_object_by_public_id(self.kwargs['public_id'])
+        saved = create_single_address(request, partner)
+        if not saved:
+            return Response(saved.error, status=saved.status)
+        return Response(saved.data)
 
-    def list_addresses(self, request, public_id=None):
-        model = BimaCoreAddress
-        serializer = BimaCoreAddressSerializer
-        return self.list_object(request, public_id=public_id, model=model, serializer=serializer)
+    def update_address(self, request, *args, **kwargs):
+        partner = BimaErpPartner.objects.get_object_by_public_id(self.kwargs['public_id'])
+        saved = update_single_address(request, partner)
+        if not saved:
+            return Response(saved.error, status=saved.status)
+        return Response(saved.data)
 
+    def get_address(self, request, *args, **kwargs):
+        partner = BimaErpPartner.objects.get_object_by_public_id(self.kwargs['public_id'])
+        address = get_object_or_404(BimaCoreAddress, public_id=self.kwargs['address_public_id'], parent_id=partner.id)
+        serialized_address = BimaCoreAddressSerializer(address)
+        return Response(serialized_address.data)
 
+    def list_contacts(self, request, *args, **kwargs):
+        partner = BimaErpPartner.objects.get_object_by_public_id(self.kwargs['public_id'])
+        contacts = get_contacts_for_parent_entity(partner)
+        serialized_contact = BimaCoreContactSerializer(contacts, many=True)
+        return Response(serialized_contact.data)
 
+    def create_contact(self, request, *args, **kwargs):
+        partner = BimaErpPartner.objects.get_object_by_public_id(self.kwargs['public_id'])
+        saved = create_single_contact(request, partner)
+        if not saved:
+            return Response(saved.error, status=saved.status)
+        return Response(saved.data)
+
+    def update_contact(self, request, *args, **kwargs):
+        partner = BimaErpPartner.objects.get_object_by_public_id(self.kwargs['public_id'])
+        saved = update_single_contact(request, partner)
+        if not saved:
+            return Response(saved.error, status=saved.status)
+        return Response(saved.data)
+
+    def list_documents(self, request, *args, **kwargs):
+        partner = BimaErpPartner.objects.get_object_by_public_id(self.kwargs['public_id'])
+        contacts = get_documents_for_parent_entity(partner)
+        serialized_contact = BimaCoreDocumentSerializer(contacts, many=True)
+        return Response(serialized_contact.data)
+
+    def create_document(self, request, *args, **kwargs):
+        partner = BimaErpPartner.objects.get_object_by_public_id(self.kwargs['public_id'])
+        saved = create_single_document(request, partner)
+        if not saved:
+            return Response(saved.error, status=saved.status)
+        return Response(saved.data)
+
+    def update_document(self, request, *args, **kwargs):
+        partner = BimaErpPartner.objects.get_object_by_public_id(self.kwargs['public_id'])
+        saved = update_single_document(request, partner)
+        if not saved:
+            return Response(saved.error, status=saved.status)
+        return Response(saved.data)

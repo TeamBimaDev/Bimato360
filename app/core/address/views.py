@@ -10,6 +10,8 @@ from rest_framework.response import Response
 from core.state.models import BimaCoreState
 from core.pagination import DefaultPagination
 
+from erp.partner.models import BimaErpPartner
+
 
 class BimaCoreAddressViewSet(AbstractViewSet):
     queryset = BimaCoreAddress.objects.select_related('state', 'country').all()
@@ -49,3 +51,5 @@ class BimaCoreAddressViewSet(AbstractViewSet):
     def get_object(self):
         obj = BimaCoreAddress.objects.get_object_by_public_id(self.kwargs['pk'])
         return obj
+
+

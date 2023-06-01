@@ -29,7 +29,7 @@ class BimaCoreEntityTag(AbstractModel):
         return self.name
 
     class Meta:
-        ordering = ['name']
+        ordering = ['id']
         permissions = []
 
 

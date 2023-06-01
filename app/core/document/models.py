@@ -7,6 +7,8 @@ from django.apps import apps
 
 from core.abstract.models import AbstractModel
 from common.enums.file_type import get_file_type_choices
+from rest_framework import status
+from rest_framework.exceptions import ValidationError
 
 
 class BimaCoreDocument(AbstractModel):
@@ -47,12 +49,44 @@ class BimaCoreDocument(AbstractModel):
 
 def create_document_from_parent_entity(data_document_to_save, parent):
     for document_data in data_document_to_save:
-        BimaCoreDocument.objects.create(
-            document_name=document_data.get('number', ''),
-            description=document_data.get('street', ''),
-            file_name=document_data.get('street2', ''),
-            file_extension=document_data.get('zip', ''),
-            date_file=document_data.get('city', ''),
-            parent_type=ContentType.objects.get_for_model(parent),
-            parent_id=parent.id
-        )
+        create_single_document(document_data, parent)
+
+
+def create_single_document(document_data, parent):
+    BimaCoreDocument.objects.create(
+        document_name=document_data.get('document_name', ''),
+        description=document_data.get('description', ''),
+        date_file=document_data.get('date_file', ''),
+        parent_type=ContentType.objects.get_for_model(parent),
+        parent_id=parent.id
+    )
+
+
+def update_single_document(document_data, parent):
+    try:
+        item_to_update = BimaCoreDocument.objects.get(public_id=document_data.get('public_id'))
+
+        item_to_update.document_name = document_data.get('document_name', ''),
+        item_to_update.description = document_data.get('description', ''),
+        item_to_update.date_file = document_data.get('date_file', ''),
+        item_to_update.parent_type = ContentType.objects.get_for_model(parent),
+        item_to_update.parent_id = parent.id
+
+        item_to_update.save()
+        return True
+
+    except ValidationError as e:
+        error_message = str(e)
+        return {'error': error_message, 'status': status.HTTP_400_BAD_REQUEST}
+    except BimaCoreDocument.DoesNotExist:
+        return {'error': 'Address not found', 'status': status.HTTP_500_INTERNAL_SERVER_ERROR}
+    except Exception as e:
+        error_message = str(e)
+        return {'error': error_message, 'status': status.HTTP_500_INTERNAL_SERVER_ERROR}
+
+
+def get_documents_for_parent_entity(parent):
+    return BimaCoreDocument.objects.filter(
+        parent_type=ContentType.objects.get_for_model(parent),
+        parent_id=parent.id
+    )

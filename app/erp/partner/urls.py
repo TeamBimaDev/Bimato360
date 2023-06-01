@@ -2,15 +2,29 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from erp.partner.views import BimaErpPartnerViewSet
 
+from core.address.views import BimaCoreAddressViewSet
+
 router = DefaultRouter()
 router.register('', BimaErpPartnerViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
-    path('<str:public_id>/addresses/', BimaErpPartnerViewSet.as_view({'get': 'list_addresses'}),
-         name='partner-addresses'),
-    path('<str:public_id>/document/', BimaErpPartnerViewSet.as_view({'get': 'list_documents'}),
-         name='document-partner'),
-    path('<str:public_id>/contact/', BimaErpPartnerViewSet.as_view({'get': 'list_contact'}),
-         name='document-partner'),
+
+    path('<str:public_id>/addresses/',
+         BimaErpPartnerViewSet.as_view({'get': 'list_addresses', 'post': 'create_address'}), name='partner-addresses'),
+    path('<str:public_id>/addresses/<str:address_public_id>/', BimaErpPartnerViewSet.as_view({'get': 'get_address'}),
+         name='partner-get-address'),
+
+
+    path('<str:public_id>/contacts/',
+         BimaErpPartnerViewSet.as_view({'get': 'list_contacts', 'post': 'create_contact'}), name='partner-contacts'),
+    path('<str:public_id>/contacts/<str:contact_public_id>/', BimaErpPartnerViewSet.as_view({'put': 'update_contact'}),
+         name='partner-contact'),
+
+    path('<str:public_id>/addresses/',
+         BimaErpPartnerViewSet.as_view({'get': 'list_documents', 'post': 'create_document'}), name='partner-documents'),
+    path('<str:public_id>/documents/<str:document_public_id>/',
+         BimaErpPartnerViewSet.as_view({'put': 'update_document'}),
+         name='partner-document'),
+
 ]
