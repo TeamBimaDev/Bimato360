@@ -1,7 +1,7 @@
 import csv
 
 from core.abstract.views import AbstractViewSet
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 
 from django.shortcuts import get_object_or_404
 from rest_framework import status
@@ -15,6 +15,7 @@ from erp.partner.utils import render_to_pdf
 from core.address.serializers import BimaCoreAddressSerializer
 from core.contact.serializers import BimaCoreContactSerializer
 from core.document.serializers import BimaCoreDocumentSerializer
+from core.entity_tag.serializers import BimaCoreEntityTagSerializer
 
 from core.address.models import BimaCoreAddress, get_addresses_for_parent, create_single_address
 from core.contact.models import BimaCoreContact, create_single_contact, \
@@ -22,8 +23,10 @@ from core.contact.models import BimaCoreContact, create_single_contact, \
 from core.document.models import BimaCoreDocument, create_single_document, \
     get_documents_for_parent_entity
 
-from core.pagination import DefaultPagination
+from core.entity_tag.models import BimaCoreEntityTag, create_single_entity_tag, \
+    get_entity_tags_for_parent_entity
 
+from core.pagination import DefaultPagination
 
 
 class BimaErpPartnerViewSet(AbstractViewSet):
@@ -43,8 +46,11 @@ class BimaErpPartnerViewSet(AbstractViewSet):
         contact_data = request.data.get('contact_data', [])
         document_data = request.data.get('document_data', [])
         tag_data = request.data.get('tag_data', [])
-        post_create_partner.send(sender=self.__class__, instance=new_partner, address_data=address_data,
-                                 contact_data=contact_data, document_data=document_data, tag_data=tag_data)
+        post_create_partner.send(sender=self.__class__, instance=new_partner,
+                                 address_data=address_data,
+                                 contact_data=contact_data,
+                                 document_data=document_data,
+                                 tag_data=tag_data)
 
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
@@ -67,7 +73,9 @@ class BimaErpPartnerViewSet(AbstractViewSet):
 
     def get_address(self, request, *args, **kwargs):
         partner = BimaErpPartner.objects.get_object_by_public_id(self.kwargs['public_id'])
-        address = get_object_or_404(BimaCoreAddress, public_id=self.kwargs['address_public_id'], parent_id=partner.id)
+        address = get_object_or_404(BimaCoreAddress,
+                                    public_id=self.kwargs['address_public_id'],
+                                    parent_id=partner.id)
         serialized_address = BimaCoreAddressSerializer(address)
         return Response(serialized_address.data)
 
@@ -86,7 +94,9 @@ class BimaErpPartnerViewSet(AbstractViewSet):
 
     def get_contact(self, request, *args, **kwargs):
         partner = BimaErpPartner.objects.get_object_by_public_id(self.kwargs['public_id'])
-        contact = get_object_or_404(BimaCoreContact, public_id=self.kwargs['contact_public_id'], parent_id=partner.id)
+        contact = get_object_or_404(BimaCoreContact,
+                                    public_id=self.kwargs['contact_public_id'],
+                                    parent_id=partner.id)
         serialized_contact = BimaCoreContactSerializer(contact)
         return Response(serialized_contact.data)
 
@@ -105,10 +115,32 @@ class BimaErpPartnerViewSet(AbstractViewSet):
 
     def get_document(self, request, *args, **kwargs):
         partner = BimaErpPartner.objects.get_object_by_public_id(self.kwargs['public_id'])
-        document = get_object_or_404(BimaCoreDocument, public_id=self.kwargs['document_public_id'],
+        document = get_object_or_404(BimaCoreDocument,
+                                     public_id=self.kwargs['document_public_id'],
                                      parent_id=partner.id)
         serialized_document = BimaCoreContactSerializer(document)
         return Response(serialized_document.data)
+
+    def list_tags(self, request, *args, **kwargs):
+        partner = BimaErpPartner.objects.get_object_by_public_id(self.kwargs['public_id'])
+        entity_tags = get_entity_tags_for_parent_entity(partner)
+        serialized_entity_tags = BimaCoreEntityTagSerializer(entity_tags, many=True)
+        return Response(serialized_entity_tags.data)
+
+    def create_tag(self, request, *args, **kwargs):
+        partner = BimaErpPartner.objects.get_object_by_public_id(self.kwargs['public_id'])
+        saved = create_single_entity_tag(request.data, partner)
+        if not saved:
+            return Response(saved.error, status=saved.status)
+        return Response(saved)
+
+    def get_tag(self, request, *args, **kwargs):
+        partner = BimaErpPartner.objects.get_object_by_public_id(self.kwargs['public_id'])
+        entity_tags = get_object_or_404(BimaCoreEntityTag,
+                                        public_id=self.kwargs['entity_tag_public_id'],
+                                        parent_id=partner.id)
+        serialized_entity_tags = BimaCoreEntityTagSerializer(entity_tags)
+        return JsonResponse(serialized_entity_tags.data)
 
     def export_data_csv(self, request, **kwargs):
         response = HttpResponse(content_type='text/csv')
@@ -118,7 +150,8 @@ class BimaErpPartnerViewSet(AbstractViewSet):
         writer = csv.writer(response)
         writer.writerow(field_names_to_show)
         if kwargs.get('public_id') is not None:
-            data_to_export = [BimaErpPartner.objects.get_object_by_public_id(kwargs.get('public_id'))]
+            data_to_export = [BimaErpPartner.objects.
+                              get_object_by_public_id(kwargs.get('public_id'))]
         else:
             data_to_export = BimaErpPartner.objects.all()
 
@@ -130,7 +163,8 @@ class BimaErpPartnerViewSet(AbstractViewSet):
     def export_data_pdf(self, request, **kwargs):
         template_name = "partner/pdf.html"
         if kwargs.get('public_id') is not None:
-            data_to_export = [BimaErpPartner.objects.get_object_by_public_id(kwargs.get('public_id'))]
+            data_to_export = [BimaErpPartner.objects.
+                              get_object_by_public_id(kwargs.get('public_id'))]
         else:
             data_to_export = BimaErpPartner.objects.all()
 

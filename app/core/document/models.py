@@ -26,16 +26,11 @@ class BimaCoreDocument(AbstractModel):
     file_extension = models.CharField(max_length=255)
     date_file = models.DateTimeField(auto_now_add=True)
     file_path = models.FileField(upload_to=document_file_path)
-    file_type = models.CharField(max_length=100, choices=get_file_type_choices())
+    file_type = models.CharField(max_length=100,
+                                 choices=get_file_type_choices())
     parent_type = models.ForeignKey(
         ContentType,
-        on_delete=models.CASCADE,
-        limit_choices_to={
-            'app_label__in': [
-                app_config.label for app_config in apps.get_app_configs()
-                if app_config.label not in ['admin', 'auth', 'contenttypes', 'sessions', 'auditlog']
-            ]
-        }
+        on_delete=models.CASCADE
     )
     parent_id = models.PositiveIntegerField()
     content_object = GenericForeignKey('parent_type', 'parent_id')
@@ -87,7 +82,7 @@ def create_document_from_parent_entity(data_document_to_save, parent):
 
 def create_single_document(document_data, parent):
     try:
-        BimaCoreDocument.objects.create(
+        item = BimaCoreDocument.objects.create(
             document_name=document_data.get('document_name', ''),
             description=document_data.get('description', ''),
             date_file=document_data.get('date_file', ''),

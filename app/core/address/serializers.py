@@ -37,5 +37,7 @@ class BimaCoreAddressSerializer(AbstractSerializer):
         model = BimaCoreAddress
         fields = [
             'id', 'number', 'street', 'street2', 'zip', 'city', 'state',
+            'contact_name', 'contact_phone', 'contact_email', 'can_send_bill',
+            'can_deliver', 'latitude', 'longitude', 'note',
             'country', 'country_id', 'state_id', 'created', 'updated'
         ]

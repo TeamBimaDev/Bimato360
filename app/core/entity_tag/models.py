@@ -2,11 +2,12 @@ from django.db import models
 
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
-from django.apps import apps
 from django.shortcuts import get_object_or_404
 
 from core.abstract.models import AbstractModel
 from core.tag.models import BimaCoreTag
+from rest_framework import status
+from rest_framework.exceptions import ValidationError
 
 
 class BimaCoreEntityTag(AbstractModel):
@@ -14,13 +15,7 @@ class BimaCoreEntityTag(AbstractModel):
     id_manager = models.IntegerField(blank=True, null=True)
     parent_type = models.ForeignKey(
         ContentType,
-        on_delete=models.CASCADE,
-        limit_choices_to={
-            'app_label__in': [
-                app_config.label for app_config in apps.get_app_configs()
-                if app_config.label not in ['admin', 'auth', 'contenttypes', 'sessions', 'auditlog']
-            ]
-        }
+        on_delete=models.CASCADE
     )
     parent_id = models.PositiveIntegerField()
     content_object = GenericForeignKey('parent_type', 'parent_id')
@@ -35,11 +30,30 @@ class BimaCoreEntityTag(AbstractModel):
 
 def create_entity_tag_from_parent_entity(data_entity_tag_to_save, parent):
     for tag_data in data_entity_tag_to_save:
-        tag = get_object_or_404(BimaCoreTag, public_id=tag_data['tag'])
+        create_single_entity_tag(tag_data, parent)
 
-        BimaCoreEntityTag.objects.create(
+
+def create_single_entity_tag(tag_data, parent):
+    tag = get_object_or_404(BimaCoreTag, public_id=tag_data['tag'])
+
+    try:
+        item = BimaCoreEntityTag.objects.create(
             id_manager=tag_data.get('id_manager', ''),
             tag_id=tag.id,
             parent_type=ContentType.objects.get_for_model(parent),
             parent_id=parent.id,
         )
+
+        return True
+
+    except ValidationError as e:
+        return {"error": str(e), "status": status.HTTP_400_BAD_REQUEST}
+    except Exception as e:
+        return {"error": str(e), "status": status.HTTP_500_INTERNAL_SERVER_ERROR}
+
+
+def get_entity_tags_for_parent_entity(parent):
+    return BimaCoreEntityTag.objects.select_related('tag').filter(
+        parent_type=ContentType.objects.get_for_model(parent),
+        parent_id=parent.id
+    )

@@ -51,7 +51,7 @@ def create_single_address(address_data, parent):
     state = get_object_or_404(BimaCoreState,
                               public_id=address_data.get('state', ''))
     try:
-        BimaCoreAddress.objects.create(
+        item = BimaCoreAddress.objects.create(
             number=address_data.get('number', ''),
             street=address_data.get('street', ''),
             street2=address_data.get('street2', ''),
@@ -76,7 +76,6 @@ def create_single_address(address_data, parent):
         return {"error": str(e), "status": status.HTTP_400_BAD_REQUEST}
     except Exception as e:
         return {"error": str(e), "status": status.HTTP_500_INTERNAL_SERVER_ERROR}
-
 
 
 def get_addresses_for_parent(parent):

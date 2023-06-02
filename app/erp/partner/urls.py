@@ -30,6 +30,13 @@ urlpatterns = [
          BimaErpPartnerViewSet.as_view({'get': 'get_document'}),
          name='partner-document'),
 
+    path('<str:public_id>/tags/',
+         BimaErpPartnerViewSet.as_view({'get': 'list_tags', 'post': 'create_tag'}),
+         name='partner-tags'),
+    path('<str:public_id>/tags/<str:entity_tag_public_id>/',
+         BimaErpPartnerViewSet.as_view({'get': 'get_tag'}),
+         name='partner-get-tag'),
+
     path('export_csv',
          BimaErpPartnerViewSet.as_view({'get': 'export_data_csv'}),
          name='partner-export_csv'),
