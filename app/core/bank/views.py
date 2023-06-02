@@ -1,8 +1,6 @@
 from core.abstract.views import AbstractViewSet
 from core.bank.models import BimaCoreBank
 from core.bank.serializers import BimaCoreBankSerializer
-from core.address.models import BimaCoreAddress
-from django.contrib.contenttypes.models import ContentType
 from rest_framework import status
 from rest_framework.response import Response
 from core.address.serializers import BimaCoreAddressSerializer
@@ -10,11 +8,17 @@ from django.shortcuts import get_object_or_404
 from core.pagination import DefaultPagination
 from core.bank.signals import post_create_bank
 
+from core.address.models import create_single_address, \
+    get_addresses_for_parent, \
+    BimaCoreAddress
+
+
 class BimaCoreBankViewSet(AbstractViewSet):
     queryset = BimaCoreBank.objects.all()
     serializer_class = BimaCoreBankSerializer
     permission_classes = []
     pagination_class = DefaultPagination
+
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -25,38 +29,25 @@ class BimaCoreBankViewSet(AbstractViewSet):
         post_create_bank.send(sender=self.__class__, instance=new_bank, address_data=address_data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
-    def list_object(self, request, public_id=None, model=None, serializer=None):
-        bankContentType = ContentType.objects.filter(app_label="core", model="bimacorebank").first()
-        if bankContentType:
-            bank = BimaCoreBank.objects.filter(public_id=public_id)[0]
-            objects = model.objects.filter(parent_type_id=bankContentType.id, parent_id=bank.id)
-            serialized_data = serializer(objects, many=True)
-            return Response(serialized_data.data)
-    def list_addresses(self, request, public_id=None):
-        model = BimaCoreAddress
-        serializer = BimaCoreAddressSerializer
-        return self.list_object(request, public_id=public_id, model=model, serializer=serializer)
+    def list_addresses(self, request, *args, **kwargs):
+        bank = BimaCoreBank.objects.get_object_by_public_id(self.kwargs['public_id'])
+        addresses = get_addresses_for_parent(bank)
+        serialized_addresses = BimaCoreAddressSerializer(addresses, many=True)
+        return Response(serialized_addresses.data)
 
-    def add_address_for_bank(self, request, public_id=None):
-        bank = BimaCoreBank.objects.filter(public_id=public_id).first()
-        bankContentType = ContentType.objects.filter(app_label="core", model="bimacorebank").first()
-        if not bank:
-            return Response({"error": "Bank not found"}, status=status.HTTP_404_NOT_FOUND)
+    def create_address(self, request, *args, **kwargs):
+        bank = BimaCoreBank.objects.get_object_by_public_id(self.kwargs['public_id'])
+        saved = create_single_address(request.data, bank)
+        if not saved:
+            return Response(saved.error, status=saved.status)
+        return Response(saved)
 
-        for address_data in request.data.get('address', []):
-            self.create_address(address_data, bankContentType, bank.id)
-
-        return Response({"success": "Address(es) added successfully"}, status=status.HTTP_201_CREATED)
+    def get_address(self, request, *args, **kwargs):
+        partner = BimaCoreBank.objects.get_object_by_public_id(self.kwargs['public_id'])
+        address = get_object_or_404(BimaCoreAddress, public_id=self.kwargs['address_public_id'], parent_id=partner.id)
+        serialized_address = BimaCoreAddressSerializer(address)
+        return Response(serialized_address.data)
 
     def get_object(self):
         obj = BimaCoreBank.objects.get_object_by_public_id(self.kwargs['pk'])
         return obj
-    def update_address_for_bank(self, request, public_id=None, address_id=None):
-        bank = get_object_or_404(BimaCoreBank, public_id=public_id)
-        bankContentType = ContentType.objects.get(app_label="core", model="bimacorebank")
-        address = get_object_or_404(BimaCoreAddress, id=address_id, parent_type=bankContentType, parent_id=bank.id)
-        serializer = BimaCoreAddressSerializer(address, data=request.data, partial=True)
-        serializer.is_valid(raise_exception=True)
-        updated_address = serializer.save()
-        return Response(serializer.data, status=status.HTTP_200_OK)
-

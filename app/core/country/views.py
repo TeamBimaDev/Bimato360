@@ -11,16 +11,22 @@ from core.state.serializers import BimaCoreStateSerializer
 from core.pagination import DefaultPagination
 
 
+def get_currency_data(data_to_save):
+    currency_public_id = data_to_save.get('currency')
+    currency = get_object_or_404(BimaCoreCurrency, public_id=currency_public_id)
+    data_to_save['currency_id'] = currency.id
+    return data_to_save
+
+
 class BimaCoreCountryViewSet(AbstractViewSet):
     queryset = BimaCoreCountry.objects.select_related('currency').all()
     serializer_class = BimaCoreCountrySerializer
     permission_classes = []
     pagination_class = DefaultPagination
+
     def create(self, request):
-        currency_public_id = request.data.get('currency')
-        currency = get_object_or_404(BimaCoreCurrency, public_id=currency_public_id)
         data_to_save = request.data
-        data_to_save['currency_id'] = currency.id
+        data_to_save = get_currency_data(data_to_save)
         serializer = self.get_serializer(data=data_to_save)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
@@ -31,9 +37,7 @@ class BimaCoreCountryViewSet(AbstractViewSet):
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
         data_to_save = request.data.copy()
-        currency_public_id = data_to_save.get('currency')
-        currency = get_object_or_404(BimaCoreCurrency, public_id=currency_public_id)
-        data_to_save['currency_id'] = currency.id
+        data_to_save = get_currency_data(data_to_save)
         serializer = self.get_serializer(instance, data=data_to_save, partial=partial)
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)

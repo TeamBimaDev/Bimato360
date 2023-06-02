@@ -1,5 +1,4 @@
 from django.db import models
-from django.apps import apps
 from core.abstract.models import AbstractModel
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
@@ -9,7 +8,8 @@ from rest_framework.exceptions import ValidationError
 
 
 class BimaCoreContact(AbstractModel):
-    name = models.CharField(max_length=256, blank=False, null=False, default="Si Ala")
+    name = models.CharField(max_length=256, blank=False,
+                            null=False, default="Si Ala")
     position = models.CharField(max_length=256, blank=True, null=True)
     department = models.CharField(max_length=256, blank=True, null=True)
     email = models.EmailField(blank=True, null=True)
@@ -19,13 +19,7 @@ class BimaCoreContact(AbstractModel):
     gender = models.CharField(max_length=32, blank=True, choices=get_gender_choices())
     parent_type = models.ForeignKey(
         ContentType,
-        on_delete=models.CASCADE,
-        limit_choices_to={
-            'app_label__in': [
-                app_config.label for app_config in apps.get_app_configs()
-                if app_config.label not in ['admin', 'auth', 'contenttypes', 'sessions', 'auditlog']
-            ]
-        }
+        on_delete=models.CASCADE
     )
     parent_id = models.PositiveIntegerField()
     content_object = GenericForeignKey('parent_type', 'parent_id')
@@ -59,9 +53,11 @@ def create_single_contact(contact_data, parent):
         )
         return True
     except ValidationError as e:
-        return {"error": str(e), "status": status.HTTP_400_BAD_REQUEST}
+        return {"error": str(e),
+                "status": status.HTTP_400_BAD_REQUEST}
     except Exception as e:
-        return {"error": str(e), "status": status.HTTP_500_INTERNAL_SERVER_ERROR}
+        return {"error": str(e),
+                "status": status.HTTP_500_INTERNAL_SERVER_ERROR}
 
 
 def get_contacts_for_parent_entity(parent):

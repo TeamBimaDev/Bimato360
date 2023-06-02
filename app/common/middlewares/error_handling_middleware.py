@@ -1,8 +1,9 @@
-from django.http import JsonResponse
 import logging
 from django.http import JsonResponse
 from django.core.exceptions import ObjectDoesNotExist
-from rest_framework.exceptions import ValidationError, AuthenticationFailed, PermissionDenied
+from rest_framework.exceptions import ValidationError, \
+    AuthenticationFailed, \
+    PermissionDenied
 from rest_framework.status import (
     HTTP_400_BAD_REQUEST,
     HTTP_401_UNAUTHORIZED,

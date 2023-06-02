@@ -8,4 +8,3 @@ class Gender(Enum):
 
 def get_gender_choices():
     return [(gender.name, gender.value) for gender in Gender]
-

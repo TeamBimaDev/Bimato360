@@ -11,6 +11,6 @@ def create_bank_related_entities(sender, instance, address_data, **kwargs):
     if address_data:
         create_addresses(address_data, instance)
 
-def create_addresses(addresses_data, bank):
-    create_address_from_parent_entity(addresses_data, bank)
 
+def create_addresses(addresses_data, partner):
+    create_address_from_parent_entity(addresses_data, partner)

@@ -6,4 +6,3 @@ class BimaCoreBankSerializer(AbstractSerializer):
     class Meta:
         model = BimaCoreBank
         fields = '__all__'
-

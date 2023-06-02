@@ -1,21 +1,6 @@
-"""
-Django admin customization.
-"""
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.utils.translation import gettext_lazy as _
-import core.address.admin
-import core.bank.admin
-import core.contact.admin
-import core.currency.admin
-import core.document.admin
-import core.state.admin
-import core.department.admin
-import core.post.admin
-import core.tag.admin
-import core.source.admin
-import core.country.admin
-import hr.activity_type.admin
 from user.models import User
 
 
@@ -54,6 +39,5 @@ class UserAdmin(BaseUserAdmin):
         }),
     )
 
+
 admin.site.register(User, UserAdmin)
-
-

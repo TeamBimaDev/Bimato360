@@ -2,7 +2,6 @@ from django.db import models
 from core.abstract.models import AbstractModel
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
-from django.apps import apps
 from core.country.models import BimaCoreCountry
 from core.state.models import BimaCoreState
 from django.shortcuts import get_object_or_404
@@ -18,7 +17,7 @@ class BimaCoreAddress(AbstractModel):
     city = models.CharField(max_length=128, blank=False)
     contact_name = models.CharField(max_length=256, blank=True, null=True)
     contact_phone = models.CharField(max_length=256, blank=True, null=True)
-    contact_email = models.CharField(max_length=256, blank=True, null=True)
+    contact_email = models.EmailField(max_length=256, blank=True, null=True)
     can_send_bill = models.BooleanField(blank=True, null=True)
     can_deliver = models.BooleanField(blank=True, null=True)
     latitude = models.CharField(max_length=256, blank=True, null=True)
@@ -28,13 +27,7 @@ class BimaCoreAddress(AbstractModel):
     country = models.ForeignKey(BimaCoreCountry, on_delete=models.PROTECT)
     parent_type = models.ForeignKey(
         ContentType,
-        on_delete=models.CASCADE,
-        limit_choices_to={
-            'app_label__in': [
-                app_config.label for app_config in apps.get_app_configs()
-                if app_config.label not in ['admin', 'auth', 'contenttypes', 'sessions', 'auditlog']
-            ]
-        }
+        on_delete=models.CASCADE
     )
     parent_id = models.PositiveIntegerField()
     content_object = GenericForeignKey('parent_type', 'parent_id')
@@ -53,8 +46,10 @@ def create_address_from_parent_entity(data_address_to_save, parent):
 
 
 def create_single_address(address_data, parent):
-    country = get_object_or_404(BimaCoreCountry, public_id=address_data.get('country', ''))
-    state = get_object_or_404(BimaCoreState, public_id=address_data.get('state', ''))
+    country = get_object_or_404(BimaCoreCountry,
+                                public_id=address_data.get('country', ''))
+    state = get_object_or_404(BimaCoreState,
+                              public_id=address_data.get('state', ''))
     try:
         BimaCoreAddress.objects.create(
             number=address_data.get('number', ''),

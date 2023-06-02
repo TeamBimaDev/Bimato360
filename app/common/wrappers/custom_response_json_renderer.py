@@ -19,4 +19,5 @@ class CustomResponseJSONRenderer(JSONRenderer):
             except KeyError:
                 response["data"] = data
 
-        return super(CustomResponseJSONRenderer, self).render(response, accepted_media_type, renderer_context)
+        return super(CustomResponseJSONRenderer, self).\
+            render(response, accepted_media_type, renderer_context)

@@ -15,4 +15,4 @@ class CompanyType(Enum):
 
 
 def get_company_type_choices():
-    return [(company_type.name, company_type.value) for company_type in CompanyType]
+    return [(cp.name, cp.value) for cp in CompanyType]

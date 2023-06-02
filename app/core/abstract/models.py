@@ -1,6 +1,3 @@
-"""
-Database models.
-"""
 import uuid
 
 from django.db import models
@@ -18,14 +15,11 @@ class AbstractManager(models.Manager):
 
 
 class AbstractModel(models.Model):
-    public_id = models.UUIDField(db_index=True, unique=True, default=uuid.uuid4, editable=False)
+    public_id = models.UUIDField(db_index=True, unique=True,
+                                 default=uuid.uuid4, editable=False)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
     objects = AbstractManager()
 
     class Meta:
         abstract = True
-
-
-
-

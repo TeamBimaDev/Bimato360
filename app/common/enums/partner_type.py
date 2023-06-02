@@ -7,4 +7,4 @@ class PartnerType(Enum):
 
 
 def get_partner_type_choices():
-    return [(partner_type.name, partner_type.value) for partner_type in PartnerType]
+    return [(pt.name, pt.value) for pt in PartnerType]

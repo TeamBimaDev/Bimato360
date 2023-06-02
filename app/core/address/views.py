@@ -31,7 +31,8 @@ class BimaCoreAddressViewSet(AbstractViewSet):
             instance = self.get_object()
             data_to_save = request.data.copy()
             data_to_save = get_country_and_state_from_request(data_to_save)
-            serializer = self.get_serializer(instance, data=data_to_save, partial=partial)
+            serializer = self.get_serializer(instance,
+                                             data=data_to_save, partial=partial)
             serializer.is_valid(raise_exception=True)
             self.perform_update(serializer)
             queryset = self.filter_queryset(self.get_queryset())
@@ -40,12 +41,16 @@ class BimaCoreAddressViewSet(AbstractViewSet):
                 prefetch_related_objects([instance], *queryset._prefetch_related_lookups)
             return Response(serializer.data)
         except ValidationError as e:
-            return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
+            return Response(str(e),
+                            status=status.HTTP_400_BAD_REQUEST)
         except BimaCoreAddress.DoesNotExist:
-            return Response('Item was not found', status=status.HTTP_404_NOT_FOUND)
+            return Response('Item was not found',
+                            status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
-            return Response(str(e), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response(str(e),
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def get_object(self):
-        obj = BimaCoreAddress.objects.get_object_by_public_id(self.kwargs['pk'])
+        obj = BimaCoreAddress.objects.\
+                get_object_by_public_id(self.kwargs['pk'])
         return obj

@@ -1,7 +1,11 @@
+import csv
+
 from core.abstract.views import AbstractViewSet
+from django.http import HttpResponse
 
 from django.shortcuts import get_object_or_404
 from rest_framework import status
+from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
 from erp.partner.models import BimaErpPartner
@@ -15,14 +19,17 @@ from core.document.serializers import BimaCoreDocumentSerializer
 from core.address.models import BimaCoreAddress, get_addresses_for_parent, create_single_address
 from core.contact.models import BimaCoreContact, create_single_contact, \
     get_contacts_for_parent_entity
-from core.document.models import BimaCoreDocument, create_single_document,  \
+from core.document.models import BimaCoreDocument, create_single_document, \
     get_documents_for_parent_entity
+
+from core.pagination import DefaultPagination
 
 
 class BimaErpPartnerViewSet(AbstractViewSet):
     queryset = BimaErpPartner.objects.all()
     serializer_class = BimaErpPartnerSerializer
     permission_classes = []
+    pagination_class = DefaultPagination
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -95,10 +102,27 @@ class BimaErpPartnerViewSet(AbstractViewSet):
         result = BimaCoreDocument.create_document_for_partner(partner, document_data)
         return Response(result)
 
-
     def get_document(self, request, *args, **kwargs):
         partner = BimaErpPartner.objects.get_object_by_public_id(self.kwargs['public_id'])
         document = get_object_or_404(BimaCoreDocument, public_id=self.kwargs['document_public_id'],
                                      parent_id=partner.id)
         serialized_document = BimaCoreContactSerializer(document)
         return Response(serialized_document.data)
+
+
+@api_view
+def export_data_cs(request):
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="partners.csv"'
+    model_fields = BimaErpPartner._meta
+    field_names_to_show = [fd.name for fd in model_fields.fields]
+    writer = csv.writer(response)
+    writer.writer(field_names_to_show)
+
+    data_to_export = BimaErpPartner.objects.all()
+    for partner in data_to_export:
+        writer.writerow([getattr(partner, field) for field in field_names_to_show])
+
+
+
+
