@@ -127,8 +127,8 @@ class BimaErpPartnerViewSet(AbstractViewSet):
 
         return response
 
-    def generate_pdf(self, request, **kwargs):
-        template_name = "pdf.html"
+    def export_data_pdf(self, request, **kwargs):
+        template_name = "partner/pdf.html"
         if kwargs.get('public_id') is not None:
             data_to_export = [BimaErpPartner.objects.get_object_by_public_id(kwargs.get('public_id'))]
         else:
@@ -137,6 +137,6 @@ class BimaErpPartnerViewSet(AbstractViewSet):
         return render_to_pdf(
             template_name,
             {
-                "data_to_export": data_to_export,
+                "partners": data_to_export,
             },
         )

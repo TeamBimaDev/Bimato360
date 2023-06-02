@@ -38,9 +38,9 @@ urlpatterns = [
          name='partner-export_csv'),
 
     path('export_pdf',
-         BimaErpPartnerViewSet.as_view({'get': 'generate_pdf'}),
+         BimaErpPartnerViewSet.as_view({'get': 'export_data_pdf'}),
          name='partner-export_pdf'),
     path('<str:public_id>/export_pdf',
-         BimaErpPartnerViewSet.as_view({'get': 'generate_pdf'}),
+         BimaErpPartnerViewSet.as_view({'get': 'export_data_pdf'}),
          name='partner-export_pdf'),
 ]

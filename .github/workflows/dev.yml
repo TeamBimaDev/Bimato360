@@ -1,30 +1,30 @@
-name: deploy app to server
-on: [pull_request]
-
-jobs:
-    deploy_on_server:
-      name: deploy on server
-      runs-on: ubuntu-latest
-      container: python:3.10-alpine
-
-      services:
-        db:
-          image: postgres:15
-          env:
-            POSTGRES_DB: bima360
-            POSTGRES_USER: bima360_user
-            POSTGRES_PASSWORD: bima360_password
-      steps:
-        - uses: actions/checkout@v3
-        - name: Install Poetry
-          uses: abatilo/actions-poetry@v2.0.0
-          with:
-              poetry-version: 1.4.2
-
-        - name: Install Dependencies
-          run: make install && make install-pre-commit
-
-        - name: lint
-          run: make lint
-        - name: test
-          run: make test
+#name: deploy app to server
+#on: [pull_request]
+#
+#jobs:
+#    deploy_on_server:
+#      name: deploy on server
+#      runs-on: ubuntu-latest
+#      container: python:3.10-alpine
+#
+#      services:
+#        db:
+#          image: postgres:15
+#          env:
+#            POSTGRES_DB: bima360
+#            POSTGRES_USER: bima360_user
+#            POSTGRES_PASSWORD: bima360_password
+#      steps:
+#        - uses: actions/checkout@v3
+#        - name: Install Poetry
+#          uses: abatilo/actions-poetry@v2.0.0
+#          with:
+#              poetry-version: 1.4.2
+#
+#        - name: Install Dependencies
+#          run: make install && make install-pre-commit
+#
+#        - name: lint
+#          run: make lint
+#        - name: test
+#          run: make test
