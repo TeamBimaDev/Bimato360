@@ -10,7 +10,6 @@ from common.enums.partner_type import get_partner_type_choices
 
 
 class BimaErpPartner(AbstractModel):
-
     is_supplier = models.BooleanField(blank=True, null=True)
     is_customer = models.BooleanField(blank=True, null=True)
     partner_type = models.CharField(max_length=128, blank=False, null=False, choices=get_partner_type_choices())
@@ -20,9 +19,9 @@ class BimaErpPartner(AbstractModel):
     gender = models.CharField(max_length=32, blank=True, null=True, choices=get_gender_choices())
     social_security_number = models.CharField(max_length=64, blank=True, null=True)
     id_number = models.CharField(max_length=64, blank=True, null=True)
-    Email = models.EmailField(blank=True, null=True)
-    Phone = models.CharField(blank=True, null=True)
-    Fax = models.CharField(blank=True, null=True)
+    email = models.EmailField(blank=True, null=True)
+    phone = models.CharField(blank=True, null=True)
+    fax = models.CharField(blank=True, null=True)
     company_name = models.CharField(blank=True, null=True)
     company_activity = models.CharField(blank=True, null=True)
     vat_id_number = models.CharField(blank=True, null=True)

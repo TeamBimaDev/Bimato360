@@ -1,0 +1,60 @@
+<html>
+    <head>
+        <style>
+            * {
+                font-size: 15px;
+            }
+
+            table {
+                table-layout: fixed;
+                width: 100%;
+                border: 1px solid black;
+            }
+
+            table th {
+                text-align: left;
+                padding: 3px;
+                padding-bottom: 0;
+            }
+
+            table td {
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                padding: 3px;
+                padding-bottom: 0;
+            }
+        </style>
+    </head>
+
+    <body>
+        <table>
+            <tr>
+                <th> S No </th>
+                <th> Type </th>
+                <th> Company type </th>
+                <th> First & last name </th>
+                <th> social_security_number </th>
+                <th> ID number </th>
+                <th> E-mail </th>
+                <th> Phone </th>
+                <th> Company name </th>
+                <th> Company Activity </th>
+            </tr>
+            {%for data in partners%}
+            <tr>
+                <td> {{forloop.counter}} </td>
+                <td> {{data.partner_type}} </td>
+                <td> {{data.company_type}} </td>
+                <td> {{data.first_name}} {{data.last_name}} </td>
+                <td> {{data.social_security_number}} </td>
+                <td> {{data.id_number}} </td>
+                <td> {{data.email}} </td>
+                <td> {{data.phone}} </td>
+                <td> {{data.company_name}} </td>
+                <td> {{data.company_activity}} </td>
+            </tr>
+            {%endfor%}
+        </table>
+    </body>
+</html>

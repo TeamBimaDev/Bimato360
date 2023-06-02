@@ -2,7 +2,6 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from erp.partner.views import BimaErpPartnerViewSet
 
-
 router = DefaultRouter()
 router.register('', BimaErpPartnerViewSet)
 
@@ -31,4 +30,17 @@ urlpatterns = [
          BimaErpPartnerViewSet.as_view({'get': 'get_document'}),
          name='partner-document'),
 
+    path('export_csv',
+         BimaErpPartnerViewSet.as_view({'get': 'export_data_csv'}),
+         name='partner-export_csv'),
+    path('<str:public_id>/export_csv',
+         BimaErpPartnerViewSet.as_view({'get': 'export_data_csv'}),
+         name='partner-export_csv'),
+
+    path('export_pdf',
+         BimaErpPartnerViewSet.as_view({'get': 'generate_pdf'}),
+         name='partner-export_pdf'),
+    path('<str:public_id>/export_pdf',
+         BimaErpPartnerViewSet.as_view({'get': 'generate_pdf'}),
+         name='partner-export_pdf'),
 ]

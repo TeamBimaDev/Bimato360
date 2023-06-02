@@ -10,3 +10,4 @@ python-dotenv
 django-auditlog
 django-cors-headers
 django-debug-toolbar
+xhtml2pdf

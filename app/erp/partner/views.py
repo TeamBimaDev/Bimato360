@@ -5,12 +5,12 @@ from django.http import HttpResponse
 
 from django.shortcuts import get_object_or_404
 from rest_framework import status
-from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
 from erp.partner.models import BimaErpPartner
 from erp.partner.serializers import BimaErpPartnerSerializer
 from erp.partner.signals import post_create_partner
+from erp.partner.utils import render_to_pdf
 
 from core.address.serializers import BimaCoreAddressSerializer
 from core.contact.serializers import BimaCoreContactSerializer
@@ -23,6 +23,7 @@ from core.document.models import BimaCoreDocument, create_single_document, \
     get_documents_for_parent_entity
 
 from core.pagination import DefaultPagination
+
 
 
 class BimaErpPartnerViewSet(AbstractViewSet):
@@ -109,20 +110,33 @@ class BimaErpPartnerViewSet(AbstractViewSet):
         serialized_document = BimaCoreContactSerializer(document)
         return Response(serialized_document.data)
 
+    def export_data_csv(self, request, **kwargs):
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="partners.csv"'
+        model_fields = BimaErpPartner._meta
+        field_names_to_show = [fd.name for fd in model_fields.fields]
+        writer = csv.writer(response)
+        writer.writerow(field_names_to_show)
+        if kwargs.get('public_id') is not None:
+            data_to_export = [BimaErpPartner.objects.get_object_by_public_id(kwargs.get('public_id'))]
+        else:
+            data_to_export = BimaErpPartner.objects.all()
 
-@api_view
-def export_data_cs(request):
-    response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = 'attachment; filename="partners.csv"'
-    model_fields = BimaErpPartner._meta
-    field_names_to_show = [fd.name for fd in model_fields.fields]
-    writer = csv.writer(response)
-    writer.writer(field_names_to_show)
+        for partner in data_to_export:
+            writer.writerow([getattr(partner, field) for field in field_names_to_show])
 
-    data_to_export = BimaErpPartner.objects.all()
-    for partner in data_to_export:
-        writer.writerow([getattr(partner, field) for field in field_names_to_show])
+        return response
 
+    def generate_pdf(self, request, **kwargs):
+        template_name = "pdf.html"
+        if kwargs.get('public_id') is not None:
+            data_to_export = [BimaErpPartner.objects.get_object_by_public_id(kwargs.get('public_id'))]
+        else:
+            data_to_export = BimaErpPartner.objects.all()
 
-
-
+        return render_to_pdf(
+            template_name,
+            {
+                "data_to_export": data_to_export,
+            },
+        )
