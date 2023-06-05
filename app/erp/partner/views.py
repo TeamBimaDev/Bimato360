@@ -111,7 +111,17 @@ class BimaErpPartnerViewSet(AbstractViewSet):
         document_data = request.data
         document_data['file_path'] = request.FILES['file_path']
         result = BimaCoreDocument.create_document_for_partner(partner, document_data)
-        return Response(result)
+        if isinstance(result, BimaCoreDocument):
+            return Response({
+                    "id": result.public_id,
+                    "document_name": result.document_name,
+                    "description": result.description,
+                    "date_file": result.date_file,
+                    "file_type": result.file_type
+
+            }, status=status.HTTP_201_CREATED)
+        else:
+            return Response(result, status=result.get("status", status.HTTP_500_INTERNAL_SERVER_ERROR))
 
     def get_document(self, request, *args, **kwargs):
         partner = BimaErpPartner.objects.get_object_by_public_id(self.kwargs['public_id'])
@@ -129,10 +139,15 @@ class BimaErpPartnerViewSet(AbstractViewSet):
 
     def create_tag(self, request, *args, **kwargs):
         partner = BimaErpPartner.objects.get_object_by_public_id(self.kwargs['public_id'])
-        saved = create_single_entity_tag(request.data, partner)
-        if not saved:
-            return Response(saved.error, status=saved.status)
-        return Response(saved)
+        result = create_single_entity_tag(request.data, partner)
+        if isinstance(result, BimaCoreEntityTag):
+            serializer = BimaCoreEntityTagSerializer(result)
+            return Response({
+                "id": result.public_id,
+                "tag_name": result.tag.name
+            }, status=status.HTTP_201_CREATED)
+        else:
+            return Response(result, status=result.get("status", status.HTTP_500_INTERNAL_SERVER_ERROR))
 
     def get_tag(self, request, *args, **kwargs):
         partner = BimaErpPartner.objects.get_object_by_public_id(self.kwargs['public_id'])

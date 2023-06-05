@@ -21,7 +21,7 @@ class BimaCoreEntityTag(AbstractModel):
     content_object = GenericForeignKey('parent_type', 'parent_id')
 
     def __str__(self) -> str:
-        return self.name
+        return f"{self.public_id} - {self.tag.name}"
 
     class Meta:
         ordering = ['-created']
@@ -43,8 +43,7 @@ def create_single_entity_tag(tag_data, parent):
             parent_type=ContentType.objects.get_for_model(parent),
             parent_id=parent.id,
         )
-
-        return True
+        return item
 
     except ValidationError as e:
         return {"error": str(e), "status": status.HTTP_400_BAD_REQUEST}

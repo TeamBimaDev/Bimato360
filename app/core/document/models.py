@@ -36,10 +36,11 @@ class BimaCoreDocument(AbstractModel):
     content_object = GenericForeignKey('parent_type', 'parent_id')
 
     def __str__(self) -> str:
-        return self.file_name
+        return f"{self.public_id} - {self.document_name} - {self.description} - " \
+               f"{self.date_file} - {self.file_type}"
 
     class Meta:
-        ordering = ['-created', 'file_name']
+        ordering = ['-created', 'document_name']
         permissions = []
 
     @classmethod
@@ -67,7 +68,7 @@ class BimaCoreDocument(AbstractModel):
             )
             document.file_path.save(os.path.join('uploads', 'documents', app_label, filename), file)
             document.save()
-            return True
+            return document
 
         except ValidationError as e:
             return {"error": str(e), "status": status.HTTP_400_BAD_REQUEST}

@@ -11,12 +11,19 @@ from rest_framework.response import Response
 
 from common.enums.file_type import return_list_file_type_partner
 
+from core.document.serializers import BimaCoreDocumentGetSerializer
+
 
 class BimaCoreDocumentViewSet(AbstractViewSet):
     queryset = BimaCoreDocument.objects.all()
     serializer_class = BimaCoreDocumentSerializer
     permission_classes = []
     pagination_class = DefaultPagination
+
+    def get_serializer_class(self):
+        if self.request.method == 'GET':
+            return BimaCoreDocumentGetSerializer
+        return BimaCoreDocumentSerializer
 
     def get_object(self):
         obj = BimaCoreDocument.objects.get_object_by_public_id(self.kwargs['pk'])
