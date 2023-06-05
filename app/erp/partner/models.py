@@ -24,11 +24,23 @@ class BimaErpPartner(AbstractModel):
     fax = models.CharField(blank=True, null=True)
     company_name = models.CharField(blank=True, null=True)
     company_activity = models.CharField(blank=True, null=True)
+    number_siret = models.CharField(blank=True, null=True)
     vat_id_number = models.CharField(blank=True, null=True)
     status = models.CharField(max_length=32, blank=True, null=True, choices=get_entity_status_choices())
     note = models.CharField(blank=True, null=True)
+    company_date_creation = models.DateTimeField(blank=True, null=True)
+    company_siren = models.CharField(blank=True, null=True)
+    company_siret = models.CharField(blank=True, null=True)
+    company_date_registration = models.DateTimeField(blank=True, null=True)
+    graft = models.CharField(blank=True, null=True)
+    rcs = models.CharField(blank=True, null=True)
+    company_date_struck_off = models.DateTimeField(blank=True, null=True)
+    company_ape_text = models.CharField(blank=True, null=True)
+    company_ape_code = models.CharField(blank=True, null=True)
+    company_budget = models.CharField(blank=True, null=True)
 
     def __str__(self):
         return f"{self.public_id}"
+
 
 from .signals import create_partner_related_entities

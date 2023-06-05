@@ -1,0 +1,41 @@
+version: "3"
+
+services:
+  bima360_app:
+    container_name: bima360_app
+    build:
+      context: .
+    ports:
+      - "8500:8000"
+    volumes:
+      - ./bima360_static_file/:/vol/web/
+    command: >
+      sh -c "python manage.py wait_for_db && 
+             python manage.py migrate &&
+             python manage.py runserver 0.0.0.0:8000"
+    env_file:
+      - ./app/.env
+    environment:
+      - DB_HOST=bima360_db
+    depends_on:
+      - bima360_db
+
+  bima360_db:
+    container_name: bima360_db
+    image: postgres:15
+    env_file:
+      - ./app/.env
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./bima360_db/:/var/lib/postgresql/data/
+
+  bima360_db_admin:
+    container_name: bima360_db_admin
+    image: dpage/pgadmin4
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: root
+    ports:
+      - "8501:80"

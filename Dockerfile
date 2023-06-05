@@ -1,36 +1,56 @@
-FROM python:3.10-alpine
-LABEL authors="BimaTech.Dev"
+# Stage 1: Build Stage
+FROM python:3.9-alpine3.13 as builder
 
 ENV PYTHONUNBUFFERED 1
 
-COPY ./requirements.txt /tmp/requirements.txt
-COPY ./requirements.dev.txt /tmp/requirements.dev.txt
-COPY ./scripts /scripts
-COPY ./app /app
-WORKDIR /app
-EXPOSE 8000
+RUN apk add --no-cache \
+        build-base \
+        postgresql-dev \
+        musl-dev \
+        zlib-dev \
+        libjpeg \
+        jpeg-dev \
+        pcre-dev \
+        linux-headers
 
-ARG DEV=false
-RUN python -m venv /py && \
-    /py/bin/pip install --upgrade pip && \
-    apk add --update --no-cache postgresql-client jpeg-dev && \
-    apk add --update --no-cache --virtual .tmp-build-deps \
-        build-base postgresql-dev musl-dev zlib zlib-dev linux-headers && \
-    /py/bin/pip install -r /tmp/requirements.txt && \
-    rm -rf /tmp && \
-    apk del .tmp-build-deps && \
-    adduser \
+WORKDIR /app
+
+COPY ./requirements.txt .
+
+RUN python -m venv /venv && \
+    /venv/bin/pip install --no-cache-dir -r requirements.txt
+
+# Stage 2: Production Stage
+FROM python:3.9-alpine3.13
+
+ENV PYTHONUNBUFFERED 1
+
+RUN apk add --no-cache \
+        postgresql-client \
+        libjpeg \
+        pcre
+
+COPY --from=builder /venv /venv
+COPY ./app /app
+COPY ./scripts /scripts
+
+WORKDIR /app
+
+RUN adduser \
         --disabled-password \
         --no-create-home \
         django-user && \
     mkdir -p /vol/web/media && \
     mkdir -p /vol/web/static && \
     chown -R django-user:django-user /vol && \
+    chown -R django-user:django-user ./* && \
     chmod -R 755 /vol && \
     chmod -R +x /scripts
 
-ENV PATH="/scripts:/py/bin:$PATH"
+ENV PATH="/venv/bin:/scripts:$PATH"
+
+EXPOSE 8000
 
 USER django-user
 
-CMD ["run.sh"]
+CMD ["sh", "/scripts/run.sh"]

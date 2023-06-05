@@ -148,3 +148,12 @@ app/.env
 /venv/
 /venv/Lib/
 /venv/Scripts/
+
+
+bima360_static_file/
+/bima360_static_file/
+/bima360_static_file/*
+bima360_db/
+/bima360_db/
+/bima360_db/*
+

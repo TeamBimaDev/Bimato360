@@ -10,7 +10,7 @@ class BimaHrApplicantPost(AbstractModel):
     accepted_salary = models.FloatField(blank=True, null=True, default=None)
     date = models.DateTimeField(auto_now_add=True)
     post = models.ForeignKey(BimaCorePost, on_delete=models.CASCADE)
-    applicant = models.ForeignKey(BimaHrApplicant ,on_delete=models.CASCADE)
+    applicant = models.ForeignKey(BimaHrApplicant, on_delete=models.CASCADE)
 
     def __str__(self) -> str:
-        return f'{ self.name, self.public_id}'
+        return f'{self.name, self.public_id}'
