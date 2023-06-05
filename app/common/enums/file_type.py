@@ -23,3 +23,7 @@ def get_file_type_choices():
     for enum_class in FileType.__subclasses__():
         choices += [(choice.name, choice.value) for choice in enum_class]
     return choices
+
+
+def return_list_file_type_partner():
+    return [(file_type.name, file_type.value) for file_type in FileTypePartner]

@@ -3,7 +3,6 @@ import uuid
 from django.db import models
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
-from django.apps import apps
 
 from core.abstract.models import AbstractModel
 from common.enums.file_type import get_file_type_choices
@@ -20,13 +19,14 @@ class BimaCoreDocument(AbstractModel):
         app_label = self.parent_type.model
         return os.path.join('uploads', 'documents', app_label, filename)
 
-    document_name = models.CharField(max_length=30)
-    description = models.TextField(max_length=255)
-    file_name = models.CharField(max_length=255)
-    file_extension = models.CharField(max_length=255)
+    document_name = models.CharField(max_length=256, blank=False, null=False, default='new_document')
+    description = models.TextField(max_length=255, blank=True, null=True)
+    file_name = models.CharField(max_length=255, blank=False, null=False)
+    file_content_type = models.CharField(max_length=255, blank=False, null=False, default='application/octet-stream')
+    file_extension = models.CharField(max_length=16, blank=False, null=False)
     date_file = models.DateTimeField(auto_now_add=True)
     file_path = models.FileField(upload_to=document_file_path)
-    file_type = models.CharField(max_length=100,
+    file_type = models.CharField(max_length=128,
                                  choices=get_file_type_choices())
     parent_type = models.ForeignKey(
         ContentType,
@@ -58,7 +58,8 @@ class BimaCoreDocument(AbstractModel):
                 document_name=document_data['document_name'],
                 description=document_data['description'],
                 date_file=document_data['date_file'],
-                file_type=file_content_type,
+                file_type=document_data['file_type'],
+                file_content_type=file_content_type,
                 parent_type=ContentType.objects.get_for_model(parent),
                 parent_id=parent.id,
                 file_name=filename,

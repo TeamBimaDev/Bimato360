@@ -18,8 +18,8 @@ def create_partner_related_entities(sender, instance, address_data, contact_data
     if contact_data:
         create_contacts(contact_data, instance)
 
-    if document_data:
-        create_documents(document_data, instance)
+    # if document_data:
+    #     create_documents(document_data, instance)
 
     if tag_data:
         create_tags(tag_data, instance)

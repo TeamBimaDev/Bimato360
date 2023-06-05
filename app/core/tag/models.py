@@ -1,9 +1,5 @@
 from django.db import models
-import uuid
 from core.abstract.models import AbstractModel
-from django.contrib.contenttypes.fields import GenericForeignKey
-from django.contrib.contenttypes.models import ContentType
-from django.apps import apps
 
 
 class BimaCoreTag(AbstractModel):
