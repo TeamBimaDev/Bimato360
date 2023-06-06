@@ -34,12 +34,13 @@ class BimaCoreDepartmentViewSet(AbstractViewSet):
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
         data_to_save = request.data.copy()
 
-        if data_to_save.get('department') :
+        if data_to_save.get('department'):
             department_public_id = data_to_save.get('department')
             department = get_object_or_404(BimaCoreDepartment, public_id=department_public_id)
             data_to_save['department_id'] = department.id
@@ -57,6 +58,7 @@ class BimaCoreDepartmentViewSet(AbstractViewSet):
     def get_object(self):
         obj = BimaCoreDepartment.objects.get_object_by_public_id(self.kwargs['pk'])
         return obj
+
     def get_posts_by_department(self, request, public_id=None):
         department = BimaCoreDepartment.objects.get_object_by_public_id(self.kwargs['public_id'])
         posts = BimaCorePost.objects.filter(department=department)

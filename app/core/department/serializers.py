@@ -2,25 +2,24 @@ from rest_framework import serializers
 from core.abstract.serializers import AbstractSerializer
 from .models import BimaCoreDepartment
 
+
 class BimaCoreDepartmentSerializer(AbstractSerializer):
-    parent = serializers.SerializerMethodField(read_only=True)
-    parent_id = serializers.SerializerMethodField(read_only=True)
+    department = serializers.SerializerMethodField(read_only=True)
+    department_id = serializers.PrimaryKeyRelatedField(
+        queryset=BimaCoreDepartment.objects.all(),
+        source='department',
+        write_only=True,
+        required=False
+    )
 
-    def get_parent(self, obj):
+    def get_department(self, obj):
         if obj.department:
-            serializer = self.__class__(obj.department)
-            return serializer.data
+            return {
+                'id': obj.department.public_id.hex,
+                'name': obj.department.name,
+            }
         return None
-
-    def get_parent_id(self, obj):
-        if obj.department:
-            return obj.department.public_id
-        return None
-
-    def get_children(self, obj):
-        serializer = self.__class__(obj.children.all(), many=True)
-        return serializer.data
 
     class Meta:
         model = BimaCoreDepartment
-        fields = ('id', 'name', 'description', 'department', 'manager', 'parent', 'parent_id')
+        fields = ['id', 'name', 'description', 'public_id', 'department', 'department_id', 'manager']

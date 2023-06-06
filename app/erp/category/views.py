@@ -1,26 +1,34 @@
 from core.abstract.views import AbstractViewSet
-from core.state.models import BimaCoreState
-from core.permissions import IsAdminOrReadOnly
-from core.state.serializers import BimaCoreStateSerializer
+from django.db.models import prefetch_related_objects
 from rest_framework import status
+from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
-from core.country.models import BimaCoreCountry
-from django.shortcuts import get_object_or_404
-from django.db.models.query import prefetch_related_objects
+
+from .models import BimaErpCategory
+from .serializers import BimaErpCategorySerializer
+from core.permissions import IsAdminOrReadOnly
 from core.pagination import DefaultPagination
 
 
-class BimaCoreStateViewSet(AbstractViewSet):
-    queryset = BimaCoreState.objects.select_related('country').all()
-    serializer_class = BimaCoreStateSerializer
+class BimaErpCategoryViewSet(AbstractViewSet):
+    queryset = BimaErpCategory.objects.all()
+    serializer_class = BimaErpCategorySerializer
+    # permission_classes = [IsAdminOrReadOnly]
     permission_classes = []
     pagination_class = DefaultPagination
 
     def create(self, request):
-        country_public_id = request.data.get('country')
-        country = get_object_or_404(BimaCoreCountry, public_id=country_public_id)
-        data_to_save = request.data
-        data_to_save['country_id'] = country.id
+        category_public_id = request.data.get('category', None)
+        category = None
+        data_to_save = request.data.copy()
+
+        if category_public_id is not None:
+            category = get_object_or_404(BimaErpCategory, public_id=category_public_id)
+
+        if category:
+            data_to_save['category_id'] = category.id
+            data_to_save['category'] = category.id
+
         serializer = self.get_serializer(data=data_to_save)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
@@ -31,9 +39,12 @@ class BimaCoreStateViewSet(AbstractViewSet):
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
         data_to_save = request.data.copy()
-        country_public_id = data_to_save.get('country')
-        country = get_object_or_404(BimaCoreCountry, public_id=country_public_id)
-        data_to_save['country_id'] = country.id
+
+        if data_to_save.get('category'):
+            category_public_id = data_to_save.get('category')
+            category = get_object_or_404(BimaErpCategory, public_id=category_public_id)
+            data_to_save['category_id'] = category.id
+
         serializer = self.get_serializer(instance, data=data_to_save, partial=partial)
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
@@ -44,5 +55,6 @@ class BimaCoreStateViewSet(AbstractViewSet):
         return Response(serializer.data)
 
     def get_object(self):
-        obj = BimaCoreState.objects.get_object_by_public_id(self.kwargs['pk'])
+        obj = BimaErpCategory.objects.get_object_by_public_id(self.kwargs['pk'])
+        # self.check_object_permissions(self.request, obj)
         return obj

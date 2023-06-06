@@ -1,30 +1,44 @@
-#name: deploy app to server
-#on: [pull_request]
+name: deploy_bima360_backend_to_ovh
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout the code
+        uses: actions/checkout@v2
+
+      - name: run deploy.sh to copy file and do docker compose up
+        run: |
+          chmod +x ./scripts/deploy.sh
+          ./scripts/deploy.sh ${{ secrets.SERVER_USER }} ${{ secrets.SERVER_IP }}
+
+
+#name: CI
+#
+#on:
+#  push:
+#    branches: [ main ]
+#  pull_request:
+#    branches: [ main ]
 #
 #jobs:
-#    deploy_on_server:
-#      name: deploy on server
-#      runs-on: ubuntu-latest
-#      container: python:3.10-alpine
+#  build:
+#    runs-on: ubuntu-latest
 #
-#      services:
-#        db:
-#          image: postgres:15
-#          env:
-#            POSTGRES_DB: bima360
-#            POSTGRES_USER: bima360_user
-#            POSTGRES_PASSWORD: bima360_password
-#      steps:
-#        - uses: actions/checkout@v3
-#        - name: Install Poetry
-#          uses: abatilo/actions-poetry@v2.0.0
-#          with:
-#              poetry-version: 1.4.2
+#    steps:
+#    - name: Checkout code
+#      uses: actions/checkout@v2
 #
-#        - name: Install Dependencies
-#          run: make install && make install-pre-commit
+#    - name: Copy code to OVH server
+#      run: |
+#        rsync -avz --exclude='.git/*' . ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }}:/home/ubuntu/bima360/backend
 #
-#        - name: lint
-#          run: make lint
-#        - name: test
-#          run: make test
+#    - name: Run docker-compose on OVH server
+#      run: |
+#        ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} "cd /home/ubuntu/bima360/backend && docker-compose down && docker-compose build --no-cache && docker-compose up -d"
