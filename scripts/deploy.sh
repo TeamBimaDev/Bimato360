@@ -1,8 +1,8 @@
 
-scp -r . $1@$2/home/ubuntu/bima360/backend
+rsync -avz -I --exclude='.git/*' . $1@$2:/home/$1/bima360/backend
 
 ssh $1@$2 << EOF
-cd /home/ubuntu/bima360/backend
+cd /home/$1/bima360/backend
 docker-compose down
 docker-compose build --no-cache
 docker-compose up
