@@ -26,8 +26,6 @@ jobs:
         run: |
           chmod +x ./scripts/deploy.sh
           ./scripts/deploy.sh ${{ secrets.SERVER_USER }} ${{ secrets.SERVER_IP }}
-
-
 #name: CI
 #
 #on:
