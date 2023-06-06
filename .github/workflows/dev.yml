@@ -13,6 +13,13 @@ jobs:
       - name: Checkout the code
         uses: actions/checkout@v2
 
+      - name: Setup SSH
+        run: |
+            mkdir -p ~/.ssh/
+            echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+            chmod 600 ~/.ssh/id_rsa
+            ssh-keyscan ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
+
       - name: run deploy.sh to copy file and do docker compose up
         run: |
           chmod +x ./scripts/deploy.sh
