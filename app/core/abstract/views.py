@@ -6,8 +6,15 @@ from rest_framework import filters
 from .base_filter import BaseFilter
 from .pagination import DefaultPagination
 
-from rest_framework.exceptions import NotFound, APIException, ValidationError, AuthenticationFailed, PermissionDenied
+from rest_framework.exceptions import ValidationError, AuthenticationFailed, PermissionDenied
 from django.core.exceptions import ObjectDoesNotExist
+from rest_framework.status import (
+    HTTP_400_BAD_REQUEST,
+    HTTP_401_UNAUTHORIZED,
+    HTTP_403_FORBIDDEN,
+    HTTP_404_NOT_FOUND,
+    HTTP_500_INTERNAL_SERVER_ERROR,
+)
 
 
 class AbstractViewSet(viewsets.ModelViewSet):
@@ -18,26 +25,54 @@ class AbstractViewSet(viewsets.ModelViewSet):
     pagination_class = DefaultPagination
 
     def handle_exception(self, exc):
-        if isinstance(exc, ValidationError):
-            exc = APIException('There was a validation error.')
-        elif isinstance(exc, AuthenticationFailed):
-            exc = APIException('Authentication failed.')
-        elif isinstance(exc, PermissionDenied):
-            exc = APIException('Permission was denied.')
-        elif isinstance(exc, ObjectDoesNotExist) or isinstance(exc, Http404):
-            exc = NotFound('The partner or the item does not exist.')
+        if exc.status_code:
+            error_status_code = exc.status_code
         else:
-            exc = APIException('A server error occurred.')
+            if isinstance(exc, (ValidationError,)):
+                error_status_code = HTTP_400_BAD_REQUEST
+            elif isinstance(exc, (AuthenticationFailed,)):
+                error_status_code = HTTP_401_UNAUTHORIZED
+            elif isinstance(exc, (PermissionDenied,)):
+                error_status_code = HTTP_403_FORBIDDEN
+            elif isinstance(exc, (ObjectDoesNotExist,)):
+                error_status_code = HTTP_404_NOT_FOUND
+            else:
+                error_status_code = HTTP_500_INTERNAL_SERVER_ERROR
+
+        error_message = "A server error occurred"
+        if len(exc.args[0]):
+            error_message = exc.args[0]
+
         response = super().handle_exception(exc)
 
         # Customize the response format
         custom_response_data = {
             'succeeded': False,
-            'message': response.data['detail'] if 'detail' in response.data else 'A server error occurred.',
-            'code': response.status_code,
+            'message': format_error_message(error_message),
+            'code': error_status_code,
             'data': None,
         }
 
         response.data = custom_response_data
 
         return response
+
+
+def format_error_message(error_message):
+    if not error_message:
+        return ""
+
+    if isinstance(error_message, str):
+        return error_message
+
+    if isinstance(error_message, dict):
+        formatted_message = "\n"
+        for field, errors in error_message.items():
+            formatted_message += f"\t{field}: ["
+            for error in errors:
+                formatted_message += f"(string='{error}')"
+                if error != errors[-1]:
+                    formatted_message += ", "
+            formatted_message += "],\n"
+
+        return formatted_message

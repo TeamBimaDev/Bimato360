@@ -2,6 +2,7 @@ from core.abstract.views import AbstractViewSet
 from core.bank.models import BimaCoreBank
 from core.bank.serializers import BimaCoreBankSerializer
 from rest_framework import status
+from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from core.address.serializers import BimaCoreAddressSerializer
 from django.shortcuts import get_object_or_404
@@ -17,6 +18,31 @@ class BimaCoreBankViewSet(AbstractViewSet):
     serializer_class = BimaCoreBankSerializer
     permission_classes = []
 
+    def perform_create(self, serializer):
+        email = self.request.data.get('email')
+        bic = self.request.data.get('bic')
+
+        if email and BimaCoreBank.objects.filter(email=email).exists():
+            raise ValidationError("Email must be unique.")
+
+        if bic and BimaCoreBank.objects.filter(bic=bic).exists():
+            raise ValidationError("BIC must be unique.")
+
+        serializer.save()
+
+    def perform_update(self, serializer):
+        email = self.request.data.get('email')
+        bic = self.request.data.get('bic')
+
+        instance = serializer.instance
+
+        if email and email != instance.email and BimaCoreBank.objects.filter(email=email).exists():
+            raise ValidationError("Email must be unique.")
+
+        if bic and bic != instance.bic and BimaCoreBank.objects.filter(bic=bic).exists():
+            raise ValidationError("BIC must be unique.")
+
+        serializer.save()
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
