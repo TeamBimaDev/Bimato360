@@ -1,11 +1,8 @@
-import os
-
 from core.abstract.views import AbstractViewSet
 from core.document.models import BimaCoreDocument
 
 from core.document.serializers import BimaCoreDocumentSerializer
 from django.http import HttpResponse
-from core.pagination import DefaultPagination
 from rest_framework import status
 from rest_framework.response import Response
 
@@ -18,7 +15,6 @@ class BimaCoreDocumentViewSet(AbstractViewSet):
     queryset = BimaCoreDocument.objects.all()
     serializer_class = BimaCoreDocumentSerializer
     permission_classes = []
-    pagination_class = DefaultPagination
 
     def get_serializer_class(self):
         if self.request.method == 'GET':

@@ -1,6 +1,7 @@
 import csv
 
 from core.abstract.views import AbstractViewSet
+from django.contrib.contenttypes.models import ContentType
 from django.http import HttpResponse, JsonResponse
 
 from django.shortcuts import get_object_or_404
@@ -26,14 +27,11 @@ from core.document.models import BimaCoreDocument, create_single_document, \
 from core.entity_tag.models import BimaCoreEntityTag, create_single_entity_tag, \
     get_entity_tags_for_parent_entity
 
-from core.pagination import DefaultPagination
-
 
 class BimaErpPartnerViewSet(AbstractViewSet):
     queryset = BimaErpPartner.objects.all()
     serializer_class = BimaErpPartnerSerializer
     permission_classes = []
-    pagination_class = DefaultPagination
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -113,11 +111,11 @@ class BimaErpPartnerViewSet(AbstractViewSet):
         result = BimaCoreDocument.create_document_for_partner(partner, document_data)
         if isinstance(result, BimaCoreDocument):
             return Response({
-                    "id": result.public_id,
-                    "document_name": result.document_name,
-                    "description": result.description,
-                    "date_file": result.date_file,
-                    "file_type": result.file_type
+                "id": result.public_id,
+                "document_name": result.document_name,
+                "description": result.description,
+                "date_file": result.date_file,
+                "file_type": result.file_type
 
             }, status=status.HTTP_201_CREATED)
         else:

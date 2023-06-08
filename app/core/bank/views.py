@@ -5,7 +5,6 @@ from rest_framework import status
 from rest_framework.response import Response
 from core.address.serializers import BimaCoreAddressSerializer
 from django.shortcuts import get_object_or_404
-from core.pagination import DefaultPagination
 from core.bank.signals import post_create_bank
 
 from core.address.models import create_single_address, \
@@ -17,7 +16,7 @@ class BimaCoreBankViewSet(AbstractViewSet):
     queryset = BimaCoreBank.objects.all()
     serializer_class = BimaCoreBankSerializer
     permission_classes = []
-    pagination_class = DefaultPagination
+
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)

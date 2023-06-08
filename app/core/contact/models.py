@@ -39,7 +39,7 @@ def create_contact_from_parent_entity(data_contact_to_save, parent):
 
 def create_single_contact(contact_data, parent):
     try:
-        item = BimaCoreContact.objects.create(
+        BimaCoreContact.objects.create(
             name=contact_data.get('name', ''),
             position=contact_data.get('position', ''),
             department=contact_data.get('department', ''),

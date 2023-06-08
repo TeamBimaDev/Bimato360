@@ -7,8 +7,9 @@ from core.tag.models import BimaCoreTag
 
 class BimaCoreEntityTagSerializer(AbstractSerializer):
     tag = serializers.SerializerMethodField(read_only=True)
-    tag_id = serializers.PrimaryKeyRelatedField(
+    tag_public_id = serializers.SlugRelatedField(
         queryset=BimaCoreTag.objects.all(),
+        slug_field='public_id',
         source='tag',
         write_only=True
     )
@@ -21,4 +22,4 @@ class BimaCoreEntityTagSerializer(AbstractSerializer):
 
     class Meta:
         model = BimaCoreEntityTag
-        fields = 'id', 'id_manager', 'tag', 'tag_id', 'created', 'updated'
+        fields = 'id', 'id_manager', 'tag', 'tag_public_id', 'created', 'updated'

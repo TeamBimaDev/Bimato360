@@ -1,6 +1,7 @@
 import logging
+
 from rest_framework.views import exception_handler
-from django.http import JsonResponse
+from rest_framework.response import Response
 from rest_framework.status import (
     HTTP_400_BAD_REQUEST,
     HTTP_401_UNAUTHORIZED,
@@ -9,7 +10,7 @@ from rest_framework.status import (
     HTTP_500_INTERNAL_SERVER_ERROR,
 )
 from rest_framework.exceptions import ValidationError, \
-    AuthenticationFailed,\
+    AuthenticationFailed, \
     PermissionDenied
 from django.core.exceptions import ObjectDoesNotExist
 
@@ -34,11 +35,12 @@ def custom_exception_handler(exc, context):
     response_data = {
         'succeeded': False,
         'message': error_message,
-        'code': response_status
+        'code': response_status,
+        'data': None
     }
 
     logger.error(f'An error occurred: {response_data}')
 
-    response = JsonResponse(response_data, status=response_status)
+    response = Response(response_data, status=response_status)
 
     return response

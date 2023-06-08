@@ -14,6 +14,7 @@ class BimaCompanyViewSet(AbstractViewSet):
     queryset = BimaCompany.objects.all()
     serializer_class = BimaCompanySerializer
     permission_classes = []
+
     def create_address(self, address_data, parent_type, parent_id):
         try:
             address = BimaCoreAddress.objects.create(
@@ -54,7 +55,7 @@ class BimaCompanyViewSet(AbstractViewSet):
         company = self.perform_create(serializer)
         companyContentType = ContentType.objects.filter(app_label="company", model="bimacompany").first()
         if companyContentType:
-                companyContentType_id = companyContentType.id
+            companyContentType_id = companyContentType.id
         newCompany = BimaCompany.objects.filter(public_id=serializer.data['public_id'])[0]
 
         if newCompany:
@@ -64,6 +65,7 @@ class BimaCompanyViewSet(AbstractViewSet):
                 self.create_document(document_data, companyContentType, newCompany.id)
             headers = self.get_success_headers(serializer.data)
             return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
     def list_object(self, request, public_id=None, model=None, serializer=None):
         companyContentType = ContentType.objects.filter(app_label="company", model="bimacompany").first()
         if companyContentType:
@@ -71,14 +73,17 @@ class BimaCompanyViewSet(AbstractViewSet):
             objects = model.objects.filter(parent_type_id=companyContentType.id, parent_id=company.id)
             serialized_data = serializer(objects, many=True)
             return Response(serialized_data.data)
+
     def list_addresses(self, request, public_id=None):
         model = BimaCoreAddress
         serializer = BimaCoreAddressSerializer
         return self.list_object(request, public_id=public_id, model=model, serializer=serializer)
+
     def list_documents(self, request, public_id=None):
         model = BimaCoreDocument
         serializer = BimaCoreDocumentSerializer
         return self.list_object(request, public_id=public_id, model=model, serializer=serializer)
+
     def ajout_address_for_company(self, request, public_id=None):
         company = BimaCompany.objects.filter(public_id=public_id).first()
         companyContentType = ContentType.objects.filter(app_label="company", model="bimacompany").first()
@@ -103,6 +108,7 @@ class BimaCompanyViewSet(AbstractViewSet):
             return Response({"success": "Address added successfully"}, status=status.HTTP_201_CREATED)
         else:
             return Response({"error": "Invalid request method"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
     def ajout_document_for_company(self, request, public_id=None):
         company = BimaCompany.objects.filter(public_id=public_id).first()
         companyContentType = ContentType.objects.filter(app_label="company", model="bimacompany").first()
@@ -126,5 +132,3 @@ class BimaCompanyViewSet(AbstractViewSet):
             return Response({"success": "document added successfully"}, status=status.HTTP_201_CREATED)
         else:
             return Response({"error": "Invalid request method"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
-
-

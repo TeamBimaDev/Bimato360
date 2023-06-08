@@ -4,7 +4,6 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from core.country.models import BimaCoreCountry
 from core.state.models import BimaCoreState
-from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
 
@@ -46,12 +45,10 @@ def create_address_from_parent_entity(data_address_to_save, parent):
 
 
 def create_single_address(address_data, parent):
-    country = get_object_or_404(BimaCoreCountry,
-                                public_id=address_data.get('country', ''))
-    state = get_object_or_404(BimaCoreState,
-                              public_id=address_data.get('state', ''))
     try:
-        item = BimaCoreAddress.objects.create(
+        state = BimaCoreState.objects.get_object_by_public_id(address_data.get('state_public_id'))
+        country = BimaCoreCountry.objects.get_object_by_public_id(address_data.get('country_public_id'))
+        BimaCoreAddress.objects.create(
             number=address_data.get('number', ''),
             street=address_data.get('street', ''),
             street2=address_data.get('street2', ''),
@@ -65,8 +62,8 @@ def create_single_address(address_data, parent):
             latitude=address_data.get('latitude', ''),
             longitude=address_data.get('longitude', ''),
             note=address_data.get('note', ''),
-            state_id=state.id,
-            country_id=country.id,
+            state=state,
+            country=country,
             parent_type=ContentType.objects.get_for_model(parent),
             parent_id=parent.id
         )

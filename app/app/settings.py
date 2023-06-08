@@ -24,7 +24,8 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:3000",
     "http://localhost:3000",
     "http://localhost:8000",
-    "http://127.0.0.1:8000"
+    "http://127.0.0.1:8000",
+    "http://51.83.40.92:8550",
 ]
 CORS_ALLOW_METHODS = [
     'DELETE',
@@ -54,6 +55,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'debug_toolbar',
+    'django_filters',
     'corsheaders',
     'rest_framework',
     'auditlog',
@@ -71,7 +73,7 @@ MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
-    # 'common.middlewares.error_handling_middleware.ErrorHandlingMiddleware',
+    'common.middlewares.error_handling_middleware.ErrorHandlingMiddleware',
     'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',

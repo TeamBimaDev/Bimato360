@@ -6,4 +6,3 @@ class BimaCoreSourceSerializer(AbstractSerializer):
     class Meta:
         model = BimaCoreSource
         fields = '__all__'
-

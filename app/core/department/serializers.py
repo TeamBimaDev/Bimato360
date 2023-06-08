@@ -5,8 +5,9 @@ from .models import BimaCoreDepartment
 
 class BimaCoreDepartmentSerializer(AbstractSerializer):
     department = serializers.SerializerMethodField(read_only=True)
-    department_id = serializers.PrimaryKeyRelatedField(
+    department_public_id = serializers.SlugRelatedField(
         queryset=BimaCoreDepartment.objects.all(),
+        slug_field='public_id',
         source='department',
         write_only=True,
         required=False
@@ -22,4 +23,5 @@ class BimaCoreDepartmentSerializer(AbstractSerializer):
 
     class Meta:
         model = BimaCoreDepartment
-        fields = ['id', 'name', 'description', 'public_id', 'department', 'department_id', 'manager']
+        fields = ['id', 'name', 'description', 'public_id', 'department',
+                  'department_public_id', 'manager']

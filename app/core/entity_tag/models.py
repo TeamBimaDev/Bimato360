@@ -2,7 +2,6 @@ from django.db import models
 
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
-from django.shortcuts import get_object_or_404
 
 from core.abstract.models import AbstractModel
 from core.tag.models import BimaCoreTag
@@ -34,12 +33,12 @@ def create_entity_tag_from_parent_entity(data_entity_tag_to_save, parent):
 
 
 def create_single_entity_tag(tag_data, parent):
-    tag = get_object_or_404(BimaCoreTag, public_id=tag_data['tag'])
+    tag = BimaCoreTag.objects.get_object_by_public_id(tag_data['tag_public_id'])
 
     try:
         item = BimaCoreEntityTag.objects.create(
             id_manager=tag_data.get('id_manager', ''),
-            tag_id=tag.id,
+            tag=tag,
             parent_type=ContentType.objects.get_for_model(parent),
             parent_id=parent.id,
         )

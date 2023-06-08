@@ -6,8 +6,9 @@ from core.currency.models import BimaCoreCurrency
 
 class BimaCoreCountrySerializer(AbstractSerializer):
     currency = serializers.SerializerMethodField(read_only=True)
-    currency_id = serializers.PrimaryKeyRelatedField(
+    currency_public_id = serializers.SlugRelatedField(
         queryset=BimaCoreCurrency.objects.all(),
+        slug_field='public_id',
         source='currency',
         write_only=True
     )
@@ -22,7 +23,6 @@ class BimaCoreCountrySerializer(AbstractSerializer):
         model = BimaCoreCountry
         fields = [
             'id', 'name', 'code', 'address_format',
-            'address_view_id', 'phone_code', 'name_position',
-            'vat_label', 'state_required', 'zip_required',
-            'currency', 'currency_id', 'created', 'updated'
+            'phone_code', 'vat_label', 'zip_required',
+            'currency', 'currency_public_id', 'created', 'updated'
         ]

@@ -16,9 +16,8 @@ class BimaCompany(AbstractModel):
     currency = models.ForeignKey(BimaCoreCurrency, on_delete=models.PROTECT)
     timezone = models.TimeField()
 
-
     def __str__(self):
-        return f"{self.name ,self.public_id}"
+        return f"{self.name, self.public_id}"
 
     class Meta:
         ordering = ['name']

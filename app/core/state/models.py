@@ -17,4 +17,3 @@ class BimaCoreState(AbstractModel):
     class Meta:
         ordering = ['name']
         permissions = []
-
