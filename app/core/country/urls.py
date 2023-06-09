@@ -12,4 +12,8 @@ urlpatterns = [
          BimaCoreCountryViewSet.as_view({'get': 'get_state_by_country'}),
          name='State-By-Country'),
 
+    path('generate_pdf',
+         BimaCoreCountryViewSet.as_view({'get': 'generate_pdf'}),
+         name='generate_pdf'),
+
 ]

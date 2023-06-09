@@ -1,29 +1,30 @@
 import csv
 
 from core.abstract.views import AbstractViewSet
-from django.contrib.contenttypes.models import ContentType
+
 from django.http import HttpResponse, JsonResponse
 
 from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.response import Response
 
-from erp.partner.models import BimaErpPartner
-from erp.partner.serializers import BimaErpPartnerSerializer
-from erp.partner.signals import post_create_partner
-from erp.partner.utils import render_to_pdf
+from .models import BimaErpPartner
+from .serializers import BimaErpPartnerSerializer
+from .signals import post_create_partner
+from .utils import render_to_pdf, generate_xls_file
 
 from core.address.serializers import BimaCoreAddressSerializer
-from core.contact.serializers import BimaCoreContactSerializer
-from core.document.serializers import BimaCoreDocumentSerializer
-from core.entity_tag.serializers import BimaCoreEntityTagSerializer
-
 from core.address.models import BimaCoreAddress, get_addresses_for_parent, create_single_address
+
+from core.contact.serializers import BimaCoreContactSerializer
 from core.contact.models import BimaCoreContact, create_single_contact, \
     get_contacts_for_parent_entity
+
+from core.document.serializers import BimaCoreDocumentSerializer
 from core.document.models import BimaCoreDocument, create_single_document, \
     get_documents_for_parent_entity
 
+from core.entity_tag.serializers import BimaCoreEntityTagSerializer
 from core.entity_tag.models import BimaCoreEntityTag, create_single_entity_tag, \
     get_entity_tags_for_parent_entity
 
@@ -187,3 +188,14 @@ class BimaErpPartnerViewSet(AbstractViewSet):
                 "partners": data_to_export,
             },
         )
+
+    def export_data_xls(self, request, **kwargs):
+        model_fields = BimaErpPartner._meta
+
+        if kwargs.get('public_id') is not None:
+            data_to_export = [BimaErpPartner.objects.
+                              get_object_by_public_id(kwargs.get('public_id'))]
+        else:
+            data_to_export = BimaErpPartner.objects.all()
+
+        return generate_xls_file(data_to_export, model_fields)
