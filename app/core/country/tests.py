@@ -1,8 +1,9 @@
 from django.test import TestCase
 from django.urls import reverse
 from rest_framework.test import APIClient
-from .factories import BimaCoreCountryFactory, BimaCoreCurrencyFactory
-from .models import BimaCoreCountry, BimaCoreCurrency
+from .factories import BimaCoreCountryFactory
+from .models import BimaCoreCountry
+from core.currency.factories import BimaCoreCurrencyFactory
 
 
 class BimaCoreCountryViewSetTest(TestCase):
@@ -12,7 +13,7 @@ class BimaCoreCountryViewSetTest(TestCase):
         self.country = BimaCoreCountryFactory.create(currency=self.currency)
 
     def test_create_country(self):
-        url = reverse('core:bimacorecountry-list')  # Replace with the actual name of the URL
+        url = reverse('core:bimacorecountry-list')
         data = {
             "name": "Test country",
             "code": "TC",
