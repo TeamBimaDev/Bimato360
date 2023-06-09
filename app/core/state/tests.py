@@ -1,13 +1,9 @@
 from django.test import TestCase
 from rest_framework.test import APIClient
 from django.urls import reverse
-
 from core.country.factories import BimaCoreCountryFactory
-
 from .factories import BimaCoreStateFactory
 from .models import BimaCoreState
-from ..country.models import BimaCoreCountry
-
 
 class BimaCoreStateViewSetTest(TestCase):
 
@@ -50,23 +46,4 @@ class BimaCoreStateViewSetTest(TestCase):
         url = reverse("core:bimacorestate-detail", kwargs={"pk": self.state.public_id})
         response = self.client.delete(url)
         self.assertEqual(response.status_code, 204)
-    #
-    # def test_state_name_unique(self):
-    #     url = reverse("core:bimacorestate-list")
-    #     data = {
-    #         "name": self.state.name,
-    #         "code": "my-test-code",
-    #         "country_public_id": str(self.country.public_id)
-    #     }
-    #     response = self.client.post(url, data)
-    #     self.assertEqual(response.status_code, 400)
-    #
-    # def test_state_code_unique(self):
-    #     url = reverse("core:bimacorestate-list")
-    #     data = {
-    #         "name": "my test name",
-    #         "code": self.state.code,
-    #         "country_public_id": str(self.country.public_id)
-    #     }
-    #     response = self.client.post(url, data)
-    #     self.assertEqual(response.status_code, 400)
+
