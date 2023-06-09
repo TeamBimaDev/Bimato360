@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'debug_toolbar',
     'django_filters',
+    'django_extensions',
     'corsheaders',
     'rest_framework',
     'auditlog',

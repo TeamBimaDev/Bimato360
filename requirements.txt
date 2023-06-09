@@ -12,3 +12,5 @@ django-cors-headers
 django-debug-toolbar
 xhtml2pdf
 django-filter
+factory_boy
+django-extensions

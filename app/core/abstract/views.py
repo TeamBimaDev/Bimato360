@@ -25,7 +25,7 @@ class AbstractViewSet(viewsets.ModelViewSet):
     pagination_class = DefaultPagination
 
     def handle_exception(self, exc):
-        if exc.status_code:
+        if hasattr(exc, 'status_code'):
             error_status_code = exc.status_code
         else:
             if isinstance(exc, (ValidationError,)):

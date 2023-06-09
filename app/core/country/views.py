@@ -1,3 +1,5 @@
+from django.http import Http404
+from rest_framework import status
 from rest_framework.response import Response
 from core.abstract.views import AbstractViewSet
 from core.country.models import BimaCoreCountry
@@ -20,3 +22,11 @@ class BimaCoreCountryViewSet(AbstractViewSet):
         states = BimaCoreState.objects.filter(country=country)
         serializer = BimaCoreStateSerializer(states, many=True)
         return Response(serializer.data)
+
+    def destroy(self, request, *args, **kwargs):
+        try:
+            instance = self.get_object()
+            self.perform_destroy(instance)
+        except Http404:
+            pass
+        return Response(status=status.HTTP_204_NO_CONTENT)

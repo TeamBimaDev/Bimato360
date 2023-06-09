@@ -5,7 +5,7 @@ from core.currency.models import BimaCoreCurrency
 
 class BimaCoreCountry(AbstractModel):
     name = models.CharField(max_length=128, blank=False, unique=True)
-    code = models.CharField(max_length=256, blank=True, null=True)
+    code = models.CharField(max_length=256, blank=True, null=True, unique=True)
     address_format = models.CharField(max_length=256, blank=True, null=True)
     phone_code = models.PositiveIntegerField(null=True)
     vat_label = models.CharField(max_length=64, blank=True, null=True)
