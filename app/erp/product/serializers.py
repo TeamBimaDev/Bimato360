@@ -20,7 +20,7 @@ class BimaErpProductSerializer(AbstractSerializer):
 
     def get_category(self, obj):
         return {
-            'id': obj.country.public_id.hex,
+            'id': obj.category.public_id.hex,
             'name': obj.category.name,
         }
 
