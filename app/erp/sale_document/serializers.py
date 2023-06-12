@@ -1,12 +1,16 @@
+from django.core.serializers import serialize
 from rest_framework import serializers
 
 from core.abstract.serializers import AbstractSerializer
 
 from erp.product.models import BimaErpProduct
 from .models import BimaErpSaleDocument, BimaErpSaleDocumentProduct
+from ..partner.models import BimaErpPartner
 
 
 class BimaErpSaleDocumentSerializer(AbstractSerializer):
+    history = serializers.SerializerMethodField()
+
     parents = serializers.SerializerMethodField(read_only=True)
     parent_public_ids = serializers.SlugRelatedField(
         queryset=BimaErpSaleDocument.objects.all(),
@@ -14,51 +18,72 @@ class BimaErpSaleDocumentSerializer(AbstractSerializer):
         source='parents',
         write_only=True,
         many=True,
-        required=False,  # this allows the field to be empty
+        required=False,
     )
 
-    # other fields ...
+    partner = serializers.SerializerMethodField(read_only=True)
+    partner_public_id = serializers.SlugRelatedField(
+        queryset=BimaErpPartner.objects.all(),
+        slug_field='public_id',
+        source='partner',
+        write_only=True
+    )
+
+    def get_partner(self, obj):
+        return {
+            'id': obj.partner.public_id.hex,
+            'partner_type': obj.partner.partner_type,
+            'first_name': obj.partner.first_name,
+            'last_name': obj.partner.last_name,
+            'company_name': obj.partner.company_name,
+        }
 
     def get_parents(self, obj):
         return [
             {
                 'id': parent.public_id.hex,
-                'numbers': parent.numbers,
+                'number': parent.number,
             }
             for parent in obj.parents.all()
-        ]
+        ] if obj.parents else []
+
+    def get_history(self, obj):
+        history_instances = list(obj.history.all())
+        serializer = BimaErpSaleDocumentHistorySerializer(history_instances, many=True)
+        return serializer.data
 
     class Meta:
         model = BimaErpSaleDocument
         fields = [
-            'id', 'numbers', 'date', 'status', 'type', 'partner', 'partner_public_id', 'note',
+            'id', 'number', 'date', 'status', 'type', 'partner', 'partner_public_id', 'note',
             'private_note', 'validity', 'payment_terms', 'delivery_terms', 'subtotal', 'taxes',
             'discounts', 'total', 'parents', 'parent_public_ids', 'history', 'created', 'updated'
         ]
-        read_only_fields = ('history',)
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
 
         request = self.context.get('request')
-        if request and request.path.endswith(instance.public_id.hex):
-            history = SaleDocumentHistorySerializer(instance.history.all(), many=True).data
+        if request and request.path.endswith(instance.public_id.hex + "/"):
+            history = self.get_history(instance)
             representation['history'] = history
 
         return representation
 
 
-class SaleDocumentHistorySerializer(serializers.ModelSerializer):
+class BimaErpSaleDocumentHistorySerializer(serializers.ModelSerializer):
     class Meta:
         model = BimaErpSaleDocument.history.model
-        fields = ['id', 'numbers', 'date', 'status', 'type', 'partner_public_id',
+        fields = ['id', 'number', 'date', 'status', 'type', 'partner_id',
                   'note', 'private_note', 'validity', 'payment_terms', 'delivery_terms',
-                  'subtotal', 'taxes', 'discounts', 'total', 'parent_public_id', 'history_type',
+                  'subtotal', 'taxes', 'discounts', 'total', 'history_type',
                   'history_date', 'history_user']
 
 
-class SaleDocumentProductSerializer(serializers.Serializer):
+class BimaErpSaleDocumentProductSerializer(serializers.Serializer):
     product_public_id = serializers.UUIDField()
+    name = serializers.CharField(max_length=255, required=True)
+    reference = serializers.CharField(max_length=255, required=True)
     quantity = serializers.DecimalField(max_digits=18, decimal_places=3)
     unit_price = serializers.DecimalField(max_digits=18, decimal_places=3)
     vat = serializers.DecimalField(max_digits=5, decimal_places=2, required=False)
