@@ -8,4 +8,5 @@ urlpatterns = [
         path('unit_of_measure/', include('erp.unit_of_measure.urls')),
         path('vat/', include('erp.vat.urls')),
         path('product/', include('erp.product.urls')),
+        path('sale_document/', include('erp.sale_document.urls')),
 ]

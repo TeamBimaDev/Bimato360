@@ -17,6 +17,8 @@ class BimaCoreBankViewSet(AbstractViewSet):
     queryset = BimaCoreBank.objects.all()
     serializer_class = BimaCoreBankSerializer
     permission_classes = []
+    ordering_fields = AbstractViewSet.ordering_fields + \
+                      ['name', 'email', 'bic']
 
     def perform_create(self, serializer):
         email = self.request.data.get('email')

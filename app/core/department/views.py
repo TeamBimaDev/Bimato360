@@ -12,6 +12,8 @@ class BimaCoreDepartmentViewSet(AbstractViewSet):
     queryset = BimaCoreDepartment.objects.select_related('department').all()
     serializer_class = BimaCoreDepartmentSerializer
     permission_classes = []
+    ordering_fields = AbstractViewSet.ordering_fields + \
+                      ['name', 'manager', 'department__name']
 
     def perform_update(self, serializer):
         self.validate_department(self.request.data)

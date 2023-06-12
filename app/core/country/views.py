@@ -7,15 +7,17 @@ from core.state.models import BimaCoreState
 from core.state.serializers import BimaCoreStateSerializer
 from reportlab.lib.pagesizes import letter
 
-from helpers.GeneratePdf import GeneratePdf
-from helpers.NumberedCanvas import NumberedCanvas
-from helpers.PdfTable import PdfTable
+from common.helpers.GeneratePdf import GeneratePdf
+from common.helpers.NumberedCanvas import NumberedCanvas
+from common.helpers.PdfTable import PdfTable
 
 
 class BimaCoreCountryViewSet(AbstractViewSet):
     queryset = BimaCoreCountry.objects.select_related('currency').all()
     serializer_class = BimaCoreCountrySerializer
     permission_classes = []
+    ordering_fields = AbstractViewSet.ordering_fields + \
+                      ['name', 'code', 'phone_code']
 
     def get_object(self):
         obj = BimaCoreCountry.objects.get_object_by_public_id(self.kwargs['pk'])

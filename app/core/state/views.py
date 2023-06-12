@@ -7,6 +7,8 @@ class BimaCoreStateViewSet(AbstractViewSet):
     queryset = BimaCoreState.objects.select_related('country').all()
     serializer_class = BimaCoreStateSerializer
     permission_classes = []
+    ordering_fields = AbstractViewSet.ordering_fields + \
+                      ['name', 'code', 'country__name']
 
     def get_object(self):
         obj = BimaCoreState.objects.get_object_by_public_id(self.kwargs['pk'])

@@ -34,6 +34,8 @@ class BimaErpProduct(AbstractModel):
     reorder_point = models.PositiveIntegerField()
     lead_time = models.PositiveIntegerField()
     serial_number = models.CharField(max_length=255, blank=True, null=True)
+    quantity = models.DecimalField(max_digits=10, decimal_places=3, blank=True, null=True)
+    virtual_quantity = models.DecimalField(max_digits=10, decimal_places=3, blank=True, null=True)
 
     class Meta:
         ordering = ['name']

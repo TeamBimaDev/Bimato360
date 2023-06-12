@@ -16,3 +16,4 @@ factory_boy
 django-extensions
 tablib
 openpyxl
+django-simple-history
