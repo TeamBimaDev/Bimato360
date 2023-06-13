@@ -1,6 +1,6 @@
 from django.db import models
+from django.db.models import DecimalField, Sum
 from simple_history.models import HistoricalRecords
-from django.db.models.signals import post_save
 
 from common.enums.sale_document_enum import get_sale_document_status, \
     get_sale_document_types, get_sale_document_validity
@@ -33,7 +33,12 @@ class BimaErpSaleDocumentProduct(models.Model):
     def save(self, *args, **kwargs):
         self.calculate_totals()
         super().save(*args, **kwargs)
-        post_save.send(self.__class__, instance=self)
+        update_sale_document_totals(self.sale_document)
+
+    def delete(self, *args, **kwargs):
+        sale_document = self.sale_document
+        super().delete(*args, **kwargs)
+        update_sale_document_totals(sale_document)
 
     def calculate_totals(self):
         self.total_without_vat = self.quantity * self.unit_price
@@ -65,3 +70,16 @@ class BimaErpSaleDocument(AbstractModel):
     parents = models.ManyToManyField('self', blank=True)
     history = HistoricalRecords()
     sale_document_products = models.ManyToManyField(BimaErpProduct, through=BimaErpSaleDocumentProduct)
+
+
+def update_sale_document_totals(sale_document):
+    sale_document_products = BimaErpSaleDocumentProduct.objects.filter(sale_document=sale_document)
+    totals = sale_document_products.aggregate(
+        total_discounts=Sum('discount_amount', output_field=DecimalField()),
+        total_taxes=Sum('vat_amount', output_field=DecimalField()),
+        total_amount=Sum('total_price', output_field=DecimalField())
+    )
+    sale_document.total_discount = totals['total_discounts'] if totals['total_discounts'] else 0
+    sale_document.total_vat = totals['total_taxes'] if totals['total_taxes'] else 0
+    sale_document.total_amount = totals['total_amount'] if totals['total_amount'] else 0
+    sale_document.save()
