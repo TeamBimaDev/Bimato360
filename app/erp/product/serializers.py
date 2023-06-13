@@ -60,3 +60,4 @@ class BimaErpProductSerializer(AbstractSerializer):
             'dimension', 'weight', 'reorder_point', 'lead_time', 'serial_number', 'category', 'category_public_id', 'vat',
             'vat_public_id', 'unit_of_measure', 'unit_of_measure_public_id', 'created', 'updated'
         ]
+        read_only_fields = ('quantity', 'virtual_quantity',)

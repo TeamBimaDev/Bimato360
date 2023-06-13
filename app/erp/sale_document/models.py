@@ -14,6 +14,7 @@ from core.abstract.models import AbstractModel
 class BimaErpSaleDocumentProduct(models.Model):
     sale_document = models.ForeignKey('BimaErpSaleDocument', on_delete=models.CASCADE)
     product = models.ForeignKey('BimaErpProduct', on_delete=models.CASCADE)
+    sale_document_public_id = models.UUIDField(blank=True, null=True, editable=False)
     name = models.CharField(max_length=255, blank=False, null=False)
     reference = models.CharField(max_length=255, blank=False, null=False)
     quantity = models.DecimalField(max_digits=18, decimal_places=3, blank=False, null=False)
@@ -26,19 +27,24 @@ class BimaErpSaleDocumentProduct(models.Model):
     total_without_vat = models.DecimalField(max_digits=18, decimal_places=3, blank=True, null=True)
     total_after_discount = models.DecimalField(max_digits=18, decimal_places=3, blank=True, null=True)
     total_price = models.DecimalField(max_digits=18, decimal_places=3, blank=True, null=True)
+    history = HistoricalRecords()
 
     class Meta:
         unique_together = ('sale_document', 'product')
 
     def save(self, *args, **kwargs):
+        if self.sale_document_id and not self.sale_document_public_id:
+            self.sale_document_public_id = self.sale_document.public_id
         self.calculate_totals()
         super().save(*args, **kwargs)
         update_sale_document_totals(self.sale_document)
+        self.sale_document.save()
 
     def delete(self, *args, **kwargs):
         sale_document = self.sale_document
         super().delete(*args, **kwargs)
         update_sale_document_totals(sale_document)
+        sale_document.save()
 
     def calculate_totals(self):
         self.total_without_vat = self.quantity * self.unit_price

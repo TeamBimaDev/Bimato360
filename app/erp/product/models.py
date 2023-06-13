@@ -12,7 +12,6 @@ from erp.unit_of_measure.models import BimaErpUnitOfMeasure
 
 
 class BimaErpProduct(AbstractModel):
-    # Define model fields
     name = models.CharField(max_length=255, blank=False, null=False)
     reference = models.CharField(max_length=255, blank=False, null=False)
     description = models.TextField(blank=True, null=True)

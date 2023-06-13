@@ -1,4 +1,3 @@
-from django.core.serializers import serialize
 from rest_framework import serializers
 
 from core.abstract.serializers import AbstractSerializer
@@ -59,6 +58,7 @@ class BimaErpSaleDocumentSerializer(AbstractSerializer):
             'private_note', 'validity', 'payment_terms', 'delivery_terms', 'total_vat', 'total_amount',
             'total_discount', 'parents', 'parent_public_ids', 'history', 'created', 'updated'
         ]
+        read_only_fields = ('total_vat', 'total_amount', 'total_discount',)
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
@@ -76,7 +76,7 @@ class BimaErpSaleDocumentHistorySerializer(serializers.ModelSerializer):
         model = BimaErpSaleDocument.history.model
         fields = ['id', 'number', 'date', 'status', 'type', 'partner_id',
                   'note', 'private_note', 'validity', 'payment_terms', 'delivery_terms',
-                  'total_amount', 'total_discount', 'total_vat','history_type', 'history_date',
+                  'total_amount', 'total_discount', 'total_vat', 'history_type', 'history_date',
                   'history_user']
 
 
@@ -102,7 +102,10 @@ class BimaErpSaleDocumentProductSerializer(serializers.Serializer):
 
     class Meta:
         model = BimaErpSaleDocumentProduct
-        fields = ['product', 'product_public_id', 'name', 'reference', 'quantity', 'unit_price', 'vat', 'description', 'discount']
+        fields = ['product', 'product_public_id', 'name', 'reference', 'quantity', 'unit_price', 'vat', 'description',
+                  'discount']
+        read_only_fields = ('total_without_vat', 'total_after_discount', 'total_price',)
+
 
     def validate(self, attrs):
         product = attrs['product']
@@ -134,3 +137,13 @@ class BimaErpSaleDocumentProductSerializer(serializers.Serializer):
         instance.discount = validated_data.get('discount', instance.discount)
         instance.save()
         return instance
+
+
+class BimaErpSaleDocumentProductHistorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BimaErpSaleDocumentProduct.history.model
+        fields = [
+            'id', 'sale_document_public_id', 'name', 'reference', 'quantity', 'unit_price', 'vat', 'vat_amount',
+            'description', 'discount', 'discount_amount', 'total_without_vat',
+            'total_after_discount', 'total_price', 'history_type', 'history_date'
+        ]
