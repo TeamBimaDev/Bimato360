@@ -7,4 +7,7 @@ router.register('', BimaErpSaleDocumentViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
+    path('create_new_document_from_parent/',
+         BimaErpSaleDocumentViewSet.as_view({'post': 'create_new_document_from_parent'}),
+         name='create_new_document_from_parent'),
 ]
