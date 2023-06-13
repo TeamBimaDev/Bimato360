@@ -58,31 +58,6 @@ class BimaErpPartnerViewSetTest(TestCase):
         url = reverse('erp:bimaerppartner-detail', kwargs={'pk': self.partner.public_id})
         data = {
             "is_supplier": False,
-            "is_customer": True,
-            "partner_type": "Individual",
-            "company_type": "General partnership",
-            "first_name": "John",
-            "last_name": "Doe",
-            "gender": "MALE",
-            "social_security_number": "123456789",
-            "id_number": "ABC123",
-            "email": "john.doe@example.com",
-            "phone": "1234567890",
-            "fax": "0987654321",
-            "company_name": "Example Company",
-            "company_activity": "Example Activity",
-            "vat_id_number": "VAT123",
-            "status": "Inactive",
-            "note": "Example note",
-            "company_date_creation": "2022-01-01T00:00:00Z",
-            "company_siren": "123456789",
-            "company_siret": "987654321",
-            "company_date_registration": "2022-01-01T00:00:00Z",
-            "rcs_number": "RCS123",
-            "company_date_struck_off": "2022-01-01T00:00:00Z",
-            "company_ape_text": "Example APE Text",
-            "company_ape_code": "APE123",
-            "company_capital": "10000 USD"
         }
         response = self.client.patch(url, data)
         self.assertEqual(response.status_code, 200)

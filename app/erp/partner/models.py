@@ -38,7 +38,7 @@ class BimaErpPartner(AbstractModel):
     company_capital = models.CharField(blank=True, null=True)
 
     def __str__(self):
-        return f"{self.public_id}"
+        return f"{self.public_id , self.partner_type, self.first_name}"
 
 
 from .signals import create_partner_related_entities

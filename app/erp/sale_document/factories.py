@@ -11,7 +11,7 @@ class BimaErpSaleDocumentFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = BimaErpSaleDocument
 
-    numbers = factory.Sequence(lambda n: f"D-{n}")
+    number = factory.Sequence(lambda n: f"D-{n}")
     date = factory.Faker('date')
     status = factory.Faker('random_element', elements=get_sale_document_status())
     type = factory.Faker('random_element', elements=get_sale_document_types())

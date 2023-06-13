@@ -86,3 +86,5 @@ class BimaErpSaleDocument(AbstractModel):
                 )
         new_doc.calculate_and_update_total()  # update the total
         return new_doc
+    def __str__(self):
+        return f"{self.public_id , self.number}"
