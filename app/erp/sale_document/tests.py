@@ -10,8 +10,9 @@ class BimaErpSaleDocumentViewSetTest(TestCase):
     def setUp(self):
         self.client = APIClient()
         self.partner = BimaErpPartnerFactory.create()
-        self.sale_document_product = BimaErpSaleDocumentProductFactory.create()
-        self.sale_document = BimaErpSaleDocumentFactory.create(partner=self.partner, sale_document_product=self.sale_document_product)
+        self.sale_document_products = [BimaErpSaleDocumentProductFactory.create(),
+                                       BimaErpSaleDocumentProductFactory.create()]
+        self.sale_document = BimaErpSaleDocumentFactory.create(partner=self.partner, sale_document_products=self.sale_document_products)
 
     def test_create_sale_document(self):
         url = reverse('erp:bimaerpsaledocument-list')
@@ -26,13 +27,10 @@ class BimaErpSaleDocumentViewSetTest(TestCase):
               "validity": "30 days",
               "payment_terms": "Payment Terms",
               "delivery_terms": "Delivery Terms",
-              "subtotal": 123.45,
-              "taxes": 12.34,
-              "discounts": 5.67,
-              "total": 130.12,
             }
 
         response = self.client.post(url, data)
+        print(response.data)
         self.assertEqual(response.status_code, 201)
         self.assertEqual(BimaErpSaleDocument.objects.count(), 2)
         self.assertEqual(BimaErpSaleDocument.objects.get(number="DOC-1").number, "DOC-1")
