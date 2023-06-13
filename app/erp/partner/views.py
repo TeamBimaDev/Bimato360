@@ -33,13 +33,13 @@ from core.abstract.base_filter import BaseFilter
 
 
 class PartnerFilter(BaseFilter):
-    name = django_filters.CharFilter(field_name='first_name', lookup_expr='icontains')
+    first_name = django_filters.CharFilter(field_name='first_name', lookup_expr='icontains')
     phone = django_filters.CharFilter(field_name='phone', lookup_expr='icontains')
     partner_type = django_filters.CharFilter(field_name='partner_type', lookup_expr='exact')
 
     class Meta:
         model = BimaErpPartner
-        fields = ['name', 'phone', 'partner_type']
+        fields = ['first_name', 'phone', 'partner_type']
 
 
 class BimaErpPartnerViewSet(AbstractViewSet):
