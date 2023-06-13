@@ -24,15 +24,15 @@ class BimaErpProductViewSetTest(TestCase):
             "reference": "REF_1",
             "description": "Lorem ipsum dolor sit amet.",
             "ean13": "1234567890123",
-            "type": "Service Products",
+            "type": "SERVICE_PRODUCTS",
             "purchase_price": 12.34,
             "sell_price": 56.78,
-            "price_calculation_method": "Price based on Percentage",
+            "price_calculation_method": "MANUAL",
             "sell_percentage": 78.90,
             "category_public_id": str(self.category.public_id),
             "vat_public_id": str(self.vat.public_id),
             "unit_of_measure_public_id": str(self.unit_of_measure.public_id),
-            "status": "Active",
+            "status": "ACTIVE",
             "minimum_stock_level": 10,
             "maximum_stock_level": 100,
             "dimension": "Dimensions",
@@ -45,6 +45,7 @@ class BimaErpProductViewSetTest(TestCase):
         }
 
         response = self.client.post(url, data)
+        print(response.data)
         self.assertEqual(response.status_code, 201)
         self.assertEqual(BimaErpProduct.objects.count(), 2)
         self.assertEqual(BimaErpProduct.objects.get(name="test product").name, "test product")
