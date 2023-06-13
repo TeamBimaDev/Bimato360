@@ -13,7 +13,6 @@ from rest_framework.response import Response
 from .models import BimaErpSaleDocument, BimaErpSaleDocumentProduct
 from .serializers import BimaErpSaleDocumentSerializer, BimaErpSaleDocumentProductSerializer
 from common.service.purchase_sale_service import generate_unique_number
-
 from common.enums.sale_document_enum import SaleDocumentStatus
 
 from ..product.models import BimaErpProduct
