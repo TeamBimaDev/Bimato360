@@ -56,15 +56,15 @@ class BimaErpSaleDocumentSerializer(AbstractSerializer):
         model = BimaErpSaleDocument
         fields = [
             'id', 'number', 'date', 'status', 'type', 'partner', 'partner_public_id', 'note',
-            'private_note', 'validity', 'payment_terms', 'delivery_terms', 'subtotal', 'taxes',
-            'discounts', 'total', 'parents', 'parent_public_ids', 'history', 'created', 'updated'
+            'private_note', 'validity', 'payment_terms', 'delivery_terms', 'total_vat', 'total_amount',
+            'total_discount', 'parents', 'parent_public_ids', 'history', 'created', 'updated'
         ]
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
 
         request = self.context.get('request')
-        if request and request.path.endswith(instance.public_id.hex + "/"):
+        if request and request.path.endswith(instance.public_id.hex):
             history = self.get_history(instance)
             representation['history'] = history
 
@@ -76,12 +76,22 @@ class BimaErpSaleDocumentHistorySerializer(serializers.ModelSerializer):
         model = BimaErpSaleDocument.history.model
         fields = ['id', 'number', 'date', 'status', 'type', 'partner_id',
                   'note', 'private_note', 'validity', 'payment_terms', 'delivery_terms',
-                  'subtotal', 'taxes', 'discounts', 'total', 'history_type',
-                  'history_date', 'history_user']
+                  'total_amount', 'total_discount', 'total_vat','history_type', 'history_date',
+                  'history_user']
 
 
 class BimaErpSaleDocumentProductSerializer(serializers.Serializer):
-    product_public_id = serializers.UUIDField()
+    product_public_id = serializers.SlugRelatedField(
+        queryset=BimaErpProduct.objects.all(),
+        slug_field='public_id',
+        source='product',
+        write_only=True
+    )
+    product = serializers.SerializerMethodField()
+
+    def get_product(self, obj):
+        return obj.product.public_id
+
     name = serializers.CharField(max_length=255, required=True)
     reference = serializers.CharField(max_length=255, required=True)
     quantity = serializers.DecimalField(max_digits=18, decimal_places=3)
@@ -90,9 +100,25 @@ class BimaErpSaleDocumentProductSerializer(serializers.Serializer):
     description = serializers.CharField(max_length=500, required=False)
     discount = serializers.DecimalField(max_digits=5, decimal_places=2, required=False)
 
+    class Meta:
+        model = BimaErpSaleDocumentProduct
+        fields = ['product', 'product_public_id', 'name', 'reference', 'quantity', 'unit_price', 'vat', 'description', 'discount']
+
+    def validate(self, attrs):
+        product = attrs['product']
+        sale_document = self.context.get('sale_document')
+        if BimaErpSaleDocumentProduct.objects.filter(sale_document=sale_document, product=product).exists():
+            raise serializers.ValidationError("This product already exists in the document.")
+        return attrs
+
+    def validate_product_public_id(self, value):
+        if not BimaErpProduct.objects.filter(public_id=str(value.public_id)).exists():
+            raise serializers.ValidationError("No product with this id exists.")
+        return value
+
     def create(self, validated_data):
-        product = BimaErpProduct.objects.get(public_id=validated_data['product_public_id'])
-        sale_document = BimaErpSaleDocument.objects.get(public_id=self.context['sale_document_public_id'])
+        product = validated_data.pop('product')
+        sale_document = self.context.pop('sale_document')
         sale_document_product = BimaErpSaleDocumentProduct.objects.create(
             sale_document=sale_document,
             product=product,

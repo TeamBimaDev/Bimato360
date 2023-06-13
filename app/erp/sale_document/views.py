@@ -7,6 +7,7 @@ from django.db import transaction
 from django.db.models import Sum
 from rest_framework import status
 from rest_framework.decorators import action
+from django.shortcuts import get_object_or_404, get_list_or_404
 from rest_framework.response import Response
 
 from .models import BimaErpSaleDocument, BimaErpSaleDocumentProduct
@@ -14,6 +15,8 @@ from .serializers import BimaErpSaleDocumentSerializer, BimaErpSaleDocumentProdu
 from common.service.purchase_sale_service import generate_unique_number
 
 from common.enums.sale_document_enum import SaleDocumentStatus
+
+from ..product.models import BimaErpProduct
 
 
 class SaleDocumentFilter(BaseFilter):
@@ -63,7 +66,8 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
 
     @action(detail=True, methods=['post'])
     def add_product(self, request, pk=None):
-        serializer = BimaErpSaleDocumentProductSerializer(data=request.data, context={'sale_document_public_id': pk})
+        sale_document = self.get_object()
+        serializer = BimaErpSaleDocumentProductSerializer(data=request.data, context={'sale_document': sale_document})
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -71,16 +75,39 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
 
     @action(detail=True, methods=['put'])
     def update_product(self, request, pk=None):
-        sale_document_product = BimaErpSaleDocumentProduct.objects.get(pk=pk)
+        sale_document_public_id = request.data.get('sale_document_public_id')
+        product_public_id = request.data.get('product_public_id')
+
+        if pk != sale_document_public_id:
+            return Response({'error': 'Mismatched sale_document_id'},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        product = get_object_or_404(BimaErpProduct, public_id=product_public_id)
+
+        sale_document_product = get_list_or_404(BimaErpSaleDocumentProduct,
+                                                sale_document__public_id=sale_document_public_id, product=product)[0]
+        if sale_document_product is None:
+            return Response({'error': 'Cannot find the item to edit'}, status=status.HTTP_404_NOT_FOUND)
+
         serializer = BimaErpSaleDocumentProductSerializer(sale_document_product, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data)
+            return Response(request.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=True, methods=['delete'])
     def delete_product(self, request, pk=None):
-        sale_document_product = BimaErpSaleDocumentProduct.objects.get(pk=pk)
+        sale_document_public_id = request.data.get('sale_document_public_id')
+        product_public_id = request.data.get('product_public_id')
+
+        if pk != sale_document_public_id:
+            return Response({'error': 'Mismatched sale_document_id'},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        product = get_object_or_404(BimaErpProduct, public_id=product_public_id)
+
+        sale_document_product = get_object_or_404(BimaErpSaleDocumentProduct,
+                                                  sale_document__public_id=sale_document_public_id, product=product)
         sale_document_product.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
