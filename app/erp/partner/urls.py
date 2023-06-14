@@ -51,10 +51,10 @@ urlpatterns = [
          BimaErpPartnerViewSet.as_view({'get': 'export_data_pdf'}),
          name='partner-export_pdf'),
 
-    path('export_data_xls',
+    path('export_xls',
          BimaErpPartnerViewSet.as_view({'get': 'export_data_xls'}),
-         name='partner-export_pdf'),
-    path('<str:public_id>/export_data_xls',
+         name='partner-export_xls'),
+    path('<str:public_id>/export_xls',
          BimaErpPartnerViewSet.as_view({'get': 'export_data_xls'}),
-         name='partner-export_pdf'),
+         name='partner-export_xls'),
 ]

@@ -1,5 +1,4 @@
 from datetime import datetime
-
 import django_filters
 from core.abstract.views import AbstractViewSet
 from core.abstract.base_filter import BaseFilter
@@ -165,33 +164,43 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
             raise ValidationError({'error': 'Please give the type of the document'})
 
     def create_products_from_parents(self, parents, new_document):
-        product_agg = BimaErpSaleDocumentProduct.objects.filter(
+        product_ids = BimaErpSaleDocumentProduct.objects.filter(
             sale_document__in=parents
-        ).values(
-            'product', 'name', 'reference', 'unit_price', 'vat', 'description', 'discount'
-        ).annotate(
-            total_quantity=Sum('quantity')
-        )
+        ).values_list('product', flat=True).distinct()
 
-        new_products = [
-            BimaErpSaleDocumentProduct(
+        new_products = []
+        for product_id in product_ids:
+            # Find first instance of this product
+            first_product = BimaErpSaleDocumentProduct.objects.filter(
+                sale_document__in=parents,
+                product_id=product_id
+            ).first()
+
+            if first_product is None:
+                continue
+
+            total_quantity = BimaErpSaleDocumentProduct.objects.filter(
+                sale_document__in=parents,
+                product_id=product_id
+            ).aggregate(total_quantity=Sum('quantity'))['total_quantity']
+
+            new_product = BimaErpSaleDocumentProduct(
                 sale_document=new_document,
-                name=product['name'],
-                reference=product['reference'],
-                product_id=product['product'],
-                quantity=product['total_quantity'],
-                unit_price=product['unit_price'],
-                vat=product['vat'],
-                description=product['description'],
-                discount=product['discount']
+                name=first_product.name,
+                reference=first_product.reference,
+                product_id=product_id,
+                quantity=total_quantity,
+                unit_price=first_product.unit_price,
+                vat=first_product.vat,
+                description=first_product.description,
+                discount=first_product.discount
             )
-            for product in product_agg
-        ]
+            new_product.calculate_totals()
+            new_products.append(new_product)
 
-        for product in new_products:
-            product.calculate_totals()
         BimaErpSaleDocumentProduct.objects.bulk_create(new_products)
         update_sale_document_totals(new_document)
         new_document.save()
+
 
 
