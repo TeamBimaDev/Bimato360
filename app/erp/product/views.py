@@ -8,17 +8,19 @@ from core.abstract.base_filter import BaseFilter
 
 
 class ProductFilter(BaseFilter):
-    category_name = django_filters.CharFilter(field_name='category__name', lookup_expr='icontains')
+    category_name = django_filters.CharFilter(field_name='category__name', lookup_expr='exact')
+    type = django_filters.CharFilter(field_name='type', lookup_expr='exact')
+    name = django_filters.CharFilter(field_name='name', lookup_expr='icontains')
 
     class Meta:
         model = BimaErpProduct
-        fields = ['name', 'category_name']
+        fields = ['category_name', 'type', 'name']
 
 
 class BimaErpProductViewSet(AbstractViewSet):
     queryset = BimaErpProduct.objects.select_related('vat', 'category', 'unit_of_measure').all()
     serializer_class = BimaErpProductSerializer
-    # permission_classes = [IsAdminOrReadOnly]
+    ordering_fields = AbstractViewSet.ordering_fields + ['reference', 'name', 'type', 'sell_price', 'status']
     permission_classes = []
     filterset_class = ProductFilter
 

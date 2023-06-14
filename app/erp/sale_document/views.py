@@ -3,6 +3,7 @@ from datetime import datetime
 import django_filters
 from core.abstract.views import AbstractViewSet
 from core.abstract.base_filter import BaseFilter
+from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import Sum
 from rest_framework import status
@@ -10,7 +11,7 @@ from rest_framework.decorators import action
 from django.shortcuts import get_object_or_404, get_list_or_404
 from rest_framework.response import Response
 
-from .models import BimaErpSaleDocument, BimaErpSaleDocumentProduct
+from .models import BimaErpSaleDocument, BimaErpSaleDocumentProduct, update_sale_document_totals
 from .serializers import BimaErpSaleDocumentSerializer, BimaErpSaleDocumentProductSerializer
 from common.service.purchase_sale_service import generate_unique_number
 from common.enums.sale_document_enum import SaleDocumentStatus
@@ -26,6 +27,18 @@ class SaleDocumentFilter(BaseFilter):
     class Meta:
         model = BimaErpSaleDocument
         fields = ['number', 'status', 'partner_name']
+
+
+def create_new_document(document_type, parents):
+    new_document = BimaErpSaleDocument.objects.create(
+        number=generate_unique_number('sale', document_type.lower()),
+        date=datetime.today().strftime('%Y-%m-%d'),
+        status=SaleDocumentStatus.DRAFT,
+        type=document_type,
+        partner=parents.first().partner,
+    )
+    new_document.parents.add(*parents)
+    return new_document
 
 
 class BimaErpSaleDocumentViewSet(AbstractViewSet):
@@ -110,43 +123,58 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
         sale_document_product.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+    from django.db.models import F
+    from rest_framework.decorators import action
+
     @transaction.atomic
     @action(detail=False, methods=['post'])
     def create_new_document_from_parent(self, request, *args, **kwargs):
+        document_type, parent_public_ids = self.get_request_data(request)
+        parents = self.get_parents(parent_public_ids)
+
+        # Validation checks
+        self.validate_parents(parents)
+        self.validate_document_type(document_type)
+
+        # Creation of new document
+        new_document = create_new_document(document_type, parents)
+
+        # Get product aggregates and create new products for the new document
+        self.create_products_from_parents(parents, new_document)
+
+        serializer = BimaErpSaleDocumentSerializer(new_document)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def get_request_data(self, request):
         document_type = request.data.get('document_type', '')
         parent_public_ids = request.data.get('parent_public_ids', [])
-        parents = BimaErpSaleDocument.objects.filter(public_id__in=parent_public_ids)
+        return document_type, parent_public_ids
+
+    def get_parents(self, parent_public_ids):
+        return BimaErpSaleDocument.objects.filter(public_id__in=parent_public_ids)
+
+    def validate_parents(self, parents):
         if not parents.exists():
-            return Response({'error': 'No valid parent documents found'}, status=status.HTTP_400_BAD_REQUEST)
-        if not document_type:
-            return Response({'error': 'Please give the type of the document'}, status=status.HTTP_400_BAD_REQUEST)
-
-        unique_partners = parents.values_list('partner', flat=True).distinct()
+            raise ValidationError({'error': 'No valid parent documents found'})
+        unique_partners = parents.values('partner').distinct()
         if len(unique_partners) > 1:
-            return Response({'error': 'All documents should belong to the same partner'},
-                            status=status.HTTP_400_BAD_REQUEST)
+            raise ValidationError({'error': 'All documents should belong to the same partner'})
 
-        new_document = BimaErpSaleDocument.objects.create(
-            number=generate_unique_number('sale', 'invoice'),
-            date=datetime.date.today(),
-            status=SaleDocumentStatus.DRAFT,
-            type=document_type,
-            partner=parents.first().partner,
+    def validate_document_type(self, document_type):
+        if not document_type:
+            raise ValidationError({'error': 'Please give the type of the document'})
 
-        )
-        new_document.parents.add(*parents)
-
-        product_agg = BimaErpSaleDocumentProduct.objects.filter(sale_document__in=parents).values('product').annotate(
+    def create_products_from_parents(self, parents, new_document):
+        product_agg = BimaErpSaleDocumentProduct.objects.filter(
+            sale_document__in=parents
+        ).values(
+            'product', 'name', 'reference', 'unit_price', 'vat', 'description', 'discount'
+        ).annotate(
             total_quantity=Sum('quantity')
         )
-        for product in product_agg:
-            total_price = product['unit_price'] * product['total_quantity']
-            if product['vat']:
-                total_price += (total_price * product['vat']) / 100
-            if product['discount']:
-                total_price -= (total_price * product['discount']) / 100
 
-            BimaErpSaleDocumentProduct.objects.create(
+        new_products = [
+            BimaErpSaleDocumentProduct(
                 sale_document=new_document,
                 name=product['name'],
                 reference=product['reference'],
@@ -155,9 +183,15 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
                 unit_price=product['unit_price'],
                 vat=product['vat'],
                 description=product['description'],
-                discount=product['discount'],
-                total_price=total_price
+                discount=product['discount']
             )
+            for product in product_agg
+        ]
 
-        serializer = BimaErpSaleDocumentSerializer(new_document)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        for product in new_products:
+            product.calculate_totals()
+        BimaErpSaleDocumentProduct.objects.bulk_create(new_products)
+        update_sale_document_totals(new_document)
+        new_document.save()
+
+
