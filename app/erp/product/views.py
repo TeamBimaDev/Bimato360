@@ -32,7 +32,7 @@ class BimaErpProductViewSet(AbstractViewSet):
         # self.check_object_permissions(self.request, obj)
         return obj
 
-    def export_data_csv(self, request, **kwargs):
+    def export_csv(self, request, **kwargs):
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename="products.csv"'
         model_fields = BimaErpProduct._meta
@@ -51,7 +51,7 @@ class BimaErpProductViewSet(AbstractViewSet):
         return response
 
 
-    def export_data_pdf(self, request, **kwargs):
+    def export_pdf(self, request, **kwargs):
         template_name = "product/pdf.html"
         if kwargs.get('public_id') is not None:
             data_to_export = [BimaErpProduct.objects.
@@ -65,7 +65,7 @@ class BimaErpProductViewSet(AbstractViewSet):
                 "products": data_to_export,
             },
         )
-    def export_data_xls(self, request, **kwargs):
+    def export_xls(self, request, **kwargs):
         model_fields = BimaErpProduct._meta
 
         if kwargs.get('public_id') is not None:

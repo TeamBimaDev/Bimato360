@@ -171,7 +171,7 @@ class BimaErpPartnerViewSet(AbstractViewSet):
         serialized_entity_tags = BimaCoreEntityTagSerializer(entity_tags)
         return JsonResponse(serialized_entity_tags.data)
 
-    def export_data_csv(self, request, **kwargs):
+    def export_csv(self, request, **kwargs):
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename="partners.csv"'
         model_fields = BimaErpPartner._meta
@@ -189,7 +189,7 @@ class BimaErpPartnerViewSet(AbstractViewSet):
 
         return response
 
-    def export_data_pdf(self, request, **kwargs):
+    def export_pdf(self, request, **kwargs):
         template_name = "partner/pdf.html"
         if kwargs.get('public_id') is not None:
             data_to_export = [BimaErpPartner.objects.
@@ -204,7 +204,7 @@ class BimaErpPartnerViewSet(AbstractViewSet):
             },
         )
 
-    def export_data_xls(self, request, **kwargs):
+    def export_xls(self, request, **kwargs):
         model_fields = BimaErpPartner._meta
 
         if kwargs.get('public_id') is not None:
