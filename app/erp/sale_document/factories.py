@@ -21,22 +21,14 @@ class BimaErpSaleDocumentFactory(factory.django.DjangoModelFactory):
     validity = factory.Faker('random_element', elements=get_sale_document_validity())
     payment_terms = factory.Faker('word')
     delivery_terms = factory.Faker('word')
-    subtotal = factory.Faker('pydecimal', left_digits=5, right_digits=3, positive=True)
-    taxes = factory.Faker('pydecimal', left_digits=5, right_digits=3, positive=True)
-    discounts = factory.Faker('pydecimal', left_digits=5, right_digits=3, positive=True)
-    total = factory.Faker('pydecimal', left_digits=5, right_digits=3, positive=True)
 
     @factory.post_generation
-    def products(self, create, extracted, **kwargs):
+    def sale_document_products(self, create, extracted, **kwargs):
         if not create:
             return
 
         if extracted:
-            for product_data in extracted:
-                BimaErpSaleDocumentProductFactory.create(sale_document=self, **product_data)
-        else:
-            pass
-
+            self.sale_document_products.set(extracted)
 
 class BimaErpSaleDocumentProductFactory(factory.django.DjangoModelFactory):
     class Meta:
@@ -44,9 +36,11 @@ class BimaErpSaleDocumentProductFactory(factory.django.DjangoModelFactory):
 
     sale_document = factory.SubFactory(BimaErpSaleDocumentFactory)
     product = factory.SubFactory(BimaErpProductFactory)
+    name = factory.Faker('name')
+    reference = factory.Faker('text')
     quantity = factory.Faker('pydecimal', left_digits=5, right_digits=3, positive=True)
     unit_price = factory.Faker('pydecimal', left_digits=5, right_digits=3, positive=True)
     vat = factory.Faker('pydecimal', left_digits=2, right_digits=2, positive=True, max_value=100)
     description = factory.Faker('text')
     discount = factory.Faker('pydecimal', left_digits=2, right_digits=2, positive=True, max_value=100)
-    total_price = factory.LazyAttribute(lambda obj: obj.quantity * obj.unit_price)
+
