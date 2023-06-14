@@ -31,7 +31,7 @@ class BimaErpProductViewSet(AbstractViewSet):
 
     def export_data_csv(self, request, **kwargs):
         response = HttpResponse(content_type='text/csv')
-        response['Content-Disposition'] = 'attachment; filename="partners.csv"'
+        response['Content-Disposition'] = 'attachment; filename="products.csv"'
         model_fields = BimaErpProduct._meta
         field_names_to_show = [fd.name for fd in model_fields.fields]
         writer = csv.writer(response)
@@ -42,7 +42,7 @@ class BimaErpProductViewSet(AbstractViewSet):
         else:
             data_to_export = BimaErpProduct.objects.all()
 
-        for partner in data_to_export:
-            writer.writerow([getattr(partner, field) for field in field_names_to_show])
+        for product in data_to_export:
+            writer.writerow([getattr(product, field) for field in field_names_to_show])
 
         return response
