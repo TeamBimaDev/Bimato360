@@ -28,19 +28,28 @@ class BimaErpSaleDocumentFactory(factory.django.DjangoModelFactory):
             return
 
         if extracted:
-            self.sale_document_products.set(extracted)
-
+            for sale_document_product in extracted:
+                BimaErpSaleDocumentProductFactory(
+                    sale_document=self,
+                    product=sale_document_product.product,
+                    quantity=factory.Faker("random_int", min=1, max=100)
+                )
+        else:
+            BimaErpSaleDocumentProductFactory(sale_document=self)
 class BimaErpSaleDocumentProductFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = BimaErpSaleDocumentProduct
 
     sale_document = factory.SubFactory(BimaErpSaleDocumentFactory)
     product = factory.SubFactory(BimaErpProductFactory)
-    name = factory.Faker('name')
-    reference = factory.Faker('text')
-    quantity = factory.Faker('pydecimal', left_digits=5, right_digits=3, positive=True)
-    unit_price = factory.Faker('pydecimal', left_digits=5, right_digits=3, positive=True)
-    vat = factory.Faker('pydecimal', left_digits=2, right_digits=2, positive=True, max_value=100)
-    description = factory.Faker('text')
-    discount = factory.Faker('pydecimal', left_digits=2, right_digits=2, positive=True, max_value=100)
-
+    sale_document_public_id = factory.Faker("uuid4")
+    name = factory.Faker("word")
+    reference = factory.Faker("word")
+    quantity = factory.Faker("random_int", min=1, max=100)
+    unit_price = factory.Faker("pydecimal", left_digits=4, right_digits=3, positive=True)
+    vat = factory.Faker("pydecimal", left_digits=2, right_digits=2, positive=True)
+    description = factory.Faker("sentence")
+    discount = factory.Faker("pydecimal", left_digits=2, right_digits=2, positive=True)
+    total_without_vat = factory.Faker("pydecimal", left_digits=5, right_digits=3, positive=True)
+    total_after_discount = factory.Faker("pydecimal", left_digits=5, right_digits=3, positive=True)
+    total_price = factory.Faker("pydecimal", left_digits=5, right_digits=3, positive=True)
