@@ -1,5 +1,4 @@
 import csv
-
 import django_filters
 from core.abstract.views import AbstractViewSet
 
@@ -12,8 +11,8 @@ from rest_framework.response import Response
 from .models import BimaErpPartner
 from .serializers import BimaErpPartnerSerializer
 from .signals import post_create_partner
-from .utils import render_to_pdf, generate_xls_file
-
+from .utils import generate_xls_file
+from common.utils.utils import render_to_pdf
 from core.address.serializers import BimaCoreAddressSerializer
 from core.address.models import BimaCoreAddress, get_addresses_for_parent, create_single_address
 

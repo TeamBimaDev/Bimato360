@@ -11,10 +11,10 @@ import tablib
 def generate_xls_file(data_to_export, model_fields):
     file_data = tablib.Dataset(headers=[fd.name for fd in model_fields.fields])
 
-    for partner in data_to_export:
+    for product in data_to_export:
         values = []
         for fd in model_fields.fields:
-            value = getattr(partner, fd.name)
+            value = getattr(product, fd.name)
             if isinstance(value, datetime):
                 value = value.replace(tzinfo=None)
             elif isinstance(value, UUID):
@@ -35,7 +35,10 @@ def generate_xls_file(data_to_export, model_fields):
 
     # Write the data to the sheet
     for row_data in file_data:
-        sheet.append(row_data)
+        try:
+            sheet.append(row_data)
+        except ValueError as ex:
+            print(ex)
 
     # Apply column width
     for column in range(1, len(file_data.headers) + 1):
@@ -50,10 +53,11 @@ def generate_xls_file(data_to_export, model_fields):
             cell.border = border
 
     # Apply color based on is_supplier value
-    for row in sheet.iter_rows(min_row=2, max_row=sheet.max_row, min_col=file_data.headers.index('is_supplier') + 1,
-                               max_col=file_data.headers.index('is_supplier') + 1):
+    for row in sheet.iter_rows(min_row=2, max_row=sheet.max_row,
+                               min_col=file_data.headers.index('minimum_stock_level') + 1,
+                               max_col=file_data.headers.index('minimum_stock_level') + 1):
         for cell in row:
-            if cell.value:
+            if cell.value is not None and cell.value < 5:
                 cell.fill = PatternFill(start_color='FFFF0000', end_color='FFFF0000',
                                         fill_type='solid')  # Red color
             else:

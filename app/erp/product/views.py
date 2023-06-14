@@ -6,6 +6,9 @@ from .models import BimaErpProduct
 from .serializers import BimaErpProductSerializer
 from core.abstract.base_filter import BaseFilter
 
+from .utils import generate_xls_file
+from common.utils.utils import render_to_pdf
+
 
 class ProductFilter(BaseFilter):
     category_name = django_filters.CharFilter(field_name='category__name', lookup_expr='exact')
@@ -46,3 +49,29 @@ class BimaErpProductViewSet(AbstractViewSet):
             writer.writerow([getattr(product, field) for field in field_names_to_show])
 
         return response
+
+
+    def export_data_pdf(self, request, **kwargs):
+        template_name = "product/pdf.html"
+        if kwargs.get('public_id') is not None:
+            data_to_export = [BimaErpProduct.objects.
+                              get_object_by_public_id(kwargs.get('public_id'))]
+        else:
+            data_to_export = BimaErpProduct.objects.all()
+
+        return render_to_pdf(
+            template_name,
+            {
+                "products": data_to_export,
+            },
+        )
+    def export_data_xls(self, request, **kwargs):
+        model_fields = BimaErpProduct._meta
+
+        if kwargs.get('public_id') is not None:
+            data_to_export = [BimaErpProduct.objects.
+                              get_object_by_public_id(kwargs.get('public_id'))]
+        else:
+            data_to_export = BimaErpProduct.objects.all()
+
+        return generate_xls_file(data_to_export, model_fields)
