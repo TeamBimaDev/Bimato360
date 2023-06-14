@@ -26,6 +26,9 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:8000",
     "http://127.0.0.1:8000",
     "http://51.83.40.92:8550",
+    "http://127.0.0.1:8550",
+    "http://0.0.0.0:8550",
+    "http://localhost:8550",
 ]
 CORS_ALLOW_METHODS = [
     'DELETE',

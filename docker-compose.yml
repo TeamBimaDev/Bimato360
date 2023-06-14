@@ -8,7 +8,7 @@ services:
     ports:
       - "8500:8000"
     volumes:
-      - ./bima360_static_file/:/vol/web/
+      - ./bima360_static_file/:/app/media/
     command: >
       sh -c "python manage.py wait_for_db && 
              python manage.py migrate &&
@@ -38,6 +38,8 @@ services:
     container_name: bima360_db_admin
     image: dpage/pgadmin4
     restart: always
+    volumes:
+      - ./bima360_pgadmin/:/var/lib/pgadmin
     environment:
       PGADMIN_DEFAULT_EMAIL: admin@bima360.com
       PGADMIN_DEFAULT_PASSWORD: bima_admin_pwd
