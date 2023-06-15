@@ -75,7 +75,7 @@ class BimaErpSaleDocument(AbstractModel):
     total_vat = models.DecimalField(max_digits=18, decimal_places=3, blank=True, null=True)
     total_amount = models.DecimalField(max_digits=18, decimal_places=3, blank=True, null=True)
     total_discount = models.DecimalField(max_digits=18, decimal_places=3, blank=True, null=True)
-    parents = models.ManyToManyField('self', blank=True)
+    parents = models.ManyToManyField('self', symmetrical=False, blank=True)
     history = HistoricalRecords()
     sale_document_products = models.ManyToManyField(BimaErpProduct, through=BimaErpSaleDocumentProduct)
 

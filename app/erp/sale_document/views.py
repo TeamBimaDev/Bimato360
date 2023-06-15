@@ -18,15 +18,14 @@ from common.enums.sale_document_enum import SaleDocumentStatus
 from ..product.models import BimaErpProduct
 
 
-class SaleDocumentFilter(BaseFilter):
-    partner_name = django_filters.CharFilter(field_name='partner__name', lookup_expr='icontains')
+class SaleDocumentFilter(django_filters.FilterSet):
     number = django_filters.CharFilter(field_name='number', lookup_expr='icontains')
     status = django_filters.CharFilter(field_name='status', lookup_expr='icontains')
-    type = django_filters.CharFilter(field_name='type', lookup_expr='exact')
+    type = django_filters.CharFilter(field_name='type', lookup_expr='iexact')
 
     class Meta:
         model = BimaErpSaleDocument
-        fields = ['number', 'status', 'partner_name', 'type']
+        fields = ['number', 'status', 'type']
 
 
 def create_new_document(document_type, parents):

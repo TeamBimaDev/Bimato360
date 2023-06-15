@@ -57,7 +57,8 @@ class BimaErpProductSerializer(AbstractSerializer):
         fields = [
             'id', 'name', 'reference', 'description', 'ean13', 'type', 'purchase_price', 'sell_price',
             'price_calculation_method', 'sell_percentage', 'status', 'minimum_stock_level', 'maximum_stock_level',
-            'dimension', 'weight', 'reorder_point', 'lead_time', 'serial_number', 'category', 'category_public_id', 'vat',
-            'vat_public_id', 'unit_of_measure', 'unit_of_measure_public_id', 'created', 'updated'
+            'dimension', 'weight', 'reorder_point', 'lead_time', 'serial_number', 'category', 'category_public_id',
+            'vat', 'vat_public_id', 'unit_of_measure', 'unit_of_measure_public_id', 'created', 'updated',
+            'quantity', 'virtual_quantity'
         ]
         read_only_fields = ('quantity', 'virtual_quantity',)
