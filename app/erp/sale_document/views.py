@@ -1,7 +1,6 @@
 from datetime import datetime
 import django_filters
 from core.abstract.views import AbstractViewSet
-from core.abstract.base_filter import BaseFilter
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import Sum

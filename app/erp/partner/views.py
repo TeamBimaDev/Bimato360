@@ -1,6 +1,7 @@
 import csv
 import django_filters
 from core.abstract.views import AbstractViewSet
+from django.db.models import Q
 
 from django.http import HttpResponse, JsonResponse
 
@@ -28,18 +29,22 @@ from core.entity_tag.serializers import BimaCoreEntityTagSerializer
 from core.entity_tag.models import BimaCoreEntityTag, create_single_entity_tag, \
     get_entity_tags_for_parent_entity
 
-from core.abstract.base_filter import BaseFilter
 
-
-class PartnerFilter(BaseFilter):
-    first_name = django_filters.CharFilter(field_name='first_name', lookup_expr='icontains')
+class PartnerFilter(django_filters.FilterSet):
+    search = django_filters.CharFilter(method='filter_search')
     phone = django_filters.CharFilter(field_name='phone', lookup_expr='icontains')
     partner_type = django_filters.CharFilter(field_name='partner_type', lookup_expr='exact')
 
     class Meta:
         model = BimaErpPartner
-        fields = ['first_name', 'phone', 'partner_type']
+        fields = ['phone', 'partner_type', 'search']
 
+    def filter_search(self, queryset, name, value):
+        return queryset.filter(
+            Q(first_name__icontains=value) |
+            Q(last_name__icontains=value) |
+            Q(company_name__icontains=value)
+        )
 
 class BimaErpPartnerViewSet(AbstractViewSet):
     queryset = BimaErpPartner.objects.all()

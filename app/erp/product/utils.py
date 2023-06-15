@@ -6,6 +6,7 @@ from openpyxl import Workbook
 from openpyxl.styles import Font, Border, Side, PatternFill
 from openpyxl.utils import get_column_letter
 import tablib
+import csv
 
 
 def generate_xls_file(data_to_export, model_fields):
@@ -14,7 +15,11 @@ def generate_xls_file(data_to_export, model_fields):
     for product in data_to_export:
         values = []
         for fd in model_fields.fields:
-            value = getattr(product, fd.name)
+            if fd.name in ['category', 'vat', 'unit_of_measure']:
+                value = getattr(getattr(product, fd.name), 'name')
+            else:
+                value = getattr(product, fd.name)
+
             if isinstance(value, datetime):
                 value = value.replace(tzinfo=None)
             elif isinstance(value, UUID):
@@ -52,12 +57,14 @@ def generate_xls_file(data_to_export, model_fields):
         for cell in row:
             cell.border = border
 
-    # Apply color based on is_supplier value
+    quantity_index = file_data.headers.index('quantity')
+    min_stock_level_index = file_data.headers.index('minimum_stock_level')
     for row in sheet.iter_rows(min_row=2, max_row=sheet.max_row,
-                               min_col=file_data.headers.index('minimum_stock_level') + 1,
-                               max_col=file_data.headers.index('minimum_stock_level') + 1):
+                               min_col=quantity_index + 1,
+                               max_col=quantity_index + 1):
         for cell in row:
-            if cell.value is not None and cell.value < 5:
+            corresponding_min_stock_level_cell = sheet.cell(row=cell.row, column=min_stock_level_index + 1)
+            if cell.value is not None and cell.value <= corresponding_min_stock_level_cell.value:
                 cell.fill = PatternFill(start_color='FFFF0000', end_color='FFFF0000',
                                         fill_type='solid')  # Red color
             else:
@@ -77,5 +84,18 @@ def generate_xls_file(data_to_export, model_fields):
         sheet.column_dimensions[get_column_letter(column[0].column)].width = adjusted_width
 
     workbook.save(response)
+
+    return response
+
+
+def export_to_csv(products, model_fields):
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="products.csv"'
+    field_names_to_show = [fd.name for fd in model_fields.fields]
+    writer = csv.writer(response)
+    writer.writerow(field_names_to_show)
+
+    for product in products:
+        writer.writerow([getattr(product, field) for field in field_names_to_show])
 
     return response
