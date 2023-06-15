@@ -43,11 +43,15 @@ CORS_ALLOW_HEADERS = [
     'accept-encoding',
     'authorization',
     'content-type',
+    'content-disposition',
     'dnt',
     'origin',
     'user-agent',
     'x-csrftoken',
     'x-requested-with',
+]
+CORS_EXPOSE_HEADERS = [
+    'content-disposition',
 ]
 
 INSTALLED_APPS = [

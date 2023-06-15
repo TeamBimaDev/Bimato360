@@ -22,10 +22,11 @@ class SaleDocumentFilter(BaseFilter):
     partner_name = django_filters.CharFilter(field_name='partner__name', lookup_expr='icontains')
     number = django_filters.CharFilter(field_name='number', lookup_expr='icontains')
     status = django_filters.CharFilter(field_name='status', lookup_expr='icontains')
+    type = django_filters.CharFilter(field_name='type', lookup_expr='exact')
 
     class Meta:
         model = BimaErpSaleDocument
-        fields = ['number', 'status', 'partner_name']
+        fields = ['number', 'status', 'partner_name', 'type']
 
 
 def create_new_document(document_type, parents):
@@ -142,7 +143,7 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
         self.create_products_from_parents(parents, new_document)
 
         serializer = BimaErpSaleDocumentSerializer(new_document)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response({"success": "Item created"}, status=status.HTTP_201_CREATED)
 
     def get_request_data(self, request):
         document_type = request.data.get('document_type', '')
@@ -184,6 +185,7 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
                 product_id=product_id
             ).aggregate(total_quantity=Sum('quantity'))['total_quantity']
 
+
             new_product = BimaErpSaleDocumentProduct(
                 sale_document=new_document,
                 name=first_product.name,
@@ -201,6 +203,3 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
         BimaErpSaleDocumentProduct.objects.bulk_create(new_products)
         update_sale_document_totals(new_document)
         new_document.save()
-
-
-

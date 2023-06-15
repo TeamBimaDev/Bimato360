@@ -61,10 +61,12 @@ class BimaErpSaleDocument(AbstractModel):
                               blank=False, default="DRAFT",
                               choices=get_sale_document_status())
     type = models.CharField(max_length=128, null=False,
-                            blank=False, default="DRAFT",
+                            blank=False, default="Quote",
                             choices=get_sale_document_types())
 
     partner = models.ForeignKey(BimaErpPartner, on_delete=models.PROTECT)
+    vat_label = models.CharField(max_length=128, blank=True, null=True, default="")
+    vat_amount = models.DecimalField(max_digits=18, decimal_places=3, blank=True, null=True, default=0)
     note = models.TextField(blank=True, null=True)
     private_note = models.TextField(blank=True, null=True)
     validity = models.CharField(blank=True, null=True, choices=get_sale_document_validity())
