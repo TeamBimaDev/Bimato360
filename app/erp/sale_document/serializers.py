@@ -56,7 +56,7 @@ class BimaErpSaleDocumentSerializer(AbstractSerializer):
         fields = [
             'id', 'number', 'date', 'status', 'type', 'partner', 'partner_public_id', 'note',
             'private_note', 'validity', 'payment_terms', 'delivery_terms', 'total_vat', 'total_amount',
-            'total_discount', 'parents', 'parent_public_ids', 'history', 'created', 'updated'
+            'total_discount', 'parents', 'parent_public_ids', 'history', 'vat_label', 'vat_amount', 'created', 'updated'
         ]
         read_only_fields = ('total_vat', 'total_amount', 'total_discount',)
 
@@ -75,7 +75,7 @@ class BimaErpSaleDocumentHistorySerializer(serializers.ModelSerializer):
     class Meta:
         model = BimaErpSaleDocument.history.model
         fields = ['id', 'number', 'date', 'status', 'type', 'partner_id',
-                  'note', 'private_note', 'validity', 'payment_terms', 'delivery_terms',
+                  'note', 'private_note', 'validity', 'payment_terms', 'delivery_terms', 'vat_label', 'vat_amount'
                   'total_amount', 'total_discount', 'total_vat', 'history_type', 'history_date',
                   'history_user']
 
