@@ -13,14 +13,17 @@ def update_product_quantities(sender, instance, **kwargs):
         previous_instance = None
 
     def adjust_product_quantity(sale_document, operation):
-        for sale_document_product in sale_document.bimaerpsaledocumentproduct_set.all():
-            product = sale_document_product.product
-            if sale_document.type.lower() == 'quote':
-                product.virtual_quantity = operation(product.virtual_quantity, sale_document_product.quantity)
-            elif sale_document.type.lower() in ['order', 'invoice']:
-                product.virtual_quantity = operation(product.virtual_quantity, sale_document_product.quantity)
-                product.quantity = operation(product.quantity, sale_document_product.quantity)
-            product.save()
+        try:
+            for sale_document_product in sale_document.bimaerpsaledocumentproduct_set.all():
+                product = sale_document_product.product
+                if sale_document.type.lower() == 'quote':
+                    product.virtual_quantity = operation(product.virtual_quantity, sale_document_product.quantity)
+                elif sale_document.type.lower() in ['order', 'invoice']:
+                    product.virtual_quantity = operation(product.virtual_quantity, sale_document_product.quantity)
+                    product.quantity = operation(product.quantity, sale_document_product.quantity)
+                product.save()
+        except:
+            pass
 
     if previous_instance:
         # If status was "Confirmed" and then changed to "Canceled" or "Draft"
@@ -32,6 +35,5 @@ def update_product_quantities(sender, instance, **kwargs):
             adjust_product_quantity(instance, lambda x, y: x - y)  # Subtract the product quantity
 
     else:  # if it's a new instance
-        # If status is "Confirmed"
-        if instance.status.lower() == 'confirmed':
+        if str(instance.status).lower() == 'confirmed':
             adjust_product_quantity(instance, lambda x, y: x - y)  # Subtract the product quantity

@@ -130,17 +130,13 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
         document_type, parent_public_ids = self.get_request_data(request)
         parents = self.get_parents(parent_public_ids)
 
-        # Validation checks
         self.validate_parents(parents)
         self.validate_document_type(document_type)
 
-        # Creation of new document
         new_document = create_new_document(document_type, parents)
 
-        # Get product aggregates and create new products for the new document
         self.create_products_from_parents(parents, new_document)
 
-        serializer = BimaErpSaleDocumentSerializer(new_document)
         return Response({"success": "Item created"}, status=status.HTTP_201_CREATED)
 
     def get_request_data(self, request):
@@ -182,7 +178,6 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
                 sale_document__in=parents,
                 product_id=product_id
             ).aggregate(total_quantity=Sum('quantity'))['total_quantity']
-
 
             new_product = BimaErpSaleDocumentProduct(
                 sale_document=new_document,

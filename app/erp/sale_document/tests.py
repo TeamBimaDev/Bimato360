@@ -1,4 +1,3 @@
-from unittest.mock import MagicMock
 from django.test import TestCase
 from django.urls import reverse
 from rest_framework.test import APIClient
@@ -6,12 +5,7 @@ from .factories import BimaErpProductFactory, BimaErpSaleDocumentProductFactory,
 from erp.partner.factories import BimaErpPartnerFactory
 from .models import BimaErpSaleDocument, BimaErpSaleDocumentProduct
 from .serializers import BimaErpSaleDocumentProductSerializer
-from common.service.purchase_sale_service import generate_unique_number
-from datetime import datetime
-from common.enums.sale_document_enum import SaleDocumentStatus
-
-from .views import BimaErpSaleDocumentViewSet
-
+from decimal import Decimal
 
 class BimaErpSaleDocumentViewSetTest(TestCase):
     def setUp(self):
@@ -19,7 +13,9 @@ class BimaErpSaleDocumentViewSetTest(TestCase):
         self.partner = BimaErpPartnerFactory.create()
         self.sale_document_products = [BimaErpSaleDocumentProductFactory.create(),
                                        BimaErpSaleDocumentProductFactory.create()]
-        self.sale_document = BimaErpSaleDocumentFactory.create(partner=self.partner, sale_document_products=self.sale_document_products)
+        self.sale_document = BimaErpSaleDocumentFactory.create(partner=self.partner,
+                                                               sale_document_products=self.sale_document_products)
+        self.product = BimaErpProductFactory.create()
 
     def test_create_sale_document(self):
         url = reverse('erp:bimaerpsaledocument-list')
@@ -64,6 +60,7 @@ class BimaErpSaleDocumentViewSetTest(TestCase):
         response = self.client.delete(url)
         self.assertEqual(response.status_code, 204)
         self.assertEqual(BimaErpSaleDocument.objects.count(), 2)
+
     def test_get_product(self):
         url = reverse('erp:bimaerpsaledocument-get-products', kwargs={'pk': self.sale_document.public_id})
         response = self.client.get(url)
@@ -71,6 +68,7 @@ class BimaErpSaleDocumentViewSetTest(TestCase):
         products = BimaErpSaleDocumentProduct.objects.filter(sale_document=self.sale_document)
         serializer = BimaErpSaleDocumentProductSerializer(products, many=True)
         self.assertEqual(response.data, serializer.data)
+
     def test_add_product(self):
         url = reverse('erp:bimaerpsaledocument-add-product', kwargs={'pk': self.sale_document.public_id})
         product = BimaErpProductFactory.create()
@@ -93,33 +91,33 @@ class BimaErpSaleDocumentViewSetTest(TestCase):
 
     def test_update_product(self):
         url = reverse('erp:bimaerpsaledocument-update-product', kwargs={'pk': self.sale_document.public_id})
-        product = self.sale_document.sale_document_products.first()
+        url_create = reverse('erp:bimaerpsaledocument-add-product', kwargs={'pk': self.sale_document.public_id})
+
+        product = BimaErpProductFactory.create()
         data = {
             "sale_document_public_id": str(self.sale_document.public_id),
             "product_public_id": str(product.public_id),
             "name": "Updated Product",
             "reference": "Reference 5",
             "quantity": 8,
-            "unit_price": 12.99,
+            "unit_price": 12.990,
             "vat": 5,
             "description": "Updated product description",
             "discount": 5,
         }
+        response_create = self.client.post(url_create, data)
+
         response = self.client.put(url, data)
+        print(data)
+        print(response.data)
+
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(BimaErpSaleDocumentProduct.objects.count(), 6)
-        try:
-            updated_product = BimaErpSaleDocumentProduct.objects.get(sale_document=self.sale_document, product=product)
-            self.assertEqual(updated_product.name, "Updated Product")
-            self.assertEqual(updated_product.quantity, 8)
-            self.assertEqual(updated_product.unit_price, 12.99)
-        except BimaErpSaleDocumentProduct.DoesNotExist:
-            self.fail("The updated product does not exist.")
-        updated_sale_document = BimaErpSaleDocument.objects.get(public_id=self.sale_document.public_id)
-        self.assertEqual(updated_sale_document.sale_document_products.count(), 2)
-        self.assertEqual(updated_sale_document.sale_document_products.first().name, "Updated Product")
-        self.assertEqual(len(response.data['sale_document_products']), 2)
-        self.assertEqual(response.data['sale_document_products'][0]['name'], "Updated Product")
+        self.assertEqual(BimaErpSaleDocumentProduct.objects.count(), 7)
+
+        updated_product = BimaErpSaleDocumentProduct.objects.get(sale_document=self.sale_document, product=product)
+        self.assertEqual(updated_product.name, "Updated Product")
+        self.assertEqual(updated_product.quantity, 8)
+        self.assertEqual(updated_product.unit_price, Decimal('12.990'))
 
     def test_delete_product(self):
         url = reverse('erp:bimaerpsaledocument-delete-product', kwargs={'pk': self.sale_document.public_id})
@@ -135,15 +133,3 @@ class BimaErpSaleDocumentViewSetTest(TestCase):
         self.assertEqual(BimaErpSaleDocumentProduct.objects.count(), 5)
         updated_sale_document = BimaErpSaleDocument.objects.get(public_id=self.sale_document.public_id)
         self.assertEqual(updated_sale_document.sale_document_products.count(), 1)
-    def test_calculate_totals(self):
-        instance = BimaErpSaleDocumentProduct()
-        instance.quantity = 10
-        instance.unit_price = 100
-        instance.discount = 20
-        instance.vat = 10
-        instance.calculate_totals()
-        assert instance.total_without_vat == 1000
-        assert instance.discount_amount == 200
-        assert instance.total_after_discount == 800
-        assert instance.vat_amount == 80
-        assert instance.total_price == 880

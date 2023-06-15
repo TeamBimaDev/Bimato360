@@ -5,7 +5,6 @@ from .serializers import BimaErpProductSerializer
 
 from .utils import generate_xls_file, export_to_csv
 from common.utils.utils import render_to_pdf
-from django.db.models import F
 from django.db import models
 
 

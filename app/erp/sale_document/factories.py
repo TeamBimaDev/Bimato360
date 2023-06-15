@@ -6,7 +6,6 @@ from erp.partner.factories import BimaErpPartnerFactory
 from erp.product.factories import BimaErpProductFactory
 
 
-
 class BimaErpSaleDocumentFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = BimaErpSaleDocument
@@ -36,6 +35,8 @@ class BimaErpSaleDocumentFactory(factory.django.DjangoModelFactory):
                 )
         else:
             BimaErpSaleDocumentProductFactory(sale_document=self)
+
+
 class BimaErpSaleDocumentProductFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = BimaErpSaleDocumentProduct

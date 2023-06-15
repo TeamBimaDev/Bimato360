@@ -1,5 +1,4 @@
 from rest_framework.renderers import JSONRenderer
-from collections.abc import Iterable
 
 
 class CustomResponseJSONRenderer(JSONRenderer):

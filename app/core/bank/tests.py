@@ -3,6 +3,8 @@ from rest_framework.test import APIClient
 from django.urls import reverse
 from .factories import BimaCoreBankFactory
 from .models import BimaCoreBank
+
+
 class BimaCoreBankViewSetTest(TestCase):
 
     def setUp(self):
@@ -46,4 +48,3 @@ class BimaCoreBankViewSetTest(TestCase):
         url = reverse("core:bimacorebank-detail", kwargs={"pk": self.bank.public_id})
         response = self.client.delete(url)
         self.assertEqual(response.status_code, 204)
-

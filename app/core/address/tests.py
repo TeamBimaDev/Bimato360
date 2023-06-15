@@ -7,6 +7,7 @@ from core.state.factories import BimaCoreStateFactory
 from core.country.factories import BimaCoreCountryFactory
 from django.contrib.contenttypes.models import ContentType
 
+
 class BimaCoreAddressViewSetTest(TestCase):
     def setUp(self):
         self.client = APIClient()
@@ -60,5 +61,3 @@ class BimaCoreAddressViewSetTest(TestCase):
         response = self.client.delete(url)
         self.assertEqual(response.status_code, 204)
         self.assertEqual(BimaCoreAddress.objects.count(), 0)
-
-
