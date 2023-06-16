@@ -133,3 +133,16 @@ class BimaErpSaleDocumentViewSetTest(TestCase):
         self.assertEqual(BimaErpSaleDocumentProduct.objects.count(), 5)
         updated_sale_document = BimaErpSaleDocument.objects.get(public_id=self.sale_document.public_id)
         self.assertEqual(updated_sale_document.sale_document_products.count(), 1)
+    def test_calculate_total(self):
+        product = BimaErpSaleDocumentProductFactory.create(
+            quantity=10,
+            unit_price=5.99,
+            vat=5,
+            discount=10
+        )
+        product.calculate_totals()
+        self.assertEqual(round(product.total_without_vat, 2), Decimal(59.90))
+        self.assertEqual(round(product.discount_amount, 2), Decimal(5.99))
+        self.assertEqual(round(product.total_after_discount, 2), Decimal(53.91))
+        self.assertEqual(round(product.vat_amount, 2), Decimal(2.70))
+        self.assertEqual(round(product.total_price, 2), Decimal(56.61))
