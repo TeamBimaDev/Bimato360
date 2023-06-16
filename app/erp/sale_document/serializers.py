@@ -97,7 +97,7 @@ class BimaErpSaleDocumentProductSerializer(serializers.Serializer):
     quantity = serializers.DecimalField(max_digits=18, decimal_places=3)
     unit_price = serializers.DecimalField(max_digits=18, decimal_places=3)
     vat = serializers.DecimalField(max_digits=5, decimal_places=2, required=False)
-    description = serializers.CharField(max_length=500, required=False)
+    description = serializers.CharField(max_length=500, required=False, allow_blank=True)
     discount = serializers.DecimalField(max_digits=5, decimal_places=2, required=False)
 
     class Meta:

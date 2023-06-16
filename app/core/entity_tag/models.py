@@ -12,6 +12,7 @@ from rest_framework.exceptions import ValidationError
 class BimaCoreEntityTag(AbstractModel):
     tag = models.ForeignKey(BimaCoreTag, on_delete=models.PROTECT)
     id_manager = models.IntegerField(blank=True, null=True)
+    order = models.PositiveIntegerField(blank=True, null=True,default=1)
     parent_type = models.ForeignKey(
         ContentType,
         on_delete=models.CASCADE

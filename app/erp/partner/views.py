@@ -46,6 +46,7 @@ class PartnerFilter(django_filters.FilterSet):
             Q(company_name__icontains=value)
         )
 
+
 class BimaErpPartnerViewSet(AbstractViewSet):
     queryset = BimaErpPartner.objects.all()
     serializer_class = BimaErpPartnerSerializer
