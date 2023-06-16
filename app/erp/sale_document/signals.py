@@ -21,6 +21,9 @@ def update_product_quantities(sender, instance, **kwargs):
                 elif sale_document.type.lower() in ['order', 'invoice']:
                     product.virtual_quantity = operation(product.virtual_quantity, sale_document_product.quantity)
                     product.quantity = operation(product.quantity, sale_document_product.quantity)
+                elif sale_document.type.lower() == 'credit_note':
+                    product.virtual_quantity = operation(product.virtual_quantity, -sale_document_product.quantity)
+                    product.quantity = operation(product.quantity, -sale_document_product.quantity)
                 product.save()
         except:
             pass
@@ -32,8 +35,4 @@ def update_product_quantities(sender, instance, **kwargs):
 
         # If status was "Canceled" or "Draft" and then changed to "Confirmed"
         elif previous_instance.status.lower() in ['canceled', 'draft'] and instance.status.lower() == 'confirmed':
-            adjust_product_quantity(instance, lambda x, y: x - y)  # Subtract the product quantity
-
-    else:  # if it's a new instance
-        if str(instance.status).lower() == 'confirmed':
             adjust_product_quantity(instance, lambda x, y: x - y)  # Subtract the product quantity

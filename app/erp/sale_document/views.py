@@ -135,10 +135,11 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
         self.validate_document_type(document_type)
 
         new_document = create_new_document(document_type, parents)
-
-        self.create_products_from_parents(parents, new_document)
+        reset_quantity = True if document_type.lower() == 'credit_note' else False
+        self.create_products_from_parents(parents, new_document, reset_quantity)
 
         return Response({"success": "Item created"}, status=status.HTTP_201_CREATED)
+
 
     def get_request_data(self, request):
         document_type = request.data.get('document_type', '')
@@ -159,7 +160,7 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
         if not document_type:
             raise ValidationError({'error': 'Please give the type of the document'})
 
-    def create_products_from_parents(self, parents, new_document):
+    def create_products_from_parents(self, parents, new_document, reset_quantity=False):
         product_ids = BimaErpSaleDocumentProduct.objects.filter(
             sale_document__in=parents
         ).values_list('product', flat=True).distinct()
@@ -185,7 +186,7 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
                 name=first_product.name,
                 reference=first_product.reference,
                 product_id=product_id,
-                quantity=total_quantity,
+                quantity=1 if reset_quantity else total_quantity,
                 unit_price=first_product.unit_price,
                 vat=first_product.vat,
                 description=first_product.description,
@@ -197,6 +198,8 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
         BimaErpSaleDocumentProduct.objects.bulk_create(new_products)
         update_sale_document_totals(new_document)
         new_document.save()
+
+
 
     @action(detail=True, methods=['get'], url_path='generate_pdf')
     def generate_pdf(self, request, pk=None):

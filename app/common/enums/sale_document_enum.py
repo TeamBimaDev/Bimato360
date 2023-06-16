@@ -5,6 +5,7 @@ class SaleDocumentTypes(Enum):
     QUOTE = "Quote"
     ORDER = "ORDER"
     INVOICE = "Invoice"
+    CREDIT_NOTE = "Credit note"
 
 
 class SaleDocumentStatus(Enum):
