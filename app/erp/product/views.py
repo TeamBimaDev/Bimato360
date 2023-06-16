@@ -51,6 +51,7 @@ class BimaErpProductViewSet(AbstractViewSet):
             {
                 "products": data_to_export,
             },
+            "product.pdf"
         )
 
     def export_xls(self, request, **kwargs):

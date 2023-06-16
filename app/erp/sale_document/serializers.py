@@ -75,7 +75,7 @@ class BimaErpSaleDocumentHistorySerializer(serializers.ModelSerializer):
     class Meta:
         model = BimaErpSaleDocument.history.model
         fields = ['id', 'number', 'date', 'status', 'type', 'partner_id',
-                  'note', 'private_note', 'validity', 'payment_terms', 'delivery_terms', 'vat_label', 'vat_amount'
+                  'note', 'private_note', 'validity', 'payment_terms', 'delivery_terms', 'vat_label', 'vat_amount',
                   'total_amount', 'total_discount', 'total_vat', 'history_type', 'history_date',
                   'history_user']
 

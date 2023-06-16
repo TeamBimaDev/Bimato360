@@ -207,6 +207,7 @@ class BimaErpPartnerViewSet(AbstractViewSet):
             {
                 "partners": data_to_export,
             },
+            "partner.pdf"
         )
 
     def export_xls(self, request, **kwargs):

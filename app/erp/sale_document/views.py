@@ -15,6 +15,7 @@ from common.service.purchase_sale_service import generate_unique_number
 from common.enums.sale_document_enum import SaleDocumentStatus
 
 from ..product.models import BimaErpProduct
+from common.utils.utils import render_to_pdf
 
 
 class SaleDocumentFilter(django_filters.FilterSet):
@@ -196,3 +197,12 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
         BimaErpSaleDocumentProduct.objects.bulk_create(new_products)
         update_sale_document_totals(new_document)
         new_document.save()
+
+    @action(detail=True, methods=['get'], url_path='generate_pdf')
+    def generate_pdf(self, request, pk=None):
+        sale_document = self.get_object()
+        partner = sale_document.partner
+
+        return render_to_pdf('sale_document/sale_document.html',
+                             {'sale_document': sale_document, 'partner': partner},
+                             "document.pdf")

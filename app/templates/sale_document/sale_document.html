@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+            }
+            h2 {
+                text-align: center;
+                margin-bottom: 50px;
+                color: #3f51b5;
+                font-weight: bold;
+            }
+            .data-row {
+                margin: 0px 0;
+                color: #333;
+            }
+            .bold {
+                font-weight: bold;
+            }
+            table {
+                width: 100%;
+                margin-top: 50px;
+                border-collapse: collapse;
+                font-size: 0.8em; /* reduce font size */
+            }
+            th, td {
+                border: 1px solid #ddd;
+                padding: 4px;  /* reduce padding */
+            }
+            th {
+                background-color: #f2f2f2;
+                text-align: left;
+            }
+            td{
+                text-align: left;
+                font-size: 1.3em;
+            }
+            td.center {
+                text-align: center;
+            }
+            td.right {
+                text-align: right;
+            }
+            td.total {
+                font-weight: bold;
+            }
+            .total_table{
+                margin-top:1rem;
+            }
+            .totals {
+                text-align: right;
+                font-size: 1.2em;
+                font-weight: bold;
+            }
+            .note {
+                margin-top: 50px;
+                color: #666;
+            }
+            .footer {
+                position: fixed;
+                bottom: 20px;
+                width: 100%;
+                text-align: center;
+                font-size: 0.8em;
+                color: #999;
+            }
+        </style>
+    </head>
+    <body>
+        <h2>{{ sale_document.type|capfirst }} N°: {{ sale_document.number }}</h2>
+
+        <!-- Partner data -->
+        {% if partner.partner_type == "INDIVIDUAL" %}
+            <div class="data-row"><span class="bold">Name:</span> {{ partner.first_name }} {{ partner.last_name }}</div>
+            <div class="data-row"><span class="bold">Social Security Number:</span> {{ partner.social_security_number }}</div>
+        {% else %}
+            <div class="data-row"><span class="bold">Company Name:</span> {{ partner.company_name }}</div>
+            <div class="data-row"><span class="bold">VAT ID Number:</span> {{ partner.vat_id_number }}</div>
+            <div class="data-row"><span class="bold">Company SIREN:</span> {{ partner.company_siren }}</div>
+            <div class="data-row"><span class="bold">Company SIRET:</span> {{ partner.company_siret }}</div>
+        {% endif %}
+        <div class="data-row"><span class="bold">Email:</span> {{ partner.email }}</div>
+        <div class="data-row"><span class="bold">Phone:</span> {{ partner.phone }}</div>
+
+        <!-- SaleDocumentProducts table -->
+        <table>
+            <tr>
+                <th>Name / Reference</th>
+                <th>Quantity</th>
+                <th>Unit Price</th>
+                <th>VAT</th>
+                <th>Discount</th>
+                <th>Total Amount</th>
+            </tr>
+            {% for product in sale_document.bimaerpsaledocumentproduct_set.all %}
+            <tr>
+                <td style="width: 30%">{{ product.name }} / {{ product.reference }}</td>
+                <td style="width: 10%" class="center" >{{ product.quantity }}</td>
+                <td style="width: 10%" class="right" >{{ product.unit_price }}</td>
+                <td style="width: 10%" class="right" >{{ product.vat }}</td>
+                <td style="width: 10%" class="right" >{{ product.discount }}</td>
+                <td style="width: 30%" class="right total" >{{ product.total_price }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+
+        <div class="total_table">
+            <div class="totals">Total VAT: {{ sale_document.total_vat }}</div>
+            <div class="totals">Total Discount: {{ sale_document.total_discount }}</div>
+            <div class="totals">{{ sale_document.vat_label }}: {{ sale_document.vat_amount }}</div>
+            <div class="totals">Total Amount: {{ sale_document.total_amount }}</div>
+        </div>
+
+        <!-- Note -->
+        <div class="note">Note: {{ sale_document.note }}</div>
+
+        <!-- Footer -->
+       <pdf:footer>
+            <div class="footer">
+                Page <pdf:pagenumber> of <pdf:pagecount>
+            </div>
+        </pdf:footer>
+
+    </body>
+</html>
