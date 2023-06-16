@@ -36,6 +36,7 @@ class BimaErpProductSerializer(AbstractSerializer):
         return {
             'id': obj.vat.public_id.hex,
             'name': obj.vat.name,
+            'rate': obj.vat.rate,
         }
 
     unit_of_measure = serializers.SerializerMethodField(read_only=True)
