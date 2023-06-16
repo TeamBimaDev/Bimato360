@@ -56,7 +56,8 @@ class BimaErpSaleDocumentSerializer(AbstractSerializer):
         fields = [
             'id', 'number', 'date', 'status', 'type', 'partner', 'partner_public_id', 'note',
             'private_note', 'validity', 'payment_terms', 'delivery_terms', 'total_vat', 'total_amount',
-            'total_discount', 'parents', 'parent_public_ids', 'history', 'vat_label', 'vat_amount', 'created', 'updated'
+            'total_discount', 'parents', 'parent_public_ids', 'history', 'vat_label', 'vat_amount', 'created', 'updated',
+            'total_vat', 'total_amount', 'total_discount'
         ]
         read_only_fields = ('total_vat', 'total_amount', 'total_discount',)
 
@@ -103,8 +104,10 @@ class BimaErpSaleDocumentProductSerializer(serializers.Serializer):
     class Meta:
         model = BimaErpSaleDocumentProduct
         fields = ['product', 'product_public_id', 'name', 'reference', 'quantity', 'unit_price', 'vat', 'description',
-                  'discount']
-        read_only_fields = ('total_without_vat', 'total_after_discount', 'total_price',)
+                  'discount', 'total_without_vat', 'total_after_discount', 'total_price', 'discount_amount',
+                  'vat_amount']
+
+        read_only_fields = ('total_without_vat', 'total_after_discount', 'total_price', 'discount_amount', 'vat_amount')
 
 
     def validate(self, attrs):
