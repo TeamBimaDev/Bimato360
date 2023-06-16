@@ -7,7 +7,7 @@ class BimaCoreCountry(AbstractModel):
     name = models.CharField(max_length=128, blank=False, unique=True)
     code = models.CharField(max_length=256, blank=True, null=True, unique=True)
     address_format = models.CharField(max_length=256, blank=True, null=True)
-    phone_code = models.PositiveIntegerField(null=True)
+    phone_code = models.CharField(blank=True, null=True)
     vat_label = models.CharField(max_length=64, blank=True, null=True)
     zip_required = models.BooleanField(null=True)
     currency = models.ForeignKey(BimaCoreCurrency, on_delete=models.PROTECT)
