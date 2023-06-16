@@ -100,6 +100,13 @@ class BimaErpSaleDocumentProductSerializer(serializers.Serializer):
     vat = serializers.DecimalField(max_digits=5, decimal_places=2, required=False)
     description = serializers.CharField(max_length=500, required=False, allow_blank=True)
     discount = serializers.DecimalField(max_digits=5, decimal_places=2, required=False)
+    total_without_vat = serializers.DecimalField(max_digits=18, decimal_places=3, required=False)
+    total_after_discount = serializers.DecimalField(max_digits=18, decimal_places=3, required=False)
+    total_price = serializers.DecimalField(max_digits=18, decimal_places=3, required=False)
+    discount_amount = serializers.DecimalField(max_digits=18, decimal_places=3, required=False)
+    vat_amount = serializers.DecimalField(max_digits=18, decimal_places=3, required=False)
+
+
 
     class Meta:
         model = BimaErpSaleDocumentProduct
