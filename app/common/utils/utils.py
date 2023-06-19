@@ -1,7 +1,7 @@
 from django.http import HttpResponse
 from django.template.loader import get_template
 from xhtml2pdf import pisa
-
+from django.utils.translation import gettext_lazy as _
 
 def render_to_pdf(template_src, context_dict={}, file_name="document.pdf"):
     template = get_template(template_src)
@@ -11,6 +11,6 @@ def render_to_pdf(template_src, context_dict={}, file_name="document.pdf"):
     pdf_status = pisa.CreatePDF(html, dest=response)
 
     if pdf_status.err:
-        return HttpResponse('Some errors were encountered <pre>' + html + '</pre>')
+        return HttpResponse(_('Some errors were encountered <pre>') + html + '</pre>')
 
     return response

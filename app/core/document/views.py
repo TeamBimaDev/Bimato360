@@ -1,6 +1,6 @@
 from core.abstract.views import AbstractViewSet
 from core.document.models import BimaCoreDocument
-
+from django.utils.translation import gettext_lazy as _
 from core.document.serializers import BimaCoreDocumentSerializer
 from django.http import HttpResponse
 from rest_framework import status
@@ -35,7 +35,7 @@ class BimaCoreDocumentViewSet(AbstractViewSet):
                 response['Content-Disposition'] = f'attachment; filename="{file_name}"'
                 return response
 
-        return Response(data="document not found", status=status.HTTP_404_NOT_FOUND)
+        return Response(data=_("document not found"), status=status.HTTP_404_NOT_FOUND)
 
     def get_list_file_type_partner(self, request, *args, **kwargs):
         return Response(return_list_file_type_partner())

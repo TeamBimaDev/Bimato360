@@ -1,9 +1,9 @@
 from enum import Enum
-
+from django.utils.translation import gettext_lazy as _
 
 class Gender(Enum):
-    MALE = 'Male'
-    FEMALE = 'Female'
+    MALE = _('Male')
+    FEMALE = _('Female')
 
 
 def get_gender_choices():

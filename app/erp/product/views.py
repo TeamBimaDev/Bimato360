@@ -2,7 +2,7 @@ import django_filters
 from django.db import models
 from rest_framework import status
 from rest_framework.response import Response
-
+from django.utils.translation import gettext_lazy as _
 from core.abstract.views import AbstractViewSet
 from django.shortcuts import get_object_or_404
 from rest_framework import status
@@ -57,7 +57,7 @@ class BimaErpProductViewSet(AbstractViewSet):
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
         if BimaErpSaleDocumentProduct.objects.filter(product=instance).exists():
-            return Response({"Error": "Item exists in a sale document"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"Error": _("Item exists in a sale document")}, status=status.HTTP_400_BAD_REQUEST)
 
         return super(BimaErpProductViewSet, self).destroy(request, *args, **kwargs)
 

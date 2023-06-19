@@ -1,23 +1,23 @@
 from enum import Enum
-
+from django.utils.translation import gettext_lazy as _
 
 class PriceCalculationMethod(Enum):
-    MANUAL = 'Manual Price'
-    PERCENTAGE = 'Price based on Percentage'
+    MANUAL = _('Manual Price')
+    PERCENTAGE = _('Price based on Percentage')
 
 
 class ProductType(Enum):
-    STOCKABLE_PRODUCT = 'Stockable Products'
-    SERVICE_PRODUCTS = 'Service Products'
-    PRODUCTION_PRODUCTS = 'Production Products'
+    STOCKABLE_PRODUCT = _('Stockable Products')
+    SERVICE_PRODUCTS = _('Service Products')
+    PRODUCTION_PRODUCTS = _('Production Products')
 
 
 class ProductStatus(Enum):
-    ACTIVE = 'Active'
-    OUT_OF_STOCK = 'Out of Stock:'
-    IN_TRANSIT = 'In transit'
-    DISCONTINUED = 'Discontinued'
-    NOT_FOR_SALE = 'Not for sale'
+    ACTIVE = _('Active')
+    OUT_OF_STOCK = _('Out of Stock:')
+    IN_TRANSIT = _('In transit')
+    DISCONTINUED = _('Discontinued')
+    NOT_FOR_SALE = _('Not for sale')
 
 
 def get_product_price_calculation_method():

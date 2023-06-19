@@ -1,24 +1,23 @@
 from enum import Enum
-
+from django.utils.translation import gettext_lazy as _
 
 class SaleDocumentTypes(Enum):
-    QUOTE = "Quote"
-    ORDER = "ORDER"
-    INVOICE = "Invoice"
-    CREDIT_NOTE = "Credit note"
+    QUOTE = _("Quote")
+    ORDER = _("ORDER")
+    INVOICE = _("Invoice")
+    CREDIT_NOTE = _("Credit note")
 
 
 class SaleDocumentStatus(Enum):
-    DRAFT = "Draft"
-    CONFIRMED = "Confirmed"
-    CANCELED = "CANCELED"
-
+    DRAFT = _("Draft")
+    CONFIRMED = _("Confirmed")
+    CANCELED = _("CANCELED")
 
 class SaleDocumentValidity(Enum):
-    day_30 = "30 days"
-    day_15 = "15 days"
-    day_10 = "10 days"
-    day_45 = "45 days"
+    day_30 = _("30 days")
+    day_15 = _("15 days")
+    day_10 = _("10 days")
+    day_45 = _("45 days")
 
 
 class SaleDocumentRecurringInterval(Enum):
