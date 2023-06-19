@@ -1,21 +1,24 @@
-from datetime import datetime
+import os
+from datetime import datetime, timedelta
 import django_filters
 from core.abstract.views import AbstractViewSet
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import Sum
+from django.http import JsonResponse
 from rest_framework import status
-from rest_framework.decorators import action
 from django.shortcuts import get_object_or_404, get_list_or_404
 from rest_framework.response import Response
 
 from .models import BimaErpSaleDocument, BimaErpSaleDocumentProduct, update_sale_document_totals
 from .serializers import BimaErpSaleDocumentSerializer, BimaErpSaleDocumentProductSerializer
 from common.service.purchase_sale_service import generate_unique_number
-from common.enums.sale_document_enum import SaleDocumentStatus
+from common.enums.sale_document_enum import SaleDocumentStatus, get_sale_document_recurring_interval
 
 from ..product.models import BimaErpProduct
 from common.utils.utils import render_to_pdf
+from rest_framework.decorators import action
+import logging
 
 
 class SaleDocumentFilter(django_filters.FilterSet):
@@ -122,9 +125,6 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
         sale_document_product.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    from django.db.models import F
-    from rest_framework.decorators import action
-
     @transaction.atomic
     @action(detail=False, methods=['post'])
     def create_new_document_from_parent(self, request, *args, **kwargs):
@@ -139,7 +139,6 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
         self.create_products_from_parents(parents, new_document, reset_quantity)
 
         return Response({"success": "Item created"}, status=status.HTTP_201_CREATED)
-
 
     def get_request_data(self, request):
         document_type = request.data.get('document_type', '')
@@ -184,6 +183,7 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
             new_product = BimaErpSaleDocumentProduct(
                 sale_document=new_document,
                 name=first_product.name,
+                unit_of_measure=first_product.unit_of_measure,
                 reference=first_product.reference,
                 product_id=product_id,
                 quantity=1 if reset_quantity else total_quantity,
@@ -199,8 +199,6 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
         update_sale_document_totals(new_document)
         new_document.save()
 
-
-
     @action(detail=True, methods=['get'], url_path='generate_pdf')
     def generate_pdf(self, request, pk=None):
         sale_document = self.get_object()
@@ -209,3 +207,42 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
         return render_to_pdf('sale_document/sale_document.html',
                              {'sale_document': sale_document, 'partner': partner},
                              "document.pdf")
+
+    @action(detail=False, methods=['get'], url_path='generate_recurring_sale_documents', permission_classes=[])
+    def generate_recurring_sale_documents(self, request):
+
+        authorization_token = request.headers.get('Authorization')
+        expected_token = os.environ.get('AUTHORIZATION_TOKEN_FOR_CRON')
+
+        if authorization_token != expected_token:
+            return JsonResponse({'error': 'Unauthorized'}, status=401)
+
+        today = datetime.today()
+        num_new_sale_documents = 0
+
+        recurring_sale_documents = BimaErpSaleDocument.objects.filter(is_recurring=True)
+
+        logger = logging.getLogger(__name__)
+
+        for sale_document in recurring_sale_documents:
+            next_creation_date = sale_document.date + timedelta(days=sale_document.recurring_interval)
+
+            if next_creation_date <= today:
+                try:
+                    with transaction.atomic():
+                        new_sale_document = create_new_document(
+                            document_type=sale_document.type,
+                            parents=[sale_document]
+                        )
+                        self.create_products_from_parents(parents=[sale_document], new_document=new_sale_document)
+
+                        logger.info(
+                            f"{new_sale_document.type} N° {new_sale_document.number}"
+                            f" is created from {sale_document.number}")
+
+                        num_new_sale_documents += 1
+
+                except Exception as e:
+                    logger.error(f"Error creating new SaleDocument for parent {sale_document.id}: {str(e)}")
+
+        return JsonResponse({'message': f'Successfully created {num_new_sale_documents} new sale documents'})

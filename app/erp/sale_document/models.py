@@ -3,7 +3,7 @@ from django.db.models import DecimalField, Sum
 from simple_history.models import HistoricalRecords
 
 from common.enums.sale_document_enum import get_sale_document_status, \
-    get_sale_document_types, get_sale_document_validity
+    get_sale_document_types, get_sale_document_validity, get_sale_document_recurring_interval
 
 from erp.partner.models import BimaErpPartner
 from erp.product.models import BimaErpProduct
@@ -18,6 +18,7 @@ class BimaErpSaleDocumentProduct(models.Model):
     name = models.CharField(max_length=255, blank=False, null=False)
     reference = models.CharField(max_length=255, blank=False, null=False)
     quantity = models.DecimalField(max_digits=18, decimal_places=3, blank=False, null=False)
+    unit_of_measure = models.CharField(max_length=255, blank=False, null=False, default='default')
     unit_price = models.DecimalField(max_digits=18, decimal_places=3, blank=False, null=False)
     vat = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True)
     vat_amount = models.DecimalField(max_digits=18, decimal_places=3, blank=True, null=True)
@@ -76,6 +77,13 @@ class BimaErpSaleDocument(AbstractModel):
     total_amount = models.DecimalField(max_digits=18, decimal_places=3, blank=True, null=True)
     total_discount = models.DecimalField(max_digits=18, decimal_places=3, blank=True, null=True)
     parents = models.ManyToManyField('self', symmetrical=False, blank=True)
+    is_recurring = models.BooleanField(default=False, blank=True, null=True)
+    recurring_interval = models.PositiveIntegerField(
+        blank=True,
+        null=True,
+        choices=get_sale_document_recurring_interval(),
+        help_text="Interval for recurring sale documents"
+    )
     history = HistoricalRecords()
     sale_document_products = models.ManyToManyField(BimaErpProduct, through=BimaErpSaleDocumentProduct)
 

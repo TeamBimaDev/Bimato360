@@ -98,6 +98,7 @@ class BimaErpSaleDocumentProductSerializer(serializers.Serializer):
     quantity = serializers.DecimalField(max_digits=18, decimal_places=3)
     unit_price = serializers.DecimalField(max_digits=18, decimal_places=3)
     vat = serializers.DecimalField(max_digits=5, decimal_places=2, required=False)
+    unit_of_measure = serializers.CharField(max_length=255, required=True)
     description = serializers.CharField(max_length=500, required=False, allow_blank=True)
     discount = serializers.DecimalField(max_digits=5, decimal_places=2, required=False)
     total_without_vat = serializers.DecimalField(max_digits=18, decimal_places=3, required=False)
@@ -112,7 +113,7 @@ class BimaErpSaleDocumentProductSerializer(serializers.Serializer):
         model = BimaErpSaleDocumentProduct
         fields = ['product', 'product_public_id', 'name', 'reference', 'quantity', 'unit_price', 'vat', 'description',
                   'discount', 'total_without_vat', 'total_after_discount', 'total_price', 'discount_amount',
-                  'vat_amount']
+                  'vat_amount', 'unit_of_measure']
 
         read_only_fields = ('total_without_vat', 'total_after_discount', 'total_price', 'discount_amount', 'vat_amount')
 
@@ -145,6 +146,8 @@ class BimaErpSaleDocumentProductSerializer(serializers.Serializer):
         instance.vat = validated_data.get('vat', instance.vat)
         instance.description = validated_data.get('description', instance.description)
         instance.discount = validated_data.get('discount', instance.discount)
+        instance.name = validated_data.get('name', instance.name)
+        instance.unit_of_measure = validated_data.get('unit_of_measure', instance.unit_of_measure)
         instance.save()
         return instance
 
