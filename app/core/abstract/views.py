@@ -15,6 +15,8 @@ from rest_framework.status import (
     HTTP_500_INTERNAL_SERVER_ERROR,
 )
 
+from django.utils.translation import gettext_lazy as _
+
 
 class AbstractViewSet(viewsets.ModelViewSet):
     filter_backends = [filters.OrderingFilter, DjangoFilterBackend]
@@ -38,7 +40,7 @@ class AbstractViewSet(viewsets.ModelViewSet):
             else:
                 error_status_code = HTTP_500_INTERNAL_SERVER_ERROR
 
-        error_message = "A server error occurred"
+        error_message = _("A server error occurred")
         if len(exc.args[0]):
             error_message = exc.args[0]
 

@@ -1,11 +1,14 @@
 import django_filters
+from django.db import models
+from rest_framework import status
+from rest_framework.response import Response
+
 from core.abstract.views import AbstractViewSet
 from .models import BimaErpProduct
 from .serializers import BimaErpProductSerializer
-
 from .utils import generate_xls_file, export_to_csv
 from common.utils.utils import render_to_pdf
-from django.db import models
+from erp.sale_document.models import BimaErpSaleDocumentProduct
 
 
 class ProductFilter(django_filters.FilterSet):
@@ -37,6 +40,13 @@ class BimaErpProductViewSet(AbstractViewSet):
         obj = BimaErpProduct.objects.get_object_by_public_id(self.kwargs['pk'])
         # self.check_object_permissions(self.request, obj)
         return obj
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if BimaErpSaleDocumentProduct.objects.filter(product=instance).exists():
+            return Response({"Error": "Item exists in a sale document"}, status=status.HTTP_400_BAD_REQUEST)
+
+        return super(BimaErpProductViewSet, self).destroy(request, *args, **kwargs)
 
     def export_csv(self, request, **kwargs):
         data_to_export = self.get_data_to_export(kwargs)

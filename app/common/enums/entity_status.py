@@ -1,10 +1,11 @@
 from enum import Enum
+from django.utils.translation import gettext_lazy as _
 
 
 class EntityStatus(Enum):
-    ACTIVE = 'Active'
-    INACTIVE = 'Inactive'
-    BLOCKED = 'Blocked'
+    ACTIVE = _('Active')
+    INACTIVE = _('Inactive')
+    BLOCKED = _('Blocked')
 
 
 def get_entity_status_choices():

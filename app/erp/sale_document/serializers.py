@@ -5,6 +5,7 @@ from core.abstract.serializers import AbstractSerializer
 from erp.product.models import BimaErpProduct
 from .models import BimaErpSaleDocument, BimaErpSaleDocumentProduct
 from ..partner.models import BimaErpPartner
+from django.utils.translation import gettext_lazy as _
 
 
 class BimaErpSaleDocumentSerializer(AbstractSerializer):
@@ -56,7 +57,8 @@ class BimaErpSaleDocumentSerializer(AbstractSerializer):
         fields = [
             'id', 'number', 'date', 'status', 'type', 'partner', 'partner_public_id', 'note',
             'private_note', 'validity', 'payment_terms', 'delivery_terms', 'total_vat', 'total_amount',
-            'total_discount', 'parents', 'parent_public_ids', 'history', 'vat_label', 'vat_amount', 'created', 'updated',
+            'total_discount', 'parents', 'parent_public_ids', 'history', 'vat_label', 'vat_amount', 'created',
+            'updated',
             'total_vat', 'total_amount', 'total_discount'
         ]
         read_only_fields = ('total_vat', 'total_amount', 'total_discount',)
@@ -107,8 +109,6 @@ class BimaErpSaleDocumentProductSerializer(serializers.Serializer):
     discount_amount = serializers.DecimalField(max_digits=18, decimal_places=3, required=False)
     vat_amount = serializers.DecimalField(max_digits=18, decimal_places=3, required=False)
 
-
-
     class Meta:
         model = BimaErpSaleDocumentProduct
         fields = ['product', 'product_public_id', 'name', 'reference', 'quantity', 'unit_price', 'vat', 'description',
@@ -117,7 +117,6 @@ class BimaErpSaleDocumentProductSerializer(serializers.Serializer):
 
         read_only_fields = ('total_without_vat', 'total_after_discount', 'total_price', 'discount_amount', 'vat_amount')
 
-
     def validate(self, attrs):
         product = attrs['product']
         sale_document = self.context.get('sale_document')
@@ -125,9 +124,19 @@ class BimaErpSaleDocumentProductSerializer(serializers.Serializer):
             raise serializers.ValidationError("This product already exists in the document.")
         return attrs
 
+    def validate_quantity(self, desired_quantity):
+        product = self.instance.product
+        net_change_in_quantity = desired_quantity
+        if self.instance:
+            net_change_in_quantity = desired_quantity - self.instance.quantity
+
+        if not BimaErpSaleDocumentProduct.is_quantity_available(product, net_change_in_quantity):
+            raise serializers.ValidationError(_("Not enough stock available for this product."))
+        return desired_quantity
+
     def validate_product_public_id(self, value):
         if not BimaErpProduct.objects.filter(public_id=str(value.public_id)).exists():
-            raise serializers.ValidationError("No product with this id exists.")
+            raise serializers.ValidationError(_("No product with this id exists."))
         return value
 
     def create(self, validated_data):

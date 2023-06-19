@@ -1,0 +1,90 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-06-19 15:03+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+#: .\app\settings.py:215
+msgid "English"
+msgstr ""
+
+#: .\app\settings.py:216
+msgid "French"
+msgstr ""
+
+#: .\common\enums\company_type.py:6
+msgid "Sole proprietorship"
+msgstr ""
+
+#: .\common\enums\company_type.py:7
+msgid "General partnership"
+msgstr ""
+
+#: .\common\enums\company_type.py:8
+msgid "Limited partnership"
+msgstr ""
+
+#: .\common\enums\company_type.py:9
+msgid "Public limited company(PLC)"
+msgstr ""
+
+#: .\common\enums\company_type.py:10
+msgid "Limited liability company(LLC)"
+msgstr ""
+
+#: .\common\enums\company_type.py:11
+msgid "Simplified joint - stock"
+msgstr ""
+
+#: .\common\enums\company_type.py:12
+msgid "company Partnership limited by shares"
+msgstr ""
+
+#: .\common\enums\company_type.py:13
+msgid "Cooperative society"
+msgstr ""
+
+#: .\common\enums\company_type.py:14
+msgid "Unincorporated joint venture"
+msgstr ""
+
+#: .\common\enums\company_type.py:15
+msgid "Joint - stock company"
+msgstr ""
+
+#: .\core\abstract\views.py:43
+msgid "A server error occurred"
+msgstr ""
+
+#: .\core\admin.py:13
+msgid "Personal Info"
+msgstr ""
+
+#: .\core\admin.py:15
+msgid "Permissions"
+msgstr ""
+
+#: .\core\admin.py:24
+msgid "Important dates"
+msgstr ""
+
+#: .\erp\sale_document\serializers.py:134
+msgid "Not enough stock available for this product."
+msgstr ""
+
+#: .\erp\sale_document\serializers.py:139
+msgid "No product with this id exists."
+msgstr ""

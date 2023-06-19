@@ -2,6 +2,7 @@ import os
 from datetime import timedelta
 from pathlib import Path
 from dotenv import load_dotenv
+
 import logging
 
 load_dotenv()
@@ -206,4 +207,18 @@ LOGGING = {
 }
 INTERNAL_IPS = [
     "127.0.0.1",
+]
+
+from django.utils.translation import gettext_lazy as _
+LANGUAGE_CODE = 'en-us'
+LANGUAGES = [
+    ('en', _('English')),
+    ('fr', _('French')),
+
+]
+
+USE_I18N = True
+USE_L10N = True
+LOCALE_PATHS = [
+    os.path.join(BASE_DIR, 'app', 'locale'),
 ]
