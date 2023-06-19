@@ -31,7 +31,8 @@ class BimaErpCategoryViewSet(AbstractViewSet):
             serializer = BimaCoreEntityTagSerializer(result)
             return Response({
                 "id": result.public_id,
-                "tag_name": result.tag.name
+                "tag_name": result.tag.name,
+                "order": result.order
             }, status=status.HTTP_201_CREATED)
         else:
             return Response(result, status=result.get("status", status.HTTP_500_INTERNAL_SERVER_ERROR))
