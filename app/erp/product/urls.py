@@ -8,7 +8,12 @@ router.register('', BimaErpProductViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
-
+    path('<str:public_id>/tags/',
+         BimaErpProductViewSet.as_view({'get': 'list_tags', 'post': 'create_tag'}),
+         name='product-tags'),
+    path('<str:public_id>/tags/<str:entity_tag_public_id>/',
+         BimaErpProductViewSet.as_view({'get': 'get_tag'}),
+         name='product-get-tag'),
     path('export_csv',
          BimaErpProductViewSet.as_view({'get': 'export_csv'}),
          name='product-export_csv'),

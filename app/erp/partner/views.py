@@ -153,7 +153,7 @@ class BimaErpPartnerViewSet(AbstractViewSet):
 
     def list_tags(self, request, *args, **kwargs):
         partner = BimaErpPartner.objects.get_object_by_public_id(self.kwargs['public_id'])
-        entity_tags = get_entity_tags_for_parent_entity(partner)
+        entity_tags = get_entity_tags_for_parent_entity(partner).order_by('order')
         serialized_entity_tags = BimaCoreEntityTagSerializer(entity_tags, many=True)
         return Response(serialized_entity_tags.data)
 
@@ -164,7 +164,8 @@ class BimaErpPartnerViewSet(AbstractViewSet):
             serializer = BimaCoreEntityTagSerializer(result)
             return Response({
                 "id": result.public_id,
-                "tag_name": result.tag.name
+                "tag_name": result.tag.name,
+                "order": result.order,
             }, status=status.HTTP_201_CREATED)
         else:
             return Response(result, status=result.get("status", status.HTTP_500_INTERNAL_SERVER_ERROR))
