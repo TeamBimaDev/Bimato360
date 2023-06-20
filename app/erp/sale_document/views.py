@@ -9,7 +9,7 @@ from django.http import JsonResponse
 from rest_framework import status
 from django.shortcuts import get_object_or_404, get_list_or_404
 from rest_framework.response import Response
-
+from django.utils.translation import gettext_lazy as _
 from .models import BimaErpSaleDocument, BimaErpSaleDocumentProduct, update_sale_document_totals
 from .serializers import BimaErpSaleDocumentSerializer, BimaErpSaleDocumentProductSerializer
 from common.service.purchase_sale_service import generate_unique_number
@@ -63,7 +63,7 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
         if not quotation_order_invoice:
             quotation_order_invoice = request.query_params.get('quotation_order_invoice', '')
         if not sale_or_purchase or not quotation_order_invoice:
-            return Response({'error': 'Please provide all needed data'},
+            return Response({'error': _('Please provide all needed data')},
                             status=status.HTTP_400_BAD_REQUEST)
 
         unique_number = generate_unique_number(sale_or_purchase, quotation_order_invoice)
@@ -93,7 +93,7 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
         product_public_id = request.data.get('product_public_id')
 
         if pk != sale_document_public_id:
-            return Response({'error': 'Mismatched sale_document_id'},
+            return Response({'error': _('Mismatched sale_document_id')},
                             status=status.HTTP_400_BAD_REQUEST)
 
         product = get_object_or_404(BimaErpProduct, public_id=product_public_id)
@@ -101,7 +101,7 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
         sale_document_product = get_list_or_404(BimaErpSaleDocumentProduct,
                                                 sale_document__public_id=sale_document_public_id, product=product)[0]
         if sale_document_product is None:
-            return Response({'error': 'Cannot find the item to edit'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'error': _('Cannot find the item to edit')}, status=status.HTTP_404_NOT_FOUND)
 
         serializer = BimaErpSaleDocumentProductSerializer(sale_document_product, data=request.data, partial=True)
         if serializer.is_valid():
@@ -115,7 +115,7 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
         product_public_id = request.data.get('product_public_id')
 
         if pk != sale_document_public_id:
-            return Response({'error': 'Mismatched sale_document_id'},
+            return Response({'error': _('Mismatched sale_document_id')},
                             status=status.HTTP_400_BAD_REQUEST)
 
         product = get_object_or_404(BimaErpProduct, public_id=product_public_id)
@@ -138,7 +138,7 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
         reset_quantity = True if document_type.lower() == 'credit_note' else False
         self.create_products_from_parents(parents, new_document, reset_quantity)
 
-        return Response({"success": "Item created"}, status=status.HTTP_201_CREATED)
+        return Response({"success": _("Item created")}, status=status.HTTP_201_CREATED)
 
     def get_request_data(self, request):
         document_type = request.data.get('document_type', '')
@@ -150,14 +150,14 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
 
     def validate_parents(self, parents):
         if not parents.exists():
-            raise ValidationError({'error': 'No valid parent documents found'})
+            raise ValidationError({'error': _('No valid parent documents found')})
         unique_partners = parents.values('partner').distinct()
         if len(unique_partners) > 1:
-            raise ValidationError({'error': 'All documents should belong to the same partner'})
+            raise ValidationError({'error': _('All documents should belong to the same partner')})
 
     def validate_document_type(self, document_type):
         if not document_type:
-            raise ValidationError({'error': 'Please give the type of the document'})
+            raise ValidationError({'error': _('Please give the type of the document')})
 
     def create_products_from_parents(self, parents, new_document, reset_quantity=False):
         product_ids = BimaErpSaleDocumentProduct.objects.filter(
@@ -215,7 +215,7 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
         expected_token = os.environ.get('AUTHORIZATION_TOKEN_FOR_CRON')
 
         if authorization_token != expected_token:
-            return JsonResponse({'error': 'Unauthorized'}, status=401)
+            return JsonResponse({'error': _('Unauthorized')}, status=401)
 
         today = datetime.today()
         num_new_sale_documents = 0
@@ -243,6 +243,6 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
                         num_new_sale_documents += 1
 
                 except Exception as e:
-                    logger.error(f"Error creating new SaleDocument for parent {sale_document.id}: {str(e)}")
+                    logger.error(_(f"Error creating new SaleDocument for parent {sale_document.id}: {str(e)}"))
 
-        return JsonResponse({'message': f'Successfully created {num_new_sale_documents} new sale documents'})
+        return JsonResponse({'message': _(f'Successfully created {num_new_sale_documents} new sale documents')})

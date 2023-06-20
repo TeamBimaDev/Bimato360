@@ -11,7 +11,7 @@ from core.bank.signals import post_create_bank
 from core.address.models import create_single_address, \
     get_addresses_for_parent, \
     BimaCoreAddress
-
+from django.utils.translation import gettext_lazy as _
 
 class BimaCoreBankViewSet(AbstractViewSet):
     queryset = BimaCoreBank.objects.all()
@@ -25,10 +25,10 @@ class BimaCoreBankViewSet(AbstractViewSet):
         bic = self.request.data.get('bic')
 
         if email and BimaCoreBank.objects.filter(email=email).exists():
-            raise ValidationError("Email must be unique.")
+            raise ValidationError(_("Email must be unique."))
 
         if bic and BimaCoreBank.objects.filter(bic=bic).exists():
-            raise ValidationError("BIC must be unique.")
+            raise ValidationError(_("BIC must be unique."))
 
         serializer.save()
 
@@ -39,10 +39,10 @@ class BimaCoreBankViewSet(AbstractViewSet):
         instance = serializer.instance
 
         if email and email != instance.email and BimaCoreBank.objects.filter(email=email).exists():
-            raise ValidationError("Email must be unique.")
+            raise ValidationError(_("Email must be unique."))
 
         if bic and bic != instance.bic and BimaCoreBank.objects.filter(bic=bic).exists():
-            raise ValidationError("BIC must be unique.")
+            raise ValidationError(_("BIC must be unique."))
 
         serializer.save()
 

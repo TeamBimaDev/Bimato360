@@ -6,8 +6,7 @@ from .serializers import BimaCoreDepartmentSerializer
 from rest_framework.response import Response
 from core.post.models import BimaCorePost
 from core.post.serializers import BimaCorePostSerializer
-
-
+from django.utils.translation import gettext_lazy as _
 class BimaCoreDepartmentViewSet(AbstractViewSet):
     queryset = BimaCoreDepartment.objects.select_related('department').prefetch_related('children__children').all()
     serializer_class = BimaCoreDepartmentSerializer
@@ -36,7 +35,7 @@ class BimaCoreDepartmentViewSet(AbstractViewSet):
                 (data['department_public_id'] == department_child.public_id.hex) and \
                 (department_child.department.public_id.hex == data['id'])
         ):
-            raise ValidationError("A department cannot have its parent as its child.")
+            raise ValidationError(_("A department cannot have its parent as its child."))
 
     def get_object(self):
         obj = BimaCoreDepartment.objects.get_object_by_public_id(self.kwargs['pk'])

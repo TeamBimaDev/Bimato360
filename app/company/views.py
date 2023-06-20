@@ -8,7 +8,7 @@ from core.address.models import BimaCoreAddress
 from core.address.serializers import BimaCoreAddressSerializer
 from core.document.models import BimaCoreDocument
 from core.document.serializers import BimaCoreDocumentSerializer
-
+from django.utils.translation import gettext_lazy as _
 
 class BimaCompanyViewSet(AbstractViewSet):
     queryset = BimaCompany.objects.all()
@@ -88,7 +88,7 @@ class BimaCompanyViewSet(AbstractViewSet):
         company = BimaCompany.objects.filter(public_id=public_id).first()
         companyContentType = ContentType.objects.filter(app_label="company", model="bimacompany").first()
         if not company:
-            return Response({"error": "company not found"}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"error": _("company not found")}, status=status.HTTP_404_NOT_FOUND)
 
         if request.method == 'POST':
             address_data = {
@@ -105,15 +105,15 @@ class BimaCompanyViewSet(AbstractViewSet):
             }
             for address_data in request.data.get('address', []):
                 self.create_address(address_data, companyContentType, company.id)
-            return Response({"success": "Address added successfully"}, status=status.HTTP_201_CREATED)
+            return Response({"success": _("Address added successfully")}, status=status.HTTP_201_CREATED)
         else:
-            return Response({"error": "Invalid request method"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+            return Response({"error": _("Invalid request method")}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
     def ajout_document_for_company(self, request, public_id=None):
         company = BimaCompany.objects.filter(public_id=public_id).first()
         companyContentType = ContentType.objects.filter(app_label="company", model="bimacompany").first()
         if not company:
-            return Response({"error": "company not found"}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"error": _("company not found")}, status=status.HTTP_404_NOT_FOUND)
 
         if request.method == 'POST':
             document_data = {
@@ -129,6 +129,6 @@ class BimaCompanyViewSet(AbstractViewSet):
             }
             for document_data in request.data.get('address', []):
                 self.create_document(document_data, companyContentType, company.id)
-            return Response({"success": "document added successfully"}, status=status.HTTP_201_CREATED)
+            return Response({"success": _("document added successfully")}, status=status.HTTP_201_CREATED)
         else:
-            return Response({"error": "Invalid request method"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+            return Response({"error": _("Invalid request method")}, status=status.HTTP_405_METHOD_NOT_ALLOWED)

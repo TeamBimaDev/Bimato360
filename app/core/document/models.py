@@ -3,7 +3,7 @@ import uuid
 from django.db import models
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
-
+from django.utils.translation import gettext_lazy as _
 from core.abstract.models import AbstractModel
 from common.enums.file_type import get_file_type_choices
 from rest_framework import status
@@ -53,7 +53,7 @@ class BimaCoreDocument(AbstractModel):
             app_label = parent._meta.label
 
             if not file_content_type:
-                raise ValidationError('Invalid file content type.')
+                raise ValidationError(_('Invalid file content type.'))
 
             document = cls(
                 document_name=document_data['document_name'],
