@@ -9,7 +9,7 @@ from core.post.serializers import BimaCorePostSerializer
 
 
 class BimaCoreDepartmentViewSet(AbstractViewSet):
-    queryset = BimaCoreDepartment.objects.select_related('department').all()
+    queryset = BimaCoreDepartment.objects.select_related('department').prefetch_related('children__children').all()
     serializer_class = BimaCoreDepartmentSerializer
     permission_classes = []
     ordering_fields = AbstractViewSet.ordering_fields + \
