@@ -67,25 +67,26 @@ def entity_tag_exists(tag, parent_type, parent_id):
 
 
 def get_order(tag_data, parent_type, parent_id):
-    existing_orders = BimaCoreEntityTag.objects.filter(
+    order = tag_data.get("order", 1)
+    total_tags = BimaCoreEntityTag.objects.filter(
         parent_type=parent_type,
         parent_id=parent_id
-    ).values_list('order', flat=True)
+    ).count()
 
-    order = tag_data.get("order", 1)
-
-    if order is None:
-        if existing_orders:
-            order = max(existing_orders) + 1
-        else:
-            order = 1
-
-    if order and existing_orders and order in existing_orders:
-        BimaCoreEntityTag.objects.filter(
+    if order > total_tags:
+        order = total_tags + 1
+    else:
+        existing_orders = BimaCoreEntityTag.objects.filter(
             parent_type=parent_type,
-            parent_id=parent_id,
-            order__gte=order
-        ).update(order=models.F('order') + 1)
+            parent_id=parent_id
+        ).values_list('order', flat=True)
+
+        if order in existing_orders:
+            BimaCoreEntityTag.objects.filter(
+                parent_type=parent_type,
+                parent_id=parent_id,
+                order__gte=order
+            ).update(order=models.F('order') + 1)
 
     return order
 
