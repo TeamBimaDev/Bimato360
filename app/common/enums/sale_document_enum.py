@@ -1,6 +1,7 @@
 from enum import Enum
 from django.utils.translation import gettext_lazy as _
 
+
 class SaleDocumentTypes(Enum):
     QUOTE = _("Quote")
     ORDER = _("ORDER")
@@ -12,6 +13,7 @@ class SaleDocumentStatus(Enum):
     DRAFT = _("Draft")
     CONFIRMED = _("Confirmed")
     CANCELED = _("CANCELED")
+
 
 class SaleDocumentValidity(Enum):
     day_30 = _("30 days")

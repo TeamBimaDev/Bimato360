@@ -6,6 +6,10 @@ router = DefaultRouter()
 router.register('', BimaCoreCountryViewSet)
 
 urlpatterns = [
+    path('populate_database_from_csv',
+         BimaCoreCountryViewSet.as_view({'get': 'populate_database_from_csv'}),
+         name='populate_database_from_csv'),
+
     path('', include(router.urls)),
 
     path('<str:public_id>/states/',

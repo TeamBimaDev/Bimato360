@@ -5,7 +5,6 @@ from rest_framework import serializers
 from core.tag.models import BimaCoreTag
 
 
-
 class BimaCoreEntityTagSerializer(AbstractSerializer):
     tag = serializers.SerializerMethodField(read_only=True)
     tag_public_id = serializers.SlugRelatedField(
