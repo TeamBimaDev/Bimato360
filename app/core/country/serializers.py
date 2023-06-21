@@ -22,7 +22,7 @@ class BimaCoreCountrySerializer(AbstractSerializer):
     class Meta:
         model = BimaCoreCountry
         fields = [
-            'id', 'name', 'code', 'address_format',
+            'id', 'name', 'code', 'address_format', 'iso3', 'iso2', 'capital',
             'phone_code', 'vat_label', 'zip_required',
             'currency', 'currency_public_id', 'created', 'updated'
         ]

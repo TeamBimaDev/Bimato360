@@ -10,7 +10,10 @@ services:
     volumes:
       - ./bima360_static_file/:/app/media/
     command: >
-      sh -c "python manage.py wait_for_db && 
+      sh -c "
+             chmod -R 777 /app/media &&
+             chown -R 1000:1000 /app/media &&
+             python manage.py wait_for_db && 
              python manage.py migrate &&
              python manage.py runserver 0.0.0.0:8000"
     env_file:
