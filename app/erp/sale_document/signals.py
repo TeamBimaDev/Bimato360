@@ -5,6 +5,12 @@ from django.core.exceptions import ObjectDoesNotExist
 from .models import BimaErpSaleDocument
 
 
+class InsufficientQuantityError(Exception):
+    def __init__(self, product):
+        self.product = product
+        super().__init__(f"Insufficient quantity for product {product.reference}")
+
+
 @receiver(pre_save, sender=BimaErpSaleDocument)
 def update_product_quantities(sender, instance, **kwargs):
     try:
@@ -19,12 +25,20 @@ def update_product_quantities(sender, instance, **kwargs):
                 if sale_document.type.lower() == 'quote':
                     product.virtual_quantity = operation(product.virtual_quantity, sale_document_product.quantity)
                 elif sale_document.type.lower() in ['order', 'invoice']:
-                    product.virtual_quantity = operation(product.virtual_quantity, sale_document_product.quantity)
-                    product.quantity = operation(product.quantity, sale_document_product.quantity)
+                    new_virtual_quantity = operation(product.virtual_quantity, sale_document_product.quantity)
+                    new_quantity = operation(product.quantity, sale_document_product.quantity)
+                    if new_quantity < 0:
+                        raise InsufficientQuantityError(product)
+
+                    product.virtual_quantity = new_virtual_quantity
+                    product.quantity = new_quantity
                 elif sale_document.type.lower() == 'credit_note':
                     product.virtual_quantity = operation(product.virtual_quantity, -sale_document_product.quantity)
                     product.quantity = operation(product.quantity, -sale_document_product.quantity)
                 product.save()
+        except InsufficientQuantityError as e:
+            print(f"Insufficient quantity for product {e.product.reference}")
+            raise
         except:
             pass
 

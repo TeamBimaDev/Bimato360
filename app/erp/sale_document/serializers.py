@@ -129,15 +129,14 @@ class BimaErpSaleDocumentProductSerializer(serializers.Serializer):
 
         if self.instance:
             product = self.instance.product
-            net_change_in_quantity = desired_quantity - self.instance.quantity
         else:
             try:
                 product_public_id = self.initial_data.get('product_public_id', '')
                 product = BimaErpProduct.objects.get(public_id=product_public_id)
-                net_change_in_quantity = desired_quantity
             except ObjectDoesNotExist:
                 raise serializers.ValidationError(_("No product with this id exists."))
 
+        net_change_in_quantity = desired_quantity
         if not BimaErpSaleDocumentProduct.is_quantity_available(product, net_change_in_quantity):
             raise serializers.ValidationError(_("Not enough stock available for this product."))
         return desired_quantity

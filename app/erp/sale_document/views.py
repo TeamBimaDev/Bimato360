@@ -1,4 +1,5 @@
 import os
+from collections import defaultdict
 from datetime import datetime, timedelta
 import django_filters
 from core.abstract.views import AbstractViewSet
@@ -11,7 +12,8 @@ from django.shortcuts import get_object_or_404, get_list_or_404
 from rest_framework.response import Response
 from django.utils.translation import gettext_lazy as _
 from .models import BimaErpSaleDocument, BimaErpSaleDocumentProduct, update_sale_document_totals
-from .serializers import BimaErpSaleDocumentSerializer, BimaErpSaleDocumentProductSerializer
+from .serializers import BimaErpSaleDocumentSerializer, BimaErpSaleDocumentProductSerializer, \
+    BimaErpSaleDocumentHistorySerializer, BimaErpSaleDocumentProductHistorySerializer
 from common.service.purchase_sale_service import generate_unique_number
 from common.enums.sale_document_enum import SaleDocumentStatus, get_sale_document_recurring_interval
 
@@ -139,6 +141,105 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
         self.create_products_from_parents(parents, new_document, reset_quantity)
 
         return Response({"success": _("Item created")}, status=status.HTTP_201_CREATED)
+
+    @action(detail=True, methods=['get'], url_path='get_history_diff')
+    def get_history_diff(self, request, pk=None):
+        sale_document = self.get_object()
+
+        history = list(sale_document.history.all())
+
+        if len(history) < 2:
+            return Response({'error': 'Not enough history to compare.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        changes_by_date = {}
+        for i in range(len(history) - 1):
+            latest_history = history[i]
+            previous_history = history[i + 1]
+
+            latest_serialized = BimaErpSaleDocumentHistorySerializer(latest_history).data
+            previous_serialized = BimaErpSaleDocumentHistorySerializer(previous_history).data
+
+            for field, latest_value in latest_serialized.items():
+                if field == 'history_date':
+                    continue
+
+                previous_value = previous_serialized.get(field)
+                if latest_value != previous_value:
+                    change_date = latest_serialized.get('history_date')
+                    change = {
+                        'field': field,
+                        'old_value': previous_value,
+                        'new_value': latest_value
+                    }
+
+                    # Group changes by date
+                    if change_date in changes_by_date:
+                        changes_by_date[change_date].append(change)
+                    else:
+                        changes_by_date[change_date] = [change]
+
+        ordered_changes = [{'date': date, 'changes': changes} for date, changes in changes_by_date.items()]
+
+        return Response({'differences': ordered_changes}, status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=['get'], url_path='get_product_history_diff')
+    def get_product_history_diff(self, request, pk=None):
+        sale_document = self.get_object()
+
+        # Query the historical records directly
+        history_records = BimaErpSaleDocumentProduct.history.filter(sale_document_id=sale_document.id).order_by(
+            'history_date')
+
+        # Group history records by product_id
+        history_by_product = defaultdict(list)
+        for record in history_records:
+            history_by_product[record.sale_document_public_id].append(record)
+
+        all_products_differences = []
+        for product_public_id, history in history_by_product.items():
+            if len(history) < 2:
+                continue
+
+            changes_by_date = {}
+            for i in range(len(history) - 1):
+                latest_history = history[i]
+                previous_history = history[i + 1]
+
+                latest_serialized = BimaErpSaleDocumentProductHistorySerializer(latest_history).data
+                previous_serialized = BimaErpSaleDocumentProductHistorySerializer(previous_history).data
+
+                for field, latest_value in latest_serialized.items():
+                    # Ignore the history_date and history_type fields
+                    if field in ['history_date', 'history_type', 'id']:
+                        continue
+
+                    previous_value = previous_serialized.get(field)
+                    if latest_value != previous_value:
+                        change_date = latest_serialized.get('history_date')
+                        history_type = latest_serialized.get('history_type')
+                        change = {
+                            'field': field,
+                            'old_value': previous_value,
+                            'new_value': latest_value,
+                            'history_type': history_type
+                        }
+
+                        # Group changes by date
+                        if change_date in changes_by_date:
+                            changes_by_date[change_date].append(change)
+                        else:
+                            changes_by_date[change_date] = [change]
+
+            # Convert changes_by_date to an ordered list
+            ordered_changes = [{'date': date, 'changes': changes} for date, changes in changes_by_date.items()]
+
+            product_name = history[0].name if history else None
+            all_products_differences.append({
+                'product_name': product_name,
+                'differences': ordered_changes
+            })
+
+        return Response({'products_differences': all_products_differences}, status=status.HTTP_200_OK)
 
     def get_request_data(self, request):
         document_type = request.data.get('document_type', '')
