@@ -19,11 +19,15 @@ from core.entity_tag.serializers import BimaCoreEntityTagSerializer
 
 
 class ProductFilter(django_filters.FilterSet):
+
+    name = django_filters.CharFilter(field_name='name', lookup_expr='icontains')
+    type = django_filters.CharFilter(field_name='type', lookup_expr='exact')
+    reference = django_filters.CharFilter(field_name='reference', lookup_expr='icontains')
+    status = django_filters.CharFilter(field_name='status', lookup_expr='exact')
+    serial_number = django_filters.CharFilter(field_name='serial_number', lookup_expr='icontains')
     category = django_filters.UUIDFilter(field_name='category__public_id')
     vat = django_filters.UUIDFilter(field_name='vat__public_id')
     unit_of_measure = django_filters.UUIDFilter(field_name='unit_of_measure__public_id')
-    name = django_filters.CharFilter(field_name='name', lookup_expr='icontains')
-    type = django_filters.CharFilter(field_name='type')
     low_stock = django_filters.BooleanFilter(method='low_stock_filter')
 
     class Meta:

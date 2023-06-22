@@ -4,6 +4,7 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from core.country.models import BimaCoreCountry
 from core.state.models import BimaCoreState
+from django.forms import model_to_dict
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
 
@@ -48,7 +49,7 @@ def create_single_address(address_data, parent):
     try:
         state = BimaCoreState.objects.get_object_by_public_id(address_data.get('state_public_id'))
         country = BimaCoreCountry.objects.get_object_by_public_id(address_data.get('country_public_id'))
-        BimaCoreAddress.objects.create(
+        address = BimaCoreAddress.objects.create(
             number=address_data.get('number', ''),
             street=address_data.get('street', ''),
             street2=address_data.get('street2', ''),
@@ -67,7 +68,7 @@ def create_single_address(address_data, parent):
             parent_type=ContentType.objects.get_for_model(parent),
             parent_id=parent.id
         )
-        return True
+        return {"status": status.HTTP_201_CREATED, "data": model_to_dict(address)}
 
     except ValidationError as e:
         return {"error": str(e), "status": status.HTTP_400_BAD_REQUEST}

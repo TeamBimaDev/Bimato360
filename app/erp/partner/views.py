@@ -86,10 +86,10 @@ class BimaErpPartnerViewSet(AbstractViewSet):
 
     def create_address(self, request, *args, **kwargs):
         partner = BimaErpPartner.objects.get_object_by_public_id(self.kwargs['public_id'])
-        saved = create_single_address(request.data, partner)
-        if not saved:
-            return Response(saved.error, status=saved.status)
-        return Response(saved)
+        response = create_single_address(request.data, partner)
+        if "error" in response:
+            return Response({"detail": response["error"]}, status=response["status"])
+        return Response(response["data"], status=response["status"])
 
     def get_address(self, request, *args, **kwargs):
         partner = BimaErpPartner.objects.get_object_by_public_id(self.kwargs['public_id'])
@@ -107,10 +107,10 @@ class BimaErpPartnerViewSet(AbstractViewSet):
 
     def create_contact(self, request, *args, **kwargs):
         partner = BimaErpPartner.objects.get_object_by_public_id(self.kwargs['public_id'])
-        saved = create_single_contact(request.data, partner)
-        if not saved:
-            return Response(saved.error, status=saved.status)
-        return Response(saved)
+        response = create_single_contact(request.data, partner)
+        if "error" in response:
+            return Response({"detail": response["error"]}, status=response["status"])
+        return Response(response["data"], status=response["status"])
 
     def get_contact(self, request, *args, **kwargs):
         partner = BimaErpPartner.objects.get_object_by_public_id(self.kwargs['public_id'])

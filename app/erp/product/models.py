@@ -13,7 +13,7 @@ from erp.unit_of_measure.models import BimaErpUnitOfMeasure
 
 class BimaErpProduct(AbstractModel):
     name = models.CharField(max_length=255, blank=False, null=False)
-    reference = models.CharField(max_length=255, blank=False, null=False)
+    reference = models.CharField(max_length=255, blank=False, null=False, unique=True)
     description = models.TextField(blank=True, null=True)
     ean13 = models.CharField(max_length=64, blank=True, null=True)
     type = models.CharField(max_length=255, choices=get_product_types(), blank=False, null=False)

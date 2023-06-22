@@ -9,6 +9,8 @@ from common.enums.file_type import get_file_type_choices
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
 
+from common.validators.file_validators import validate_file_size, validate_file_extension
+
 
 class BimaCoreDocument(AbstractModel):
     def document_file_path(self, filename):
@@ -26,6 +28,8 @@ class BimaCoreDocument(AbstractModel):
     file_extension = models.CharField(max_length=16, blank=False, null=False)
     date_file = models.DateTimeField(auto_now_add=True)
     file_path = models.FileField(upload_to=document_file_path)
+    file_path = models.FileField(upload_to=document_file_path,
+                                 validators=[validate_file_size, validate_file_extension])
     file_type = models.CharField(max_length=128,
                                  choices=get_file_type_choices())
     parent_type = models.ForeignKey(
@@ -66,7 +70,9 @@ class BimaCoreDocument(AbstractModel):
                 file_name=filename,
                 file_extension=ext
             )
+
             document.file_path.save(os.path.join('uploads', 'documents', app_label, filename), file)
+            document.full_clean()
             document.save()
             return document
 

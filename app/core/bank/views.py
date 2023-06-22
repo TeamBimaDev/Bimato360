@@ -64,10 +64,10 @@ class BimaCoreBankViewSet(AbstractViewSet):
 
     def create_address(self, request, *args, **kwargs):
         bank = BimaCoreBank.objects.get_object_by_public_id(self.kwargs['public_id'])
-        saved = create_single_address(request.data, bank)
-        if not saved:
-            return Response(saved.error, status=saved.status)
-        return Response(saved)
+        response = create_single_address(request.data, bank)
+        if "error" in response:
+            return Response({"detail": response["error"]}, status=response["status"])
+        return Response(response["data"], status=response["status"])
 
     def get_address(self, request, *args, **kwargs):
         partner = BimaCoreBank.objects.get_object_by_public_id(self.kwargs['public_id'])
