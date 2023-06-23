@@ -2,10 +2,11 @@
 Views for the user API.
 """
 from django.contrib.auth.models import Permission
-from rest_framework import generics, authentication, permissions, viewsets
+from django.db import transaction
+from rest_framework import permissions, viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.views import APIView
+
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.settings import api_settings
 
@@ -17,54 +18,50 @@ from user.serializers import (
 from user.models import User
 
 
-class CreateUserView(generics.CreateAPIView):
-    """Create a new user in the system."""
-    permission_classes = (permissions.AllowAny,)
-    serializer_class = UserSerializer
-
-
 class CreateTokenView(TokenObtainPairView):
     permission_classes = (permissions.AllowAny,)
     serializer_class = AuthTokenSerializer
     renderer_classes = api_settings.DEFAULT_RENDERER_CLASSES
 
 
-class ManageUserView(generics.RetrieveUpdateAPIView):
-    """Manage the authenticated user."""
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
     serializer_class = UserSerializer
-    # authentication_classes = [authentication.isA]
     permission_classes = [permissions.IsAuthenticated]
 
-    def get_object(self):
-        """Retrieve and return the authenticated user."""
-        return self.request.user
+    def list(self, request, *args, **kwargs):
+        serializer = self.get_serializer(request.user)
+        return Response(serializer.data)
 
+    @action(detail=False, methods=['get'], url_path='me')
+    def me(self, request):
+        serializer = self.get_serializer(request.user)
+        return Response(serializer.data)
 
-class UserPermissionViewSet(viewsets.ViewSet):
+    @action(detail=False, methods=['get'], url_path='list-permissions')
+    def list_permissions(self, request):
+        permissions = Permission.objects.all()
+        permissions_list = [{'id': perm.id, 'name': perm.name, 'codename': perm.codename} for perm in permissions]
+        return Response(permissions_list)
 
-    # Custom action for managing user permissions
-    @action(detail=True, methods=['post'], url_path='manage-permissions')
-    def manage_permissions(self, request, pk=None):
-        user = User.objects.get(pk=pk)
-        permissions = request.data.get('permissions', [])
+    @action(detail=False, methods=['post'], url_path='manage-permissions')
+    def manage_permissions(self, request):
+        # Check if the user has the permission to access this endpoint
+        if not request.user.has_perm('auth.change_permission'):
+            return Response({'error': 'You do not have permission to manage permissions'},
+                            status=status.HTTP_403_FORBIDDEN)
 
-        # Add permissions to user
-        for perm_codename in permissions.get('add', []):
-            permission = Permission.objects.get(codename=perm_codename)
-            user.user_permissions.add(permission)
+        new_permission_ids = set(request.data.get('permissions', []))
+        current_permission_ids = set(request.user.user_permissions.values_list('id', flat=True))
 
-        # Remove permissions from user
-        for perm_codename in permissions.get('remove', []):
-            permission = Permission.objects.get(codename=perm_codename)
-            user.user_permissions.remove(permission)
+        permissions_to_add = new_permission_ids - current_permission_ids
+        permissions_to_remove = current_permission_ids - new_permission_ids
+
+        with transaction.atomic():
+            permissions_to_add = Permission.objects.filter(id__in=permissions_to_add)
+            request.user.user_permissions.add(*permissions_to_add)
+
+            permissions_to_remove = Permission.objects.filter(id__in=permissions_to_remove)
+            request.user.user_permissions.remove(*permissions_to_remove)
 
         return Response({'status': 'Permissions updated successfully'})
-
-
-class ListPermissionsViewSet(viewsets.ViewSet):
-
-    @action(detail=False, methods=['get'], url_path='get-permissions')
-    def get(self, request):
-        permissions = Permission.objects.all()
-        permissions_list = [{'id': perm.id, 'codename': perm.codename, 'name': perm.name} for perm in permissions]
-        return Response(permissions_list)

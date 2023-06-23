@@ -79,9 +79,9 @@ class BimaErpSaleDocument(AbstractModel):
     validity = models.CharField(blank=True, null=True, choices=get_sale_document_validity())
     payment_terms = models.CharField(max_length=100, blank=True, null=True)
     delivery_terms = models.CharField(max_length=100, blank=True, null=True)
-    total_vat = models.DecimalField(max_digits=18, decimal_places=3, blank=True, null=True)
-    total_amount = models.DecimalField(max_digits=18, decimal_places=3, blank=True, null=True)
-    total_discount = models.DecimalField(max_digits=18, decimal_places=3, blank=True, null=True)
+    total_vat = models.DecimalField(max_digits=18, decimal_places=3, blank=True, null=True, default=0)
+    total_amount = models.DecimalField(max_digits=18, decimal_places=3, blank=True, null=True, default=0)
+    total_discount = models.DecimalField(max_digits=18, decimal_places=3, blank=True, null=True, default=0)
     parents = models.ManyToManyField('self', symmetrical=False, blank=True)
     is_recurring = models.BooleanField(default=False, blank=True, null=True)
     recurring_interval = models.PositiveIntegerField(

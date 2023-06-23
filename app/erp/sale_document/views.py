@@ -38,7 +38,7 @@ class SaleDocumentFilter(django_filters.FilterSet):
     date_lte = django_filters.DateFilter(field_name='date', lookup_expr='lte')
     total_amount_gte = django_filters.NumberFilter(field_name='total_amount', lookup_expr='gte')
     total_amount_lte = django_filters.NumberFilter(field_name='total_amount', lookup_expr='lte')
-    validity_expired = django_filters.BooleanFilter(method='filter_validity_expired')
+    validity_expired = django_filters.CharFilter(method='filter_validity_expired')
 
     class Meta:
         model = BimaErpSaleDocument
@@ -49,14 +49,14 @@ class SaleDocumentFilter(django_filters.FilterSet):
         current_date = timezone.now().date()
         validity_days = {validity.name: int(validity.name.split("_")[1]) for validity in SaleDocumentValidity}
 
-        if value is 'ALL':  # If value is not provided, return all documents
+        if value == "ALL" or value is None:
             return queryset
 
         queries = Q()
         for validity, days in validity_days.items():
-            if value is 'EXPIRED':  # If value is True, the document is expired
+            if value == "EXPIRED":
                 queries |= Q(date__lte=current_date - timedelta(days=days), validity=validity)
-            elif value is 'NOT_EXPIRED':  # If value is False, the document is not expired
+            elif value == "NOT_EXPIRED":
                 queries |= Q(date__gt=current_date - timedelta(days=days), validity=validity)
 
         return queryset.filter(queries)

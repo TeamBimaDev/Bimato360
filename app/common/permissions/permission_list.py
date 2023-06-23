@@ -1,85 +1,109 @@
 class PermissionsList:
-    CORE_BANK_CREATE = 'core.bank.can_create'
-    CORE_BANK_UPDATE = 'core.bank.can_update'
-    CORE_BANK_DELETE = 'core.bank.can_delete'
-    CORE_BANK_READ = 'core.bank.can_read'
-    CORE_CONTACT_CREATE = 'core.contact.can_create'
-    CORE_CONTACT_UPDATE = 'core.contact.can_update'
-    CORE_CONTACT_DELETE = 'core.contact.can_delete'
-    CORE_CONTACT_READ = 'core.contact.can_read'
-    CORE_COUNTRY_CREATE = 'core.country.can_create'
-    CORE_COUNTRY_UPDATE = 'core.country.can_update'
-    CORE_COUNTRY_DELETE = 'core.country.can_delete'
-    CORE_COUNTRY_READ = 'core.country.can_read'
-    CORE_CURRENCY_CREATE = 'core.currency.can_create'
-    CORE_CURRENCY_UPDATE = 'core.currency.can_update'
-    CORE_CURRENCY_DELETE = 'core.currency.can_delete'
-    CORE_CURRENCY_READ = 'core.currency.can_read'
-    CORE_DEPARTMENT_CREATE = 'core.department.can_create'
-    CORE_DEPARTMENT_UPDATE = 'core.department.can_update'
-    CORE_DEPARTMENT_DELETE = 'core.department.can_delete'
-    CORE_DEPARTMENT_READ = 'core.department.can_read'
-    CORE_DOCUMENT_CREATE = 'core.document.can_create'
-    CORE_DOCUMENT_UPDATE = 'core.document.can_update'
-    CORE_DOCUMENT_DELETE = 'core.document.can_delete'
-    CORE_DOCUMENT_READ = 'core.document.can_read'
-    CORE_ENTITY_TAG_CREATE = 'core.entity_tag.can_create'
-    CORE_ENTITY_TAG_UPDATE = 'core.entity_tag.can_update'
-    CORE_ENTITY_TAG_DELETE = 'core.entity_tag.can_delete'
-    CORE_ENTITY_TAG_READ = 'core.entity_tag.can_read'
-    CORE_POST_CREATE = 'core.post.can_create'
-    CORE_POST_UPDATE = 'core.post.can_update'
-    CORE_POST_DELETE = 'core.post.can_delete'
-    CORE_POST_READ = 'core.post.can_read'
-    CORE_SOURCE_CREATE = 'core.source.can_create'
-    CORE_SOURCE_UPDATE = 'core.source.can_update'
-    CORE_SOURCE_DELETE = 'core.source.can_delete'
-    CORE_SOURCE_READ = 'core.source.can_read'
-    CORE_STATE_CREATE = 'core.state.can_create'
-    CORE_STATE_UPDATE = 'core.state.can_update'
-    CORE_STATE_DELETE = 'core.state.can_delete'
-    CORE_STATE_READ = 'core.state.can_read'
-    CORE_TAG_CREATE = 'core.tag.can_create'
-    CORE_TAG_UPDATE = 'core.tag.can_update'
-    CORE_TAG_DELETE = 'core.tag.can_delete'
-    CORE_TAG_READ = 'core.tag.can_read'
+    CORE_BANK_CREATE = ('core.bank.can_create', 'Can create bank')
+    CORE_BANK_UPDATE = ('core.bank.can_update', 'Can update bank')
+    CORE_BANK_DELETE = ('core.bank.can_delete', 'Can delete bank')
+    CORE_BANK_READ = ('core.bank.can_read', 'Can read bank')
 
-    ERP_CATEGORY_CREATE = 'erp.category.can_create'
-    ERP_CATEGORY_UPDATE = 'erp.category.can_update'
-    ERP_CATEGORY_DELETE = 'erp.category.can_delete'
-    ERP_CATEGORY_READ = 'erp.category.can_read'
-    ERP_PARTNER_CREATE = 'erp.partner.can_create'
-    ERP_PARTNER_UPDATE = 'erp.partner.can_update'
-    ERP_PARTNER_DELETE = 'erp.partner.can_delete'
-    ERP_PARTNER_READ = 'erp.partner.can_read'
-    ERP_PAYMENT_TERMS_CREATE = 'erp.payment_terms.can_create'
-    ERP_PAYMENT_TERMS_UPDATE = 'erp.payment_terms.can_update'
-    ERP_PAYMENT_TERMS_DELETE = 'erp.payment_terms.can_delete'
-    ERP_PAYMENT_TERMS_READ = 'erp.payment_terms.can_read'
-    ERP_PRODUCT_CREATE = 'erp.product.can_create'
-    ERP_PRODUCT_UPDATE = 'erp.product.can_update'
-    ERP_PRODUCT_DELETE = 'erp.product.can_delete'
-    ERP_PRODUCT_READ = 'erp.product.can_read'
-    ERP_SALE_DOCUMENT_CREATE = 'erp.sale_document.can_create'
-    ERP_SALE_DOCUMENT_UPDATE = 'erp.sale_document.can_update'
-    ERP_SALE_DOCUMENT_DELETE = 'erp.sale_document.can_delete'
-    ERP_SALE_DOCUMENT_READ = 'erp.sale_document.can_read'
-    ERP_SALE_DOCUMENT_ADD_PRODUCT = 'erp.sale_document.can_add_product'
-    ERP_SALE_DOCUMENT_DELETE_PRODUCT = 'erp.sale_document.can_delete_product'
-    ERP_SALE_DOCUMENT_CHANGE_STATUS = 'erp.sale_document.can_change_status'
-    ERP_SALE_DOCUMENT_ROLLBACK_STATUS = 'erp.sale_document.can_rollback_status'
-    ERP_SALE_DOCUMENT_GENERATE_DOCUMENT = 'erp.sale_document.can_generate_document'
-    ERP_SALE_DOCUMENT_VIEW_HISTORY = 'erp.sale_document.can_view_history'
-    ERP_UNIT_OF_MEASURE_CREATE = 'erp.unit_of_measure.can_create'
-    ERP_UNIT_OF_MEASURE_UPDATE = 'erp.unit_of_measure.can_update'
-    ERP_UNIT_OF_MEASURE_DELETE = 'erp.unit_of_measure.can_delete'
-    ERP_UNIT_OF_MEASURE_READ = 'erp.unit_of_measure.can_read'
-    ERP_VAR_CREATE = 'erp.var.can_create'
-    ERP_VAR_UPDATE = 'erp.var.can_update'
-    ERP_VAR_DELETE = 'erp.var.can_delete'
-    ERP_VAR_READ = 'erp.var.can_read'
+    CORE_CONTACT_CREATE = ('core.contact.can_create', 'Can create contact')
+    CORE_CONTACT_UPDATE = ('core.contact.can_update', 'Can update contact')
+    CORE_CONTACT_DELETE = ('core.contact.can_delete', 'Can delete contact')
+    CORE_CONTACT_READ = ('core.contact.can_read', 'Can read contact')
 
-    USER_USER_CREATE = 'user.user.can_create'
-    USER_USER_UPDATE = 'user.user.can_update'
-    USER_USER_DELETE = 'user.user.can_delete'
-    USER_USER_READ = 'user.user.can_read'
+    CORE_COUNTRY_CREATE = ('core.country.can_create', 'Can create country')
+    CORE_COUNTRY_UPDATE = ('core.country.can_update', 'Can update country')
+    CORE_COUNTRY_DELETE = ('core.country.can_delete', 'Can delete country')
+    CORE_COUNTRY_READ = ('core.country.can_read', 'Can read country')
+
+    CORE_CURRENCY_CREATE = ('core.currency.can_create', 'Can create currency')
+    CORE_CURRENCY_UPDATE = ('core.currency.can_update', 'Can update currency')
+    CORE_CURRENCY_DELETE = ('core.currency.can_delete', 'Can delete currency')
+    CORE_CURRENCY_READ = ('core.currency.can_read', 'Can read currency')
+
+    CORE_DEPARTMENT_CREATE = ('core.department.can_create', 'Can create department')
+    CORE_DEPARTMENT_UPDATE = ('core.department.can_update', 'Can update department')
+    CORE_DEPARTMENT_DELETE = ('core.department.can_delete', 'Can delete department')
+    CORE_DEPARTMENT_READ = ('core.department.can_read', 'Can read department')
+
+    CORE_DOCUMENT_CREATE = ('core.document.can_create', 'Can create document')
+    CORE_DOCUMENT_UPDATE = ('core.document.can_update', 'Can update document')
+    CORE_DOCUMENT_DELETE = ('core.document.can_delete', 'Can delete document')
+    CORE_DOCUMENT_READ = ('core.document.can_read', 'Can read document')
+
+    CORE_ENTITY_TAG_CREATE = ('core.entity_tag.can_create', 'Can create entity tag')
+    CORE_ENTITY_TAG_UPDATE = ('core.entity_tag.can_update', 'Can update entity tag')
+    CORE_ENTITY_TAG_DELETE = ('core.entity_tag.can_delete', 'Can delete entity tag')
+    CORE_ENTITY_TAG_READ = ('core.entity_tag.can_read', 'Can read entity tag')
+
+    CORE_POST_CREATE = ('core.post.can_create', 'Can create post')
+    CORE_POST_UPDATE = ('core.post.can_update', 'Can update post')
+    CORE_POST_DELETE = ('core.post.can_delete', 'Can delete post')
+    CORE_POST_READ = ('core.post.can_read', 'Can read post')
+
+    CORE_SOURCE_CREATE = ('core.source.can_create', 'Can create source')
+    CORE_SOURCE_UPDATE = ('core.source.can_update', 'Can update source')
+    CORE_SOURCE_DELETE = ('core.source.can_delete', 'Can delete source')
+    CORE_SOURCE_READ = ('core.source.can_read', 'Can read source')
+
+    CORE_STATE_CREATE = ('core.state.can_create', 'Can create state')
+    CORE_STATE_UPDATE = ('core.state.can_update', 'Can update state')
+    CORE_STATE_DELETE = ('core.state.can_delete', 'Can delete state')
+    CORE_STATE_READ = ('core.state.can_read', 'Can read state')
+
+    CORE_TAG_CREATE = ('core.tag.can_create', 'Can create tag')
+    CORE_TAG_UPDATE = ('core.tag.can_update', 'Can update tag')
+    CORE_TAG_DELETE = ('core.tag.can_delete', 'Can delete tag')
+    CORE_TAG_READ = ('core.tag.can_read', 'Can read tag')
+
+    ERP_CATEGORY_CREATE = ('erp.category.can_create', 'Can create category')
+    ERP_CATEGORY_UPDATE = ('erp.category.can_update', 'Can update category')
+    ERP_CATEGORY_DELETE = ('erp.category.can_delete', 'Can delete category')
+    ERP_CATEGORY_READ = ('erp.category.can_read', 'Can read category')
+
+    ERP_PARTNER_CREATE = ('erp.partner.can_create', 'Can create partner')
+    ERP_PARTNER_UPDATE = ('erp.partner.can_update', 'Can update partner')
+    ERP_PARTNER_DELETE = ('erp.partner.can_delete', 'Can delete partner')
+    ERP_PARTNER_READ = ('erp.partner.can_read', 'Can read partner')
+
+    ERP_PAYMENT_TERMS_CREATE = ('erp.payment_terms.can_create', 'Can create payment terms')
+    ERP_PAYMENT_TERMS_UPDATE = ('erp.payment_terms.can_update', 'Can update payment terms')
+    ERP_PAYMENT_TERMS_DELETE = ('erp.payment_terms.can_delete', 'Can delete payment terms')
+    ERP_PAYMENT_TERMS_READ = ('erp.payment_terms.can_read', 'Can read payment terms')
+
+    ERP_PRODUCT_CREATE = ('erp.product.can_create', 'Can create product')
+    ERP_PRODUCT_UPDATE = ('erp.product.can_update', 'Can update product')
+    ERP_PRODUCT_DELETE = ('erp.product.can_delete', 'Can delete product')
+    ERP_PRODUCT_READ = ('erp.product.can_read', 'Can read product')
+
+    ERP_SALE_DOCUMENT_CREATE = ('erp.sale_document.can_create', 'Can create sale document')
+    ERP_SALE_DOCUMENT_UPDATE = ('erp.sale_document.can_update', 'Can update sale document')
+    ERP_SALE_DOCUMENT_DELETE = ('erp.sale_document.can_delete', 'Can delete sale document')
+    ERP_SALE_DOCUMENT_READ = ('erp.sale_document.can_read', 'Can read sale document')
+
+    ERP_SALE_DOCUMENT_ADD_PRODUCT = ('erp.sale_document.can_add_product',
+                                     'Can add product to sale document')
+    ERP_SALE_DOCUMENT_DELETE_PRODUCT = ('erp.sale_document.can_delete_product',
+                                        'Can delete product from sale document')
+    ERP_SALE_DOCUMENT_CHANGE_STATUS = ('erp.sale_document.can_change_status',
+                                       'Can change status of sale document')
+    ERP_SALE_DOCUMENT_ROLLBACK_STATUS = ('erp.sale_document.can_rollback_status',
+                                         'Can rollback status of sale document')
+    ERP_SALE_DOCUMENT_GENERATE_DOCUMENT = ('erp.sale_document.can_generate_document',
+                                           'Can generate document from sale document')
+    ERP_SALE_DOCUMENT_VIEW_HISTORY = ('erp.sale_document.can_view_history',
+                                      'Can view history of sale document')
+
+    ERP_UNIT_OF_MEASURE_CREATE = ('erp.unit_of_measure.can_create', 'Can create unit of measure')
+    ERP_UNIT_OF_MEASURE_UPDATE = ('erp.unit_of_measure.can_update', 'Can update unit of measure')
+    ERP_UNIT_OF_MEASURE_DELETE = ('erp.unit_of_measure.can_delete', 'Can delete unit of measure')
+    ERP_UNIT_OF_MEASURE_READ = ('erp.unit_of_measure.can_read', 'Can read unit of measure')
+
+    ERP_VAR_CREATE = ('erp.var.can_create', 'Can create variable')
+    ERP_VAR_UPDATE = ('erp.var.can_update', 'Can update variable')
+    ERP_VAR_DELETE = ('erp.var.can_delete', 'Can delete variable')
+    ERP_VAR_READ = ('erp.var.can_read', 'Can read variable')
+
+    USER_USER_CREATE = ('user.user.can_create', 'Can create user')
+    USER_USER_UPDATE = ('user.user.can_update', 'Can update user')
+    USER_USER_DELETE = ('user.user.can_delete', 'Can delete user')
+    USER_USER_READ = ('user.user.can_read', 'Can read user')
+    USER_USER_ADD_PERMISSION = ('user.user.can_add_permission', 'Can add permission to user')

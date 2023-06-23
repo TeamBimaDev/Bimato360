@@ -9,11 +9,13 @@ from rest_framework import serializers
 
 
 class UserSerializer(serializers.ModelSerializer):
+    id = serializers.UUIDField(source='public_id',
+                               read_only=True, format='hex')
     """Serializer for the user object."""
 
     class Meta:
         model = get_user_model()
-        fields = ['email', 'password', 'name']
+        fields = ['email', 'password', 'name', 'id']
         extra_kwargs = {'password': {'write_only': True, 'min_length': 5}}
 
     def create(self, validated_data):
@@ -41,4 +43,5 @@ class AuthTokenSerializer(TokenObtainPairSerializer):
         token['name'] = user.name
         token['email'] = user.email
         token['user_id'] = user.id
+        token['user_public_id'] = user.public_id.hex
         return token

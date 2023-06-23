@@ -10,18 +10,15 @@ from rest_framework_simplejwt.views import (
 
 from user import views
 
-from user.views import CreateTokenView, UserPermissionViewSet, ListPermissionsViewSet
+from .views import UserViewSet
 
 app_name = 'user'
 
 router = DefaultRouter()
-router.register(r'permissions', UserPermissionViewSet, basename='user-permission')
-router.register(r'list-permissions', ListPermissionsViewSet, basename='list-permissions')
+router.register('', UserViewSet)
 
 urlpatterns = [
-    path('create/', views.CreateUserView.as_view(), name='create'),
-    path('token/', CreateTokenView.as_view(), name='token_obtain_pair'),
+    path('token/', views.CreateTokenView.as_view(), name='token_obtain_pair'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    path('me/', views.ManageUserView.as_view(), name='me'),
     path('', include(router.urls)),
 ]

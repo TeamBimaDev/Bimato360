@@ -1,6 +1,10 @@
+import uuid
+
 from django.contrib.auth.base_user import BaseUserManager, AbstractBaseUser
 from django.contrib.auth.models import PermissionsMixin
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
+from django.http import Http404
 
 
 class UserManager(BaseUserManager):
@@ -25,6 +29,13 @@ class UserManager(BaseUserManager):
 
         return user
 
+    def get_object_by_public_id(self, public_id):
+        try:
+            instance = self.get(public_id=public_id)
+            return instance
+        except (ObjectDoesNotExist, ValueError, TypeError):
+            return Http404
+
 
 class User(AbstractBaseUser, PermissionsMixin):
     """User in the system."""
@@ -32,6 +43,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     name = models.CharField(max_length=255)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
+    public_id = models.UUIDField(db_index=True, unique=True,
+                                 default=uuid.uuid4, editable=False)
 
     objects = UserManager()
 
