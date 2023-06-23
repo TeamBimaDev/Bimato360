@@ -1,11 +1,13 @@
 import os
+from uuid import UUID
+
 import django_filters
 import logging
 from collections import defaultdict
 from datetime import datetime, timedelta
 from django.core.exceptions import ValidationError
 from django.db import transaction
-from django.db.models import Sum
+from django.db.models import Sum, Q
 from django.http import JsonResponse
 from rest_framework import status
 from rest_framework.decorators import action
@@ -31,7 +33,7 @@ class SaleDocumentFilter(django_filters.FilterSet):
     number = django_filters.CharFilter(field_name='number', lookup_expr='icontains')
     status = django_filters.CharFilter(field_name='status', lookup_expr='iexact')
     type = django_filters.CharFilter(field_name='type', lookup_expr='iexact')
-    partner = django_filters.CharFilter(field_name='partner', lookup_expr='iexact')
+    partner = django_filters.CharFilter(method='filter_partner_hex')
     date_gte = django_filters.DateFilter(field_name='date', lookup_expr='gte')
     date_lte = django_filters.DateFilter(field_name='date', lookup_expr='lte')
     total_amount_gte = django_filters.NumberFilter(field_name='total_amount', lookup_expr='gte')
@@ -45,20 +47,23 @@ class SaleDocumentFilter(django_filters.FilterSet):
 
     def filter_validity_expired(self, queryset, name, value):
         current_date = timezone.now().date()
-
         validity_days = {validity.name: int(validity.name.split("_")[1]) for validity in SaleDocumentValidity}
 
-        if value is None:
+        queries = Q()
+        for validity, days in validity_days.items():
+            if value:  # If value is True, the document is expired
+                queries |= Q(date__lte=current_date - timedelta(days=days), validity=validity)
+            else:  # If value is False, the document is not expired
+                queries &= ~Q(date__lte=current_date - timedelta(days=days), validity=validity)
+
+        return queryset.filter(queries)
+
+    def filter_partner_hex(self, queryset, name, value):
+        try:
+            uuid_value = UUID(hex=value)
+            return queryset.filter(partner__public_id=uuid_value)
+        except ValueError:
             return queryset
-
-        elif value is True:
-            return queryset.filter(date__lte=current_date - timedelta(days=validity_days[self.validity]),
-                                   validity__in=validity_days.keys())
-
-        else:  # value is False
-            return queryset.exclude(date__lte=current_date - timedelta(days=validity_days[self.validity]),
-                                    validity__in=validity_days.keys())
-
 
 class BimaErpSaleDocumentViewSet(AbstractViewSet):
     queryset = BimaErpSaleDocument.objects.select_related('partner').all()
