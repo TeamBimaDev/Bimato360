@@ -49,12 +49,15 @@ class SaleDocumentFilter(django_filters.FilterSet):
         current_date = timezone.now().date()
         validity_days = {validity.name: int(validity.name.split("_")[1]) for validity in SaleDocumentValidity}
 
+        if value is 'ALL':  # If value is not provided, return all documents
+            return queryset
+
         queries = Q()
         for validity, days in validity_days.items():
-            if value:  # If value is True, the document is expired
+            if value is 'EXPIRED':  # If value is True, the document is expired
                 queries |= Q(date__lte=current_date - timedelta(days=days), validity=validity)
-            else:  # If value is False, the document is not expired
-                queries &= ~Q(date__lte=current_date - timedelta(days=days), validity=validity)
+            elif value is 'NOT_EXPIRED':  # If value is False, the document is not expired
+                queries |= Q(date__gt=current_date - timedelta(days=days), validity=validity)
 
         return queryset.filter(queries)
 
