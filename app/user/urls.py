@@ -11,6 +11,8 @@ from user import views
 
 from user.views import CreateTokenView
 
+from .views import ChangePasswordView
+
 app_name = 'user'
 
 urlpatterns = [
@@ -18,4 +20,5 @@ urlpatterns = [
     path('token/', CreateTokenView.as_view(), name='token_obtain_pair'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('me/', views.ManageUserView.as_view(), name='me'),
+    path('change_password/<int:pk>/', ChangePasswordView.as_view(), name='change_password'),
 ]
