@@ -1,5 +1,6 @@
 from django.db import models
 from django.db.models import DecimalField, Sum
+from rest_framework.exceptions import ValidationError
 from simple_history.models import HistoricalRecords
 
 from common.enums.sale_document_enum import get_sale_document_status, \
@@ -12,8 +13,8 @@ from core.abstract.models import AbstractModel
 
 
 class BimaErpSaleDocumentProduct(models.Model):
-    sale_document = models.ForeignKey('BimaErpSaleDocument', on_delete=models.CASCADE)
-    product = models.ForeignKey('BimaErpProduct', on_delete=models.CASCADE)
+    sale_document = models.ForeignKey('BimaErpSaleDocument', on_delete=models.PROTECT)
+    product = models.ForeignKey('BimaErpProduct', on_delete=models.PROTECT)
     sale_document_public_id = models.UUIDField(blank=True, null=True, editable=False)
     name = models.CharField(max_length=255, blank=False, null=False)
     reference = models.CharField(max_length=255, blank=False, null=False)
@@ -79,6 +80,8 @@ class BimaErpSaleDocument(AbstractModel):
     validity = models.CharField(blank=True, null=True, choices=get_sale_document_validity())
     payment_terms = models.CharField(max_length=100, blank=True, null=True)
     delivery_terms = models.CharField(max_length=100, blank=True, null=True)
+    total_amount_without_vat = models.DecimalField(max_digits=18, decimal_places=3, blank=True, null=True, default=0)
+    total_after_discount = models.DecimalField(max_digits=18, decimal_places=3, blank=True, null=True, default=0)
     total_vat = models.DecimalField(max_digits=18, decimal_places=3, blank=True, null=True, default=0)
     total_amount = models.DecimalField(max_digits=18, decimal_places=3, blank=True, null=True, default=0)
     total_discount = models.DecimalField(max_digits=18, decimal_places=3, blank=True, null=True, default=0)
@@ -93,15 +96,27 @@ class BimaErpSaleDocument(AbstractModel):
     history = HistoricalRecords()
     sale_document_products = models.ManyToManyField(BimaErpProduct, through=BimaErpSaleDocumentProduct)
 
+    def save(self, *args, **kwargs):
+        if self.pk is not None:  # only do this for existing instances, not when creating new ones
+            if self.bimaerpsaledocument_set.exists():
+                raise ValidationError("Cannot modify a SaleDocument that has children.")
+        super().save(*args, **kwargs)
+
 
 def update_sale_document_totals(sale_document):
     sale_document_products = BimaErpSaleDocumentProduct.objects.filter(sale_document=sale_document)
     totals = sale_document_products.aggregate(
         total_discounts=Sum('discount_amount', output_field=DecimalField()),
         total_taxes=Sum('vat_amount', output_field=DecimalField()),
-        total_amount=Sum('total_price', output_field=DecimalField())
+        total_amount=Sum('total_price', output_field=DecimalField()),
+        total_amount_without_vat=Sum('total_without_vat', output_field=DecimalField()),
+        total_after_discount=Sum('total_after_discount', output_field=DecimalField()),
+
     )
     sale_document.total_discount = totals['total_discounts'] if totals['total_discounts'] else 0
     sale_document.total_vat = totals['total_taxes'] if totals['total_taxes'] else 0
     sale_document.total_amount = totals['total_amount'] if totals['total_amount'] else 0
+    sale_document.total_amount_without_vat = totals['total_amount_without_vat'] \
+        if totals['total_amount_without_vat'] else 0
+    sale_document.total_after_discount = totals['total_after_discount'] if totals['total_after_discount'] else 0
     sale_document.save()

@@ -18,6 +18,7 @@ from core.state.models import BimaCoreState
 
 from core.currency.models import BimaCoreCurrency
 
+
 # from common.permissions.action_base_permission import ActionBasedPermission
 
 
@@ -56,8 +57,6 @@ class BimaCoreCountryViewSet(AbstractViewSet):
         pdf_table = PdfTable(model_name, fields)
         generate_pdf = GeneratePdf(response, pdf, pdf_table)
         return generate_pdf.generate()
-
-
 
     @transaction.atomic
     @action(detail=False, methods=['get'], url_path='populate_database_from_csv')

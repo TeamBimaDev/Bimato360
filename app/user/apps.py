@@ -6,5 +6,5 @@ class UserConfig(AppConfig):
     name = 'user'
 
     def ready(self):
-        import user.signals  # noqa
-        import user.receivers  # noqa
+        from .signals import reset_password_signal
+        from .receivers import send_password_reset_email

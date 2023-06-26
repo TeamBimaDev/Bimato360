@@ -1,6 +1,6 @@
-from django.db.models.signals import pre_save
+from django.db.models.signals import pre_save, pre_delete
 from django.dispatch import receiver
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 
 from .models import BimaErpSaleDocument
 
@@ -50,3 +50,9 @@ def update_product_quantities(sender, instance, **kwargs):
         # If status was "Canceled" or "Draft" and then changed to "Confirmed"
         elif previous_instance.status.lower() in ['canceled', 'draft'] and instance.status.lower() == 'confirmed':
             adjust_product_quantity(instance, lambda x, y: x - y)  # Subtract the product quantity
+
+
+@receiver(pre_delete, sender=BimaErpSaleDocument)
+def check_products_before_delete(sender, instance, **kwargs):
+    if instance.sale_document_products.count() > 0:
+        raise ValidationError("Cannot delete item because it contains products.")

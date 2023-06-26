@@ -5,9 +5,11 @@ import django_filters
 import logging
 from collections import defaultdict
 from datetime import datetime, timedelta
+
+from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.db import transaction
-from django.db.models import Sum, Q
+from django.db.models import Sum, Q, Prefetch
 from django.http import JsonResponse
 from rest_framework import status
 from rest_framework.decorators import action
@@ -27,6 +29,8 @@ from common.enums.sale_document_enum import SaleDocumentStatus, get_sale_documen
 from common.utils.utils import render_to_pdf
 
 from common.enums.sale_document_enum import SaleDocumentValidity
+
+from core.address.models import BimaCoreAddress
 
 
 class SaleDocumentFilter(django_filters.FilterSet):
@@ -210,21 +214,18 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
     def get_product_history_diff(self, request, pk=None):
         sale_document = self.get_object()
 
-        # Query the historical records directly
         history_records = BimaErpSaleDocumentProduct.history.filter(sale_document_id=sale_document.id).order_by(
-            'history_date')
+            '-history_date')
 
-        # Group history records by product_id
         history_by_product = defaultdict(list)
         for record in history_records:
-            history_by_product[record.sale_document_public_id].append(record)
+            history_by_product[record.product_id].append(record)
 
         all_products_differences = []
-        for product_public_id, history in history_by_product.items():
-            if len(history) < 2:
-                continue
+        for product_id, history in history_by_product.items():
+            history = sorted(history, key=lambda x: x.history_date)
 
-            changes_by_date = {}
+            product_differences = []
             for i in range(len(history) - 1):
                 latest_history = history[i]
                 previous_history = history[i + 1]
@@ -233,34 +234,26 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
                 previous_serialized = BimaErpSaleDocumentProductHistorySerializer(previous_history).data
 
                 for field, latest_value in latest_serialized.items():
-                    # Ignore the history_date and history_type fields
                     if field in ['history_date', 'history_type', 'id']:
                         continue
 
                     previous_value = previous_serialized.get(field)
                     if latest_value != previous_value:
-                        change_date = latest_serialized.get('history_date')
-                        history_type = latest_serialized.get('history_type')
                         change = {
+                            'date': latest_serialized.get('history_date'),
                             'field': field,
                             'old_value': previous_value,
                             'new_value': latest_value,
-                            'history_type': history_type
+                            'history_type': latest_serialized.get('history_type'),
+                            'user': latest_history.history_user.username if latest_history.history_user else None
                         }
-
-                        # Group changes by date
-                        if change_date in changes_by_date:
-                            changes_by_date[change_date].append(change)
-                        else:
-                            changes_by_date[change_date] = [change]
-
-            # Convert changes_by_date to an ordered list
-            ordered_changes = [{'date': date, 'changes': changes} for date, changes in changes_by_date.items()]
+                        product_differences.append(change)
 
             product_name = history[0].name if history else None
             all_products_differences.append({
+                'product_id': product_id,
                 'product_name': product_name,
-                'differences': ordered_changes
+                'differences': product_differences
             })
 
         return Response({'products_differences': all_products_differences}, status=status.HTTP_200_OK)
@@ -270,8 +263,14 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
         sale_document = self.get_object()
         partner = sale_document.partner
 
+        partner_content_type = ContentType.objects.get_for_model(partner)
+        first_address = BimaCoreAddress.objects.filter(
+            parent_type=partner_content_type,
+            parent_id=partner.id
+        ).select_related('state', 'country').first()
+
         return render_to_pdf('sale_document/sale_document.html',
-                             {'sale_document': sale_document, 'partner': partner},
+                             {'sale_document': sale_document, 'partner': partner, 'address': first_address},
                              "document.pdf")
 
     @transaction.atomic

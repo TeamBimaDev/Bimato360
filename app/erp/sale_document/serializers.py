@@ -11,6 +11,9 @@ from django.utils.translation import gettext_lazy as _
 
 class BimaErpSaleDocumentSerializer(AbstractSerializer):
     history = serializers.SerializerMethodField()
+    children = serializers.SerializerMethodField(read_only=True)
+
+    # Other methods ...
 
     parents = serializers.SerializerMethodField(read_only=True)
     parent_public_ids = serializers.SlugRelatedField(
@@ -53,13 +56,22 @@ class BimaErpSaleDocumentSerializer(AbstractSerializer):
         serializer = BimaErpSaleDocumentHistorySerializer(history_instances, many=True)
         return serializer.data
 
+    def get_children(self, obj):
+        return [
+            {
+                'id': child.public_id.hex,
+                'number': child.number,
+            }
+            for child in obj.bimaerpsaledocument_set.all()
+        ] if obj.bimaerpsaledocument_set else []
+
     class Meta:
         model = BimaErpSaleDocument
         fields = [
             'id', 'number', 'date', 'status', 'type', 'partner', 'partner_public_id', 'note',
             'private_note', 'validity', 'payment_terms', 'delivery_terms', 'total_vat', 'total_amount',
             'total_discount', 'parents', 'parent_public_ids', 'history', 'vat_label', 'vat_amount', 'created',
-            'updated', 'total_vat', 'total_amount', 'total_discount'
+            'updated', 'total_vat', 'total_amount', 'total_discount', 'children'
         ]
         read_only_fields = ('total_vat', 'total_amount', 'total_discount',)
 

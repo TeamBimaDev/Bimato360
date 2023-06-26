@@ -19,9 +19,14 @@
 
             .sale_document_number_div{
                 margin-top: 2rem;
-                margin-bottom: 2rem;
                 letter-spacing: 2px;
+                font-size: 1.2em;
            }
+           .sale_document_date_div{
+               margin-top: 0.5rem;
+                margin-bottom: 2rem;
+           }
+
             .invoice_number_span {
                 letter-spacing: 0px;
             }
@@ -84,7 +89,7 @@
             }
             .total_span_item_text{
                 display: inline-block;
-                width: 100px;
+                width: 130px;
             }
             .total_span_item_value{
                 display: inline-block;
@@ -117,7 +122,13 @@
             <div class="sale_document_number_div">
                 {{ sale_document.type|upper  }} NUMBER <br/>
                 <span class="invoice_number_span">{{ sale_document.number }}</span>
+
             </div>
+            <div class="sale_document_date_div">
+                <span class="invoice_number_span">{{ sale_document.date }}</span>
+            </div>
+
+
         </div>
 
 
@@ -134,6 +145,13 @@
             {% endif %}
             <div class="partner_secondary_item"> {{ partner.email }}</div>
             <div class="partner_secondary_item"> {{ partner.phone }}</div>
+
+            <div class="partner_address">
+                <span> {{ address.number }} {{ address.street }} {{ address.zip }}</span>
+                <br/>
+                <span> {{ address.city }} {{ address.state.name }} {{ address.country.name }}</span>
+
+            </div>
         </div>
 
 
@@ -161,13 +179,18 @@
         <div class="content-wrapper">
             <div class="totals_div">
                 <div class="totals_div_item">
-                    <span class="total_span_item_text">Total VAT:</span>
-                    <span class="total_span_item_value total">{{ sale_document.total_vat }}</span>
+                    <span class="total_span_item_text">Total Without VAT:</span>
+                    <span class="total_span_item_value total">{{ sale_document.total_amount_without_vat }}</span>
                 </div>
+
                 <div class="totals_div_item">
                     <span class="total_span_item_text">Total Discount: </span>
                     <span class="total_span_item_value total">{{ sale_document.total_discount }}</span>
 
+                </div>
+                <div class="totals_div_item">
+                    <span class="total_span_item_text">Total VAT:</span>
+                    <span class="total_span_item_value total">{{ sale_document.total_vat }}</span>
                 </div>
                 <div class="totals_div_item">
                     <span class="total_span_item_text grand_total">Total Amount: </span>
