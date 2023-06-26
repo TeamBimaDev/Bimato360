@@ -3,6 +3,7 @@ FROM python:3.9-alpine3.13 as builder
 
 ENV PYTHONUNBUFFERED 1
 
+# Install build dependencies
 RUN apk add --no-cache \
         build-base \
         postgresql-dev \
@@ -11,25 +12,40 @@ RUN apk add --no-cache \
         libjpeg \
         jpeg-dev \
         pcre-dev \
-        linux-headers
+        linux-headers \
+        fontconfig \
+        ttf-dejavu \
+        pango-dev
 
 WORKDIR /app
 
 COPY ./requirements.txt .
 
+# Create virtual environment and install Python dependencies
 RUN python -m venv /venv && \
     /venv/bin/pip install --no-cache-dir -r requirements.txt
 
-RUN apt install python3-pip libpango-1.0-0 libharfbuzz0b libpangoft2-1.0-0 libffi-dev libjpeg-dev libopenjp2-7-dev
+
 # Stage 2: Production Stage
 FROM python:3.9-alpine3.13
 
 ENV PYTHONUNBUFFERED 1
 
+# Install runtime dependencies
 RUN apk add --no-cache \
         postgresql-client \
         libjpeg \
-        pcre
+        pcre \
+        py3-pip \
+        py3-pillow \
+        py3-cffi \
+        py3-brotli \
+        gcc \
+        musl-dev \
+        python3-dev \
+        pango \
+        fontconfig \
+        ttf-dejavu
 
 COPY --from=builder /venv /venv
 COPY ./app /app
@@ -37,6 +53,7 @@ COPY ./scripts /scripts
 
 WORKDIR /app
 
+# Add user and set permissions
 RUN adduser \
         --disabled-password \
         --no-create-home \

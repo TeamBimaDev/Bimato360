@@ -68,6 +68,7 @@ class SaleDocumentFilter(django_filters.FilterSet):
         except ValueError:
             return queryset
 
+
 class BimaErpSaleDocumentViewSet(AbstractViewSet):
     queryset = BimaErpSaleDocument.objects.select_related('partner').all()
     serializer_class = BimaErpSaleDocumentSerializer
@@ -169,7 +170,7 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
     def get_history_diff(self, request, pk=None):
         sale_document = self.get_object()
 
-        history = list(sale_document.history.all())
+        history = list(sale_document.history.all().select_related('history_user'))
 
         if len(history) < 2:
             return Response({'error': 'Not enough history to compare.'}, status=status.HTTP_400_BAD_REQUEST)
@@ -192,10 +193,10 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
                     change = {
                         'field': field,
                         'old_value': previous_value,
-                        'new_value': latest_value
+                        'new_value': latest_value,
+                        'user': latest_history.history_user.username if latest_history.history_user else None
                     }
 
-                    # Group changes by date
                     if change_date in changes_by_date:
                         changes_by_date[change_date].append(change)
                     else:

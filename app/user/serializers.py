@@ -9,6 +9,7 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework import serializers
 from .models import User
 
+
 class UserSerializer(serializers.ModelSerializer):
     id = serializers.UUIDField(source='public_id',
                                read_only=True, format='hex')
@@ -33,6 +34,7 @@ class UserSerializer(serializers.ModelSerializer):
             user.save()
         return user
 
+
 class AuthTokenSerializer(TokenObtainPairSerializer):
 
     @classmethod
@@ -45,30 +47,31 @@ class AuthTokenSerializer(TokenObtainPairSerializer):
         token['user_public_id'] = user.public_id.hex
         return token
 
-"""change and reset password"""
-class ChangePasswordSerializer(serializers.ModelSerializer):
-    old_password = serializers.CharField(write_only=True, required=True, validators=[validate_password])
-    new_password = serializers.CharField(write_only=True, required=True)
-    confirm_new_password = serializers.CharField(write_only=True, required=True)
 
-    class Meta:
-        model = User
-        fields = ('old_password', 'new_password', 'confirm_new_password')
+class ChangePasswordSerializer(serializers.Serializer):
+    old_password = serializers.CharField(required=True)
+    new_password = serializers.CharField(required=True)
+    new_password_confirm = serializers.CharField(required=True)
 
     def validate(self, attrs):
-        if attrs['new_password'] != attrs['confirm_new_password']:
-            raise serializers.ValidationError("New password fields didn't match.")
+        if attrs['new_password'] != attrs['new_password_confirm']:
+            raise serializers.ValidationError({"new_password": "New passwords fields didn't match."})
         return attrs
 
-    def update(self, instance, validated_data):
-        old_password = validated_data.get('old_password')
-        new_password = validated_data.get('new_password')
+    def validate_new_password(self, value):
+        validate_password(value)
+        return value
 
-        if old_password and new_password:
-            if not instance.check_password(old_password):
-                raise serializers.ValidationError("Old password is not correct.")
-            instance.set_password(new_password)
-            instance.save()
-            return instance
 
-        raise serializers.ValidationError("Both old password and new password are required.")
+class ResetPasswordEmailRequestSerializer(serializers.Serializer):
+    email = serializers.EmailField(min_length=2)
+
+    class Meta:
+        fields = ['email']
+
+    def validate_email(self, value):
+        try:
+            user = get_user_model().objects.get(email=value)
+        except get_user_model().DoesNotExist:
+            raise serializers.ValidationError('User with this email does not exists.')
+        return value
