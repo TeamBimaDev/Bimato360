@@ -56,6 +56,9 @@ class BimaCoreDocument(AbstractModel):
             file_content_type = file.content_type
             app_label = parent._meta.label
 
+            validate_file_size(file)
+            validate_file_extension(file)
+
             if not file_content_type:
                 raise ValidationError(_('Invalid file content type.'))
 

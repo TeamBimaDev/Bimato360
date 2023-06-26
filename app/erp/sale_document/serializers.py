@@ -59,20 +59,9 @@ class BimaErpSaleDocumentSerializer(AbstractSerializer):
             'id', 'number', 'date', 'status', 'type', 'partner', 'partner_public_id', 'note',
             'private_note', 'validity', 'payment_terms', 'delivery_terms', 'total_vat', 'total_amount',
             'total_discount', 'parents', 'parent_public_ids', 'history', 'vat_label', 'vat_amount', 'created',
-            'updated',
-            'total_vat', 'total_amount', 'total_discount'
+            'updated', 'total_vat', 'total_amount', 'total_discount'
         ]
         read_only_fields = ('total_vat', 'total_amount', 'total_discount',)
-
-    def to_representation(self, instance):
-        representation = super().to_representation(instance)
-
-        request = self.context.get('request')
-        if request and request.path.endswith(instance.public_id.hex):
-            history = self.get_history(instance)
-            representation['history'] = history
-
-        return representation
 
 
 class BimaErpSaleDocumentHistorySerializer(serializers.ModelSerializer):

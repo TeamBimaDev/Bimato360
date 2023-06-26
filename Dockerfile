@@ -20,6 +20,7 @@ COPY ./requirements.txt .
 RUN python -m venv /venv && \
     /venv/bin/pip install --no-cache-dir -r requirements.txt
 
+RUN apt install python3-pip libpango-1.0-0 libharfbuzz0b libpangoft2-1.0-0 libffi-dev libjpeg-dev libopenjp2-7-dev
 # Stage 2: Production Stage
 FROM python:3.9-alpine3.13
 
