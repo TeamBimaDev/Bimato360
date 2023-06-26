@@ -254,10 +254,8 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
 
             product_name = history[0].name if history else None
 
-            # Sort product differences by date in ascending order for groupby to work correctly
             product_differences.sort(key=lambda x: x['date'])
 
-            # Group by date and convert each group to a list
             grouped_product_differences = []
             for key, group in groupby(product_differences, lambda x: x['date']):
                 grouped_product_differences.append({
