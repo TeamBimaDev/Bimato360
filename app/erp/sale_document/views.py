@@ -1,4 +1,5 @@
 import os
+from itertools import groupby
 from uuid import UUID
 
 import django_filters
@@ -210,6 +211,8 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
 
         return Response({'differences': ordered_changes}, status=status.HTTP_200_OK)
 
+    from itertools import groupby
+
     @action(detail=True, methods=['get'], url_path='get_product_history_diff')
     def get_product_history_diff(self, request, pk=None):
         sale_document = self.get_object()
@@ -250,10 +253,22 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
                         product_differences.append(change)
 
             product_name = history[0].name if history else None
+
+            # Sort product differences by date in ascending order for groupby to work correctly
+            product_differences.sort(key=lambda x: x['date'])
+
+            # Group by date and convert each group to a list
+            grouped_product_differences = []
+            for key, group in groupby(product_differences, lambda x: x['date']):
+                grouped_product_differences.append({
+                    'date': key,
+                    'changes': list(group)
+                })
+
             all_products_differences.append({
                 'product_id': product_id,
                 'product_name': product_name,
-                'differences': product_differences
+                'differences': grouped_product_differences
             })
 
         return Response({'products_differences': all_products_differences}, status=status.HTTP_200_OK)
