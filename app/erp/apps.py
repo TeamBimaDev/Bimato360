@@ -7,3 +7,4 @@ class ErpConfig(AppConfig):
 
     def ready(self):
         from .sale_document import signals
+        from .partner import signals

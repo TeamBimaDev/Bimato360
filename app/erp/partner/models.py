@@ -36,6 +36,14 @@ class BimaErpPartner(AbstractModel):
     company_ape_text = models.CharField(blank=True, null=True)
     company_ape_code = models.CharField(blank=True, null=True)
     company_capital = models.CharField(blank=True, null=True)
+    credit = models.DecimalField(max_digits=18, decimal_places=3, default=0)
+    balance = models.DecimalField(max_digits=18, decimal_places=3, default=0)
+
+    def update_balance(self):
+        total_income = sum(transaction.amount for transaction in self.transactions.filter(transaction_type='INCOME'))
+        total_expense = sum(transaction.amount for transaction in self.transactions.filter(transaction_type='EXPENSE'))
+        self.balance = total_income - total_expense - self.credit
+        self.save()
 
     def __str__(self):
         return f"{self.public_id , self.partner_type, self.first_name}"

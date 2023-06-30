@@ -1,21 +1,99 @@
+from logging import getLogger
+
+from django.http import Http404
+from django.utils.translation import gettext_lazy as _
+
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import viewsets
-from rest_framework import filters
-
-from .base_filter import BaseFilter
-from .pagination import DefaultPagination
-
-from rest_framework.exceptions import ValidationError, AuthenticationFailed, PermissionDenied
-from django.core.exceptions import ObjectDoesNotExist
+from rest_framework import viewsets, filters
+from rest_framework.exceptions import (
+    ValidationError,
+    AuthenticationFailed,
+    PermissionDenied,
+    NotAuthenticated,
+    NotFound,
+    MethodNotAllowed,
+    NotAcceptable,
+    UnsupportedMediaType,
+    ParseError,
+    APIException,
+    Throttled
+)
+from django.core.exceptions import ObjectDoesNotExist, BadRequest
 from rest_framework.status import (
     HTTP_400_BAD_REQUEST,
     HTTP_401_UNAUTHORIZED,
     HTTP_403_FORBIDDEN,
     HTTP_404_NOT_FOUND,
+    HTTP_405_METHOD_NOT_ALLOWED,
+    HTTP_406_NOT_ACCEPTABLE,
+    HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+    HTTP_429_TOO_MANY_REQUESTS,
     HTTP_500_INTERNAL_SERVER_ERROR,
 )
 
-from django.utils.translation import gettext_lazy as _
+from .base_filter import BaseFilter
+from .pagination import DefaultPagination
+
+logger = getLogger(__name__)
+
+EXCEPTIONS_MAP = {
+    ValidationError: {
+        'status_code': HTTP_400_BAD_REQUEST,
+        'message': "Invalid input",
+    },
+    BadRequest: {
+        'status_code': HTTP_400_BAD_REQUEST,
+        'message': "Bad request",
+    },
+    APIException: {
+        'status_code': HTTP_400_BAD_REQUEST,
+        'message': "API exception occurred",
+    },
+    ParseError: {
+        'status_code': HTTP_400_BAD_REQUEST,
+        'message': "Malformed request",
+    },
+    AuthenticationFailed: {
+        'status_code': HTTP_401_UNAUTHORIZED,
+        'message': "Authentication failed",
+    },
+    NotAuthenticated: {
+        'status_code': HTTP_401_UNAUTHORIZED,
+        'message': "Not authenticated",
+    },
+    PermissionDenied: {
+        'status_code': HTTP_403_FORBIDDEN,
+        'message': "Permission denied",
+    },
+    NotFound: {
+        'status_code': HTTP_404_NOT_FOUND,
+        'message': "Resource not found",
+    },
+    ObjectDoesNotExist: {
+        'status_code': HTTP_404_NOT_FOUND,
+        'message': "Resource does not exist",
+    },
+    MethodNotAllowed: {
+        'status_code': HTTP_405_METHOD_NOT_ALLOWED,
+        'message': "Method not allowed",
+    },
+    NotAcceptable: {
+        'status_code': HTTP_406_NOT_ACCEPTABLE,
+        'message': "Request not acceptable",
+    },
+    UnsupportedMediaType: {
+        'status_code': HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+        'message': "Unsupported media type",
+    },
+    Throttled: {
+        'status_code': HTTP_429_TOO_MANY_REQUESTS,
+        'message': "Too many requests",
+    },
+    Http404: {
+        'status_code': HTTP_404_NOT_FOUND,
+        'message': "Unable to get the item",
+    }
+}
 
 
 class AbstractViewSet(viewsets.ModelViewSet):
@@ -25,31 +103,25 @@ class AbstractViewSet(viewsets.ModelViewSet):
     ordering = ['-updated']
     pagination_class = DefaultPagination
 
-    def handle_exception(self, exc):
-        if hasattr(exc, 'status_code'):
-            error_status_code = exc.status_code
-        else:
-            if isinstance(exc, (ValidationError,)):
-                error_status_code = HTTP_400_BAD_REQUEST
-            elif isinstance(exc, (AuthenticationFailed,)):
-                error_status_code = HTTP_401_UNAUTHORIZED
-            elif isinstance(exc, (PermissionDenied,)):
-                error_status_code = HTTP_403_FORBIDDEN
-            elif isinstance(exc, (ObjectDoesNotExist,)):
-                error_status_code = HTTP_404_NOT_FOUND
-            else:
-                error_status_code = HTTP_500_INTERNAL_SERVER_ERROR
-
-        error_message = _("A server error occurred")
-        if len(exc.args[0]):
+    def get_error_message(self, exc):
+        error_message = str(exc)
+        if exc.args and exc.args[0]:
             error_message = exc.args[0]
+        if isinstance(error_message, dict):
+            error_message = self.format_error_message(error_message)
+        return error_message
+
+    def handle_exception(self, exc):
+        error_status_code = EXCEPTIONS_MAP.get(type(exc), {}).get('status_code', HTTP_500_INTERNAL_SERVER_ERROR)
+        error_message = EXCEPTIONS_MAP.get(type(exc), {}).get('message', _("A server error occurred"))
+
+        logger.error(f"Exception handled: {error_message}", exc_info=True)
 
         response = super().handle_exception(exc)
 
-        # Customize the response format
         custom_response_data = {
             'succeeded': False,
-            'message': format_error_message(error_message),
+            'message': error_message,
             'code': error_status_code,
             'data': None,
         }
@@ -58,22 +130,19 @@ class AbstractViewSet(viewsets.ModelViewSet):
 
         return response
 
-
-def format_error_message(error_message):
-    if not error_message:
-        return ""
-
-    if isinstance(error_message, str):
-        return error_message
-
-    if isinstance(error_message, dict):
-        formatted_message = "\n"
-        for field, errors in error_message.items():
-            formatted_message += f"\t{field}: ["
-            for error in errors:
-                formatted_message += f"(string='{error}')"
-                if error != errors[-1]:
-                    formatted_message += ", "
-            formatted_message += "],\n"
-
-        return formatted_message
+    @staticmethod
+    def format_error_message(error_message):
+        if not error_message:
+            return ""
+        if isinstance(error_message, str):
+            return error_message
+        if isinstance(error_message, dict):
+            formatted_message = "\n"
+            for field, errors in error_message.items():
+                formatted_message += f"\t{field}: ["
+                for error in errors:
+                    formatted_message += f"(string='{error}')"
+                    if error != errors[-1]:
+                        formatted_message += ", "
+                formatted_message += "],\n"
+            return formatted_message

@@ -7,6 +7,7 @@ urlpatterns = [
     path('country/', include('core.country.urls')),
     path('state/', include('core.state.urls')),
     path('bank/', include('core.bank.urls')),
+    path('cash/', include('core.cash.urls')),
     path('contact/', include('core.contact.urls')),
     path('address/', include('core.address.urls')),
     path('document/', include('core.document.urls')),

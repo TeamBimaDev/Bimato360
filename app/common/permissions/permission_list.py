@@ -54,6 +54,11 @@ class PermissionsList:
     CORE_TAG_DELETE = ('core.tag.can_delete', 'Can delete tag')
     CORE_TAG_READ = ('core.tag.can_read', 'Can read tag')
 
+    CORE_CASH_CREATE = ('core.cash.can_create', 'Can create cash')
+    CORE_CASH_UPDATE = ('core.cash.can_update', 'Can update cash')
+    CORE_CASH_DELETE = ('core.cash.can_delete', 'Can delete cash')
+    CORE_CASH_READ = ('core.cash.can_read', 'Can read cash')
+
     ERP_CATEGORY_CREATE = ('erp.category.can_create', 'Can create category')
     ERP_CATEGORY_UPDATE = ('erp.category.can_update', 'Can update category')
     ERP_CATEGORY_DELETE = ('erp.category.can_delete', 'Can delete category')
@@ -97,13 +102,16 @@ class PermissionsList:
     ERP_UNIT_OF_MEASURE_DELETE = ('erp.unit_of_measure.can_delete', 'Can delete unit of measure')
     ERP_UNIT_OF_MEASURE_READ = ('erp.unit_of_measure.can_read', 'Can read unit of measure')
 
-    ERP_VAR_CREATE = ('erp.var.can_create', 'Can create variable')
-    ERP_VAR_UPDATE = ('erp.var.can_update', 'Can update variable')
-    ERP_VAR_DELETE = ('erp.var.can_delete', 'Can delete variable')
-    ERP_VAR_READ = ('erp.var.can_read', 'Can read variable')
+    ERP_VAT_CREATE = ('erp.vat.can_create', 'Can create vat')
+    ERP_VAT_UPDATE = ('erp.vat.can_update', 'Can update vat')
+    ERP_VAT_DELETE = ('erp.vat.can_delete', 'Can delete vat')
+    ERP_VAT_READ = ('erp.vat.can_read', 'Can read vat')
 
     USER_USER_CREATE = ('user.user.can_create', 'Can create user')
     USER_USER_UPDATE = ('user.user.can_update', 'Can update user')
     USER_USER_DELETE = ('user.user.can_delete', 'Can delete user')
     USER_USER_READ = ('user.user.can_read', 'Can read user')
     USER_USER_ADD_PERMISSION = ('user.user.can_add_permission', 'Can add permission to user')
+    USER_USER_UPDATE_OTHER_PASSWORD = ('user.user.can_edit_other_password', 'Can update other password')
+    USER_USER_ACTIVATE_ACCOUNT = ('user.user.can_activate_account', 'Can activate new created user account')
+

@@ -16,10 +16,10 @@ from erp.sale_document.models import BimaErpSaleDocumentProduct
 
 from core.entity_tag.models import get_entity_tags_for_parent_entity, create_single_entity_tag, BimaCoreEntityTag
 from core.entity_tag.serializers import BimaCoreEntityTagSerializer
+from common.permissions.action_base_permission import ActionBasedPermission
 
 
 class ProductFilter(django_filters.FilterSet):
-
     name = django_filters.CharFilter(field_name='name', lookup_expr='icontains')
     type = django_filters.CharFilter(field_name='type', lookup_expr='exact')
     reference = django_filters.CharFilter(field_name='reference', lookup_expr='icontains')
@@ -45,18 +45,27 @@ class BimaErpProductViewSet(AbstractViewSet):
     serializer_class = BimaErpProductSerializer
     ordering_fields = AbstractViewSet.ordering_fields + ['reference', 'name', 'type', 'sell_price', 'status']
     permission_classes = []
+    permission_classes = (ActionBasedPermission,)
     filterset_class = ProductFilter
+    action_permissions = {
+        'list': ['product.can_read'],
+        'create': ['product.can_create'],
+        'retrieve': ['product.can_read'],
+        'update': ['product.can_update'],
+        'partial_update': ['product.can_update'],
+        'destroy': ['product.can_delete'],
+    }
 
     def get_object(self):
         obj = BimaErpProduct.objects.get_object_by_public_id(self.kwargs['pk'])
         # self.check_object_permissions(self.request, obj)
         return obj
+
     def list_tags(self, request, *args, **kwargs):
         product = BimaErpProduct.objects.get_object_by_public_id(self.kwargs['public_id'])
         entity_tags = get_entity_tags_for_parent_entity(product).order_by('order')
         serialized_entity_tags = BimaCoreEntityTagSerializer(entity_tags, many=True)
         return Response(serialized_entity_tags.data)
-
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -64,7 +73,6 @@ class BimaErpProductViewSet(AbstractViewSet):
             return Response({"Error": _("Item exists in a sale document")}, status=status.HTTP_400_BAD_REQUEST)
 
         return super(BimaErpProductViewSet, self).destroy(request, *args, **kwargs)
-
 
     def create_tag(self, request, *args, **kwargs):
         product = BimaErpProduct.objects.get_object_by_public_id(self.kwargs['public_id'])

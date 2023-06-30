@@ -73,9 +73,9 @@ INSTALLED_APPS = [
     'logging',
     'core',
     'user',
-    'hr',
     'company',
-    'erp'
+    'erp',
+    'treasury',
 ]
 
 MIDDLEWARE = [
@@ -225,9 +225,9 @@ LOCALE_PATHS = [
 
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'your-email@gmail.com'
-EMAIL_HOST_PASSWORD = 'your-password'
-DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+EMAIL_HOST = 'localhost'
+EMAIL_PORT = 1025
+DEFAULT_FROM_EMAIL = "test@bimatech.io"
+
+
+

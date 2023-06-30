@@ -28,6 +28,7 @@ from core.document.models import BimaCoreDocument, create_single_document, \
 from core.entity_tag.serializers import BimaCoreEntityTagSerializer
 from core.entity_tag.models import BimaCoreEntityTag, create_single_entity_tag, \
     get_entity_tags_for_parent_entity
+from common.permissions.action_base_permission import ActionBasedPermission
 
 
 class PartnerFilter(django_filters.FilterSet):
@@ -51,9 +52,18 @@ class BimaErpPartnerViewSet(AbstractViewSet):
     queryset = BimaErpPartner.objects.all()
     serializer_class = BimaErpPartnerSerializer
     permission_classes = []
+    permission_classes = (ActionBasedPermission,)
     ordering_fields = AbstractViewSet.ordering_fields + \
                       ['first_name', 'email', 'phone', 'partner_type']
     filterset_class = PartnerFilter
+    action_permissions = {
+        'list': ['partner.can_read'],
+        'create': ['partner.can_create'],
+        'retrieve': ['partner.can_read'],
+        'update': ['partner.can_update'],
+        'partial_update': ['partner.can_update'],
+        'destroy': ['partner.can_delete'],
+    }
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)

@@ -19,5 +19,5 @@ class BimaCoreCountry(AbstractModel):
         return f"{self.name, self.currency, self.id}"
 
     class Meta:
-        ordering = ['name']
+        ordering = ['-name']
         permissions = []

@@ -19,25 +19,25 @@ from core.state.models import BimaCoreState
 from core.currency.models import BimaCoreCurrency
 
 
-# from common.permissions.action_base_permission import ActionBasedPermission
+from common.permissions.action_base_permission import ActionBasedPermission
 
 
 class BimaCoreCountryViewSet(AbstractViewSet):
     queryset = BimaCoreCountry.objects.select_related('currency').all()
     serializer_class = BimaCoreCountrySerializer
     permission_classes = []
-    # permission_classes = (ActionBasedPermission,)
+    permission_classes = (ActionBasedPermission,)
     ordering_fields = AbstractViewSet.ordering_fields + \
                       ['name', 'code', 'phone_code']
 
-    # action_permissions = {
-    #     'list': [],
-    #     'create': ['country.can_create'],
-    #     'retrieve': [],
-    #     'update': ['country.can_update'],
-    #     'partial_update': ['country.can_update'],
-    #     'destroy': ['country.can_delete'],
-    # }
+    action_permissions = {
+        'list': ['country.can_read'],
+        'create': ['country.can_create'],
+        'retrieve': ['country.can_read'],
+        'update': ['country.can_update'],
+        'partial_update': ['country.can_update'],
+        'destroy': ['country.can_delete'],
+    }
 
     def get_object(self):
         obj = BimaCoreCountry.objects.get_object_by_public_id(self.kwargs['pk'])

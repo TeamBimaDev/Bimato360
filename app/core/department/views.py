@@ -7,12 +7,25 @@ from rest_framework.response import Response
 from core.post.models import BimaCorePost
 from core.post.serializers import BimaCorePostSerializer
 from django.utils.translation import gettext_lazy as _
+from common.permissions.action_base_permission import ActionBasedPermission
+
+
 class BimaCoreDepartmentViewSet(AbstractViewSet):
     queryset = BimaCoreDepartment.objects.select_related('department').prefetch_related('children__children').all()
     serializer_class = BimaCoreDepartmentSerializer
     permission_classes = []
+    permission_classes = (ActionBasedPermission,)
     ordering_fields = AbstractViewSet.ordering_fields + \
                       ['name', 'manager', 'department__name']
+
+    action_permissions = {
+        'list': ['department.can_read'],
+        'create': ['department.can_create'],
+        'retrieve': ['department.can_read'],
+        'update': ['department.can_update'],
+        'partial_update': ['department.can_update'],
+        'destroy': ['department.can_delete'],
+    }
 
     def perform_update(self, serializer):
         self.validate_department(self.request.data)

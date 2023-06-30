@@ -4,6 +4,9 @@ from core.abstract.models import AbstractModel
 
 class BimaCoreTag(AbstractModel):
     name = models.CharField(max_length=128, blank=False, null=False)
+    parent = models.ForeignKey('self', null=True, blank=True,
+                            on_delete=models.SET_NULL,
+                            related_name='children')
 
     def __str__(self) -> str:
         return self.name

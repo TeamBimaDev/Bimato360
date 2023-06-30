@@ -12,13 +12,25 @@ from core.address.models import create_single_address, \
     get_addresses_for_parent, \
     BimaCoreAddress
 from django.utils.translation import gettext_lazy as _
+from common.permissions.action_base_permission import ActionBasedPermission
+
 
 class BimaCoreBankViewSet(AbstractViewSet):
     queryset = BimaCoreBank.objects.all()
     serializer_class = BimaCoreBankSerializer
     permission_classes = []
+    permission_classes = (ActionBasedPermission,)
     ordering_fields = AbstractViewSet.ordering_fields + \
                       ['name', 'email', 'bic']
+
+    action_permissions = {
+        'list': ['bank.can_read'],
+        'create': ['bank.can_create'],
+        'retrieve': ['bank.can_read'],
+        'update': ['bank.can_update'],
+        'partial_update': ['bank.can_update'],
+        'destroy': ['bank.can_delete'],
+    }
 
     def perform_create(self, serializer):
         email = self.request.data.get('email')

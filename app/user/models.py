@@ -47,6 +47,15 @@ class User(AbstractBaseUser, PermissionsMixin):
     public_id = models.UUIDField(db_index=True, unique=True,
                                  default=uuid.uuid4, editable=False)
 
+    date_joined = models.DateTimeField(auto_now_add=True)
+    is_approved = models.BooleanField(default=False)
+    approved_by = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True)
+    approved_at = models.DateTimeField(null=True, blank=True)
+
+    reset_password_token = models.CharField(max_length=255, null=True, blank=True)
+    reset_password_uid = models.CharField(max_length=255, null=True, blank=True)
+    reset_password_time = models.DateTimeField(null=True, blank=True)
+
     objects = UserManager()
 
     USERNAME_FIELD = 'email'

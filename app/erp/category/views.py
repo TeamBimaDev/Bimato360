@@ -7,11 +7,21 @@ from rest_framework.response import Response
 from core.entity_tag.models import get_entity_tags_for_parent_entity, create_single_entity_tag, BimaCoreEntityTag
 from core.entity_tag.serializers import BimaCoreEntityTagSerializer
 from django.http import JsonResponse
+from common.permissions.action_base_permission import ActionBasedPermission
 
 class BimaErpCategoryViewSet(AbstractViewSet):
     queryset = BimaErpCategory.objects.all()
     serializer_class = BimaErpCategorySerializer
     permission_classes = []
+    permission_classes = (ActionBasedPermission,)
+    action_permissions = {
+        'list': ['category.can_read'],
+        'create': ['category.can_create'],
+        'retrieve': ['category.can_read'],
+        'update': ['category.can_update'],
+        'partial_update': ['category.can_update'],
+        'destroy': ['category.can_delete'],
+    }
 
     def get_object(self):
         obj = BimaErpCategory.objects.get_object_by_public_id(self.kwargs['pk'])

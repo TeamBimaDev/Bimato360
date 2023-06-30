@@ -32,6 +32,7 @@ from common.utils.utils import render_to_pdf
 from common.enums.sale_document_enum import SaleDocumentValidity
 
 from core.address.models import BimaCoreAddress
+from common.permissions.action_base_permission import ActionBasedPermission
 
 
 class SaleDocumentFilter(django_filters.FilterSet):
@@ -44,6 +45,7 @@ class SaleDocumentFilter(django_filters.FilterSet):
     total_amount_gte = django_filters.NumberFilter(field_name='total_amount', lookup_expr='gte')
     total_amount_lte = django_filters.NumberFilter(field_name='total_amount', lookup_expr='lte')
     validity_expired = django_filters.CharFilter(method='filter_validity_expired')
+    product = django_filters.CharFilter(method='filter_product_hex')
 
     class Meta:
         model = BimaErpSaleDocument
@@ -73,17 +75,61 @@ class SaleDocumentFilter(django_filters.FilterSet):
         except ValueError:
             return queryset
 
+    def filter_product_hex(self, queryset, name, value):
+        try:
+            product_public_id = UUID(hex=value)
+            return queryset.filter(bimaerpsaledocumentproduct__product__public_id=product_public_id)
+        except ValueError:
+            return queryset
+
 
 class BimaErpSaleDocumentViewSet(AbstractViewSet):
     queryset = BimaErpSaleDocument.objects.select_related('partner').all()
     serializer_class = BimaErpSaleDocumentSerializer
-    # permission_classes = [IsAdminOrReadOnly]
     permission_classes = []
+    permission_classes = (ActionBasedPermission,)
     filterset_class = SaleDocumentFilter
+    action_permissions = {
+        'list': ['sale_document.can_read'],
+        'create': ['sale_document.can_create'],
+        'retrieve': ['sale_document.can_read'],
+        'update': ['sale_document.can_update'],
+        'partial_update': ['sale_document.can_update'],
+        'destroy': ['sale_document.can_delete'],
+        'get_history_diff': ['sale_document.can_view_history'],
+        'get_product_history_diff': ['sale_document.can_view_history'],
+        'generate_pdf': ['sale_document.can_generate_document'],
+
+    }
 
     def get_object(self):
         obj = BimaErpSaleDocument.objects.get_object_by_public_id(self.kwargs['pk'])
         return obj
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        new_status = request.data.get('status')
+
+        if instance.status == 'DRAFT' and new_status in ['CONFIRMED', 'CANCELED']:
+            if not request.user.has_perm('erp.sale_document.can_change_status'):
+                return Response({'error': _('You do not have permission to change the status')},
+                                status=status.HTTP_403_FORBIDDEN)
+        elif instance.status in ['CONFIRMED', 'CANCELED'] and new_status == 'DRAFT':
+            if not request.user.has_perm('erp.sale_document.can_rollback_status'):
+                return Response({'error': _('You do not have permission to rollback the status')},
+                                status=status.HTTP_403_FORBIDDEN)
+
+        return super().update(request, *args, **kwargs)
+
+    def create(self, request, *args, **kwargs):
+        new_status = request.data.get('status')
+
+        if new_status in ['CONFIRMED', 'CANCELED']:
+            if not request.user.has_perm('erp.sale_document.can_change_status'):
+                return Response({'error': _('You do not have permission to set the status')},
+                                status=status.HTTP_403_FORBIDDEN)
+
+        return super().create(request, *args, **kwargs)
 
     @action(detail=False, methods=['get'])
     def get_unique_number(self, request, **kwargs):
@@ -182,8 +228,8 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
 
         changes_by_date = {}
         for i in range(len(history) - 1):
-            latest_history = history[i]
-            previous_history = history[i + 1]
+            previous_history = history[i]
+            latest_history = history[i + 1]
 
             latest_serialized = BimaErpSaleDocumentHistorySerializer(latest_history).data
             previous_serialized = BimaErpSaleDocumentHistorySerializer(previous_history).data
@@ -230,8 +276,8 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
 
             product_differences = []
             for i in range(len(history) - 1):
-                latest_history = history[i]
-                previous_history = history[i + 1]
+                previous_history = history[i]
+                latest_history = history[i + 1]
 
                 latest_serialized = BimaErpSaleDocumentProductHistorySerializer(latest_history).data
                 previous_serialized = BimaErpSaleDocumentProductHistorySerializer(previous_history).data
@@ -285,6 +331,7 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
         return render_to_pdf('sale_document/sale_document.html',
                              {'sale_document': sale_document, 'partner': partner, 'address': first_address},
                              "document.pdf")
+
 
     @transaction.atomic
     @action(detail=False, methods=['get'], url_path='generate_recurring_sale_documents', permission_classes=[])

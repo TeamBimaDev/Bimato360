@@ -1,3 +1,4 @@
+from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver, Signal
 from django.db import transaction
 
@@ -5,6 +6,8 @@ from core.address.models import create_address_from_parent_entity
 from core.contact.models import create_contact_from_parent_entity
 from core.document.models import create_document_from_parent_entity
 from core.entity_tag.models import create_entity_tag_from_parent_entity
+
+from treasury.transaction.models import BimaTreasuryTransaction
 
 post_create_partner = Signal()
 
@@ -23,6 +26,18 @@ def create_partner_related_entities(sender, instance, address_data, contact_data
 
     if tag_data:
         create_tags(tag_data, instance)
+
+
+@receiver(post_save, sender=BimaTreasuryTransaction)
+def update_partner_balance_on_transaction_save(sender, instance, **kwargs):
+    if instance.partner:
+        instance.partner.update_balance()
+
+
+@receiver(post_delete, sender=BimaTreasuryTransaction)
+def update_partner_balance_on_transaction_delete(sender, instance, **kwargs):
+    if instance.partner:
+        instance.partner.update_balance()
 
 
 def create_addresses(addresses_data, partner):
