@@ -53,15 +53,29 @@ class UserSerializer(serializers.ModelSerializer):
 
 class AuthTokenSerializer(TokenObtainPairSerializer):
 
+    def validate(self, attrs):
+        data = super().validate(attrs)
+        user = self.user
+
+        if not user.is_active or not user.is_approved:
+            raise serializers.ValidationError(_("User is not active or not approved."))
+
+        return data
+
     @classmethod
     def get_token(cls, user):
         token = super(AuthTokenSerializer, cls).get_token(user)
-        # Add custom claims
         token['name'] = user.name
         token['email'] = user.email
         token['user_id'] = user.id
         token['user_public_id'] = user.public_id.hex
+        token['permissions'] = get_custom_user_permissions(user)
         return token
+
+
+def get_custom_user_permissions(user):
+    permissions = user.user_permissions.all()
+    return [p.codename for p in permissions]
 
 
 class ChangePasswordSerializer(serializers.Serializer):

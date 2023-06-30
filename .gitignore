@@ -141,8 +141,8 @@ GitHub.sublime-settings
 !.vscode/extensions.json 
 .history
 .idea/misc.xml
-app/.env
-app/.env
+app/dev.env
+app/dev.env
 
 *.pyc
 /venv/

@@ -33,65 +33,66 @@ from rest_framework.status import (
 
 from .base_filter import BaseFilter
 from .pagination import DefaultPagination
+from django.utils.translation import gettext_lazy as _
 
 logger = getLogger(__name__)
 
 EXCEPTIONS_MAP = {
     ValidationError: {
         'status_code': HTTP_400_BAD_REQUEST,
-        'message': "Invalid input",
+        'message': _("Invalid input"),
     },
     BadRequest: {
         'status_code': HTTP_400_BAD_REQUEST,
-        'message': "Bad request",
+        'message': _("Bad request"),
     },
     APIException: {
         'status_code': HTTP_400_BAD_REQUEST,
-        'message': "API exception occurred",
+        'message': _("API exception occurred"),
     },
     ParseError: {
         'status_code': HTTP_400_BAD_REQUEST,
-        'message': "Malformed request",
+        'message': _("Malformed request"),
     },
     AuthenticationFailed: {
         'status_code': HTTP_401_UNAUTHORIZED,
-        'message': "Authentication failed",
+        'message': _("Authentication failed"),
     },
     NotAuthenticated: {
         'status_code': HTTP_401_UNAUTHORIZED,
-        'message': "Not authenticated",
+        'message': _("Not authenticated"),
     },
     PermissionDenied: {
         'status_code': HTTP_403_FORBIDDEN,
-        'message': "Permission denied",
+        'message': _("Permission denied"),
     },
     NotFound: {
         'status_code': HTTP_404_NOT_FOUND,
-        'message': "Resource not found",
+        'message': _("Resource not found"),
     },
     ObjectDoesNotExist: {
         'status_code': HTTP_404_NOT_FOUND,
-        'message': "Resource does not exist",
+        'message': _("Resource does not exist"),
     },
     MethodNotAllowed: {
         'status_code': HTTP_405_METHOD_NOT_ALLOWED,
-        'message': "Method not allowed",
+        'message': _("Method not allowed"),
     },
     NotAcceptable: {
         'status_code': HTTP_406_NOT_ACCEPTABLE,
-        'message': "Request not acceptable",
+        'message': _("Request not acceptable"),
     },
     UnsupportedMediaType: {
         'status_code': HTTP_415_UNSUPPORTED_MEDIA_TYPE,
-        'message': "Unsupported media type",
+        'message': _("Unsupported media type"),
     },
     Throttled: {
         'status_code': HTTP_429_TOO_MANY_REQUESTS,
-        'message': "Too many requests",
+        'message': _("Too many requests"),
     },
     Http404: {
         'status_code': HTTP_404_NOT_FOUND,
-        'message': "Unable to get the item",
+        'message': _("Unable to get the item"),
     }
 }
 

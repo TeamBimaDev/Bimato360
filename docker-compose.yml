@@ -17,9 +17,10 @@ services:
              python manage.py migrate &&
              python manage.py runserver 0.0.0.0:8000"
     env_file:
-      - ./app/.env
+      - app/dev.env
     environment:
       - DB_HOST=bima360_db
+      - DJANGO_ENV=prod
     depends_on:
       - bima360_db
     networks:
@@ -29,7 +30,7 @@ services:
     container_name: bima360_db
     image: postgres:15
     env_file:
-      - ./app/.env
+      - app/dev.env
     ports:
       - "5432:5432"
     volumes:

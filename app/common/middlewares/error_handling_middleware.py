@@ -11,6 +11,8 @@ from rest_framework.status import (
     HTTP_404_NOT_FOUND,
     HTTP_500_INTERNAL_SERVER_ERROR,
 )
+
+
 class ErrorHandlingMiddleware:
 
     def __init__(self, get_response):

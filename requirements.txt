@@ -21,3 +21,6 @@ requests
 reportlab
 requests
 weasyprint
+coloredlogs
+python-decouple
+tenacity

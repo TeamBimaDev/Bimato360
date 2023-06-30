@@ -7,6 +7,7 @@ def validate_file_size(value):
     if file_size > limit_mb * 1024 * 1024:
         raise ValidationError(f'Max file size is {limit_mb}MB')
 
+
 def validate_file_extension(value):
     valid_extensions = ['xls', 'xlsx', 'png', 'jpg', 'jpeg', 'pdf', 'doc', 'docx', 'ppt', 'pptx']
     ext = value.name.split('.')[-1]

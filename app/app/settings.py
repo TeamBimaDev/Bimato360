@@ -1,59 +1,31 @@
 import os
+import coloredlogs
 from datetime import timedelta
 from pathlib import Path
-from dotenv import load_dotenv
+from decouple import Config, Csv, RepositoryEnv
 
-import logging
 
-load_dotenv()
+def get_env_path():
+    django_env = os.getenv('DJANGO_ENV', 'dev')
+    return f"{django_env}.env"
+
+
+env_path = get_env_path()
+
+config = Config(RepositoryEnv(env_path))
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = os.environ.get('SECRET_KEY', 'changeme')
+SECRET_KEY = config('SECRET_KEY', 'changeme')
 
-DEBUG = bool(int(os.environ.get('DEBUG', 1)))
+DEBUG = config('DEBUG', cast=bool)
 
-ALLOWED_HOSTS = []
-ALLOWED_HOSTS.extend(
-    filter(
-        None,
-        os.environ.get('ALLOWED_HOSTS', '').split(','),
-    )
-)
-CORS_ALLOWED_ORIGINS = [
-    "http://127.0.0.1:5173",
-    "http://localhost:5173",
-    "http://127.0.0.1:3000",
-    "http://localhost:3000",
-    "http://localhost:8000",
-    "http://127.0.0.1:8000",
-    "http://51.83.40.92:8550",
-    "http://127.0.0.1:8550",
-    "http://0.0.0.0:8550",
-    "http://localhost:8550",
-]
-CORS_ALLOW_METHODS = [
-    'DELETE',
-    'GET',
-    'OPTIONS',
-    'PATCH',
-    'POST',
-    'PUT',
-]
-CORS_ALLOW_HEADERS = [
-    'accept',
-    'accept-encoding',
-    'authorization',
-    'content-type',
-    'content-disposition',
-    'dnt',
-    'origin',
-    'user-agent',
-    'x-csrftoken',
-    'x-requested-with',
-]
-CORS_EXPOSE_HEADERS = [
-    'content-disposition',
-]
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', cast=Csv())
+
+CORS_ALLOWED_ORIGINS = config('CORS_ALLOWED_ORIGINS', cast=Csv())
+CORS_ALLOW_METHODS = config('CORS_ALLOW_METHODS', cast=Csv())
+CORS_ALLOW_HEADERS = config('CORS_ALLOW_HEADERS', cast=Csv())
+CORS_EXPOSE_HEADERS = config('CORS_EXPOSE_HEADERS', cast=Csv())
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -83,7 +55,7 @@ MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
-    #'common.middlewares.error_handling_middleware.ErrorHandlingMiddleware',
+    # 'common.middlewares.error_handling_middleware.ErrorHandlingMiddleware',
     'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -99,7 +71,7 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
-                os.path.join(BASE_DIR, 'templates/'),
+            os.path.join(BASE_DIR, 'templates/'),
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -118,11 +90,11 @@ WSGI_APPLICATION = 'app.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'HOST': os.environ.get('DB_HOST'),
-        'NAME': os.environ.get('DB_NAME'),
-        'USER': os.environ.get('DB_USER'),
-        'PASSWORD': os.environ.get('DB_PASS'),
-        'PORT': os.environ.get('DB_PORT'),
+        'HOST': config('DB_HOST'),
+        'NAME': config('DB_NAME'),
+        'USER': config('DB_USER'),
+        'PASSWORD': config('DB_PASS'),
+        'PORT': config('DB_PORT'),
     }
 }
 
@@ -188,28 +160,75 @@ SIMPLE_JWT = {
     'AUTH_HEADER_TYPES': ('JWT',),
 }
 
-logging.basicConfig(level=logging.INFO)
-
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
-    'handlers': {
-        'file': {
-            'level': 'ERROR',
-            'class': 'logging.FileHandler',
-            'filename': os.path.join(BASE_DIR, 'logs', 'django_errors.log')
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {message}',
+            'style': '{',
+        },
+        'colored': {
+            '()': 'coloredlogs.ColoredFormatter',
+            'format': "%(asctime)s \033[1m%(name)s\033[0m [%(levelname)s] %(message)s",
+            'datefmt': "%Y-%m-%d %H:%M:%S"
         },
     },
-    'root': {
-        'handlers': ['file'],
-        'level': 'ERROR',
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'colored',
+        },
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(BASE_DIR, 'logs', 'django_errors.log'),
+            'formatter': 'verbose',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console', 'file'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        'core': {
+            'handlers': ['console', 'file'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'user': {
+            'handlers': ['console', 'file'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'company': {
+            'handlers': ['console', 'file'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'erp': {
+            'handlers': ['console', 'file'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'treasury': {
+            'handlers': ['console', 'file'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
     },
 }
+
+coloredlogs.install()
+
 INTERNAL_IPS = [
     "127.0.0.1",
 ]
 
 from django.utils.translation import gettext_lazy as _
+
 LANGUAGE_CODE = 'en-us'
 LANGUAGES = [
     ('en', _('English')),
@@ -223,11 +242,10 @@ LOCALE_PATHS = [
     os.path.join(BASE_DIR, 'app', 'locale'),
 ]
 
-
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'localhost'
-EMAIL_PORT = 1025
-DEFAULT_FROM_EMAIL = "test@bimatech.io"
-
-
-
+EMAIL_BACKEND = config('EMAIL_BACKEND')
+EMAIL_HOST = config('EMAIL_HOST')
+EMAIL_PORT = config('EMAIL_PORT', cast=int)
+DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL')
+EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
+EMAIL_USE_TLS = config('EMAIL_USE_TLS', cast=bool, default=False)

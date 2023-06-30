@@ -1,12 +1,13 @@
 from smtplib import SMTPException
-
 from django.core.mail import EmailMessage
 from app import settings
 import logging
+from tenacity import retry, stop_after_attempt, wait_exponential
 
 
 class EmailService:
     @staticmethod
+    @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, max=10))
     def send_email(subject, message, to_email, from_email=None, html_message=None):
         logger = logging.getLogger(__name__)
         if not from_email:
@@ -27,5 +28,7 @@ class EmailService:
             logger.info(f'Email sent successfully: {email}')
         except SMTPException as e:
             logger.error(f'SMTP Error sending email: {e}')
+            raise
         except Exception as e:
             logger.error(f'Unexpected error sending email: {e}')
+            raise
