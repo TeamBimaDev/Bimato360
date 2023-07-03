@@ -437,7 +437,7 @@ def create_new_document(document_type, parents):
     new_document = BimaErpSaleDocument.objects.create(
         number=generate_unique_number('sale', document_type.lower()),
         date=datetime.today().strftime('%Y-%m-%d'),
-        status=SaleDocumentStatus.DRAFT,
+        status=SaleDocumentStatus.DRAFT.value,
         type=document_type,
         partner=parents.first().partner,
     )

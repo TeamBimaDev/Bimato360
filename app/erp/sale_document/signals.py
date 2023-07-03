@@ -3,16 +3,22 @@ from django.dispatch import receiver
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 
 from .models import BimaErpSaleDocument
+from django.utils.translation import gettext_lazy as _
 
 
 class InsufficientQuantityError(Exception):
     def __init__(self, product):
         self.product = product
-        super().__init__(f"Insufficient quantity for product {product.reference}")
+        super().__init__(_(f"Insufficient quantity for product {product.reference}"))
 
 
-@receiver(pre_save, sender=BimaErpSaleDocument)
-def update_product_quantities(sender, instance, **kwargs):
+def check_sale_document_contains_at_least_one_product_when_confirmed(instance):
+    """Ensure that a confirmed SaleDocument contains at least one product."""
+    if instance.status.lower() == "confirmed" and not instance.sale_document_products.exists():
+        raise ValidationError(_("Confirmed Item must contain at least one Product."))
+
+
+def update_product_quantities(sender, instance):
     try:
         previous_instance = sender.objects.get(id=instance.id)
     except ObjectDoesNotExist:
@@ -37,7 +43,7 @@ def update_product_quantities(sender, instance, **kwargs):
                     product.quantity = operation(product.quantity, -sale_document_product.quantity)
                 product.save()
         except InsufficientQuantityError as e:
-            print(f"Insufficient quantity for product {e.product.reference}")
+            print(_(f"Insufficient quantity for product {e.product.reference}"))
             raise
         except:
             pass
@@ -50,6 +56,12 @@ def update_product_quantities(sender, instance, **kwargs):
         # If status was "Canceled" or "Draft" and then changed to "Confirmed"
         elif previous_instance.status.lower() in ['canceled', 'draft'] and instance.status.lower() == 'confirmed':
             adjust_product_quantity(instance, lambda x, y: x - y)  # Subtract the product quantity
+
+
+@receiver(pre_save, sender=BimaErpSaleDocument)
+def pre_save_sale_document(sender, instance, **kwargs):
+    check_sale_document_contains_at_least_one_product_when_confirmed(instance)
+    update_product_quantities(sender, instance)
 
 
 @receiver(pre_delete, sender=BimaErpSaleDocument)
