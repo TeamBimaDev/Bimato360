@@ -4,7 +4,7 @@ from core.abstract.models import AbstractModel
 
 
 class BimaErpCategory(AbstractModel):
-    name = models.CharField(max_length=255, blank=False, null=False)
+    name = models.CharField(max_length=255, blank=False, null=False, unique=True)
     description = models.TextField(blank=True, null=True)
     active = models.BooleanField(default=True)
     category = models.ForeignKey('self', on_delete=models.CASCADE, null=True,
@@ -12,6 +12,7 @@ class BimaErpCategory(AbstractModel):
 
     def __str__(self) -> str:
         return self.name
+
     class Meta:
         ordering = ['name']
         permissions = []

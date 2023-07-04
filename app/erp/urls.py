@@ -9,4 +9,5 @@ urlpatterns = [
         path('vat/', include('erp.vat.urls')),
         path('product/', include('erp.product.urls')),
         path('sale_document/', include('erp.sale_document.urls')),
+        path('purchase_document/', include('erp.purchase_document.urls')),
 ]

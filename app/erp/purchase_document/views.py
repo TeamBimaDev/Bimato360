@@ -1,8 +1,6 @@
 import os
 from itertools import groupby
-from uuid import UUID
 
-import django_filters
 import logging
 from collections import defaultdict
 from datetime import datetime, timedelta
@@ -10,77 +8,29 @@ from datetime import datetime, timedelta
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.db import transaction
-from django.db.models import Sum, Q, Prefetch
+from django.db.models import Sum
 from django.http import JsonResponse
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404, get_list_or_404
 from django.utils.translation import gettext_lazy as _
-from django.utils import timezone
 
 from core.abstract.views import AbstractViewSet
+from core.address.models import BimaCoreAddress
+
 from ..product.models import BimaErpProduct
 from .models import BimaErpPurchaseDocument, BimaErpPurchaseDocumentProduct, update_purchase_document_totals
 from .serializers import BimaErpPurchaseDocumentSerializer, BimaErpPurchaseDocumentProductSerializer, \
     BimaErpPurchaseDocumentHistorySerializer, BimaErpPurchaseDocumentProductHistorySerializer
+from .filter import PurchaseDocumentFilter
 
-from common.service.purchase_purchase_service import generate_unique_number
 from common.enums.purchase_document_enum import PurchaseDocumentStatus, get_purchase_document_recurring_interval
 from common.utils.utils import render_to_pdf
-
-from common.enums.purchase_document_enum import PurchaseDocumentValidity
-
-from core.address.models import BimaCoreAddress
 from common.permissions.action_base_permission import ActionBasedPermission
+from common.service.purchase_sale_service import SalePurchaseService
 
 
-class PurchaseDocumentFilter(django_filters.FilterSet):
-    number = django_filters.CharFilter(field_name='number', lookup_expr='icontains')
-    status = django_filters.CharFilter(field_name='status', lookup_expr='iexact')
-    type = django_filters.CharFilter(field_name='type', lookup_expr='iexact')
-    partner = django_filters.CharFilter(method='filter_partner_hex')
-    date_gte = django_filters.DateFilter(field_name='date', lookup_expr='gte')
-    date_lte = django_filters.DateFilter(field_name='date', lookup_expr='lte')
-    total_amount_gte = django_filters.NumberFilter(field_name='total_amount', lookup_expr='gte')
-    total_amount_lte = django_filters.NumberFilter(field_name='total_amount', lookup_expr='lte')
-    validity_expired = django_filters.CharFilter(method='filter_validity_expired')
-    product = django_filters.CharFilter(method='filter_product_hex')
-
-    class Meta:
-        model = BimaErpPurchaseDocument
-        fields = ['number', 'status', 'type', 'partner', 'date_gte', 'date_lte', 'total_amount_gte', 'total_amount_lte',
-                  'validity_expired']
-
-    def filter_validity_expired(self, queryset, name, value):
-        current_date = timezone.now().date()
-        validity_days = {validity.name: int(validity.name.split("_")[1]) for validity in PurchaseDocumentValidity}
-
-        if value == "ALL" or value is None:
-            return queryset
-
-        queries = Q()
-        for validity, days in validity_days.items():
-            if value == "EXPIRED":
-                queries |= Q(date__lte=current_date - timedelta(days=days), validity=validity)
-            elif value == "NOT_EXPIRED":
-                queries |= Q(date__gt=current_date - timedelta(days=days), validity=validity)
-
-        return queryset.filter(queries)
-
-    def filter_partner_hex(self, queryset, name, value):
-        try:
-            uuid_value = UUID(hex=value)
-            return queryset.filter(partner__public_id=uuid_value)
-        except ValueError:
-            return queryset
-
-    def filter_product_hex(self, queryset, name, value):
-        try:
-            product_public_id = UUID(hex=value)
-            return queryset.filter(bimaerppurchasedocumentproduct__product__public_id=product_public_id)
-        except ValueError:
-            return queryset
 
 
 class BimaErpPurchaseDocumentViewSet(AbstractViewSet):
@@ -143,9 +93,9 @@ class BimaErpPurchaseDocumentViewSet(AbstractViewSet):
             return Response({'error': _('Please provide all needed data')},
                             status=status.HTTP_400_BAD_REQUEST)
 
-        unique_number = generate_unique_number(purchase_or_purchase, quotation_order_invoice)
+        unique_number = SalePurchaseService.generate_unique_number(purchase_or_purchase, quotation_order_invoice)
         while BimaErpPurchaseDocument.objects.filter(number=unique_number).exists():
-            unique_number = generate_unique_number(purchase_or_purchase, quotation_order_invoice)
+            unique_number = SalePurchaseService.generate_unique_number(purchase_or_purchase, quotation_order_invoice)
         return Response({"unique_number": unique_number})
 
     @action(detail=True, methods=['get'], url_path='products')
@@ -158,7 +108,8 @@ class BimaErpPurchaseDocumentViewSet(AbstractViewSet):
     @action(detail=True, methods=['post'])
     def add_product(self, request, pk=None):
         purchase_document = self.get_object()
-        serializer = BimaErpPurchaseDocumentProductSerializer(data=request.data, context={'purchase_document': purchase_document})
+        serializer = BimaErpPurchaseDocumentProductSerializer(data=request.data,
+                                                              context={'purchase_document': purchase_document})
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -176,11 +127,13 @@ class BimaErpPurchaseDocumentViewSet(AbstractViewSet):
         product = get_object_or_404(BimaErpProduct, public_id=product_public_id)
 
         purchase_document_product = get_list_or_404(BimaErpPurchaseDocumentProduct,
-                                                purchase_document__public_id=purchase_document_public_id, product=product)[0]
+                                                    purchase_document__public_id=purchase_document_public_id,
+                                                    product=product)[0]
         if purchase_document_product is None:
             return Response({'error': _('Cannot find the item to edit')}, status=status.HTTP_404_NOT_FOUND)
 
-        serializer = BimaErpPurchaseDocumentProductSerializer(purchase_document_product, data=request.data, partial=True)
+        serializer = BimaErpPurchaseDocumentProductSerializer(purchase_document_product, data=request.data,
+                                                              partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(request.data)
@@ -198,7 +151,8 @@ class BimaErpPurchaseDocumentViewSet(AbstractViewSet):
         product = get_object_or_404(BimaErpProduct, public_id=product_public_id)
 
         purchase_document_product = get_object_or_404(BimaErpPurchaseDocumentProduct,
-                                                  purchase_document__public_id=purchase_document_public_id, product=product)
+                                                      purchase_document__public_id=purchase_document_public_id,
+                                                      product=product)
         purchase_document_product.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -257,13 +211,12 @@ class BimaErpPurchaseDocumentViewSet(AbstractViewSet):
 
         return Response({'differences': ordered_changes}, status=status.HTTP_200_OK)
 
-    from itertools import groupby
-
     @action(detail=True, methods=['get'], url_path='get_product_history_diff')
     def get_product_history_diff(self, request, pk=None):
         purchase_document = self.get_object()
 
-        history_records = BimaErpPurchaseDocumentProduct.history.filter(purchase_document_id=purchase_document.id).order_by(
+        history_records = BimaErpPurchaseDocumentProduct.history.filter(
+            purchase_document_id=purchase_document.id).order_by(
             '-history_date')
 
         history_by_product = defaultdict(list)
@@ -323,7 +276,7 @@ class BimaErpPurchaseDocumentViewSet(AbstractViewSet):
         pdf_filename = "delivery_note.pdf"
         context = self._get_context(pk)
         context['document_title'] = 'Delivery Note'
-        return self.render_to_pdf(template_name, context, pdf_filename)
+        return render_to_pdf(template_name, context, pdf_filename)
 
     @action(detail=True, methods=['get'], url_path='generate_pdf')
     def generate_pdf(self, request, pk=None):
@@ -331,7 +284,7 @@ class BimaErpPurchaseDocumentViewSet(AbstractViewSet):
         pdf_filename = "document.pdf"
         context = self._get_context(pk)
         context['document_title'] = context['purchase_document'].type
-        return self.render_to_pdf(template_name, context, pdf_filename)
+        return render_to_pdf(template_name, context, pdf_filename)
 
     def _get_context(self, pk):
         purchase_document = self.get_object()
@@ -374,7 +327,8 @@ class BimaErpPurchaseDocumentViewSet(AbstractViewSet):
                             document_type=purchase_document.type,
                             parents=[purchase_document]
                         )
-                        self.create_products_from_parents(parents=[purchase_document], new_document=new_purchase_document)
+                        self.create_products_from_parents(parents=[purchase_document],
+                                                          new_document=new_purchase_document)
 
                         logger.info(
                             f"{new_purchase_document.type} N° {new_purchase_document.number}"
@@ -449,7 +403,7 @@ class BimaErpPurchaseDocumentViewSet(AbstractViewSet):
 
 def create_new_document(document_type, parents):
     new_document = BimaErpPurchaseDocument.objects.create(
-        number=generate_unique_number('purchase', document_type.lower()),
+        number=SalePurchaseService.generate_unique_number('purchase', document_type.lower()),
         date=datetime.today().strftime('%Y-%m-%d'),
         status=PurchaseDocumentStatus.DRAFT.value,
         type=document_type,

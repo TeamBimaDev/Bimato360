@@ -1,8 +1,6 @@
 import os
 from itertools import groupby
-from uuid import UUID
 
-import django_filters
 import logging
 from collections import defaultdict
 from datetime import datetime, timedelta
@@ -10,77 +8,31 @@ from datetime import datetime, timedelta
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.db import transaction
-from django.db.models import Sum, Q, Prefetch
+from django.db.models import Sum
 from django.http import JsonResponse
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404, get_list_or_404
 from django.utils.translation import gettext_lazy as _
-from django.utils import timezone
 
 from core.abstract.views import AbstractViewSet
+
+from .filter import SaleDocumentFilter
+from .service import SaleDocumentService
 from ..product.models import BimaErpProduct
 from .models import BimaErpSaleDocument, BimaErpSaleDocumentProduct, update_sale_document_totals
 from .serializers import BimaErpSaleDocumentSerializer, BimaErpSaleDocumentProductSerializer, \
     BimaErpSaleDocumentHistorySerializer, BimaErpSaleDocumentProductHistorySerializer
 
-from common.service.purchase_sale_service import generate_unique_number
+
 from common.enums.sale_document_enum import SaleDocumentStatus, get_sale_document_recurring_interval
 from common.utils.utils import render_to_pdf
-
-from common.enums.sale_document_enum import SaleDocumentValidity
 
 from core.address.models import BimaCoreAddress
 from common.permissions.action_base_permission import ActionBasedPermission
 
-
-class SaleDocumentFilter(django_filters.FilterSet):
-    number = django_filters.CharFilter(field_name='number', lookup_expr='icontains')
-    status = django_filters.CharFilter(field_name='status', lookup_expr='iexact')
-    type = django_filters.CharFilter(field_name='type', lookup_expr='iexact')
-    partner = django_filters.CharFilter(method='filter_partner_hex')
-    date_gte = django_filters.DateFilter(field_name='date', lookup_expr='gte')
-    date_lte = django_filters.DateFilter(field_name='date', lookup_expr='lte')
-    total_amount_gte = django_filters.NumberFilter(field_name='total_amount', lookup_expr='gte')
-    total_amount_lte = django_filters.NumberFilter(field_name='total_amount', lookup_expr='lte')
-    validity_expired = django_filters.CharFilter(method='filter_validity_expired')
-    product = django_filters.CharFilter(method='filter_product_hex')
-
-    class Meta:
-        model = BimaErpSaleDocument
-        fields = ['number', 'status', 'type', 'partner', 'date_gte', 'date_lte', 'total_amount_gte', 'total_amount_lte',
-                  'validity_expired']
-
-    def filter_validity_expired(self, queryset, name, value):
-        current_date = timezone.now().date()
-        validity_days = {validity.name: int(validity.name.split("_")[1]) for validity in SaleDocumentValidity}
-
-        if value == "ALL" or value is None:
-            return queryset
-
-        queries = Q()
-        for validity, days in validity_days.items():
-            if value == "EXPIRED":
-                queries |= Q(date__lte=current_date - timedelta(days=days), validity=validity)
-            elif value == "NOT_EXPIRED":
-                queries |= Q(date__gt=current_date - timedelta(days=days), validity=validity)
-
-        return queryset.filter(queries)
-
-    def filter_partner_hex(self, queryset, name, value):
-        try:
-            uuid_value = UUID(hex=value)
-            return queryset.filter(partner__public_id=uuid_value)
-        except ValueError:
-            return queryset
-
-    def filter_product_hex(self, queryset, name, value):
-        try:
-            product_public_id = UUID(hex=value)
-            return queryset.filter(bimaerpsaledocumentproduct__product__public_id=product_public_id)
-        except ValueError:
-            return queryset
+from common.service.purchase_sale_service import SalePurchaseService
 
 
 class BimaErpSaleDocumentViewSet(AbstractViewSet):
@@ -133,20 +85,11 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
 
     @action(detail=False, methods=['get'])
     def get_unique_number(self, request, **kwargs):
-        sale_or_purchase = kwargs.get('sale_purchase', '')
-        quotation_order_invoice = kwargs.get('quotation_order_invoice', '')
-        if not sale_or_purchase:
-            sale_or_purchase = request.query_params.get('sale_purchase', '')
-        if not quotation_order_invoice:
-            quotation_order_invoice = request.query_params.get('quotation_order_invoice', '')
-        if not sale_or_purchase or not quotation_order_invoice:
-            return Response({'error': _('Please provide all needed data')},
-                            status=status.HTTP_400_BAD_REQUEST)
-
-        unique_number = generate_unique_number(sale_or_purchase, quotation_order_invoice)
-        while BimaErpSaleDocument.objects.filter(number=unique_number).exists():
-            unique_number = generate_unique_number(sale_or_purchase, quotation_order_invoice)
-        return Response({"unique_number": unique_number})
+        try:
+            unique_number = SaleDocumentService.get_unique_number(request, **kwargs)
+            return Response({"unique_number": unique_number})
+        except ValidationError as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=True, methods=['get'], url_path='products')
     def get_products(self, request, pk=None):
@@ -257,8 +200,6 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
 
         return Response({'differences': ordered_changes}, status=status.HTTP_200_OK)
 
-    from itertools import groupby
-
     @action(detail=True, methods=['get'], url_path='get_product_history_diff')
     def get_product_history_diff(self, request, pk=None):
         sale_document = self.get_object()
@@ -323,7 +264,7 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
         pdf_filename = "delivery_note.pdf"
         context = self._get_context(pk)
         context['document_title'] = 'Delivery Note'
-        return self.render_to_pdf(template_name, context, pdf_filename)
+        return render_to_pdf(template_name, context, pdf_filename)
 
     @action(detail=True, methods=['get'], url_path='generate_pdf')
     def generate_pdf(self, request, pk=None):
@@ -331,7 +272,7 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
         pdf_filename = "document.pdf"
         context = self._get_context(pk)
         context['document_title'] = context['sale_document'].type
-        return self.render_to_pdf(template_name, context, pdf_filename)
+        return render_to_pdf(template_name, context, pdf_filename)
 
     def _get_context(self, pk):
         sale_document = self.get_object()
@@ -449,7 +390,7 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
 
 def create_new_document(document_type, parents):
     new_document = BimaErpSaleDocument.objects.create(
-        number=generate_unique_number('sale', document_type.lower()),
+        number=SalePurchaseService.generate_unique_number('sale', document_type.lower()),
         date=datetime.today().strftime('%Y-%m-%d'),
         status=SaleDocumentStatus.DRAFT.value,
         type=document_type,

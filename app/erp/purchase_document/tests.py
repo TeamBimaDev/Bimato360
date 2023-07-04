@@ -7,14 +7,15 @@ from .models import BimaErpPurchaseDocument, BimaErpPurchaseDocumentProduct
 from .serializers import BimaErpPurchaseDocumentProductSerializer
 from decimal import Decimal
 
+
 class BimaErpPurchaseDocumentViewSetTest(TestCase):
     def setUp(self):
         self.client = APIClient()
         self.partner = BimaErpPartnerFactory.create()
         self.purchase_document_products = [BimaErpPurchaseDocumentProductFactory.create(),
-                                       BimaErpPurchaseDocumentProductFactory.create()]
+                                           BimaErpPurchaseDocumentProductFactory.create()]
         self.purchase_document = BimaErpPurchaseDocumentFactory.create(partner=self.partner,
-                                                               purchase_document_products=self.purchase_document_products)
+                                                                       purchase_document_products=self.purchase_document_products)
         self.product = BimaErpProductFactory.create()
 
     def test_create_purchase_document(self):
@@ -53,7 +54,8 @@ class BimaErpPurchaseDocumentViewSetTest(TestCase):
         }
         response = self.client.patch(url, data)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(BimaErpPurchaseDocument.objects.get(public_id=self.purchase_document.public_id).number, "update DOC-1")
+        self.assertEqual(BimaErpPurchaseDocument.objects.get(public_id=self.purchase_document.public_id).number,
+                         "update DOC-1")
 
     def test_delete_purchase_document(self):
         url = reverse('erp:bimaerppurchasedocument-detail', kwargs={'pk': self.purchase_document.public_id})
@@ -114,7 +116,8 @@ class BimaErpPurchaseDocumentViewSetTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(BimaErpPurchaseDocumentProduct.objects.count(), 7)
 
-        updated_product = BimaErpPurchaseDocumentProduct.objects.get(purchase_document=self.purchase_document, product=product)
+        updated_product = BimaErpPurchaseDocumentProduct.objects.get(purchase_document=self.purchase_document,
+                                                                     product=product)
         self.assertEqual(updated_product.name, "Updated Product")
         self.assertEqual(updated_product.quantity, 8)
         self.assertEqual(updated_product.unit_price, Decimal('12.990'))
@@ -133,6 +136,7 @@ class BimaErpPurchaseDocumentViewSetTest(TestCase):
         self.assertEqual(BimaErpPurchaseDocumentProduct.objects.count(), 5)
         updated_purchase_document = BimaErpPurchaseDocument.objects.get(public_id=self.purchase_document.public_id)
         self.assertEqual(updated_purchase_document.purchase_document_products.count(), 1)
+
     def test_calculate_total(self):
         product = BimaErpPurchaseDocumentProductFactory.create(
             quantity=10,

@@ -126,22 +126,6 @@ class BimaErpPurchaseDocumentProductSerializer(serializers.Serializer):
             raise serializers.ValidationError("This product already exists in the document.")
         return attrs
 
-    def validate_quantity(self, desired_quantity):
-
-        if self.instance:
-            product = self.instance.product
-        else:
-            try:
-                product_public_id = self.initial_data.get('product_public_id', '')
-                product = BimaErpProduct.objects.get(public_id=product_public_id)
-            except ObjectDoesNotExist:
-                raise serializers.ValidationError(_("No product with this id exists."))
-
-        net_change_in_quantity = desired_quantity
-        if not BimaErpPurchaseDocumentProduct.is_quantity_available(product, net_change_in_quantity):
-            raise serializers.ValidationError(_("Not enough stock available for this product."))
-        return desired_quantity
-
     def validate_product_public_id(self, value):
         if not BimaErpProduct.objects.filter(public_id=str(value.public_id)).exists():
             raise serializers.ValidationError(_("No product with this id exists."))

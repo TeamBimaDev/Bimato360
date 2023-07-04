@@ -55,15 +55,10 @@ class BimaErpPurchaseDocumentProduct(models.Model):
         self.vat_amount = self.total_after_discount * (self.vat or 0) / 100
         self.total_price = self.total_after_discount + self.vat_amount
 
-    @staticmethod
-    def is_quantity_available(product, quantity_to_add_purchase_document):
-        if product.type == 'STOCKABLE_PRODUCT' and product.quantity < quantity_to_add_purchase_document:
-            return False
-        return True
-
 
 class BimaErpPurchaseDocument(AbstractModel):
     number = models.CharField(max_length=32, null=False, blank=False, unique=True)
+    number_at_partner = models.CharField(max_length=32, null=False, blank=False, unique=True)
     date = models.DateField(null=False, blank=False)
     status = models.CharField(max_length=128, null=False,
                               blank=False, default="DRAFT",

@@ -97,6 +97,24 @@ class PermissionsList:
     ERP_SALE_DOCUMENT_VIEW_HISTORY = ('erp.sale_document.can_view_history',
                                       'Can view history of sale document')
 
+    ERP_PURCHASE_DOCUMENT_CREATE = ('erp.purchase_document.can_create', 'Can create purchase document')
+    ERP_PURCHASE_DOCUMENT_UPDATE = ('erp.purchase_document.can_update', 'Can update purchase document')
+    ERP_PURCHASE_DOCUMENT_DELETE = ('erp.purchase_document.can_delete', 'Can delete purchase document')
+    ERP_PURCHASE_DOCUMENT_READ = ('erp.purchase_document.can_read', 'Can read purchase document')
+
+    ERP_PURCHASE_DOCUMENT_ADD_PRODUCT = ('erp.purchase_document.can_add_product',
+                                         'Can add product to purchase document')
+    ERP_PURCHASE_DOCUMENT_DELETE_PRODUCT = ('erp.purchase_document.can_delete_product',
+                                            'Can delete product from purchase document')
+    ERP_PURCHASE_DOCUMENT_CHANGE_STATUS = ('erp.purchase_document.can_change_status',
+                                           'Can change status of purchase document')
+    ERP_PURCHASE_DOCUMENT_ROLLBACK_STATUS = ('erp.purchase_document.can_rollback_status',
+                                             'Can rollback status of purchase document')
+    ERP_PURCHASE_DOCUMENT_GENERATE_DOCUMENT = ('erp.purchase_document.can_generate_document',
+                                               'Can generate document from purchase document')
+    ERP_PURCHASE_DOCUMENT_VIEW_HISTORY = ('erp.purchase_document.can_view_history',
+                                          'Can view history of purchase document')
+
     ERP_UNIT_OF_MEASURE_CREATE = ('erp.unit_of_measure.can_create', 'Can create unit of measure')
     ERP_UNIT_OF_MEASURE_UPDATE = ('erp.unit_of_measure.can_update', 'Can update unit of measure')
     ERP_UNIT_OF_MEASURE_DELETE = ('erp.unit_of_measure.can_delete', 'Can delete unit of measure')
