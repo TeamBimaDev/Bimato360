@@ -1,7 +1,6 @@
 import django_filters
 from django.db import models
-from rest_framework import status
-from rest_framework.response import Response
+
 from django.utils.translation import gettext_lazy as _
 from core.abstract.views import AbstractViewSet
 from django.shortcuts import get_object_or_404

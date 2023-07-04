@@ -12,7 +12,7 @@ import csv
 from django.core.exceptions import ValidationError
 from .models import BimaErpPartner
 
-from typing import List
+
 from common.enums.company_type import get_company_type_choices
 from common.enums.entity_status import get_entity_status_choices
 from common.enums.gender import get_gender_choices
@@ -22,15 +22,24 @@ from common.enums.partner_type import get_partner_type_choices
 def generate_xls_file(data_to_export, model_fields):
     file_data = tablib.Dataset(headers=[fd.name for fd in model_fields.fields])
 
-    for partner in data_to_export:
+    for product in data_to_export:
         values = []
         for fd in model_fields.fields:
-            value = getattr(partner, fd.name)
-            if isinstance(value, datetime):
-                value = value.replace(tzinfo=None)
-            elif isinstance(value, UUID):
-                value = str(value)
-            values.append(value)
+            value = None
+            try:
+                if fd.name in ['category', 'vat', 'unit_of_measure']:
+                    value = getattr(getattr(product, fd.name), 'name', None)
+                else:
+                    value = getattr(product, fd.name, None)
+
+                if isinstance(value, datetime):
+                    value = value.replace(tzinfo=None)
+                elif isinstance(value, UUID):
+                    value = str(value)
+            except Exception as e:
+                print(f"Error while processing field {fd.name}: {e}")
+            finally:
+                values.append(value)
         file_data.append(values)
 
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
@@ -60,11 +69,17 @@ def generate_xls_file(data_to_export, model_fields):
         for cell in row:
             cell.border = border
 
-    # Apply color based on is_supplier value
-    for row in sheet.iter_rows(min_row=2, max_row=sheet.max_row, min_col=file_data.headers.index('is_supplier') + 1,
-                               max_col=file_data.headers.index('is_supplier') + 1):
+    quantity_index = file_data.headers.index('quantity')
+    min_stock_level_index = file_data.headers.index('minimum_stock_level')
+    for row in sheet.iter_rows(min_row=2, max_row=sheet.max_row,
+                               min_col=quantity_index + 1,
+                               max_col=quantity_index + 1):
         for cell in row:
-            if cell.value:
+            corresponding_min_stock_level_cell = sheet.cell(row=cell.row, column=min_stock_level_index + 1)
+            if (cell.value is not None and corresponding_min_stock_level_cell.value is not None and
+                    isinstance(cell.value, (float, int)) and isinstance(corresponding_min_stock_level_cell.value,
+                                                                        (float, int)) and
+                    cell.value <= corresponding_min_stock_level_cell.value):
                 cell.fill = PatternFill(start_color='FFFF0000', end_color='FFFF0000',
                                         fill_type='solid')  # Red color
             else:

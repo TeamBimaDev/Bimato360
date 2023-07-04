@@ -8,22 +8,28 @@ from openpyxl.utils import get_column_letter
 import tablib
 import csv
 
+from .models import BimaErpProduct
+
 
 def generate_xls_file(data_to_export, model_fields):
-    file_data = tablib.Dataset(headers=[fd.name for fd in model_fields.fields])
+    headers = [str(fd.verbose_name) for fd in model_fields.fields]
+    file_data = tablib.Dataset()
 
     for product in data_to_export:
         values = []
         for fd in model_fields.fields:
-            if fd.name in ['category', 'vat', 'unit_of_measure']:
-                value = getattr(getattr(product, fd.name), 'name')
-            else:
-                value = getattr(product, fd.name)
-
-            if isinstance(value, datetime):
-                value = value.replace(tzinfo=None)
-            elif isinstance(value, UUID):
-                value = str(value)
+            value = None
+            try:
+                if fd.name in ['category', 'vat', 'unit_of_measure']:
+                    value = getattr(getattr(product, fd.name), 'name', None)
+                else:
+                    value = getattr(product, fd.name, None)
+                if isinstance(value, datetime):
+                    value = value.replace(tzinfo=None)
+                elif isinstance(value, UUID):
+                    value = str(value)
+            except Exception as ex:
+                print(f"An error occurred while getting value of {fd.name}. Error: {str(ex)}")
             values.append(value)
         file_data.append(values)
 
@@ -32,21 +38,21 @@ def generate_xls_file(data_to_export, model_fields):
 
     workbook = Workbook()
     sheet = workbook.active
-    sheet.append(file_data.headers)
+
+    # append headers
+    sheet.append(headers)
 
     header_font = Font(size=12, bold=True)
-    for cell in sheet[1]:  # Assuming your header is in the first row
+    for cell in sheet[1]:
         cell.font = header_font
 
-    # Write the data to the sheet
     for row_data in file_data:
         try:
             sheet.append(row_data)
         except ValueError as ex:
             print(ex)
 
-    # Apply column width
-    for column in range(1, len(file_data.headers) + 1):
+    for column in range(1, len(headers) + 1):
         column_letter = get_column_letter(column)
         sheet.column_dimensions[column_letter].width = 12
 
@@ -57,19 +63,17 @@ def generate_xls_file(data_to_export, model_fields):
         for cell in row:
             cell.border = border
 
-    quantity_index = file_data.headers.index('quantity')
-    min_stock_level_index = file_data.headers.index('minimum_stock_level')
+    quantity_index = headers.index(BimaErpProduct._meta.get_field('quantity').verbose_name)
+    min_stock_level_index = headers.index(BimaErpProduct._meta.get_field('minimum_stock_level').verbose_name)
     for row in sheet.iter_rows(min_row=2, max_row=sheet.max_row,
                                min_col=quantity_index + 1,
                                max_col=quantity_index + 1):
         for cell in row:
             corresponding_min_stock_level_cell = sheet.cell(row=cell.row, column=min_stock_level_index + 1)
-            if cell.value is not None and cell.value <= corresponding_min_stock_level_cell.value:
-                cell.fill = PatternFill(start_color='FFFF0000', end_color='FFFF0000',
-                                        fill_type='solid')  # Red color
+            if cell.value is not None and corresponding_min_stock_level_cell.value is not None and cell.value <= corresponding_min_stock_level_cell.value:
+                cell.fill = PatternFill(start_color='FFFF0000', end_color='FFFF0000', fill_type='solid')  # Red color
             else:
-                cell.fill = PatternFill(start_color='FF00FF00', end_color='FF00FF00',
-                                        fill_type='solid')  # Green color
+                cell.fill = PatternFill(start_color='FF00FF00', end_color='FF00FF00', fill_type='solid')  # Green color
 
     for column in sheet.columns:
         max_length = 0

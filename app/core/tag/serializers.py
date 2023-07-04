@@ -14,7 +14,8 @@ class BimaCoreTagSerializer(AbstractSerializer):
         slug_field='public_id',
         source='parent',
         write_only=True,
-        required=False
+        required=False,
+        allow_null=True
     )
 
     def get_parent(self, obj):
@@ -49,6 +50,11 @@ class BimaCoreTagSerializer(AbstractSerializer):
             validated_data['color'] = color
 
         return super().update(instance, validated_data)
+
+    def to_internal_value(self, data):
+        if 'parent_public_id' in data and data['parent_public_id'] == "":
+            data['parent_public_id'] = None
+        return super().to_internal_value(data)
 
     def _get_unique_color(self):
         while True:
