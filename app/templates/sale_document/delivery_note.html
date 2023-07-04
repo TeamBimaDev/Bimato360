@@ -117,10 +117,10 @@
 
         <div class="sale_document_details">
             <div class="sale_document_type_div">
-                {{ sale_document.type|capfirst }}
+                {{ document_title|capfirst }}
             </div>
             <div class="sale_document_number_div">
-                {{ sale_document.type|upper  }} NUMBER <br/>
+                {{ document_title|upper  }} NUMBER <br/>
                 <span class="invoice_number_span">{{ sale_document.number }}</span>
             </div>
             <div class="sale_document_date_div">

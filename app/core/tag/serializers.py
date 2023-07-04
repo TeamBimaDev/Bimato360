@@ -4,6 +4,7 @@ from rest_framework import serializers
 import re
 import random
 from django.core.exceptions import ObjectDoesNotExist
+from django.utils.translation import gettext_lazy as _
 
 
 class BimaCoreTagSerializer(AbstractSerializer):
@@ -30,7 +31,7 @@ class BimaCoreTagSerializer(AbstractSerializer):
 
     def validate_color(self, value):
         if value and not re.match('^([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$', value):
-            raise serializers.ValidationError("This field should be a valid hex color.")
+            raise serializers.ValidationError(_("This field should be a valid hex color."))
         return value
 
     def create(self, validated_data):

@@ -21,21 +21,21 @@ from django.utils import timezone
 
 from core.abstract.views import AbstractViewSet
 from ..product.models import BimaErpProduct
-from .models import BimaErpSaleDocument, BimaErpSaleDocumentProduct, update_sale_document_totals
-from .serializers import BimaErpSaleDocumentSerializer, BimaErpSaleDocumentProductSerializer, \
-    BimaErpSaleDocumentHistorySerializer, BimaErpSaleDocumentProductHistorySerializer
+from .models import BimaErpPurchaseDocument, BimaErpPurchaseDocumentProduct, update_purchase_document_totals
+from .serializers import BimaErpPurchaseDocumentSerializer, BimaErpPurchaseDocumentProductSerializer, \
+    BimaErpPurchaseDocumentHistorySerializer, BimaErpPurchaseDocumentProductHistorySerializer
 
-from common.service.purchase_sale_service import generate_unique_number
-from common.enums.sale_document_enum import SaleDocumentStatus, get_sale_document_recurring_interval
+from common.service.purchase_purchase_service import generate_unique_number
+from common.enums.purchase_document_enum import PurchaseDocumentStatus, get_purchase_document_recurring_interval
 from common.utils.utils import render_to_pdf
 
-from common.enums.sale_document_enum import SaleDocumentValidity
+from common.enums.purchase_document_enum import PurchaseDocumentValidity
 
 from core.address.models import BimaCoreAddress
 from common.permissions.action_base_permission import ActionBasedPermission
 
 
-class SaleDocumentFilter(django_filters.FilterSet):
+class PurchaseDocumentFilter(django_filters.FilterSet):
     number = django_filters.CharFilter(field_name='number', lookup_expr='icontains')
     status = django_filters.CharFilter(field_name='status', lookup_expr='iexact')
     type = django_filters.CharFilter(field_name='type', lookup_expr='iexact')
@@ -48,13 +48,13 @@ class SaleDocumentFilter(django_filters.FilterSet):
     product = django_filters.CharFilter(method='filter_product_hex')
 
     class Meta:
-        model = BimaErpSaleDocument
+        model = BimaErpPurchaseDocument
         fields = ['number', 'status', 'type', 'partner', 'date_gte', 'date_lte', 'total_amount_gte', 'total_amount_lte',
                   'validity_expired']
 
     def filter_validity_expired(self, queryset, name, value):
         current_date = timezone.now().date()
-        validity_days = {validity.name: int(validity.name.split("_")[1]) for validity in SaleDocumentValidity}
+        validity_days = {validity.name: int(validity.name.split("_")[1]) for validity in PurchaseDocumentValidity}
 
         if value == "ALL" or value is None:
             return queryset
@@ -78,32 +78,32 @@ class SaleDocumentFilter(django_filters.FilterSet):
     def filter_product_hex(self, queryset, name, value):
         try:
             product_public_id = UUID(hex=value)
-            return queryset.filter(bimaerpsaledocumentproduct__product__public_id=product_public_id)
+            return queryset.filter(bimaerppurchasedocumentproduct__product__public_id=product_public_id)
         except ValueError:
             return queryset
 
 
-class BimaErpSaleDocumentViewSet(AbstractViewSet):
-    queryset = BimaErpSaleDocument.objects.select_related('partner').all()
-    serializer_class = BimaErpSaleDocumentSerializer
+class BimaErpPurchaseDocumentViewSet(AbstractViewSet):
+    queryset = BimaErpPurchaseDocument.objects.select_related('partner').all()
+    serializer_class = BimaErpPurchaseDocumentSerializer
     permission_classes = []
     permission_classes = (ActionBasedPermission,)
-    filterset_class = SaleDocumentFilter
+    filterset_class = PurchaseDocumentFilter
     action_permissions = {
-        'list': ['sale_document.can_read'],
-        'create': ['sale_document.can_create'],
-        'retrieve': ['sale_document.can_read'],
-        'update': ['sale_document.can_update'],
-        'partial_update': ['sale_document.can_update'],
-        'destroy': ['sale_document.can_delete'],
-        'get_history_diff': ['sale_document.can_view_history'],
-        'get_product_history_diff': ['sale_document.can_view_history'],
-        'generate_pdf': ['sale_document.can_generate_document'],
+        'list': ['purchase_document.can_read'],
+        'create': ['purchase_document.can_create'],
+        'retrieve': ['purchase_document.can_read'],
+        'update': ['purchase_document.can_update'],
+        'partial_update': ['purchase_document.can_update'],
+        'destroy': ['purchase_document.can_delete'],
+        'get_history_diff': ['purchase_document.can_view_history'],
+        'get_product_history_diff': ['purchase_document.can_view_history'],
+        'generate_pdf': ['purchase_document.can_generate_document'],
 
     }
 
     def get_object(self):
-        obj = BimaErpSaleDocument.objects.get_object_by_public_id(self.kwargs['pk'])
+        obj = BimaErpPurchaseDocument.objects.get_object_by_public_id(self.kwargs['pk'])
         return obj
 
     def update(self, request, *args, **kwargs):
@@ -111,11 +111,11 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
         new_status = request.data.get('status')
 
         if instance.status == 'DRAFT' and new_status in ['CONFIRMED', 'CANCELED']:
-            if not request.user.has_perm('erp.sale_document.can_change_status'):
+            if not request.user.has_perm('erp.purchase_document.can_change_status'):
                 return Response({'error': _('You do not have permission to change the status')},
                                 status=status.HTTP_403_FORBIDDEN)
         elif instance.status in ['CONFIRMED', 'CANCELED'] and new_status == 'DRAFT':
-            if not request.user.has_perm('erp.sale_document.can_rollback_status'):
+            if not request.user.has_perm('erp.purchase_document.can_rollback_status'):
                 return Response({'error': _('You do not have permission to rollback the status')},
                                 status=status.HTTP_403_FORBIDDEN)
 
@@ -125,7 +125,7 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
         new_status = request.data.get('status')
 
         if new_status in ['CONFIRMED', 'CANCELED']:
-            if not request.user.has_perm('erp.sale_document.can_change_status'):
+            if not request.user.has_perm('erp.purchase_document.can_change_status'):
                 return Response({'error': _('You do not have permission to set the status')},
                                 status=status.HTTP_403_FORBIDDEN)
 
@@ -133,32 +133,32 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
 
     @action(detail=False, methods=['get'])
     def get_unique_number(self, request, **kwargs):
-        sale_or_purchase = kwargs.get('sale_purchase', '')
+        purchase_or_purchase = kwargs.get('purchase_purchase', '')
         quotation_order_invoice = kwargs.get('quotation_order_invoice', '')
-        if not sale_or_purchase:
-            sale_or_purchase = request.query_params.get('sale_purchase', '')
+        if not purchase_or_purchase:
+            purchase_or_purchase = request.query_params.get('purchase_purchase', '')
         if not quotation_order_invoice:
             quotation_order_invoice = request.query_params.get('quotation_order_invoice', '')
-        if not sale_or_purchase or not quotation_order_invoice:
+        if not purchase_or_purchase or not quotation_order_invoice:
             return Response({'error': _('Please provide all needed data')},
                             status=status.HTTP_400_BAD_REQUEST)
 
-        unique_number = generate_unique_number(sale_or_purchase, quotation_order_invoice)
-        while BimaErpSaleDocument.objects.filter(number=unique_number).exists():
-            unique_number = generate_unique_number(sale_or_purchase, quotation_order_invoice)
+        unique_number = generate_unique_number(purchase_or_purchase, quotation_order_invoice)
+        while BimaErpPurchaseDocument.objects.filter(number=unique_number).exists():
+            unique_number = generate_unique_number(purchase_or_purchase, quotation_order_invoice)
         return Response({"unique_number": unique_number})
 
     @action(detail=True, methods=['get'], url_path='products')
     def get_products(self, request, pk=None):
-        sale_document = self.get_object()
-        products = BimaErpSaleDocumentProduct.objects.filter(sale_document=sale_document)
-        serializer = BimaErpSaleDocumentProductSerializer(products, many=True)
+        purchase_document = self.get_object()
+        products = BimaErpPurchaseDocumentProduct.objects.filter(purchase_document=purchase_document)
+        serializer = BimaErpPurchaseDocumentProductSerializer(products, many=True)
         return Response(serializer.data)
 
     @action(detail=True, methods=['post'])
     def add_product(self, request, pk=None):
-        sale_document = self.get_object()
-        serializer = BimaErpSaleDocumentProductSerializer(data=request.data, context={'sale_document': sale_document})
+        purchase_document = self.get_object()
+        serializer = BimaErpPurchaseDocumentProductSerializer(data=request.data, context={'purchase_document': purchase_document})
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -166,21 +166,21 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
 
     @action(detail=True, methods=['put'])
     def update_product(self, request, pk=None):
-        sale_document_public_id = request.data.get('sale_document_public_id')
+        purchase_document_public_id = request.data.get('purchase_document_public_id')
         product_public_id = request.data.get('product_public_id')
 
-        if pk != sale_document_public_id:
-            return Response({'error': _('Mismatched sale_document_id')},
+        if pk != purchase_document_public_id:
+            return Response({'error': _('Mismatched purchase_document_id')},
                             status=status.HTTP_400_BAD_REQUEST)
 
         product = get_object_or_404(BimaErpProduct, public_id=product_public_id)
 
-        sale_document_product = get_list_or_404(BimaErpSaleDocumentProduct,
-                                                sale_document__public_id=sale_document_public_id, product=product)[0]
-        if sale_document_product is None:
+        purchase_document_product = get_list_or_404(BimaErpPurchaseDocumentProduct,
+                                                purchase_document__public_id=purchase_document_public_id, product=product)[0]
+        if purchase_document_product is None:
             return Response({'error': _('Cannot find the item to edit')}, status=status.HTTP_404_NOT_FOUND)
 
-        serializer = BimaErpSaleDocumentProductSerializer(sale_document_product, data=request.data, partial=True)
+        serializer = BimaErpPurchaseDocumentProductSerializer(purchase_document_product, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(request.data)
@@ -188,18 +188,18 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
 
     @action(detail=True, methods=['delete'])
     def delete_product(self, request, pk=None):
-        sale_document_public_id = request.data.get('sale_document_public_id')
+        purchase_document_public_id = request.data.get('purchase_document_public_id')
         product_public_id = request.data.get('product_public_id')
 
-        if pk != sale_document_public_id:
-            return Response({'error': _('Mismatched sale_document_id')},
+        if pk != purchase_document_public_id:
+            return Response({'error': _('Mismatched purchase_document_id')},
                             status=status.HTTP_400_BAD_REQUEST)
 
         product = get_object_or_404(BimaErpProduct, public_id=product_public_id)
 
-        sale_document_product = get_object_or_404(BimaErpSaleDocumentProduct,
-                                                  sale_document__public_id=sale_document_public_id, product=product)
-        sale_document_product.delete()
+        purchase_document_product = get_object_or_404(BimaErpPurchaseDocumentProduct,
+                                                  purchase_document__public_id=purchase_document_public_id, product=product)
+        purchase_document_product.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @transaction.atomic
@@ -219,9 +219,9 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
 
     @action(detail=True, methods=['get'], url_path='get_history_diff')
     def get_history_diff(self, request, pk=None):
-        sale_document = self.get_object()
+        purchase_document = self.get_object()
 
-        history = list(sale_document.history.all().select_related('history_user'))
+        history = list(purchase_document.history.all().select_related('history_user'))
 
         if len(history) < 2:
             return Response({'error': 'Not enough history to compare.'}, status=status.HTTP_400_BAD_REQUEST)
@@ -231,8 +231,8 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
             previous_history = history[i]
             latest_history = history[i + 1]
 
-            latest_serialized = BimaErpSaleDocumentHistorySerializer(latest_history).data
-            previous_serialized = BimaErpSaleDocumentHistorySerializer(previous_history).data
+            latest_serialized = BimaErpPurchaseDocumentHistorySerializer(latest_history).data
+            previous_serialized = BimaErpPurchaseDocumentHistorySerializer(previous_history).data
 
             for field, latest_value in latest_serialized.items():
                 if field == 'history_date':
@@ -261,9 +261,9 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
 
     @action(detail=True, methods=['get'], url_path='get_product_history_diff')
     def get_product_history_diff(self, request, pk=None):
-        sale_document = self.get_object()
+        purchase_document = self.get_object()
 
-        history_records = BimaErpSaleDocumentProduct.history.filter(sale_document_id=sale_document.id).order_by(
+        history_records = BimaErpPurchaseDocumentProduct.history.filter(purchase_document_id=purchase_document.id).order_by(
             '-history_date')
 
         history_by_product = defaultdict(list)
@@ -279,8 +279,8 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
                 previous_history = history[i]
                 latest_history = history[i + 1]
 
-                latest_serialized = BimaErpSaleDocumentProductHistorySerializer(latest_history).data
-                previous_serialized = BimaErpSaleDocumentProductHistorySerializer(previous_history).data
+                latest_serialized = BimaErpPurchaseDocumentProductHistorySerializer(latest_history).data
+                previous_serialized = BimaErpPurchaseDocumentProductHistorySerializer(previous_history).data
 
                 for field, latest_value in latest_serialized.items():
                     if field in ['history_date', 'history_type', 'id']:
@@ -319,7 +319,7 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
 
     @action(detail=True, methods=['get'], url_path='generate_delivery_note')
     def generate_delivery_note(self, request, pk=None):
-        template_name = 'sale_document/delivery_note.html'
+        template_name = 'purchase_document/delivery_note.html'
         pdf_filename = "delivery_note.pdf"
         context = self._get_context(pk)
         context['document_title'] = 'Delivery Note'
@@ -327,15 +327,15 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
 
     @action(detail=True, methods=['get'], url_path='generate_pdf')
     def generate_pdf(self, request, pk=None):
-        template_name = 'sale_document/sale_document.html'
+        template_name = 'purchase_document/purchase_document.html'
         pdf_filename = "document.pdf"
         context = self._get_context(pk)
-        context['document_title'] = context['sale_document'].type
+        context['document_title'] = context['purchase_document'].type
         return self.render_to_pdf(template_name, context, pdf_filename)
 
     def _get_context(self, pk):
-        sale_document = self.get_object()
-        partner = sale_document.partner
+        purchase_document = self.get_object()
+        partner = purchase_document.partner
 
         partner_content_type = ContentType.objects.get_for_model(partner)
         first_address = BimaCoreAddress.objects.filter(
@@ -343,13 +343,13 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
             parent_id=partner.id
         ).select_related('state', 'country').first()
 
-        context = {'sale_document': sale_document, 'partner': partner, 'address': first_address}
+        context = {'purchase_document': purchase_document, 'partner': partner, 'address': first_address}
 
         return context
 
     @transaction.atomic
-    @action(detail=False, methods=['get'], url_path='generate_recurring_sale_documents', permission_classes=[])
-    def generate_recurring_sale_documents(self, request):
+    @action(detail=False, methods=['get'], url_path='generate_recurring_purchase_documents', permission_classes=[])
+    def generate_recurring_purchase_documents(self, request):
 
         authorization_token = request.headers.get('Authorization')
         expected_token = os.environ.get('AUTHORIZATION_TOKEN_FOR_CRON')
@@ -358,34 +358,34 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
             return JsonResponse({'error': _('Unauthorized')}, status=401)
 
         today = datetime.today()
-        num_new_sale_documents = 0
+        num_new_purchase_documents = 0
 
-        recurring_sale_documents = BimaErpSaleDocument.objects.filter(is_recurring=True)
+        recurring_purchase_documents = BimaErpPurchaseDocument.objects.filter(is_recurring=True)
 
         logger = logging.getLogger(__name__)
 
-        for sale_document in recurring_sale_documents:
-            next_creation_date = sale_document.date + timedelta(days=sale_document.recurring_interval)
+        for purchase_document in recurring_purchase_documents:
+            next_creation_date = purchase_document.date + timedelta(days=purchase_document.recurring_interval)
 
             if next_creation_date <= today:
                 try:
                     with transaction.atomic():
-                        new_sale_document = create_new_document(
-                            document_type=sale_document.type,
-                            parents=[sale_document]
+                        new_purchase_document = create_new_document(
+                            document_type=purchase_document.type,
+                            parents=[purchase_document]
                         )
-                        self.create_products_from_parents(parents=[sale_document], new_document=new_sale_document)
+                        self.create_products_from_parents(parents=[purchase_document], new_document=new_purchase_document)
 
                         logger.info(
-                            f"{new_sale_document.type} N° {new_sale_document.number}"
-                            f" is created from {sale_document.number}")
+                            f"{new_purchase_document.type} N° {new_purchase_document.number}"
+                            f" is created from {purchase_document.number}")
 
-                        num_new_sale_documents += 1
+                        num_new_purchase_documents += 1
 
                 except Exception as e:
-                    logger.error(_(f"Error creating new SaleDocument for parent {sale_document.id}: {str(e)}"))
+                    logger.error(_(f"Error creating new PurchaseDocument for parent {purchase_document.id}: {str(e)}"))
 
-        return JsonResponse({'message': _(f'Successfully created {num_new_sale_documents} new sale documents')})
+        return JsonResponse({'message': _(f'Successfully created {num_new_purchase_documents} new purchase documents')})
 
     def get_request_data(self, request):
         document_type = request.data.get('document_type', '')
@@ -393,7 +393,7 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
         return document_type, parent_public_ids
 
     def get_parents(self, parent_public_ids):
-        return BimaErpSaleDocument.objects.filter(public_id__in=parent_public_ids)
+        return BimaErpPurchaseDocument.objects.filter(public_id__in=parent_public_ids)
 
     def validate_parents(self, parents):
         if not parents.exists():
@@ -407,28 +407,28 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
             raise ValidationError({'error': _('Please give the type of the document')})
 
     def create_products_from_parents(self, parents, new_document, reset_quantity=False):
-        product_ids = BimaErpSaleDocumentProduct.objects.filter(
-            sale_document__in=parents
+        product_ids = BimaErpPurchaseDocumentProduct.objects.filter(
+            purchase_document__in=parents
         ).values_list('product', flat=True).distinct()
 
         new_products = []
         for product_id in product_ids:
             # Find first instance of this product
-            first_product = BimaErpSaleDocumentProduct.objects.filter(
-                sale_document__in=parents,
+            first_product = BimaErpPurchaseDocumentProduct.objects.filter(
+                purchase_document__in=parents,
                 product_id=product_id
             ).first()
 
             if first_product is None:
                 continue
 
-            total_quantity = BimaErpSaleDocumentProduct.objects.filter(
-                sale_document__in=parents,
+            total_quantity = BimaErpPurchaseDocumentProduct.objects.filter(
+                purchase_document__in=parents,
                 product_id=product_id
             ).aggregate(total_quantity=Sum('quantity'))['total_quantity']
 
-            new_product = BimaErpSaleDocumentProduct(
-                sale_document=new_document,
+            new_product = BimaErpPurchaseDocumentProduct(
+                purchase_document=new_document,
                 name=first_product.name,
                 unit_of_measure=first_product.unit_of_measure,
                 reference=first_product.reference,
@@ -442,16 +442,16 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
             new_product.calculate_totals()
             new_products.append(new_product)
 
-        BimaErpSaleDocumentProduct.objects.bulk_create(new_products)
-        update_sale_document_totals(new_document)
+        BimaErpPurchaseDocumentProduct.objects.bulk_create(new_products)
+        update_purchase_document_totals(new_document)
         new_document.save()
 
 
 def create_new_document(document_type, parents):
-    new_document = BimaErpSaleDocument.objects.create(
-        number=generate_unique_number('sale', document_type.lower()),
+    new_document = BimaErpPurchaseDocument.objects.create(
+        number=generate_unique_number('purchase', document_type.lower()),
         date=datetime.today().strftime('%Y-%m-%d'),
-        status=SaleDocumentStatus.DRAFT.value,
+        status=PurchaseDocumentStatus.DRAFT.value,
         type=document_type,
         partner=parents.first().partner,
     )

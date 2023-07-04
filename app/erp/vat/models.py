@@ -4,7 +4,7 @@ from core.abstract.models import AbstractModel
 
 class BimaErpVat(AbstractModel):
     name = models.CharField(max_length=128, blank=False, unique=True)
-    rate = models.FloatField(blank=False, unique=False)
+    rate = models.FloatField(blank=False, unique=True)
     active = models.BooleanField(default=True)
 
     class Meta:
