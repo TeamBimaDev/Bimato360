@@ -12,6 +12,7 @@ from .models import User
 from datetime import timedelta
 from django.utils import timezone
 from django.utils.http import urlsafe_base64_decode
+from django.utils.translation import gettext_lazy as _
 
 
 class UserSerializer(serializers.ModelSerializer):

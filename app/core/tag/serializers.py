@@ -1,6 +1,9 @@
 from .models import BimaCoreTag
 from core.abstract.serializers import AbstractSerializer
 from rest_framework import serializers
+import re
+import random
+from django.core.exceptions import ObjectDoesNotExist
 
 
 class BimaCoreTagSerializer(AbstractSerializer):
@@ -23,4 +26,33 @@ class BimaCoreTagSerializer(AbstractSerializer):
 
     class Meta:
         model = BimaCoreTag
-        fields = ['id', 'name', 'public_id', 'parent', 'parent_public_id']
+        fields = ['id', 'name', 'public_id', 'parent', 'parent_public_id', 'color']
+
+    def validate_color(self, value):
+        if value and not re.match('^([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$', value):
+            raise serializers.ValidationError("This field should be a valid hex color.")
+        return value
+
+    def create(self, validated_data):
+        color = validated_data.get('color', None)
+        if not color:
+            color = self._get_unique_color()
+            validated_data['color'] = color
+
+        return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        color = validated_data.get('color', None)
+        if not color and not instance.color:
+            color = self._get_unique_color()
+            validated_data['color'] = color
+
+        return super().update(instance, validated_data)
+
+    def _get_unique_color(self):
+        while True:
+            color = "%06x" % random.randint(0, 0xFFFFFF)
+            try:
+                BimaCoreTag.objects.get(color=color)
+            except ObjectDoesNotExist:
+                return color

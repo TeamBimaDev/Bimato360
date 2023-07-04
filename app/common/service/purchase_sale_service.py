@@ -9,7 +9,8 @@ def generate_unique_number(sale_or_purchase, quotation_order_invoice):
     third_char = {
         "quotation": "Q",
         "order": "O",
-        "invoice": "I"
+        "invoice": "I",
+        "credit_note": "C"
     }.get(quotation_order_invoice, "Q")
     year = datetime.now().year
     random_string = get_random_string(length=12, allowed_chars='ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789')

@@ -2,6 +2,7 @@ import csv
 import django_filters
 from core.abstract.views import AbstractViewSet
 from django.db.models import Q
+from rest_framework.decorators import action
 
 from django.http import HttpResponse, JsonResponse
 
@@ -12,7 +13,8 @@ from rest_framework.response import Response
 from .models import BimaErpPartner
 from .serializers import BimaErpPartnerSerializer
 from .signals import post_create_partner
-from .utils import generate_xls_file
+from .utils import generate_xls_file, create_partners_from_csv
+
 from common.utils.utils import render_to_pdf
 from core.address.serializers import BimaCoreAddressSerializer
 from core.address.models import BimaCoreAddress, get_addresses_for_parent, create_single_address
@@ -232,3 +234,16 @@ class BimaErpPartnerViewSet(AbstractViewSet):
             data_to_export = BimaErpPartner.objects.all()
 
         return generate_xls_file(data_to_export, model_fields)
+
+    @action(detail=False, methods=['post'])
+    def generate_partner_from_csv(self, request):
+        file = request.FILES.get('file')
+
+        if not file:
+            return Response({'detail': 'CSV file is required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            create_partners_from_csv(file)
+            return Response({'detail': 'Successfully created partners.'}, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)

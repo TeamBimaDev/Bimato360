@@ -8,6 +8,17 @@ from openpyxl.utils import get_column_letter
 import tablib
 
 
+import csv
+from django.core.exceptions import ValidationError
+from .models import BimaErpPartner
+
+from typing import List
+from common.enums.company_type import get_company_type_choices
+from common.enums.entity_status import get_entity_status_choices
+from common.enums.gender import get_gender_choices
+from common.enums.partner_type import get_partner_type_choices
+
+
 def generate_xls_file(data_to_export, model_fields):
     file_data = tablib.Dataset(headers=[fd.name for fd in model_fields.fields])
 
@@ -75,3 +86,76 @@ def generate_xls_file(data_to_export, model_fields):
     workbook.save(response)
 
     return response
+
+
+CSV_TO_MODEL_MAP = {
+    "partner_type": ["partner_type"],
+    "company_type": ["company_type"],
+    "name": ["first_name", "last_name"],
+    "nom": ["first_name", "last_name"],
+    "gender": ["gender"],
+    "social_security_number": ["social_security_number"],
+    "id_number": ["id_number"],
+    "email": ["email"],
+    "phone_number": ["phone"],
+    "fax": ["fax"],
+    "company_name": ["company_name"],
+    "company_activity": ["company_activity"],
+    "vat_id_number": ["vat_id_number"],
+    "status": ["status"],
+    "note": ["note"],
+    "company_date_creation": ["company_date_creation"],
+    "company_siren": ["company_siren"],
+    "company_siret": ["company_siret"],
+    "company_date_registration": ["company_date_registration"],
+    "rcs_number": ["rcs_number"],
+    "company_date_struck_off": ["company_date_struck_off"],
+    "company_ape_text": ["company_ape_text"],
+    "company_ape_code": ["company_ape_code"],
+    "company_capital": ["company_capital"],
+    "credit": ["credit"],
+    "balance": ["balance"],
+}
+
+CHOICES_MAP = {
+    "gender": get_gender_choices(),
+    "partner_type": get_partner_type_choices(),
+    "status": get_entity_status_choices(),
+    "company_type": get_company_type_choices(),
+}
+
+
+def validate_choice_value(value: str, choices):
+    choice_values = [item[0] for item in choices]
+    if value not in choice_values:
+        raise ValueError(f"Invalid value. Expected one of {choice_values}")
+    return value
+
+
+def create_partners_from_csv(file_path: str):
+    partners = []
+
+    with open(file_path, mode='r') as file:
+        csv_reader = csv.DictReader(file)
+
+        for row in csv_reader:
+            partner_data = {}
+
+            for csv_header, value in row.items():
+                model_fields = CSV_TO_MODEL_MAP.get(csv_header.lower(), [])
+
+                for model_field in model_fields:
+                    if model_field in ['gender', 'partner_type', 'status', 'company_type']:
+                        choices = CHOICES_MAP[model_field]
+                        value = validate_choice_value(value, choices)
+                    partner_data[model_field] = value
+
+            partner = BimaErpPartner(**partner_data)
+
+            try:
+                partner.full_clean()
+                partners.append(partner)
+            except ValidationError as e:
+                print(f"Failed to save partner: {e}")
+
+    BimaErpPartner.objects.bulk_create(partners)
