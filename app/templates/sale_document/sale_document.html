@@ -3,9 +3,36 @@
     <head>
         <style>
             @page {
-                @bottom-center {
+                @top-left {
+                    content: element(header-left);
+                }
+                @top-right {
+                    content: element(header-right);
+                }
+                @bottom-left {
+                    content: element(footer-left);
+                }
+                @bottom-right {
                     content: "Page " counter(page) " of " counter(pages);
                 }
+
+            }
+            #header-left {
+                position: running(header-left);
+
+            }
+            #header-right {
+                position: running(header-right);
+            }
+            #footer-left {
+                position: running(footer-left);
+            }
+
+
+            .logo {
+                width: 200px;
+                height: 100px;
+                object-fit: contain;
             }
 
             .sale_document_type_div{
@@ -101,7 +128,8 @@
             .note {
                 margin-top: 1rem;
                 max-width: 350px;
-                border: 1px solid #59981A;
+                font-size: 0.8em;
+
             }
             .content-wrapper {
                     display: flex;
@@ -114,6 +142,12 @@
         </style>
     </head>
     <body>
+        <div id="header-left">
+            <img src="{{ request.scheme }}://{{ request.get_host }}{{ MEDIA_URL }}{{ company_data.favorite_logo.file_path }}" alt="Company Logo" class="logo"/>
+        </div>
+        <div id="header-right">
+            {{ company_data.company.header_note|safe }}
+        </div>
 
         <div class="sale_document_details">
             <div class="sale_document_type_div">
@@ -200,7 +234,9 @@
 
         <!-- Note -->
         <div class="note">{{ sale_document.note }}</div>
-
+         <div id="footer-left">
+            {{ company_data.company.footer_note|safe }}
+        </div>
 
 
     </body>

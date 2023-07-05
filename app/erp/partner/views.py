@@ -142,7 +142,7 @@ class BimaErpPartnerViewSet(AbstractViewSet):
         partner = BimaErpPartner.objects.get_object_by_public_id(self.kwargs['public_id'])
         document_data = request.data
         document_data['file_path'] = request.FILES['file_path']
-        result = BimaCoreDocument.create_document_for_partner(partner, document_data)
+        result = BimaCoreDocument.create_document_for_parent(partner, document_data)
         if isinstance(result, BimaCoreDocument):
             return Response({
                 "id": result.public_id,

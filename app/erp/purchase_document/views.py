@@ -31,8 +31,6 @@ from common.permissions.action_base_permission import ActionBasedPermission
 from common.service.purchase_sale_service import SalePurchaseService
 
 
-
-
 class BimaErpPurchaseDocumentViewSet(AbstractViewSet):
     queryset = BimaErpPurchaseDocument.objects.select_related('partner').all()
     serializer_class = BimaErpPurchaseDocumentSerializer
@@ -405,7 +403,7 @@ def create_new_document(document_type, parents):
     new_document = BimaErpPurchaseDocument.objects.create(
         number=SalePurchaseService.generate_unique_number('purchase', document_type.lower()),
         date=datetime.today().strftime('%Y-%m-%d'),
-        status=PurchaseDocumentStatus.DRAFT.value,
+        status=PurchaseDocumentStatus.DRAFT.name,
         type=document_type,
         partner=parents.first().partner,
     )

@@ -1,15 +1,19 @@
+from datetime import datetime
 import os
 import uuid
+
 from django.db import models
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import gettext_lazy as _
-from core.abstract.models import AbstractModel
-from common.enums.file_type import get_file_type_choices
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
 
+from core.abstract.models import AbstractModel
+from common.enums.file_type import get_file_type_choices
 from common.validators.file_validators import validate_file_size, validate_file_extension
+from common.enums.file_type import FileTypeCompany
+from common.service.file_service import resize_image
 
 
 class BimaCoreDocument(AbstractModel):
@@ -27,11 +31,11 @@ class BimaCoreDocument(AbstractModel):
     file_content_type = models.CharField(max_length=255, blank=False, null=False, default='application/octet-stream')
     file_extension = models.CharField(max_length=16, blank=False, null=False)
     date_file = models.DateTimeField(auto_now_add=True)
-    file_path = models.FileField(upload_to=document_file_path)
     file_path = models.FileField(upload_to=document_file_path,
                                  validators=[validate_file_size, validate_file_extension])
     file_type = models.CharField(max_length=128,
                                  choices=get_file_type_choices())
+    is_favorite = models.BooleanField(blank=True, default=False)
     parent_type = models.ForeignKey(
         ContentType,
         on_delete=models.CASCADE
@@ -48,8 +52,16 @@ class BimaCoreDocument(AbstractModel):
         permissions = []
 
     @classmethod
-    def create_document_for_partner(cls, parent, document_data):
+    def create_document_for_parent(cls, parent, document_data):
         try:
+            if document_data['file_type']:
+                existing_docs = cls.objects.filter(parent_type=ContentType.objects.get_for_model(parent),
+                                                   parent_id=parent.id,
+                                                   file_type=document_data['file_type'])
+
+            if document_data['file_type'] == FileTypeCompany.COMPANY_LOGO.name and \
+                    document_data.get('is_favorite', False):
+                existing_docs.update(is_favorite=False)
             file = document_data['file_path']
             ext = os.path.splitext(file.name)[1]
             filename = f'{uuid.uuid4()}{ext}'
@@ -62,16 +74,25 @@ class BimaCoreDocument(AbstractModel):
             if not file_content_type:
                 raise ValidationError(_('Invalid file content type.'))
 
+            # Resize image if it's a logo and the file is an image
+            if document_data['file_type'] == FileTypeCompany.COMPANY_LOGO.name and \
+                    file_content_type.startswith('image/'):
+                try:
+                    file = resize_image(file, 200, 100)
+                except Exception as e:
+                    print(f"Failed to resize the image. Error: {str(e)}")
+
             document = cls(
                 document_name=document_data['document_name'],
-                description=document_data['description'],
-                date_file=document_data['date_file'],
+                description=document_data.get('description', ''),
+                date_file=document_data.get('date_file', datetime.now()),
                 file_type=document_data['file_type'],
                 file_content_type=file_content_type,
                 parent_type=ContentType.objects.get_for_model(parent),
                 parent_id=parent.id,
                 file_name=filename,
-                file_extension=ext
+                file_extension=ext,
+                is_favorite=document_data.get('is_favorite', False)
             )
 
             document.file_path.save(os.path.join('uploads', 'documents', app_label, filename), file)
@@ -112,3 +133,6 @@ def get_documents_for_parent_entity(parent):
         parent_type=ContentType.objects.get_for_model(parent),
         parent_id=parent.id
     )
+
+
+

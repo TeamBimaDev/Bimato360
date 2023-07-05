@@ -21,7 +21,7 @@ class BimaCoreEntityTag(AbstractModel):
     content_object = GenericForeignKey('parent_type', 'parent_id')
 
     def __str__(self) -> str:
-        return f"{self.public_id} - {self.tag.name} - {self.tag.order} "
+        return f"{self.public_id} - {self.tag.name} - {self.order} "
 
     class Meta:
         ordering = ['-created']

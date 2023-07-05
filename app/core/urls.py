@@ -1,5 +1,7 @@
 from django.urls import path, include
 
+from .views import CoreView
+
 app_name = 'core'
 
 urlpatterns = [
@@ -16,4 +18,5 @@ urlpatterns = [
     path('tag/', include('core.tag.urls')),
     path('entity_tag/', include('core.entity_tag.urls')),
     path('source/', include('core.source.urls')),
+    path('utils/<str:action>/', CoreView.as_view(), name='utility'),
 ]

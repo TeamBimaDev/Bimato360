@@ -1,6 +1,7 @@
 from enum import Enum
 from django.utils.translation import gettext_lazy as _
 
+
 class FileType(Enum):
     pass
 
@@ -11,7 +12,12 @@ class FileTypePartner(FileType):
     PARTNER_CIRET_DOCUMENT = _('PARTNER_CIRET_DOCUMENT')
 
 
-class FileTypeBank(Enum):
+class FileTypeCompany(FileType):
+    COMPANY_LOGO = _('Logo')
+    COMPANY_DOCUMENT = _('Documents')
+
+
+class FileTypeBank(FileType):
     EMPLOYEE_CV = _('EMPLOYEE_CV')
     EMPLOYEE_RESUME = _('EMPLOYEE_RESUME')
     EMPLOYEE_DRIVER_LICENCE = _('EMPLOYEE_DRIVER_LICENCE')
@@ -27,3 +33,7 @@ def get_file_type_choices():
 
 def return_list_file_type_partner():
     return [(file_type.name, file_type.value) for file_type in FileTypePartner]
+
+
+def return_list_file_type_company():
+    return [(file_type.name, file_type.value) for file_type in FileTypeCompany]

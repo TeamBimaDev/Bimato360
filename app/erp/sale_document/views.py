@@ -34,6 +34,9 @@ from common.permissions.action_base_permission import ActionBasedPermission
 
 from common.service.purchase_sale_service import SalePurchaseService
 
+from company.models import BimaCompany
+from company.service import fetch_company_data
+
 
 class BimaErpSaleDocumentViewSet(AbstractViewSet):
     queryset = BimaErpSaleDocument.objects.select_related('partner').all()
@@ -272,6 +275,7 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
         pdf_filename = "document.pdf"
         context = self._get_context(pk)
         context['document_title'] = context['sale_document'].type
+        context['request'] = request
         return render_to_pdf(template_name, context, pdf_filename)
 
     def _get_context(self, pk):
@@ -284,7 +288,11 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
             parent_id=partner.id
         ).select_related('state', 'country').first()
 
-        context = {'sale_document': sale_document, 'partner': partner, 'address': first_address}
+        company = BimaCompany.objects.first()
+        company_data = fetch_company_data(company)
+
+        context = {'sale_document': sale_document, 'partner': partner, 'address': first_address,
+                   'company_data': company_data}
 
         return context
 
@@ -392,7 +400,7 @@ def create_new_document(document_type, parents):
     new_document = BimaErpSaleDocument.objects.create(
         number=SalePurchaseService.generate_unique_number('sale', document_type.lower()),
         date=datetime.today().strftime('%Y-%m-%d'),
-        status=SaleDocumentStatus.DRAFT.value,
+        status=SaleDocumentStatus.DRAFT.name,
         type=document_type,
         partner=parents.first().partner,
     )

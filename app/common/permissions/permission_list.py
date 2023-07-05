@@ -133,3 +133,11 @@ class PermissionsList:
     USER_USER_UPDATE_OTHER_PASSWORD = ('user.user.can_edit_other_password', 'Can update other password')
     USER_USER_ACTIVATE_ACCOUNT = ('user.user.can_activate_account', 'Can activate new created user account')
 
+    COMPANY_COMPANY_CREATE = ('company.company.can_create', 'Can create company')
+    COMPANY_COMPANY_UPDATE = ('company.company.can_update', 'Can update company')
+    COMPANY_COMPANY_DELETE = ('company.company.can_delete', 'Can delete company')
+    COMPANY_COMPANY_READ = ('company.company.can_read', 'Can read company')
+    COMPANY_COMPANY_ADD_DOCUMENT = ('company.company.can_add_document', 'Can add document')
+    COMPANY_COMPANY_ADD_ADDRESS = ('company.company.can_add_address', 'Can add address')
+
+

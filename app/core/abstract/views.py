@@ -105,16 +105,18 @@ class AbstractViewSet(viewsets.ModelViewSet):
     pagination_class = DefaultPagination
 
     def get_error_message(self, exc):
+        if isinstance(exc, dict) or isinstance(exc, str):
+            return self.format_error_message(exc)
+
         error_message = str(exc)
-        if exc.args and exc.args[0]:
-            error_message = exc.args[0]
-        if isinstance(error_message, dict):
-            error_message = self.format_error_message(error_message)
-        return error_message
+        if exc.args:
+            formatted_messages = [self.format_error_message(arg) for arg in exc.args]
+            error_message = " ".join(formatted_messages)
+        return error_message or EXCEPTIONS_MAP.get(type(exc), {}).get('message', _("A server error occurred"))
 
     def handle_exception(self, exc):
         error_status_code = EXCEPTIONS_MAP.get(type(exc), {}).get('status_code', HTTP_500_INTERNAL_SERVER_ERROR)
-        error_message = EXCEPTIONS_MAP.get(type(exc), {}).get('message', _("A server error occurred"))
+        error_message = self.get_error_message(exc)
 
         logger.error(f"Exception handled: {error_message}", exc_info=True)
 
