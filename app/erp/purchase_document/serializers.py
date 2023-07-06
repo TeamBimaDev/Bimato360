@@ -13,8 +13,6 @@ class BimaErpPurchaseDocumentSerializer(AbstractSerializer):
     history = serializers.SerializerMethodField()
     children = serializers.SerializerMethodField(read_only=True)
 
-    # Other methods ...
-
     parents = serializers.SerializerMethodField(read_only=True)
     parent_public_ids = serializers.SlugRelatedField(
         queryset=BimaErpPurchaseDocument.objects.all(),

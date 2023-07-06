@@ -59,3 +59,6 @@ class User(AbstractBaseUser, PermissionsMixin):
     objects = UserManager()
 
     USERNAME_FIELD = 'email'
+
+    def has_perm(self, perm, obj=None):
+        return self.user_permissions.filter(codename=perm).exists()
