@@ -10,6 +10,9 @@ class BimaCoreCountryFactory(factory.django.DjangoModelFactory):
 
     name = factory.Faker('country')
     code = factory.Faker('country_code')
+    iso3 = factory.Faker('text')
+    iso2 = factory.Faker('text')
+    capital = factory.Faker('text')
     address_format = factory.Faker('word')
     phone_code = factory.Faker('random_int')
     vat_label = factory.Faker('word')

@@ -33,7 +33,7 @@ class BimaErpVatTest(APITestCase):
         self.client.force_authenticate(self.user)
 
     def test_create_vat(self):
-        url = reverse('erp:bimaerpcategory-list')
+        url = reverse('erp:bimaerpvat-list')
         response = self.client.post(url, self.vat_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(BimaErpVat.objects.count(), 1)
