@@ -31,6 +31,7 @@ class BimaCoreContact(AbstractModel):
     class Meta:
         ordering = ['name']
         permissions = []
+        default_permissions = ()
 
 
 def create_contact_from_parent_entity(data_contact_to_save, parent):

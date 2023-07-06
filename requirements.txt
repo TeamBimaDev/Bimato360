@@ -24,3 +24,4 @@ weasyprint
 coloredlogs
 python-decouple
 tenacity
+celery==5.3.1

@@ -11,5 +11,6 @@ class BimaTreasuryPaymentProvider(AbstractModel):
     supports_refunds = models.BooleanField(null=True, default=False)
 
     class Meta:
-        ordering = ['id']
+        ordering = ['name']
         permissions = []
+        default_permissions = ()

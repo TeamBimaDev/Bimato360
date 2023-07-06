@@ -50,6 +50,7 @@ class BimaCoreDocument(AbstractModel):
     class Meta:
         ordering = ['-created', 'document_name']
         permissions = []
+        default_permissions = ()
 
     @classmethod
     def create_document_for_parent(cls, parent, document_data):

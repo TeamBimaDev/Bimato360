@@ -15,3 +15,4 @@ class BimaCoreDepartment(AbstractModel):
     class Meta:
         ordering = ['name']
         permissions = []
+        default_permissions = ()

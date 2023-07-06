@@ -33,6 +33,7 @@ class BimaErpSaleDocumentProduct(models.Model):
 
     class Meta:
         unique_together = ('sale_document', 'product')
+        default_permissions = ()
 
     def save(self, *args, **kwargs):
         if self.sale_document_id and not self.sale_document_public_id:
@@ -95,6 +96,11 @@ class BimaErpSaleDocument(AbstractModel):
     )
     history = HistoricalRecords()
     sale_document_products = models.ManyToManyField(BimaErpProduct, through=BimaErpSaleDocumentProduct)
+
+    class Meta:
+        ordering = ['-created']
+        permissions = []
+        default_permissions = ()
 
     def save(self, *args, **kwargs):
         if self.pk is not None:  # only do this for existing instances, not when creating new ones

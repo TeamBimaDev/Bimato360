@@ -10,5 +10,6 @@ class BimaTreasuryTransactionPaymentMethodBankTransferDetail(AbstractModel):
     account_number = models.CharField(max_length=64, blank=True, null=True)
 
     class Meta:
-        ordering = ['id']
+        ordering = ['-created']
         permissions = []
+        default_permissions = ()

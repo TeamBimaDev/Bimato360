@@ -23,3 +23,4 @@ class BimaTreasuryTransaction(AbstractModel):
     class Meta:
         ordering = ['-date']
         permissions = []
+        default_permissions = ()

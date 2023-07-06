@@ -9,5 +9,6 @@ class BimaTreasuryPaymentTermsDetails(AbstractModel):
     payment_terms = models.ForeignKey(model=BimaTreasuryPaymentTerms, on_delete=models.CASCADE, null=True, blank=True)
 
     class Meta:
-        ordering = ['id']
+        ordering = ['name']
         permissions = []
+        default_permissions = ()

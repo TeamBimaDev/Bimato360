@@ -12,5 +12,6 @@ class BimaTreasuryTransactionPaymentMethodCardTransferDetail(AbstractModel):
     expiry_date = models.DateField(null=True, blank=True)
 
     class Meta:
-        ordering = ['id']
+        ordering = ['-created']
         permissions = []
+        default_permissions = ()

@@ -12,3 +12,4 @@ class BimaCoreSource(AbstractModel):
     class Meta:
         ordering = ['name']
         permissions = []
+        default_permissions = ()

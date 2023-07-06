@@ -38,6 +38,7 @@ class BimaCoreAddress(AbstractModel):
     class Meta:
         ordering = ['number']
         permissions = []
+        default_permissions = ()
 
 
 def create_address_from_parent_entity(data_address_to_save, parent):

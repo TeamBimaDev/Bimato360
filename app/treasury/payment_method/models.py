@@ -13,5 +13,6 @@ class BimaTreasuryPaymentMethod(AbstractModel):
     active = models.BooleanField(default=True)
 
     class Meta:
-        ordering = ['id']
+        ordering = ['name']
         permissions = []
+        default_permissions = ()

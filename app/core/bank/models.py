@@ -15,3 +15,4 @@ class BimaCoreBank(AbstractModel):
     class Meta:
         ordering = ['name']
         permissions = []
+        default_permissions = ()

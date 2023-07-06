@@ -7,7 +7,6 @@ from core.cash.models import BimaCoreCash
 from treasury.payment_provider.models import BimaTreasuryPaymentProvider
 
 
-
 class BimaTreasuryTransactionPaymentMethod(AbstractModel):
     transaction = models.ForeignKey('BimaTreasuryTransaction', on_delete=models.PROTECT, null=True, blank=True)
     payment_method = models.ForeignKey('BimaTreasuryPaymentMethod', on_delete=models.PROTECT, null=True, blank=True)
@@ -21,5 +20,6 @@ class BimaTreasuryTransactionPaymentMethod(AbstractModel):
     due_date = models.DateField(null=True, blank=True)
 
     class Meta:
-        ordering = ['id']
+        ordering = ['-created']
         permissions = []
+        default_permissions = ()

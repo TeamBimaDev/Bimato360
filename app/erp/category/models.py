@@ -16,3 +16,4 @@ class BimaErpCategory(AbstractModel):
     class Meta:
         ordering = ['name']
         permissions = []
+        default_permissions = ()

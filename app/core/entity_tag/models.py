@@ -26,6 +26,7 @@ class BimaCoreEntityTag(AbstractModel):
     class Meta:
         ordering = ['-created']
         permissions = []
+        default_permissions = ()
 
 
 def create_entity_tag_from_parent_entity(data_entity_tag_to_save, parent):

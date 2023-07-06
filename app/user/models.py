@@ -60,5 +60,10 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     USERNAME_FIELD = 'email'
 
+    class Meta:
+        ordering = ['name']
+        permissions = []
+        default_permissions = ()
+
     def has_perm(self, perm, obj=None):
         return self.user_permissions.filter(codename=perm).exists()

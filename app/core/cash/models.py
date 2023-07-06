@@ -11,3 +11,4 @@ class BimaCoreCash(AbstractModel):
     class Meta:
         ordering = ['id']
         permissions = []
+        default_permissions = ()

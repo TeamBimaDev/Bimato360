@@ -1,0 +1,7 @@
+FROM rabbitmq:3.8-management
+
+ENV RABBITMQ_DEFAULT_USER=bima_rbmq_user
+ENV RABBITMQ_DEFAULT_PASSWORD=bima_rbmq_user
+
+EXPOSE 15672
+EXPOSE 5672

@@ -52,6 +52,12 @@ services:
     networks:
       - bima360-network
 
+  celery:
+    build: .
+    command: celery -A app worker --loglevel=info
+    volumes:
+      - .:/app
+
 
 networks:
   bima360-network:

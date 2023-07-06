@@ -48,5 +48,10 @@ class BimaErpPartner(AbstractModel):
     def __str__(self):
         return f"{self.public_id , self.partner_type, self.first_name}"
 
+    class Meta:
+        ordering = ['-created']
+        permissions = []
+        default_permissions = ()
+
 
 from .signals import create_partner_related_entities

@@ -2,12 +2,14 @@ from smtplib import SMTPException
 from django.core.mail import EmailMessage
 from app import settings
 import logging
-from tenacity import retry, stop_after_attempt, wait_exponential
+# from tenacity import retry, stop_after_attempt,
+from celery import shared_task
 
 
 class EmailService:
     @staticmethod
-    @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, max=10))
+    # @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, max=10))
+    @shared_task(bind=True, max_retries=3, soft_time_limit=500)
     def send_email(subject, message, to_email, from_email=None, html_message=None):
         logger = logging.getLogger(__name__)
         if not from_email:
