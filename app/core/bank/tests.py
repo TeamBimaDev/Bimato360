@@ -1,10 +1,11 @@
 from django.urls import reverse
 from rest_framework.test import APITestCase, APIClient
 from rest_framework import status
-from .factories import UserFactory, BimaCoreBankFactory
+from .factories import  BimaCoreBankFactory
 from .models import BimaCoreBank
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
+from user.factories import UserFactory
 
 
 class BimaCoreBankTest(APITestCase):
@@ -51,10 +52,6 @@ class BimaCoreBankTest(APITestCase):
         url = reverse('core:bimacorebank-detail', kwargs={'pk': str(bank.public_id)})
         data = {'name': 'Updated Name'}
         response = self.client.patch(url, data, format='json')
-        print("1")
-        print(bank)
-        print("2")
-        print(response.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(BimaCoreBank.objects.get(pk=bank.pk).name, 'Updated Name')
 
