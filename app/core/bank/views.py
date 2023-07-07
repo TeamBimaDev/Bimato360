@@ -82,8 +82,8 @@ class BimaCoreBankViewSet(AbstractViewSet):
         return Response(response["data"], status=response["status"])
 
     def get_address(self, request, *args, **kwargs):
-        partner = BimaCoreBank.objects.get_object_by_public_id(self.kwargs['public_id'])
-        address = get_object_or_404(BimaCoreAddress, public_id=self.kwargs['address_public_id'], parent_id=partner.id)
+        bank = BimaCoreBank.objects.get_object_by_public_id(self.kwargs['public_id'])
+        address = get_object_or_404(BimaCoreAddress, public_id=self.kwargs['address_public_id'], parent_id=bank.id)
         serialized_address = BimaCoreAddressSerializer(address)
         return Response(serialized_address.data)
 

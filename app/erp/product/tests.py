@@ -12,7 +12,7 @@ from erp.vat.factories import BimaErpVatFactory
 from erp.category.factories import BimaErpCategoryFactory
 
 
-class BimaErpCategoryTest(APITestCase):
+class BimaErpProductTest(APITestCase):
 
     def setUp(self):
         self.create_permissions()

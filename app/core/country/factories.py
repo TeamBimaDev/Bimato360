@@ -8,8 +8,8 @@ class BimaCoreCountryFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = BimaCoreCountry
 
-    name = factory.Faker('country')
-    code = factory.Faker('country_code')
+    name = factory.Sequence(lambda n: f'CountryName{n}')
+    code = factory.Sequence(lambda n: f'CountryCode{n}')
     iso3 = factory.Faker('text')
     iso2 = factory.Faker('text')
     capital = factory.Faker('text')

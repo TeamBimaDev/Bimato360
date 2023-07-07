@@ -7,8 +7,8 @@ class BimaCoreCurrencyFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = BimaCoreCurrency
 
-    name = factory.Faker('currency_name')
-    symbol = factory.Faker('currency_symbol')
+    name = factory.Sequence(lambda n: f'CurrencyName{n}')
+    symbol = factory.Sequence(lambda n: f'CurrencySymbol{n}')
     decimal_places = factory.Faker('random_int')
     active = factory.Faker('boolean')
     currency_unit_label = factory.Faker('currency_code')

@@ -35,3 +35,7 @@ class BimaErpPartnerFactory(factory.django.DjangoModelFactory):
     company_ape_text = factory.Faker('job')
     company_ape_code = factory.Faker('random_number', digits=4)
     company_capital = factory.Faker('random_number', digits=6)
+    credit = factory.Faker('pydecimal', right_digits=3, positive=True, max_value=100000)
+    balance = factory.Faker('pydecimal', right_digits=3, positive=True, max_value=100000)
+
+
