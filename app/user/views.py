@@ -30,11 +30,15 @@ from .models import User
 from .signals import reset_password_signal, user_activated_signal
 from common.permissions.app_permission import IsAdminOrSelfUser, IsAdminUser, CanEditOtherPassword, UserHasAddPermission
 
+from core.abstract.pagination import DefaultPagination
+
 
 class CreateTokenView(TokenObtainPairView):
     permission_classes = (permissions.AllowAny,)
     serializer_class = AuthTokenSerializer
     renderer_classes = api_settings.DEFAULT_RENDERER_CLASSES
+    ordering = ['-name']
+    pagination_class = DefaultPagination
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -57,9 +61,8 @@ class UserViewSet(viewsets.ModelViewSet):
             permission_classes = [permissions.IsAuthenticated]
         return [permission() for permission in permission_classes]
 
-    def list(self, request, *args, **kwargs):
-        serializer = self.get_serializer(request.user)
-        return Response(serializer.data)
+    def get_queryset(self):
+        return User.objects.all()
 
     @action(detail=False, methods=['get'], url_path='me')
     def me(self, request):
@@ -115,6 +118,11 @@ class UserViewSet(viewsets.ModelViewSet):
         }
 
         return Response(response_data, status=status.HTTP_200_OK)
+
+    def get_object(self):
+        obj = User.objects. \
+            get_object_by_public_id(self.kwargs['pk'])
+        return obj
 
 
 class UserActivationView(APIView):

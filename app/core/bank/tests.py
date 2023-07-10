@@ -98,7 +98,6 @@ class BimaCoreBankTest(APITestCase):
 
     def create_permissions(self):
         permission_list = [
-            # Add your permission tuples here.
             ('core.bank.can_create', 'Can create bank'),
             ('core.bank.can_update', 'Can update bank'),
             ('core.bank.can_delete', 'Can delete bank'),

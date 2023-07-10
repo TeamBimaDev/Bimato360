@@ -5,7 +5,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.template.loader import render_to_string
 from .signals import reset_password_signal, user_created_signal, user_activated_signal
-from common.email.email_service import EmailService
+from .tasks import send_email_async
 
 
 @receiver(reset_password_signal)
@@ -17,11 +17,11 @@ def send_password_reset_email(sender, **kwargs):
     }
     message = render_to_string('user/reset_password_email.html', context)
     mail_subject = 'Password Reset'
-    EmailService.send_email(mail_subject, message, email)
+    send_email_async.delay(mail_subject, message, email)
 
 
 @receiver(post_save, sender=get_user_model())
-def notify_admins_on_user_creation(sender, instance, created, **kwargs):
+def send_email_after_user_created(sender, instance, created, **kwargs):
     if created and not instance.is_superuser:
         user_created_signal.send(sender=sender, user=instance)
 
@@ -38,7 +38,19 @@ def send_user_activation_email(sender, user, **kwargs):
         }
         message = render_to_string('user/activation_email.html', context)
         mail_subject = 'User Activation'
-        EmailService.send_email(mail_subject, message, admin.email)
+        send_email_async.delay(mail_subject, message, admin.email)
+
+
+@receiver(user_created_signal)
+def send_user_creation_email(sender, user, **kwargs):
+    context = {
+        'user_name': user.name,
+        'registration_time': user.date_joined,
+        'site_url': os.getenv('SITE_URL')
+    }
+    message = render_to_string('user/user_creation_email_notify.html', context)
+    mail_subject = 'Account Created'
+    send_email_async.delay(mail_subject, message, user.email)
 
 
 @receiver(user_activated_signal)
@@ -52,4 +64,4 @@ def send_activation_confirmation_email(sender, **kwargs):
     }
     message = render_to_string('user/activation_confirmation_email.html', context)
     mail_subject = 'Account Activation Confirmation'
-    EmailService.send_email(mail_subject, message, user.email)
+    send_email_async.delay(mail_subject, message, user.email)
