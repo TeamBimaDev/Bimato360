@@ -91,6 +91,8 @@ class PermissionsList:
 
     ERP_SALE_DOCUMENT_ADD_PRODUCT = ('erp.sale_document.can_add_product',
                                      'Can add product to sale document')
+    ERP_SALE_DOCUMENT_UPDATE_PRODUCT = ('erp.sale_document.can_update_product',
+                                        'Can update product in a sale document')
     ERP_SALE_DOCUMENT_DELETE_PRODUCT = ('erp.sale_document.can_delete_product',
                                         'Can delete product from sale document')
     ERP_SALE_DOCUMENT_CHANGE_STATUS = ('erp.sale_document.can_change_status',
@@ -109,6 +111,8 @@ class PermissionsList:
 
     ERP_PURCHASE_DOCUMENT_ADD_PRODUCT = ('erp.purchase_document.can_add_product',
                                          'Can add product to purchase document')
+    ERP_PURCHASE_DOCUMENT_UPDATE_PRODUCT = ('erp.purchase_document.can_update_product',
+                                            'Can update product in a purchase document')
     ERP_PURCHASE_DOCUMENT_DELETE_PRODUCT = ('erp.purchase_document.can_delete_product',
                                             'Can delete product from purchase document')
     ERP_PURCHASE_DOCUMENT_CHANGE_STATUS = ('erp.purchase_document.can_change_status',

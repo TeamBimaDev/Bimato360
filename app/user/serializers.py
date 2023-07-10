@@ -6,6 +6,7 @@ from django.contrib.auth import (
 )
 from django.contrib.auth.password_validation import validate_password
 from django.utils.encoding import force_str
+from rest_framework.exceptions import ValidationError
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework import serializers
 from .models import User
@@ -15,21 +16,38 @@ from django.utils.http import urlsafe_base64_decode
 from django.utils.translation import gettext_lazy as _
 
 
+def password_match_validator(data):
+    password = data.get('password')
+    confirm_password = data.get('confirm_password')
+    if password != confirm_password:
+        raise ValidationError("Password fields didn't match.")
+    return data
+
+
 class UserSerializer(serializers.ModelSerializer):
     id = serializers.UUIDField(source='public_id',
                                read_only=True, format='hex')
+    confirm_password = serializers.CharField(write_only=True, required=False)
+
     """Serializer for the user object."""
 
     class Meta:
         model = get_user_model()
         fields = ['id', 'email', 'name', 'is_active', 'is_staff', 'public_id', 'date_joined',
-                  'is_approved', 'approved_by', 'approved_at', 'password']
-        extra_kwargs = {'password': {'write_only': True, 'min_length': 5}}
+                  'is_approved', 'approved_by', 'approved_at', 'password', 'confirm_password']
+        extra_kwargs = {
+            'password': {'write_only': True, 'min_length': 5, 'validators': [validate_password]},
+        }
 
     approved_by = serializers.SlugRelatedField(
-        slug_field='username',
+        slug_field='name',
         read_only=True
     )
+
+    def validate(self, data):
+        if data.context['request'].method == "POST":
+            password_match_validator(data)
+            validate_password(data.get('password'))
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
@@ -39,11 +57,13 @@ class UserSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         """Create and return a user with encrypted password."""
+        validated_data.pop('confirm_password', None)
         return get_user_model().objects.create_user(**validated_data)
 
     def update(self, instance, validated_data):
         """Update and return user."""
         password = validated_data.pop('password', None)
+        validated_data.pop('confirm_password', None)  # We don't need the 'confirm_password' value anymore.
         user = super().update(instance, validated_data)
 
         if password:

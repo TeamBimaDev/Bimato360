@@ -104,6 +104,9 @@ AUTH_PASSWORD_VALIDATORS = [
     },
     {
         'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'OPTIONS': {
+            'min_length': 9,
+        }
     },
     {
         'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
@@ -251,6 +254,11 @@ EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
 EMAIL_USE_TLS = config('EMAIL_USE_TLS', cast=bool, default=False)
 
 
-CELERY_BROKER_URL = 'amqp://bima_rbmq_user:bima_rbmq_password@rabbitmq:5672//'
+CELERY_BROKER_URL = 'amqp://bimauser:bimapass@localhost:5672//'
+CELERY_BROKER_BACKEND = "db+sqlite:///celery.sqlite"
+CELERY_CACHE_BACKEND = "db+sqlite:///celery.sqlite"
+CELERY_RESULT_BACKEND = "db+sqlite:///celery.sqlite"
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+
