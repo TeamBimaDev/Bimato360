@@ -4,6 +4,11 @@ class PermissionsList:
     CORE_BANK_DELETE = ('core.bank.can_delete', 'Can delete bank')
     CORE_BANK_READ = ('core.bank.can_read', 'Can read bank')
 
+    CORE_ADDRESS_CREATE = ('core.address.can_create', 'Can create address')
+    CORE_ADDRESS_UPDATE = ('core.address.can_update', 'Can update address')
+    CORE_ADDRESS_DELETE = ('core.address.can_delete', 'Can delete address')
+    CORE_ADDRESS_READ = ('core.address.can_read', 'Can read address')
+
     CORE_CONTACT_CREATE = ('core.contact.can_create', 'Can create contact')
     CORE_CONTACT_UPDATE = ('core.contact.can_update', 'Can update contact')
     CORE_CONTACT_DELETE = ('core.contact.can_delete', 'Can delete contact')

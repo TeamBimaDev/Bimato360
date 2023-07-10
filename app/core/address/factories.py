@@ -22,8 +22,8 @@ class BimaCoreAddressFactory(factory.django.DjangoModelFactory):
     latitude = Faker('latitude')
     longitude = Faker('longitude')
     note = Faker('text')
-    state = BimaCoreStateFactory()
-    country = BimaCoreCountryFactory()
+    state = factory.SubFactory(BimaCoreStateFactory)
+    country = factory.SubFactory(BimaCoreCountryFactory)
     parent_type = None
     parent_id = None
     content_object = None

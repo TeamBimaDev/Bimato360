@@ -12,7 +12,7 @@ from core.country.factories import BimaCoreCountryFactory
 from core.state.factories import BimaCoreStateFactory
 from core.bank.models import BimaCoreBank
 from erp.partner.factories import BimaErpPartnerFactory
-
+from erp.partner.models import BimaErpPartner
 
 class BimaCoreAddressTest(APITestCase):
 
@@ -22,16 +22,21 @@ class BimaCoreAddressTest(APITestCase):
         self.user = UserFactory()
         self.state = BimaCoreStateFactory.create()
         self.country = BimaCoreCountryFactory.create()
-        permission = Permission.objects.get(codename='core.bank.can_create')
+        permission = Permission.objects.get(codename='core.address.can_create')
         self.user.user_permissions.add(permission)
-        permission = Permission.objects.get(codename='erp.partner.can_create')
+        permission = Permission.objects.get(codename='core.address.can_update')
         self.user.user_permissions.add(permission)
+        permission = Permission.objects.get(codename='core.address.can_delete')
+        self.user.user_permissions.add(permission)
+        permission = Permission.objects.get(codename='core.address.can_read')
+        self.user.user_permissions.add(permission)
+
         self.address_data = {
             'number': '123',
             'street': 'Test Street',
             'zip': '12345',
             'city': 'Test City',
-            'contact_name': 'John Doe',
+            'contact_name': 'Contact name',
             'contact_phone': '1234567890',
             'contact_email': 'test@example.com',
             'can_send_bill': True,
@@ -62,16 +67,80 @@ class BimaCoreAddressTest(APITestCase):
         response = self.client.post(url, self.address_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(BimaCoreAddress.objects.count(), 1)
+    def test_update_address(self):
+        self.test_create_address_with_bank()
+        address = BimaCoreAddress.objects.first()
+        address_data = {
+            'contact_name': 'update contact name'
+        }
+        url = reverse('core:bimacoreaddress-detail', kwargs={'pk': str(address.public_id)})
+        response3 = self.client.patch(url, address_data, format='json')
+        self.assertEqual(response3.status_code, status.HTTP_200_OK)
+        self.assertEqual(BimaCoreAddress.objects.get(pk=address.pk).contact_name, 'update contact name')
+    def test_delete_address(self):
+        self.test_create_address_with_bank()
+        address = BimaCoreAddress.objects.first()
+        url = reverse('core:bimacoreaddress-detail', kwargs={'pk': str(address.public_id)})
+        response = self.client.delete(url, format='json')
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
+    def test_add_address_for_bank(self):
+        BimaCoreBankFactory.create()
+        self.bank = BimaCoreBank.objects.first()
+        public_id = self.bank.public_id
+        url2 = reverse('core:bimacorebank-list') + f'{public_id}/addresses/'
+        self.address_data['parent_type'] = ContentType.objects.get_for_model(self.bank).id
+        self.address_data['parent_id'] = self.bank.id
+        response = self.client.post(url2, self.address_data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(BimaCoreAddress.objects.count(), 1)
+    def test_add_address_for_partner(self):
+        BimaErpPartnerFactory.create()
+        self.partner = BimaErpPartner.objects.first()
+        public_id = self.partner.public_id
+        url2 = reverse('erp:bimaerppartner-list') + f'{public_id}/addresses/'
+        self.address_data['parent_type'] = ContentType.objects.get_for_model(self.partner).id
+        self.address_data['parent_id'] = self.partner.id
+        response = self.client.post(url2, self.address_data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(BimaCoreAddress.objects.count(), 1)
+    def test_unauthenticated(self):
+        self.client.logout()
+        url = reverse('core:bimacoreaddress-list')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+    def test_unauthorized_update(self):
+        self.client.logout()
+        user_without_permission = UserFactory()
+        self.client.force_authenticate(user_without_permission)
+        self.test_create_address_with_bank()
+        address = BimaCoreAddress.objects.first()
+        address_data = {
+            'contact_name': 'update contact name'
+        }
+        url = reverse('core:bimacoreaddress-detail', kwargs={'pk': str(address.public_id)})
+        response = self.client.patch(url, address_data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+    def test_unauthorized_delete(self):
+        self.client.logout()
+        user_without_permission = UserFactory()
+        self.client.force_authenticate(user_without_permission)
+        self.test_create_address_with_bank()
+        address = BimaCoreAddress.objects.first()
+        url = reverse('core:bimacoreaddress-detail', kwargs={'pk': str(address.public_id)})
+        response = self.client.delete(url, format='json')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
     def create_permissions(self):
         permission_list = [
             # Add your permission tuples here.
-            ('core.bank.can_create', 'Can create bank'),
-            ('erp.partner.can_update', 'Can update partner'),
+            ('core.address.can_create', 'Can create address'),
+            ('core.address.can_update', 'Can update address'),
+            ('core.address.can_delete', 'Can delete address'),
+            ('core.address.can_read', 'Can read address'),
         ]
 
         for permission_code, permission_name in permission_list:
-            content_type = ContentType.objects.get_for_model(BimaCoreBank)
+            content_type = ContentType.objects.get_for_model(BimaCoreAddress)
             Permission.objects.get_or_create(
                 codename=permission_code,
                 name=permission_name,
