@@ -22,7 +22,7 @@ from .serializers import (
     UserSerializer,
     AuthTokenSerializer,
     ChangePasswordSerializer,
-    ResetPasswordEmailRequestSerializer, SetNewPasswordSerializer
+    ResetPasswordEmailRequestSerializer, SetNewPasswordSerializer, AdminCreateUserSerializer
 )
 
 from .models import User
@@ -75,25 +75,27 @@ class UserViewSet(viewsets.ModelViewSet):
         permissions_list = [{'id': perm.id, 'name': perm.name, 'codename': perm.codename} for perm in permissions]
         return Response(permissions_list)
 
-    @action(detail=False, methods=['post'], url_path='manage-permissions')
+    @action(detail=True, methods=['post'], url_path='manage-permissions')
     def manage_permissions(self, request):
-        # Check if the user has the permission to access this endpoint
-        if not request.user.has_perm('auth.change_permission'):
+
+        user_to_update = self.get_object()
+
+        if not user_to_update.has_perm('auth.change_permission'):
             return Response({'error': 'You do not have permission to manage permissions'},
                             status=status.HTTP_403_FORBIDDEN)
 
         new_permission_ids = set(request.data.get('permissions', []))
-        current_permission_ids = set(request.user.user_permissions.values_list('id', flat=True))
+        current_permission_ids = set(user_to_update.user_permissions.values_list('id', flat=True))
 
         permissions_to_add = new_permission_ids - current_permission_ids
         permissions_to_remove = current_permission_ids - new_permission_ids
 
         with transaction.atomic():
             permissions_to_add = Permission.objects.filter(id__in=permissions_to_add)
-            request.user.user_permissions.add(*permissions_to_add)
+            user_to_update.user_permissions.add(*permissions_to_add)
 
             permissions_to_remove = Permission.objects.filter(id__in=permissions_to_remove)
-            request.user.user_permissions.remove(*permissions_to_remove)
+            user_to_update.user_permissions.remove(*permissions_to_remove)
 
         return Response({'status': 'Permissions updated successfully'})
 
@@ -123,6 +125,13 @@ class UserViewSet(viewsets.ModelViewSet):
         obj = User.objects. \
             get_object_by_public_id(self.kwargs['pk'])
         return obj
+
+    @action(detail=False, methods=['post'], url_path='create_by_admin')
+    def create_by_admin(self, request):
+        serializer = AdminCreateUserSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class UserActivationView(APIView):
@@ -228,3 +237,14 @@ class PasswordResetConfirmView(GenericAPIView):
         user.set_password(serializer.validated_data.get('password'))
         user.save()
         return Response({'success': True, 'message': 'Password reset successful'}, status=status.HTTP_200_OK)
+
+
+class CreateUserPasswordForFirstTime(APIView):
+    serializer_class = SetNewPasswordSerializer
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data)
+        if serializer.is_valid():
+            return Response({"detail": "Password has been reset."})
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

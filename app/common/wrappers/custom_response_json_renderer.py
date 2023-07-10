@@ -5,6 +5,15 @@ class CustomResponseJSONRenderer(JSONRenderer):
     def render(self, data, accepted_media_type=None, renderer_context=None):
         try:
             status_code = renderer_context['response'].status_code
+            if not str(status_code).startswith('2'):
+                response = {
+                    'succeeded': False,
+                    "code": status_code,
+                    "data": None,
+                    "message": data
+                }
+                return super(CustomResponseJSONRenderer, self).render(response, accepted_media_type, renderer_context)
+
             if data is None:
                 return super(CustomResponseJSONRenderer, self). \
                     render(data, accepted_media_type, renderer_context)

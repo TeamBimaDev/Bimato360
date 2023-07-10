@@ -34,20 +34,24 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = get_user_model()
         fields = ['id', 'email', 'name', 'is_active', 'is_staff', 'public_id', 'date_joined',
-                  'is_approved', 'approved_by', 'approved_at', 'password', 'confirm_password']
-        extra_kwargs = {
-            'password': {'write_only': True, 'min_length': 5, 'validators': [validate_password]},
-        }
+                  'is_approved', 'approved_by', 'approved_at', 'password']
+        extra_kwargs = {'password': {'write_only': True, 'min_length': 5, 'required': False}}
 
     approved_by = serializers.SlugRelatedField(
-        slug_field='name',
+        slug_field='username',
         read_only=True
     )
 
     def validate(self, data):
-        if data.context['request'].method == "POST":
-            password_match_validator(data)
-            validate_password(data.get('password'))
+        request_method = self.context['request'].method
+        if request_method == "POST":
+            password = data.get('password')
+            confirm_password = data.get('confirm_password')
+            if password != confirm_password:
+                raise serializers.ValidationError("Password fields didn't match.")
+            if password:
+                validate_password(password)
+        return data
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
@@ -63,12 +67,30 @@ class UserSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         """Update and return user."""
         password = validated_data.pop('password', None)
-        validated_data.pop('confirm_password', None)  # We don't need the 'confirm_password' value anymore.
         user = super().update(instance, validated_data)
 
         if password:
             user.set_password(password)
             user.save()
+        return user
+
+
+class AdminCreateUserSerializer(serializers.ModelSerializer):
+    id = serializers.UUIDField(source='public_id', read_only=True, format='hex')
+
+    class Meta:
+        model = get_user_model()
+        fields = ['id', 'email', 'name']
+        extra_kwargs = {'name': {'required': True}}
+
+    def create(self, validated_data):
+        """Create and return a new user."""
+        password = get_user_model().objects.make_random_password()
+        user = get_user_model().objects.create_user(**validated_data, password=password,  created_by_admin=True)
+        user.is_password_change_when_created = False
+        user.created_by_admin = True
+        user.set_password(password)
+        user.save()
         return user
 
 
@@ -149,7 +171,6 @@ class SetNewPasswordSerializer(serializers.Serializer):
             uid = force_str(urlsafe_base64_decode(uidb64))
             user = User.objects.get(id=uid)
 
-            # Check that token matches and has not expired
             token_matches = user.reset_password_token == token
             token_not_expired = timezone.now() - user.reset_password_time <= timedelta(hours=24)
 
@@ -160,6 +181,11 @@ class SetNewPasswordSerializer(serializers.Serializer):
             user.reset_password_token = None
             user.reset_password_uid = None
             user.reset_password_time = None
+            user.set_password(password)
+            if user.is_password_change_when_created is False:
+                user.is_password_change_when_created = True
+                user.is_approved = True
+                user.approved_at = timezone.now()
             user.save()
 
             return attrs
