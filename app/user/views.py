@@ -32,7 +32,8 @@ from .models import User
 from .signals import reset_password_signal, user_activated_signal, user_declined_signal
 from common.permissions.app_permission import IsAdminOrSelfUser, IsAdminUser, CanEditOtherPassword, UserHasAddPermission
 
-from common.permissions.app_permission import IsAdminAndCanActivateAccount
+from common.permissions.app_permission import IsAdminAndCanActivateAccount, IsSelfUserOrUserCanUpdate, \
+    UserCanCreateOtherUser
 
 from core.abstract.pagination import DefaultPagination
 
@@ -59,13 +60,18 @@ class UserViewSet(viewsets.ModelViewSet):
         if self.action == 'create':
             permission_classes = [permissions.AllowAny]
         elif self.action in ['update', 'partial_update']:
-            permission_classes = [IsAdminOrSelfUser]
+            permission_classes = [permissions.IsAuthenticated & IsSelfUserOrUserCanUpdate]
         elif self.action == 'destroy':
             permission_classes = [IsAdminUser]
-        elif self.action in ['list_permissions', 'manage_permissions']:
+        elif self.action in ['list_permissions', 'manage_permissions', 'list_user_permissions']:
             permission_classes = [permissions.IsAdminUser & permissions.IsAuthenticated & UserHasAddPermission]
+        elif self.action in ['create_by_admin']:
+            permission_classes = [permissions.IsAuthenticated & UserCanCreateOtherUser]
+        elif self.action in ['manage_user_activation']:
+            permission_classes = [IsAdminAndCanActivateAccount]
         else:
             permission_classes = [permissions.IsAuthenticated]
+
         return [permission() for permission in permission_classes]
 
     def get_queryset(self):

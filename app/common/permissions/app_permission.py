@@ -37,7 +37,7 @@ class CanEditOtherPassword(permissions.BasePermission):
         if obj == request.user:
             return True
 
-        return request.user.is_staff and request.user.user_permissions.\
+        return request.user.is_staff and request.user.user_permissions. \
             filter(codename='user.user.can_edit_other_password').exists()
 
 
@@ -59,3 +59,15 @@ class IsAdminAndCanActivateAccount(permissions.BasePermission):
         if request.user.is_staff:
             return request.user.has_perm('user.user.can_activate_account')
         return False
+
+
+class IsSelfUserOrUserCanUpdate(permissions.BasePermission):
+
+    def has_object_permission(self, request, view, obj):
+        return request.user == obj or request.user.has_perm('user.user.can_update')
+
+
+class UserCanCreateOtherUser(permissions.BasePermission):
+
+    def has_object_permission(self, request, view, obj):
+        return request.user == obj or request.user.has_perm('user.user.can_create')
