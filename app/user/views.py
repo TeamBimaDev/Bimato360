@@ -1,5 +1,6 @@
 from datetime import timedelta
 
+from django.contrib.contenttypes.models import ContentType
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.contrib.auth import get_user_model
@@ -31,6 +32,8 @@ from .signals import reset_password_signal, user_activated_signal
 from common.permissions.app_permission import IsAdminOrSelfUser, IsAdminUser, CanEditOtherPassword, UserHasAddPermission
 
 from core.abstract.pagination import DefaultPagination
+
+from core.models import GlobalPermission
 
 
 class CreateTokenView(TokenObtainPairView):
@@ -71,16 +74,17 @@ class UserViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['get'], url_path='list-permissions')
     def list_permissions(self, request):
-        permissions = Permission.objects.all()
+        content_type = ContentType.objects.get_for_model(GlobalPermission)
+        permissions = Permission.objects.all(content_type=content_type)
         permissions_list = [{'id': perm.id, 'name': perm.name, 'codename': perm.codename} for perm in permissions]
         return Response(permissions_list)
 
     @action(detail=True, methods=['post'], url_path='manage-permissions')
-    def manage_permissions(self, request):
+    def manage_permissions(self, request, pk=None):
 
         user_to_update = self.get_object()
 
-        if not request.user.user_permissions.has_perm('auth.change_permission'):
+        if not request.user.has_perm('user.user.can_add_permission'):
             return Response({'error': 'You do not have permission to manage permissions'},
                             status=status.HTTP_403_FORBIDDEN)
 
@@ -91,11 +95,14 @@ class UserViewSet(viewsets.ModelViewSet):
         permissions_to_remove = current_permission_ids - new_permission_ids
 
         with transaction.atomic():
-            permissions_to_add = Permission.objects.filter(id__in=permissions_to_add)
-            user_to_update.user_permissions.add(*permissions_to_add)
+            try:
+                permissions_to_add = Permission.objects.filter(id__in=permissions_to_add)
+                user_to_update.user_permissions.add(*permissions_to_add)
 
-            permissions_to_remove = Permission.objects.filter(id__in=permissions_to_remove)
-            user_to_update.user_permissions.remove(*permissions_to_remove)
+                permissions_to_remove = Permission.objects.filter(id__in=permissions_to_remove)
+                user_to_update.user_permissions.remove(*permissions_to_remove)
+            except Exception as e:
+                return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
         return Response({'status': 'Permissions updated successfully'})
 

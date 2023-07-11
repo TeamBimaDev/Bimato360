@@ -24,7 +24,6 @@ class PermissionsList:
     CORE_CURRENCY_DELETE = ('core.currency.can_delete', 'Can delete currency', 'CORE_CURRENCY')
     CORE_CURRENCY_READ = ('core.currency.can_read', 'Can read currency', 'CORE_CURRENCY')
 
-
     CORE_DEPARTMENT_CREATE = ('core.department.can_create', 'Can create department', 'CORE_DEPARTMENT')
     CORE_DEPARTMENT_UPDATE = ('core.department.can_update', 'Can update department', 'CORE_DEPARTMENT')
     CORE_DEPARTMENT_DELETE = ('core.department.can_delete', 'Can delete department', 'CORE_DEPARTMENT')
