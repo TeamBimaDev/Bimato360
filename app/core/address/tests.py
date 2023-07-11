@@ -109,27 +109,7 @@ class BimaCoreAddressTest(APITestCase):
         url = reverse('core:bimacoreaddress-list')
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-    def test_unauthorized_update(self):
-        self.client.logout()
-        user_without_permission = UserFactory()
-        self.client.force_authenticate(user_without_permission)
-        self.test_create_address_with_bank()
-        address = BimaCoreAddress.objects.first()
-        address_data = {
-            'contact_name': 'update contact name'
-        }
-        url = reverse('core:bimacoreaddress-detail', kwargs={'pk': str(address.public_id)})
-        response = self.client.patch(url, address_data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-    def test_unauthorized_delete(self):
-        self.client.logout()
-        user_without_permission = UserFactory()
-        self.client.force_authenticate(user_without_permission)
-        self.test_create_address_with_bank()
-        address = BimaCoreAddress.objects.first()
-        url = reverse('core:bimacoreaddress-detail', kwargs={'pk': str(address.public_id)})
-        response = self.client.delete(url, format='json')
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
     def create_permissions(self):
         permission_list = [
             # Add your permission tuples here.

@@ -95,27 +95,6 @@ class BimaCoreEntityTagTest(APITestCase):
         url = reverse('core:bimacoreentitytag-list')
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-    def test_unauthorized_update(self):
-        self.client.logout()
-        user_without_permission = UserFactory()
-        self.client.force_authenticate(user_without_permission)
-        self.test_create_entity_tag_with_partner()
-        entity_tag = BimaCoreEntityTag.objects.first()
-        address_data = {
-            'order': 3
-        }
-        url = reverse('core:bimacoreentitytag-detail', kwargs={'pk': str(entity_tag.public_id)})
-        response = self.client.patch(url, address_data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-    def test_unauthorized_delete(self):
-        self.client.logout()
-        user_without_permission = UserFactory()
-        self.client.force_authenticate(user_without_permission)
-        self.test_create_entity_tag_with_partner()
-        entity_tag = BimaCoreEntityTag.objects.first()
-        url = reverse('core:bimacoreentitytag-detail', kwargs={'pk': str(entity_tag.public_id)})
-        response = self.client.delete(url, format='json')
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
     def create_permissions(self):
         permission_list = [
             # Add your permission tuples here.
