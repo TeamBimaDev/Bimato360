@@ -80,7 +80,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
         user_to_update = self.get_object()
 
-        if not user_to_update.has_perm('auth.change_permission'):
+        if not request.user.user_permissions.has_perm('auth.change_permission'):
             return Response({'error': 'You do not have permission to manage permissions'},
                             status=status.HTTP_403_FORBIDDEN)
 

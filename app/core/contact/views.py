@@ -7,18 +7,18 @@ from common.permissions.action_base_permission import ActionBasedPermission
 class BimaCoreContactViewSet(AbstractViewSet):
     queryset = BimaCoreContact.objects.all()
     serializer_class = BimaCoreContactSerializer
-    permission_classes = (ActionBasedPermission,)
+    # permission_classes = (ActionBasedPermission,)
     ordering_fields = AbstractViewSet.ordering_fields + \
                       ['name', 'position']
 
-    action_permissions = {
-        'list': ['contact.can_read'],
-        'create': ['contact.can_create'],
-        'retrieve': ['contact.can_read'],
-        'update': ['contact.can_update'],
-        'partial_update': ['contact.can_update'],
-        'destroy': ['contact.can_delete'],
-    }
+    # action_permissions = {
+    #     'list': ['contact.can_read'],
+    #     'create': ['contact.can_create'],
+    #     'retrieve': ['contact.can_read'],
+    #     'update': ['contact.can_update'],
+    #     'partial_update': ['contact.can_update'],
+    #     'destroy': ['contact.can_delete'],
+    # }
 
 
     def get_object(self):

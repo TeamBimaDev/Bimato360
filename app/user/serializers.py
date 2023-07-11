@@ -34,11 +34,13 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = get_user_model()
         fields = ['id', 'email', 'name', 'is_active', 'is_staff', 'public_id', 'date_joined',
-                  'is_approved', 'approved_by', 'approved_at', 'password']
-        extra_kwargs = {'password': {'write_only': True, 'min_length': 5, 'required': False}}
+                  'is_approved', 'approved_by', 'approved_at', 'password', 'confirm_password']
+        extra_kwargs = {
+            'password': {'write_only': True, 'min_length': 5, 'validators': [validate_password]},
+        }
 
     approved_by = serializers.SlugRelatedField(
-        slug_field='username',
+        slug_field='name',
         read_only=True
     )
 
@@ -86,7 +88,7 @@ class AdminCreateUserSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         """Create and return a new user."""
         password = get_user_model().objects.make_random_password()
-        user = get_user_model().objects.create_user(**validated_data, password=password,  created_by_admin=True)
+        user = get_user_model().objects.create_user(**validated_data, password=password, created_by_admin=True)
         user.is_password_change_when_created = False
         user.created_by_admin = True
         user.set_password(password)

@@ -17,9 +17,10 @@ class Command(BaseCommand):
                                 not callable(attr) and not attr.startswith("__")]
 
         for permission_tuple in permissions_in_class:
-            permission_codename, permission_name = permission_tuple
+            permission_codename, permission_name, permission_group = permission_tuple
 
             if not Permission.objects.filter(codename=permission_codename).exists():
-                Permission.objects.create(content_type=content_type, codename=permission_codename, name=permission_name)
+                permission = Permission.objects.create(content_type=content_type, codename=permission_codename,
+                                                       name=permission_name)
 
         self.stdout.write(self.style.SUCCESS('Successfully synced permissions'))
