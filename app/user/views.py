@@ -75,7 +75,7 @@ class UserViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'], url_path='list-permissions')
     def list_permissions(self, request):
         content_type = ContentType.objects.get_for_model(GlobalPermission)
-        permissions = Permission.objects.all(content_type=content_type)
+        permissions = Permission.objects.filter(content_type=content_type)
         permissions_list = [{'id': perm.id, 'name': perm.name, 'codename': perm.codename} for perm in permissions]
         return Response(permissions_list)
 
