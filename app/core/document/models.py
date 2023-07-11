@@ -15,6 +15,8 @@ from common.validators.file_validators import validate_file_size, validate_file_
 from common.enums.file_type import FileTypeCompany
 from common.service.file_service import resize_image
 
+from common.enums.file_type import FileTypeUser
+
 
 class BimaCoreDocument(AbstractModel):
     def document_file_path(self, filename):
@@ -60,9 +62,7 @@ class BimaCoreDocument(AbstractModel):
                                                    parent_id=parent.id,
                                                    file_type=document_data['file_type'])
 
-            if document_data['file_type'] == FileTypeCompany.COMPANY_LOGO.name and \
-                    document_data.get('is_favorite', False):
-                existing_docs.update(is_favorite=False)
+            verify_is_favorite_item_exist(document_data, existing_docs)
             file = document_data['file_path']
             ext = os.path.splitext(file.name)[1]
             filename = f'{uuid.uuid4()}{ext}'
@@ -108,6 +108,17 @@ class BimaCoreDocument(AbstractModel):
             return {"error": str(e), "status": status.HTTP_500_INTERNAL_SERVER_ERROR}
 
 
+def verify_is_favorite_item_exist(cls, document_data, existing_docs):
+    if (
+            (
+                    document_data['file_type'] == FileTypeCompany.COMPANY_LOGO.name or
+                    document_data['file_type'] == FileTypeUser.USER_PROFILE_PICTURE.name
+            )
+            and document_data.get('is_favorite', False)
+    ):
+        existing_docs.update(is_favorite=False)
+
+
 def create_document_from_parent_entity(data_document_to_save, parent):
     for document_data in data_document_to_save:
         create_single_document(document_data, parent)
@@ -134,6 +145,3 @@ def get_documents_for_parent_entity(parent):
         parent_type=ContentType.objects.get_for_model(parent),
         parent_id=parent.id
     )
-
-
-

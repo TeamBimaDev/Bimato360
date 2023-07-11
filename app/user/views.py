@@ -9,6 +9,7 @@ from django.contrib.auth.tokens import default_token_generator
 from django.db import transaction
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import permissions, viewsets, status, generics
 from rest_framework.decorators import action
 from rest_framework.generics import GenericAPIView
@@ -28,6 +29,7 @@ from .serializers import (
 )
 
 from .models import User
+from .service import get_favorite_user_profile_image
 
 from .signals import reset_password_signal, user_activated_signal, user_declined_signal
 from common.permissions.app_permission import IsAdminOrSelfUser, IsAdminUser, CanEditOtherPassword, UserHasAddPermission
@@ -39,19 +41,23 @@ from core.abstract.pagination import DefaultPagination
 
 from core.models import GlobalPermission
 
+from common.enums.file_type import return_list_file_type_user
+from core.document.models import get_documents_for_parent_entity, BimaCoreDocument
+
 
 class CreateTokenView(TokenObtainPairView):
     permission_classes = (permissions.AllowAny,)
     serializer_class = AuthTokenSerializer
     renderer_classes = api_settings.DEFAULT_RENDERER_CLASSES
     ordering = ['-name']
-    pagination_class = DefaultPagination
 
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    filter_class = UserFilter
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = UserFilter
+    pagination_class = DefaultPagination
 
     def get_permissions(self):
         """
@@ -73,9 +79,6 @@ class UserViewSet(viewsets.ModelViewSet):
             permission_classes = [permissions.IsAuthenticated]
 
         return [permission() for permission in permission_classes]
-
-    def get_queryset(self):
-        return User.objects.all()
 
     @action(detail=False, methods=['get'], url_path='me')
     def me(self, request):
@@ -176,6 +179,43 @@ class UserViewSet(viewsets.ModelViewSet):
                 user_declined_signal.send(sender=self.__class__, user=user, admin=request.user)
 
         return Response({"status": f"Users have been {action}d successfully"}, status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=['get'], url_path='documents')
+    def list_documents(self, request, *args, **kwargs):
+        company = self.get_object()
+        documents = get_documents_for_parent_entity(company)
+        serialized_documents = UserSerializer(documents, many=True)
+        return Response(serialized_documents.data)
+
+    @action(detail=False, methods=['get'], url_path='documents_type')
+    def document_type(self, request, *args, **kwargs):
+        return Response(return_list_file_type_user())
+
+    @action(detail=True, methods=['post'], url_path='documents')
+    def create_document(self, request, *args, **kwargs):
+        user = self.get_object()
+        document_data = request.data
+        document_data['file_path'] = request.FILES['file_path']
+        document_data['is_favorite'] = request.data.get('is_favorite', False)
+        result = BimaCoreDocument.create_document_for_parent(user, document_data)
+        if isinstance(result, BimaCoreDocument):
+            return Response({
+                "id": result.public_id,
+                "document_name": result.document_name,
+                "description": result.description,
+                "date_file": result.date_file,
+                "file_type": result.file_type,
+                "is_favorite": result.is_favorite
+
+            }, status=status.HTTP_201_CREATED)
+        else:
+            return Response(result, status=result.get("status", status.HTTP_500_INTERNAL_SERVER_ERROR))
+
+    @action(detail=True, methods=['get'], url_path='get_favorite_user_profile_image')
+    def get_favorite_user_profile_image(self, request, *args, **kwargs):
+        user = self.get_object()
+        favorite_image = get_favorite_user_profile_image(user)
+        return Response(favorite_image, status=status.HTTP_200_OK)
 
 
 class UserActivationView(APIView):
