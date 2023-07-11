@@ -57,6 +57,5 @@ class IsAdminAndCanActivateAccount(permissions.BasePermission):
 
     def has_permission(self, request, view):
         if request.user.is_staff:
-            has_permission = request.user.user_permissions.filter(codename='user.user.can_activate_account').exists()
-            return has_permission
+            return request.user.has_perm('user.user.can_activate_account')
         return False

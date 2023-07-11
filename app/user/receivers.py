@@ -9,7 +9,8 @@ from django.dispatch import receiver
 from django.template.loader import render_to_string
 from django.utils.http import urlsafe_base64_encode
 
-from .signals import reset_password_signal, user_created_signal, user_activated_signal, user_created_by_admin_signal
+from .signals import reset_password_signal, user_created_signal, user_activated_signal, user_created_by_admin_signal, \
+    user_declined_signal
 from .tasks import send_email_async
 from app.settings import config
 
@@ -95,5 +96,19 @@ def send_activation_confirmation_email(sender, **kwargs):
         'activation_time': user.approved_at,
     }
     message = render_to_string('user/activation_confirmation_email.html', context)
+    mail_subject = 'Account Activation Confirmation'
+    send_email_async.delay(mail_subject, message, user.email, html_message=True)
+
+
+@receiver(user_declined_signal)
+def send_declined_email_for_user(sender, **kwargs):
+    user = kwargs['user']
+    admin = kwargs['admin']
+    context = {
+        'user_name': user.name,
+        'admin_name': admin.name,
+        'activation_time': user.approved_at,
+    }
+    message = render_to_string('user/user_declined_email.html', context)
     mail_subject = 'Account Activation Confirmation'
     send_email_async.delay(mail_subject, message, user.email, html_message=True)

@@ -19,6 +19,7 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.settings import api_settings
 
+from .filters import UserFilter
 from .serializers import (
     UserSerializer,
     AuthTokenSerializer,
@@ -28,8 +29,10 @@ from .serializers import (
 
 from .models import User
 
-from .signals import reset_password_signal, user_activated_signal
+from .signals import reset_password_signal, user_activated_signal, user_declined_signal
 from common.permissions.app_permission import IsAdminOrSelfUser, IsAdminUser, CanEditOtherPassword, UserHasAddPermission
+
+from common.permissions.app_permission import IsAdminAndCanActivateAccount
 
 from core.abstract.pagination import DefaultPagination
 
@@ -47,6 +50,7 @@ class CreateTokenView(TokenObtainPairView):
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+    filter_class = UserFilter
 
     def get_permissions(self):
         """
@@ -140,21 +144,60 @@ class UserViewSet(viewsets.ModelViewSet):
         user = serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
+    @action(detail=False, methods=['post'], url_path='manage_user_activation')
+    def manage_user_activation(self, request):
+        public_ids = request.data.get('user_public_ids', [])
+        action = request.data.get('action', None)
+
+        if action not in ['approve', 'decline']:
+            return Response({"error": "Invalid action"}, status=status.HTTP_400_BAD_REQUEST)
+
+        users = User.objects.filter(public_id__in=public_ids)
+
+        for user in users:
+            if action == 'approve':
+                user.is_approved = True
+                user.approved_by = request.user
+                user.approved_at = timezone.now()
+                user.is_active = True
+                user.save()
+                user_activated_signal.send(sender=self.__class__, user=user, admin=request.user)
+            elif action == 'decline':
+                user.is_approved = False
+                user.is_active = False
+                user.reason_declined = request.data.get('reason_declined', None)
+                user.save()
+                user_declined_signal.send(sender=self.__class__, user=user, admin=request.user)
+
+        return Response({"status": f"Users have been {action}d successfully"}, status=status.HTTP_200_OK)
+
 
 class UserActivationView(APIView):
-    permission_classes = (permissions.IsAdminUser,)
+    permission_classes = (IsAdminAndCanActivateAccount,)
 
-    def get(self, request, user_id):
+    def post(self, request, user_id):
         user = get_user_model().objects.get(public_id=user_id)
-        if request.user.has_perm('user.user.can_activate_account'):
+        inform_user = request.data.get('inform_user', True)
+
+        if 'is_approved' in request.data and request.data['is_approved']:
             user.is_approved = True
-            user.approved_by = request.user
+            user.is_approved_by = request.user
             user.approved_at = timezone.now()
+            user.is_active = True
             user.save()
             user_activated_signal.send(sender=self.__class__, user=user, admin=request.user)
-            return Response({'status': 'User activated'}, status=status.HTTP_200_OK)
+            response = {'status': 'User activated'}
         else:
-            return Response({'error': 'You do not have permission to activate users'}, status=status.HTTP_403_FORBIDDEN)
+            user.is_approved = False
+            user.is_active = False
+            user.reason_declined = request.data.get('reason_declined', None)
+            user.save()
+            if inform_user:
+                user_declined_signal.send(sender=self.__class__, user=user, admin=request.user)
+            response = {'status': 'User not activated'}
+
+        user.save()
+        return Response(response, status=status.HTTP_200_OK)
 
 
 class ChangePasswordView(generics.UpdateAPIView):
