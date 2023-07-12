@@ -337,6 +337,31 @@ class PasswordResetConfirmView(GenericAPIView):
 class CreateUserPasswordForFirstTime(APIView):
     serializer_class = SetNewPasswordSerializer
 
+    def get(self, request, *args, **kwargs):
+        uidb64 = kwargs.get('uidb64')
+        token = kwargs.get('token')
+        public_id = kwargs.get('public_id')
+
+        if uidb64 is None or token is None or public_id is None:
+            return Response({"detail": "Missing parameters."}, status=status.HTTP_400_BAD_REQUEST)
+
+        uid = force_str(urlsafe_base64_decode(uidb64))
+        user = User.objects.get(public_id=public_id)
+
+        if not user:
+            return Response({"detail": "User not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        if uid != str(user.pk):
+            return Response({"detail": "Invalid uid."}, status=status.HTTP_400_BAD_REQUEST)
+
+        if user.reset_password_token != token:
+            return Response({"detail": "Invalid token."}, status=status.HTTP_400_BAD_REQUEST)
+
+        if timezone.now() - user.reset_password_time > timedelta(hours=24):
+            return Response({"detail": "Token expired."}, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response({"detail": "Valid token."})
+
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():

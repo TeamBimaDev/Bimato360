@@ -45,7 +45,7 @@ def send_user_activation_email(sender, user, **kwargs):
             'admin_name': admin.name,
             'user_name': user.name,
             'registration_time': user.date_joined,
-            'activation_link': config('SITE_URL') + '/api/user/activate_user_account/' + str(user.public_id) + "/"
+            'activation_link': config('SITE_URL') + '/users/approve/' + str(user.public_id) + "/"
         }
         message = render_to_string('user/activation_email.html', context)
         mail_subject = 'User Activation'
@@ -79,7 +79,8 @@ def send_user_created_by_admin_creation_email(sender, user, **kwargs):
         'site_url': config('SITE_URL'),
         'uidb64': uidb64,
         'token': token,
-        'activation_link': config('SITE_URL') + '/api/user/activate_user_account/' + str(user.public_id) + "/"
+        'activation_link': config('SITE_URL') + '/api/user/activate_user_account/' + str(user.public_id) + "/" +
+                           str(uidb64) + "/" + str(token) + "/"
     }
     message = render_to_string('user/user_activate_account_and_change_password.html', context)
     mail_subject = 'Account Created'
