@@ -43,11 +43,11 @@ class BimaCoreDocumentViewSet(AbstractViewSet):
     def get_list_file_type_partner(self, request, *args, **kwargs):
         return Response(return_list_file_type_partner())
 
-    @action(detail=False, methods=['get'], url_path='user_documents_type')
+    @action(detail=False, methods=['get'], url_path='list_file_type_user')
     def user_documents_type(self, request, *args, **kwargs):
         return Response(return_list_file_type_user())
 
-    @action(detail=False, methods=['get'], url_path='company_documents_type')
+    @action(detail=False, methods=['get'], url_path='list_file_type_company')
     def company_documents_type(self, request, *args, **kwargs):
         return Response(return_list_file_type_company())
 
