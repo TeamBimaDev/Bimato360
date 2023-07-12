@@ -1,6 +1,8 @@
 """
 Serializers for the user API View.
 """
+import binascii
+
 from django.contrib.auth import (
     get_user_model,
 )
@@ -175,11 +177,23 @@ class SetNewPasswordSerializer(serializers.Serializer):
             confirm_password = attrs.get('confirm_password')
             uidb64 = attrs.get('uidb64')
             token = attrs.get('token')
+            public_id = attrs.get('public_id')
+
             if password != confirm_password:
                 raise serializers.ValidationError({"confirm_password": "Passwords do not match"})
 
-            uid = force_str(urlsafe_base64_decode(uidb64))
-            user = User.objects.get(id=uid)
+            try:
+                uid = force_str(urlsafe_base64_decode(uidb64))
+            except (ValueError, binascii.Error):
+                raise serializers.ValidationError({'details': _('Unable to identify credential')})
+
+            try:
+                user = User.objects.get(public_id=public_id)
+            except User.DoesNotExist:
+                raise serializers.ValidationError({'details': _('Unable to identify credential')})
+
+            if uid != str(user.pk):
+                raise serializers.ValidationError({'details': _('Unable to identify credential')})
 
             token_matches = user.reset_password_token == token
             token_not_expired = timezone.now() - user.reset_password_time <= timedelta(hours=24)

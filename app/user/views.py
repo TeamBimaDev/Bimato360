@@ -1,3 +1,4 @@
+import binascii
 from datetime import timedelta
 
 from django.contrib.contenttypes.models import ContentType
@@ -334,6 +335,7 @@ class PasswordResetConfirmView(GenericAPIView):
 
 class CreateUserPasswordForFirstTime(APIView):
     serializer_class = SetNewPasswordSerializer
+    permission_classes = (permissions.AllowAny,)
 
     def get(self, request, *args, **kwargs):
         uidb64 = kwargs.get('uidb64')
@@ -343,10 +345,14 @@ class CreateUserPasswordForFirstTime(APIView):
         if uidb64 is None or token is None or public_id is None:
             return Response({"detail": "Missing parameters."}, status=status.HTTP_400_BAD_REQUEST)
 
-        uid = force_str(urlsafe_base64_decode(uidb64))
-        user = User.objects.get(public_id=public_id)
+        try:
+            uid = force_str(urlsafe_base64_decode(uidb64))
+        except (ValueError, binascii.Error):
+            return Response({"detail": "Invalid uid format."}, status=status.HTTP_400_BAD_REQUEST)
 
-        if not user:
+        try:
+            user = User.objects.get(public_id=public_id)
+        except User.DoesNotExist:
             return Response({"detail": "User not found."}, status=status.HTTP_404_NOT_FOUND)
 
         if uid != str(user.pk):
