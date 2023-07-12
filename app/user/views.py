@@ -41,8 +41,9 @@ from core.abstract.pagination import DefaultPagination
 
 from core.models import GlobalPermission
 
-from common.enums.file_type import return_list_file_type_user
 from core.document.models import get_documents_for_parent_entity, BimaCoreDocument
+
+from core.document.serializers import BimaCoreDocumentSerializer
 
 
 class CreateTokenView(TokenObtainPairView):
@@ -184,7 +185,7 @@ class UserViewSet(viewsets.ModelViewSet):
     def list_documents(self, request, *args, **kwargs):
         user = self.get_object()
         documents = get_documents_for_parent_entity(user)
-        serialized_documents = UserSerializer(documents, many=True)
+        serialized_documents = BimaCoreDocumentSerializer(documents, many=True)
         return Response(serialized_documents.data)
 
     @action(detail=True, methods=['post'], url_path='add_document')
