@@ -222,7 +222,7 @@ class UserActivationView(APIView):
         user = get_user_model().objects.get(public_id=user_id)
         inform_user = request.data.get('inform_user', True)
 
-        if 'is_approved' in request.data and request.data['is_approved']:
+        if 'is_approved' in request.data and request.data['is_approved'] and request.data['is_approved'] == "True":
             user.is_approved = True
             user.is_approved_by = request.user
             user.approved_at = timezone.now()
