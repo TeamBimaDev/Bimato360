@@ -4,11 +4,14 @@ from django.utils.translation import gettext_lazy as _
 from core.document.serializers import BimaCoreDocumentSerializer
 from django.http import HttpResponse
 from rest_framework import status
+from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from common.enums.file_type import return_list_file_type_partner
 
 from core.document.serializers import BimaCoreDocumentGetSerializer
+
+from common.enums.file_type import return_list_file_type_user, return_list_file_type_company
 
 
 class BimaCoreDocumentViewSet(AbstractViewSet):
@@ -39,3 +42,12 @@ class BimaCoreDocumentViewSet(AbstractViewSet):
 
     def get_list_file_type_partner(self, request, *args, **kwargs):
         return Response(return_list_file_type_partner())
+
+    @action(detail=False, methods=['get'], url_path='user_documents_type')
+    def user_documents_type(self, request, *args, **kwargs):
+        return Response(return_list_file_type_user())
+
+    @action(detail=False, methods=['get'], url_path='company_documents_type')
+    def company_documents_type(self, request, *args, **kwargs):
+        return Response(return_list_file_type_company())
+
