@@ -1,30 +1,69 @@
-{% autoescape off %}
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="UTF-8">
-    <style type="text/css">
-        body {font-family: Arial, sans-serif; color: #333;}
-        .email-content {max-width: 600px; margin: 0 auto;}
-        .email-header {background-color: #f8f8f8; padding: 10px;}
-        .email-body {padding: 20px;}
-    </style>
+    <title>Account Created</title>
 </head>
-<body>
-    <div class="email-content">
-        <div class="email-header">
-            <h1>Your Account Activation</h1>
-        </div>
-        <div class="email-body">
-            <p>Dear {{ user_name }},</p>
-            <p>We regret to inform you that your account activation request on our platform has been declined by our administration.</p>
-            <p>Declined By: {{ admin_name }}</p>
-            <p>Time of Review: {{ activation_time }}</p>
-            <p>Please contact our support team if you have any questions or if you believe this was a mistake.</p>
-            <p>Best regards,</p>
-            <p>Our Platform Team</p>
-        </div>
-    </div>
+<body style="font-family: Arial, sans-serif; margin:0; padding:0; background-color: #f8f9fa;">
+    <table align="center" border="0" cellpadding="0" cellspacing="0" width="600" style="border-collapse: collapse;">
+        <tr>
+            <td align="center" bgcolor="#70bbd9" style="padding: 40px 0 30px 0;">
+                <h2 style="color: white;">Your Account Activation</h2>
+            </td>
+        </tr>
+        <tr>
+            <td bgcolor="#ffffff" style="padding: 40px 30px 40px 30px;">
+                <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                    <tr>
+                        <td style="color: #153643; font-size: 24px;">
+                            <h1>Dear, {{ user_name }}!</h1>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 20px 0 30px 0; color: #153643; line-height: 2; font-size: 16px;">
+							We regret to inform you that your account activation request on our platform has been declined by our administration.
+                            <br>
+                            Declined By: {{ admin_name }}
+							<br>
+							Time of Review: {{ activation_time }}
+							<br/>
+							Please contact our support team if you have any questions or if you believe this was a mistake.
+			            </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            Best Regards,
+                            <br>
+                            <b>Your Team</b>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+        <tr>
+            <td bgcolor="#ee4c50" style="padding: 30px 30px;">
+                <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                    <tr>
+                        <td style="color: #ffffff; font-size: 14px;" width="75%">
+                            &reg; Bima360
+                            <br/>
+
+                        </td>
+                        <td align="right" width="25%">
+                            <table border="0" cellpadding="0" cellspacing="0">
+                                <tr>
+                                    <td style="font-size: 0; line-height: 0;" width="20">&nbsp;</td>
+                                    <td>
+                                        <a href="https://www.linkedin.com/company/bimatech-technology">
+                                            <img src="../../media/assets/linkedin_32.png" alt="Linkedin" width="32" height="32" style="display: block;" border="0" />
+                                        </a>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
 </body>
 </html>
-{% endautoescape %}

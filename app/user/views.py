@@ -182,8 +182,8 @@ class UserViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['get'], url_path='documents')
     def list_documents(self, request, *args, **kwargs):
-        company = self.get_object()
-        documents = get_documents_for_parent_entity(company)
+        user = self.get_object()
+        documents = get_documents_for_parent_entity(user)
         serialized_documents = UserSerializer(documents, many=True)
         return Response(serialized_documents.data)
 

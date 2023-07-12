@@ -16,8 +16,8 @@ from django.utils.translation import gettext_lazy as _
 from core.abstract.views import AbstractViewSet
 
 from .filter import SaleDocumentFilter
-from .service import SaleDocumentService
-from .utils import generate_recurring_sale_documents, create_products_from_parents
+from .service import SaleDocumentService, generate_recurring_sale_documents, create_products_from_parents
+
 from ..product.models import BimaErpProduct
 from .models import BimaErpSaleDocument, BimaErpSaleDocumentProduct
 from .serializers import BimaErpSaleDocumentSerializer, BimaErpSaleDocumentProductSerializer, \
