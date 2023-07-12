@@ -58,6 +58,13 @@ services:
     volumes:
       - .:/app
 
+  celery_beat:
+    build: .
+    command: python -m celery -A app beat -l info
+    volumes:
+      - .:/app
+      - celerybeat-schedule:/var/lib/celery
+
 
 networks:
   bima360-network:

@@ -12,10 +12,7 @@ from rest_framework.exceptions import ValidationError
 from core.abstract.models import AbstractModel
 from common.enums.file_type import get_file_type_choices
 from common.validators.file_validators import validate_file_size, validate_file_extension
-from common.enums.file_type import FileTypeCompany
-from common.service.file_service import resize_image
-
-from common.enums.file_type import FileTypeUser
+from .service import resize_image, verify_is_favorite_item_exist
 
 
 class BimaCoreDocument(AbstractModel):
@@ -76,13 +73,7 @@ class BimaCoreDocument(AbstractModel):
             if not file_content_type:
                 raise ValidationError(_('Invalid file content type.'))
 
-            # Resize image if it's a logo and the file is an image
-            if document_data['file_type'] == FileTypeCompany.COMPANY_LOGO.name and \
-                    file_content_type.startswith('image/'):
-                try:
-                    file = resize_image(file, 200, 100)
-                except Exception as e:
-                    print(f"Failed to resize the image. Error: {str(e)}")
+            file = resize_image(document_data, file, file_content_type)
 
             document = cls(
                 document_name=document_data['document_name'],
@@ -107,19 +98,6 @@ class BimaCoreDocument(AbstractModel):
 
         except Exception as e:
             return {"error": str(e), "status": status.HTTP_500_INTERNAL_SERVER_ERROR}
-
-
-def verify_is_favorite_item_exist(document_data, existing_docs):
-    if (
-            (
-                    document_data['file_type'] == FileTypeCompany.COMPANY_LOGO.name or
-                    document_data['file_type'] == FileTypeUser.USER_PROFILE_PICTURE.name
-            )
-            and document_data.get('is_favorite', False)
-            and existing_docs is not None
-    ):
-
-        existing_docs.update(is_favorite=False)
 
 
 def create_document_from_parent_entity(data_document_to_save, parent):
