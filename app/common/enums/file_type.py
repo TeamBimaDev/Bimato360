@@ -24,6 +24,11 @@ class FileTypeBank(FileType):
     EMPLOYEE_PICTURE = _('EMPLOYEE_PICTURE')
 
 
+class FileTypeUser(FileType):
+    USER_PROFILE_PICTURE = _('USER_PROFILE_PICTURE')
+    USER_OTHER = _('USER_OTHER')
+
+
 def get_file_type_choices():
     choices = []
     for enum_class in FileType.__subclasses__():
@@ -37,3 +42,7 @@ def return_list_file_type_partner():
 
 def return_list_file_type_company():
     return [(file_type.name, file_type.value) for file_type in FileTypeCompany]
+
+
+def return_list_file_type_user():
+    return [(file_type.name, file_type.value) for file_type in FileTypeUser]

@@ -54,9 +54,16 @@ services:
 
   celery:
     build: .
-    command: python -m celery -A app worker -l info -E --pool=solo
+    command: python -m celery -A app worker -l info -E --pool=gevent
     volumes:
       - .:/app
+
+  celery_beat:
+    build: .
+    command: python -m celery -A app beat -l info
+    volumes:
+      - .:/app
+      - celerybeat-schedule:/var/lib/celery
 
 
 networks:

@@ -27,3 +27,4 @@ tenacity
 celery==5.3.1
 SQLAlchemy
 gevent
+django-celery-beat

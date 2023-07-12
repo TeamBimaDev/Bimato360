@@ -55,6 +55,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_approved = models.BooleanField(default=False)
     approved_by = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True)
     approved_at = models.DateTimeField(null=True, blank=True)
+    reason_declined = models.TextField(blank=True, null=True)
 
     reset_password_token = models.CharField(max_length=255, null=True, blank=True)
     reset_password_uid = models.CharField(max_length=255, null=True, blank=True)

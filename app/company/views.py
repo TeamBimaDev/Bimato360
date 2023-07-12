@@ -42,10 +42,6 @@ class BimaCompanyViewSet(AbstractViewSet):
         serialized_contact = BimaCoreDocumentSerializer(contacts, many=True)
         return Response(serialized_contact.data)
 
-    @action(detail=False, methods=['get'], url_path='documents_type')
-    def document_type(self, request, *args, **kwargs):
-        return Response(return_list_file_type_company())
-
     @action(detail=True, methods=['post'], url_path='documents')
     def create_document(self, request, *args, **kwargs):
         company = self.get_object()

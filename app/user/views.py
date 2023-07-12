@@ -9,6 +9,7 @@ from django.contrib.auth.tokens import default_token_generator
 from django.db import transaction
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import permissions, viewsets, status, generics
 from rest_framework.decorators import action
 from rest_framework.generics import GenericAPIView
@@ -19,6 +20,7 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.settings import api_settings
 
+from .filters import UserFilter
 from .serializers import (
     UserSerializer,
     AuthTokenSerializer,
@@ -27,13 +29,21 @@ from .serializers import (
 )
 
 from .models import User
+from .service import get_favorite_user_profile_image
 
-from .signals import reset_password_signal, user_activated_signal
+from .signals import reset_password_signal, user_activated_signal, user_declined_signal
 from common.permissions.app_permission import IsAdminOrSelfUser, IsAdminUser, CanEditOtherPassword, UserHasAddPermission
+
+from common.permissions.app_permission import IsAdminAndCanActivateAccount, IsSelfUserOrUserCanUpdate, \
+    UserCanCreateOtherUser
 
 from core.abstract.pagination import DefaultPagination
 
 from core.models import GlobalPermission
+
+from core.document.models import get_documents_for_parent_entity, BimaCoreDocument
+
+from core.document.serializers import BimaCoreDocumentSerializer
 
 
 class CreateTokenView(TokenObtainPairView):
@@ -41,12 +51,14 @@ class CreateTokenView(TokenObtainPairView):
     serializer_class = AuthTokenSerializer
     renderer_classes = api_settings.DEFAULT_RENDERER_CLASSES
     ordering = ['-name']
-    pagination_class = DefaultPagination
 
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = UserFilter
+    pagination_class = DefaultPagination
 
     def get_permissions(self):
         """
@@ -55,17 +67,19 @@ class UserViewSet(viewsets.ModelViewSet):
         if self.action == 'create':
             permission_classes = [permissions.AllowAny]
         elif self.action in ['update', 'partial_update']:
-            permission_classes = [IsAdminOrSelfUser]
+            permission_classes = [permissions.IsAuthenticated & IsSelfUserOrUserCanUpdate]
         elif self.action == 'destroy':
             permission_classes = [IsAdminUser]
-        elif self.action in ['list_permissions', 'manage_permissions']:
+        elif self.action in ['list_permissions', 'manage_permissions', 'list_user_permissions']:
             permission_classes = [permissions.IsAdminUser & permissions.IsAuthenticated & UserHasAddPermission]
+        elif self.action in ['create_by_admin']:
+            permission_classes = [permissions.IsAuthenticated & UserCanCreateOtherUser]
+        elif self.action in ['manage_user_activation']:
+            permission_classes = [IsAdminAndCanActivateAccount]
         else:
             permission_classes = [permissions.IsAuthenticated]
-        return [permission() for permission in permission_classes]
 
-    def get_queryset(self):
-        return User.objects.all()
+        return [permission() for permission in permission_classes]
 
     @action(detail=False, methods=['get'], url_path='me')
     def me(self, request):
@@ -140,21 +154,93 @@ class UserViewSet(viewsets.ModelViewSet):
         user = serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
+    @action(detail=False, methods=['post'], url_path='manage_user_activation')
+    def manage_user_activation(self, request):
+        public_ids = request.data.get('user_public_ids', [])
+        action = request.data.get('action', None)
+
+        if action not in ['approve', 'decline']:
+            return Response({"error": "Invalid action"}, status=status.HTTP_400_BAD_REQUEST)
+
+        users = User.objects.filter(public_id__in=public_ids)
+
+        for user in users:
+            if action == 'approve':
+                user.is_approved = True
+                user.approved_by = request.user
+                user.approved_at = timezone.now()
+                user.is_active = True
+                user.save()
+                user_activated_signal.send(sender=self.__class__, user=user, admin=request.user)
+            elif action == 'decline':
+                user.is_approved = False
+                user.is_active = False
+                user.reason_declined = request.data.get('reason_declined', None)
+                user.save()
+                user_declined_signal.send(sender=self.__class__, user=user, admin=request.user)
+
+        return Response({"status": f"Users have been {action}d successfully"}, status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=['get'], url_path='documents')
+    def list_documents(self, request, *args, **kwargs):
+        user = self.get_object()
+        documents = get_documents_for_parent_entity(user)
+        serialized_documents = BimaCoreDocumentSerializer(documents, many=True)
+        return Response(serialized_documents.data)
+
+    @action(detail=True, methods=['post'], url_path='add_document')
+    def create_document(self, request, *args, **kwargs):
+        user = self.get_object()
+        document_data = request.data
+        document_data['file_path'] = request.FILES['file_path']
+        document_data['is_favorite'] = request.data.get('is_favorite', False)
+        result = BimaCoreDocument.create_document_for_parent(user, document_data)
+        if isinstance(result, BimaCoreDocument):
+            return Response({
+                "id": result.public_id,
+                "document_name": result.document_name,
+                "description": result.description,
+                "date_file": result.date_file,
+                "file_type": result.file_type,
+                "is_favorite": result.is_favorite
+
+            }, status=status.HTTP_201_CREATED)
+        else:
+            return Response(result, status=result.get("status", status.HTTP_500_INTERNAL_SERVER_ERROR))
+
+    @action(detail=True, methods=['get'], url_path='get_favorite_user_profile_image')
+    def get_favorite_user_profile_image(self, request, *args, **kwargs):
+        user = self.get_object()
+        favorite_image = get_favorite_user_profile_image(user)
+        return Response(favorite_image, status=status.HTTP_200_OK)
+
 
 class UserActivationView(APIView):
-    permission_classes = (permissions.IsAdminUser,)
+    permission_classes = (IsAdminAndCanActivateAccount,)
 
-    def get(self, request, user_id):
+    def post(self, request, user_id):
         user = get_user_model().objects.get(public_id=user_id)
-        if request.user.has_perm('user.user.can_activate_account'):
+        inform_user = request.data.get('inform_user', True)
+
+        if 'is_approved' in request.data and request.data['is_approved'] and request.data['is_approved'] == "True":
             user.is_approved = True
-            user.approved_by = request.user
+            user.is_approved_by = request.user
             user.approved_at = timezone.now()
+            user.is_active = True
             user.save()
             user_activated_signal.send(sender=self.__class__, user=user, admin=request.user)
-            return Response({'status': 'User activated'}, status=status.HTTP_200_OK)
+            response = {'status': 'User activated'}
         else:
-            return Response({'error': 'You do not have permission to activate users'}, status=status.HTTP_403_FORBIDDEN)
+            user.is_approved = False
+            user.is_active = False
+            user.reason_declined = request.data.get('reason_declined', None)
+            user.save()
+            if inform_user:
+                user_declined_signal.send(sender=self.__class__, user=user, admin=request.user)
+            response = {'status': 'User not activated'}
+
+        user.save()
+        return Response(response, status=status.HTTP_200_OK)
 
 
 class ChangePasswordView(generics.UpdateAPIView):

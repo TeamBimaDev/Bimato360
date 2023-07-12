@@ -44,6 +44,14 @@ class UserSerializer(serializers.ModelSerializer):
         read_only=True
     )
 
+    def get_fields(self, *args, **kwargs):
+        fields = super().get_fields(*args, **kwargs)
+        request = self.context.get('request', None)
+        if request and getattr(request, 'method', None) == "PUT":
+            fields['password'].required = False
+            fields['confirm_password'].required = False
+        return fields
+
     def validate(self, data):
         request_method = self.context['request'].method
         if request_method == "POST":
