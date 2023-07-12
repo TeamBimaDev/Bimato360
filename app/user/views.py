@@ -70,8 +70,10 @@ class UserViewSet(viewsets.ModelViewSet):
             permission_classes = [permissions.IsAuthenticated & IsSelfUserOrUserCanUpdate]
         elif self.action == 'destroy':
             permission_classes = [IsAdminUser]
-        elif self.action in ['list_permissions', 'manage_permissions', 'list_user_permissions']:
+        elif self.action in ['manage_permissions']:
             permission_classes = [permissions.IsAdminUser & permissions.IsAuthenticated & UserHasAddPermission]
+        elif self.action in ['list_permissions', 'list_user_permissions']:
+            permission_classes = [permissions.IsAuthenticated]
         elif self.action in ['create_by_admin']:
             permission_classes = [permissions.IsAuthenticated & UserCanCreateOtherUser]
         elif self.action in ['manage_user_activation']:
