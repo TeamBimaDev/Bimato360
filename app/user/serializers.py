@@ -12,6 +12,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework import serializers
 from .models import User
+from .service import verify_user_credential_when_change_password
 from datetime import timedelta
 from django.utils import timezone
 from django.utils.http import urlsafe_base64_decode
@@ -168,6 +169,7 @@ class SetNewPasswordSerializer(serializers.Serializer):
     token = serializers.CharField(min_length=1, write_only=True, required=False)
     uidb64 = serializers.CharField(min_length=1, write_only=True, required=False)
     public_id = serializers.UUIDField()
+
     class Meta:
         fields = ['password', 'confirm_password', 'token', 'uidb64', 'public_id']
 
@@ -182,26 +184,13 @@ class SetNewPasswordSerializer(serializers.Serializer):
             if password != confirm_password:
                 raise serializers.ValidationError({"confirm_password": "Passwords do not match"})
 
-            try:
-                uid = force_str(urlsafe_base64_decode(uidb64))
-            except (ValueError, binascii.Error):
-                raise serializers.ValidationError({'details': _('Unable to identify credential')})
+            error, _ = verify_user_credential_when_change_password(uidb64, token, public_id)
 
-            try:
-                user = User.objects.get(public_id=public_id)
-            except User.DoesNotExist:
-                raise serializers.ValidationError({'details': _('Unable to identify credential')})
+            if error:
+                raise serializers.ValidationError(error)
 
-            if uid != str(user.pk):
-                raise serializers.ValidationError({'details': _('Unable to identify credential')})
+            user = User.objects.get(public_id=public_id)
 
-            token_matches = user.reset_password_token == token
-            token_not_expired = timezone.now() - user.reset_password_time <= timedelta(hours=24)
-
-            if not token_matches or not token_not_expired:
-                raise serializers.ValidationError({'password': 'Token is not valid or has expired'})
-
-            # Clear the token and uid
             user.reset_password_token = None
             user.reset_password_uid = None
             user.reset_password_time = None

@@ -1,6 +1,3 @@
-import binascii
-from datetime import timedelta
-
 from django.contrib.contenttypes.models import ContentType
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
@@ -30,7 +27,7 @@ from .serializers import (
 )
 
 from .models import User
-from .service import get_favorite_user_profile_image
+from .service import get_favorite_user_profile_image, verify_user_credential_when_change_password
 
 from .signals import reset_password_signal, user_activated_signal, user_declined_signal
 from common.permissions.app_permission import IsAdminOrSelfUser, IsAdminUser, CanEditOtherPassword, UserHasAddPermission
@@ -45,6 +42,8 @@ from core.models import GlobalPermission
 from core.document.models import get_documents_for_parent_entity, BimaCoreDocument
 
 from core.document.serializers import BimaCoreDocumentSerializer
+
+from app.settings import config
 
 
 class CreateTokenView(TokenObtainPairView):
@@ -284,21 +283,22 @@ class PasswordResetView(generics.GenericAPIView):
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
             user = get_user_model().objects.get(email=serializer.data.get('email'))
-            token = default_token_generator.make_token(user)
-            uid = urlsafe_base64_encode(force_bytes(user.pk))
-            current_site = request.build_absolute_uri('/')
-            reset_password_link = f'{current_site}/api/user/reset-password/{uid}/{token}/'
+            if user is not None:
+                token = default_token_generator.make_token(user)
+                uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
 
-            user.reset_password_token = token
-            user.reset_password_uid = uid
-            user.reset_password_time = timezone.now()
-            user.save()
+                reset_password_link = config('SITE_URL') + '/auth/reset-password/' + str(user.public_id) + "/" + str(uidb64) + "/" + str(token) + "/"
 
-            reset_password_signal.send(
-                sender=self.__class__,
-                email=user.email,
-                reset_password_link=reset_password_link,
-            )
+                user.reset_password_token = token
+                user.reset_password_uid = uidb64
+                user.reset_password_time = timezone.now()
+                user.save()
+
+                reset_password_signal.send(
+                    sender=self.__class__,
+                    email=user.email,
+                    reset_password_link=reset_password_link,
+                )
 
             return Response({'success': 'We have sent you a link to reset your password'}, status=200)
         else:
@@ -309,30 +309,20 @@ class PasswordResetConfirmView(GenericAPIView):
     serializer_class = SetNewPasswordSerializer
     permission_classes = [AllowAny]
 
-    def get(self, request, uidb64, token):
-        try:
-            uid = force_str(urlsafe_base64_decode(uidb64))
-            user = User.objects.get(id=uid)
+    def get(self, request, *args, **kwargs):
+        uidb64 = kwargs.get('uidb64')
+        token = kwargs.get('token')
+        public_id = kwargs.get('public_id')
 
-            token_matches = user.reset_password_token == token
-            token_not_expired = timezone.now() - user.reset_password_time <= timedelta(hours=24)
+        response, status_code = verify_user_credential_when_change_password(uidb64, token, public_id)
+        return Response(response, status=status_code)
 
-            if not token_matches or not token_not_expired:
-                return Response({'error': 'Token is not valid or has expired'}, status=status.HTTP_400_BAD_REQUEST)
-
-            return Response({'success': True, 'message': 'Credentials Valid', 'uidb64': uidb64, 'token': token},
-                            status=status.HTTP_200_OK)
-        except User.DoesNotExist:
-            return Response({'error': 'User does not exist'}, status=status.HTTP_400_BAD_REQUEST)
-
-    def patch(self, request, uidb64, token):
+    def patch(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        uid = force_str(urlsafe_base64_decode(uidb64))
-        user = User.objects.get(id=uid)
-        user.set_password(serializer.validated_data.get('password'))
-        user.save()
-        return Response({'success': True, 'message': 'Password reset successful'}, status=status.HTTP_200_OK)
+        if serializer.is_valid():
+            return Response({"detail": "Password has been reset."})
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class CreateUserPasswordForFirstTime(APIView):
@@ -344,29 +334,8 @@ class CreateUserPasswordForFirstTime(APIView):
         token = kwargs.get('token')
         public_id = kwargs.get('public_id')
 
-        if uidb64 is None or token is None or public_id is None:
-            return Response({"detail": "Missing parameters."}, status=status.HTTP_400_BAD_REQUEST)
-
-        try:
-            uid = force_str(urlsafe_base64_decode(uidb64))
-        except (ValueError, binascii.Error):
-            return Response({"detail": "Invalid uid format."}, status=status.HTTP_400_BAD_REQUEST)
-
-        try:
-            user = User.objects.get(public_id=public_id)
-        except User.DoesNotExist:
-            return Response({"detail": "User not found."}, status=status.HTTP_404_NOT_FOUND)
-
-        if uid != str(user.pk):
-            return Response({"detail": "Invalid uid."}, status=status.HTTP_400_BAD_REQUEST)
-
-        if user.reset_password_token != token:
-            return Response({"detail": "Invalid token."}, status=status.HTTP_400_BAD_REQUEST)
-
-        if timezone.now() - user.reset_password_time > timedelta(hours=24):
-            return Response({"detail": "Token expired."}, status=status.HTTP_400_BAD_REQUEST)
-
-        return Response({"detail": "Valid token."})
+        response, status_code = verify_user_credential_when_change_password(uidb64, token, public_id)
+        return Response(response, status=status_code)
 
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data)
@@ -374,3 +343,5 @@ class CreateUserPasswordForFirstTime(APIView):
             return Response({"detail": "Password has been reset."})
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+

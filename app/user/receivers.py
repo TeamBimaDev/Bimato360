@@ -1,6 +1,5 @@
-import os
 from django.utils import timezone
-from django.utils.encoding import force_bytes, force_str
+from django.utils.encoding import force_bytes
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
@@ -24,8 +23,7 @@ def send_password_reset_email(sender, **kwargs):
     }
     message = render_to_string('user/reset_password_email.html', context)
     mail_subject = 'Password Reset'
-    html_message = True
-    send_email_async.delay(mail_subject, message, email, html_message)
+    send_email_async.delay(mail_subject, message, email, html_message=True)
 
 
 @receiver(post_save, sender=get_user_model())
