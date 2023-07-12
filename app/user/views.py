@@ -187,7 +187,7 @@ class UserViewSet(viewsets.ModelViewSet):
         serialized_documents = UserSerializer(documents, many=True)
         return Response(serialized_documents.data)
 
-    @action(detail=True, methods=['post'], url_path='add_documents')
+    @action(detail=True, methods=['post'], url_path='add_document')
     def create_document(self, request, *args, **kwargs):
         user = self.get_object()
         document_data = request.data

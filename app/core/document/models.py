@@ -57,6 +57,7 @@ class BimaCoreDocument(AbstractModel):
     @classmethod
     def create_document_for_parent(cls, parent, document_data):
         try:
+            existing_docs = None
             if document_data['file_type']:
                 existing_docs = cls.objects.filter(parent_type=ContentType.objects.get_for_model(parent),
                                                    parent_id=parent.id,
@@ -108,14 +109,16 @@ class BimaCoreDocument(AbstractModel):
             return {"error": str(e), "status": status.HTTP_500_INTERNAL_SERVER_ERROR}
 
 
-def verify_is_favorite_item_exist(cls, document_data, existing_docs):
+def verify_is_favorite_item_exist(document_data, existing_docs):
     if (
             (
                     document_data['file_type'] == FileTypeCompany.COMPANY_LOGO.name or
                     document_data['file_type'] == FileTypeUser.USER_PROFILE_PICTURE.name
             )
             and document_data.get('is_favorite', False)
+            and existing_docs is not None
     ):
+
         existing_docs.update(is_favorite=False)
 
 
