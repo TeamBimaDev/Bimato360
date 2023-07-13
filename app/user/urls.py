@@ -22,7 +22,7 @@ router.register('', UserViewSet)
 urlpatterns = [
     path('token/', views.CreateTokenView.as_view(), name='token_obtain_pair'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    path('change-password/', ChangePasswordView.as_view(), name='change_password'),
+    path('<str:public_id>/change-password/', ChangePasswordView.as_view(), name='change_password'),
     path('password-reset/', PasswordResetView.as_view(), name='password_reset'),
     path('reset-password/<str:public_id>/<uidb64>/<token>/', PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
     path('activate_user_account/<str:user_id>/', UserActivationView.as_view(), name='activate_user_account'),

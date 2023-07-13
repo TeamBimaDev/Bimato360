@@ -245,7 +245,7 @@ class UserActivationView(APIView):
         return Response(response, status=status.HTTP_200_OK)
 
 
-class ChangePasswordView(generics.UpdateAPIView):
+class ChangePasswordView(GenericAPIView):
     serializer_class = ChangePasswordSerializer
     model = get_user_model()
 
@@ -258,10 +258,12 @@ class ChangePasswordView(generics.UpdateAPIView):
 
         return [CanEditOtherPassword()]
 
-    def get_object(self, queryset=None):
-        return self.request.user
+    def get_object(self):
+        obj = User.objects. \
+            get_object_by_public_id(self.kwargs['public_id'])
+        return obj
 
-    def update(self, request, *args, **kwargs):
+    def patch(self, request, *args, **kwargs):
         self.object = self.get_object()
         serializer = self.get_serializer(data=request.data)
 
