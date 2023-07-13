@@ -60,6 +60,7 @@ services:
     command: python -m celery -A app worker -l info -E --pool=gevent
     volumes:
       - .:/app
+    working_dir: /app
     networks:
         - bima360-network
     depends_on:
@@ -67,10 +68,11 @@ services:
 
   celery_beat:
     image: bima360_app_image
-    command: python -m celery -A app beat -l info
+    command: python -m celery -A app.celery beat -l info
     volumes:
       - .:/app
       - ./celery_beat/:/var/lib/celery
+    working_dir: /app
     networks:
       - bima360-network
     depends_on:

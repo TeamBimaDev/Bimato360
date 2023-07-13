@@ -214,7 +214,8 @@ class UserViewSet(viewsets.ModelViewSet):
     def get_favorite_user_profile_image(self, request, *args, **kwargs):
         user = self.get_object()
         favorite_image = get_favorite_user_profile_image(user)
-        return Response(favorite_image, status=status.HTTP_200_OK)
+        serialized_image = BimaCoreDocumentSerializer(favorite_image)
+        return Response(serialized_image, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['post'],
             url_path='(?P<pk>[^/.]+)/make_favorite_image/(?P<document_public_id>[^/.]+)')
