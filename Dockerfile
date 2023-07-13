@@ -23,8 +23,7 @@ COPY ./requirements.txt .
 
 # Create virtual environment and install Python dependencies
 RUN python -m venv /venv && \
-    /venv/bin/pip install --no-cache-dir -r requirements.txt && \
-    /venv/bin/pip install celery==5.3.1
+    /venv/bin/pip install --no-cache-dir -r requirements.txt
 
 
 # Stage 2: Production Stage
