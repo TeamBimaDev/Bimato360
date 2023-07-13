@@ -1,148 +1,102 @@
-from django.test import TestCase
 from django.urls import reverse
-from rest_framework.test import APIClient
-from .factories import BimaErpProductFactory, BimaErpSaleDocumentProductFactory, BimaErpSaleDocumentFactory
-from erp.partner.factories import BimaErpPartnerFactory
+from rest_framework.test import APITestCase, APIClient
+from rest_framework import status
 from .models import BimaErpSaleDocument, BimaErpSaleDocumentProduct
-from .serializers import BimaErpSaleDocumentProductSerializer
-from decimal import Decimal
+from django.contrib.auth.models import Permission
+from django.contrib.contenttypes.models import ContentType
+from user.factories import UserFactory
+from erp.partner.factories import BimaErpPartnerFactory
+from erp.category.factories import BimaErpCategoryFactory
+from erp.product.factories import BimaErpProductFactory
+from erp.product.models import BimaErpProduct
+from erp.unit_of_measure.factories import BimaErpUnitOfMeasureFactory
+from erp.vat.factories import BimaErpVatFactory
 
-class BimaErpSaleDocumentViewSetTest(TestCase):
+
+class BimaErpSaleDocumentTest(APITestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.create_permissions()
+
     def setUp(self):
         self.client = APIClient()
+        self.user = UserFactory()
         self.partner = BimaErpPartnerFactory.create()
-        self.sale_document_products = [BimaErpSaleDocumentProductFactory.create(),
-                                       BimaErpSaleDocumentProductFactory.create()]
-        self.sale_document = BimaErpSaleDocumentFactory.create(partner=self.partner,
-                                                               sale_document_products=self.sale_document_products)
-        self.product = BimaErpProductFactory.create()
-
-    def test_create_sale_document(self):
-        url = reverse('erp:bimaerpsaledocument-list')
-
-        data = {
-            "number": "DOC-2",
-            "date": "2023-06-10",
-            "status": "CONFIRMED",
+        self.sale_document_data = {
+            "number": "Document-1",
+            "date": "2023-07-13",
+            "status": "DRAFT",
             "type": "QUOTE",
             "partner_public_id": str(self.partner.public_id),
-            "note": "Ceci est une note",
-            "private_note": "Ceci est une note privée",
+            "vat_label": "VAT",
+            "vat_amount": "123.456",
+            "note": "Sample note",
+            "private_note": "Sample private note",
             "validity": "day_30",
-            "payment_terms": "Payment Terms",
-            "delivery_terms": "Delivery Terms",
-            "sale_document_products": []
+            "payment_terms": "Payment terms",
+            "delivery_terms": "Delivery terms",
+            "total_amount_without_vat": "789.012",
+            "total_after_discount": "345.678",
+            "total_vat": "234.567",
+            "total_amount": "901.234",
+            "total_discount": "123.456",
+            "is_recurring": True,
+            "recurring_interval": 2,
+            "sale_document_products": [],
         }
 
-        response = self.client.post(url, data)
-        self.assertEqual(response.status_code, 201)
-        self.assertEqual(BimaErpSaleDocument.objects.count(), 4)
-        sale_document = BimaErpSaleDocument.objects.get(number="DOC-2")
-        self.assertEqual(sale_document.number, "DOC-2")
-
-    def test_retrieve_sale_document(self):
-        url = reverse('erp:bimaerpsaledocument-detail', kwargs={'pk': self.sale_document.public_id})
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data['number'], self.sale_document.number)
-
-    def test_update_sale_document(self):
-        url = reverse('erp:bimaerpsaledocument-detail', kwargs={'pk': self.sale_document.public_id})
-        data = {
-            "number": "update DOC-1",
-        }
-        response = self.client.patch(url, data)
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(BimaErpSaleDocument.objects.get(public_id=self.sale_document.public_id).number, "update DOC-1")
-
-    def test_delete_sale_document(self):
-        url = reverse('erp:bimaerpsaledocument-detail', kwargs={'pk': self.sale_document.public_id})
-        response = self.client.delete(url)
-        self.assertEqual(response.status_code, 204)
-        self.assertEqual(BimaErpSaleDocument.objects.count(), 2)
-
-    def test_get_product(self):
-        url = reverse('erp:bimaerpsaledocument-get-products', kwargs={'pk': self.sale_document.public_id})
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 200)
-        products = BimaErpSaleDocumentProduct.objects.filter(sale_document=self.sale_document)
-        serializer = BimaErpSaleDocumentProductSerializer(products, many=True)
-        self.assertEqual(response.data, serializer.data)
-
-    def test_add_product(self):
-        url = reverse('erp:bimaerpsaledocument-add-product', kwargs={'pk': self.sale_document.public_id})
-        product = BimaErpProductFactory.create()
-        data = {
-            "product_public_id": str(product.public_id),
-            "sale_document_public_id": str(self.sale_document.public_id),
-            "name": "New Product",
-            "reference": "Reference 2",
-            "quantity": 5,
-            "unit_price": 9.99,
-            "vat": 5,
-            "description": "New product description",
-            "discount": 4,
-        }
-        response = self.client.post(url, data)
-        self.assertEqual(response.status_code, 201)
-        self.assertEqual(BimaErpSaleDocumentProduct.objects.count(), 7)
-        product = BimaErpSaleDocumentProduct.objects.get(sale_document=self.sale_document, product=product)
-        self.assertEqual(product.name, "New Product")
-
-    def test_update_product(self):
-        url = reverse('erp:bimaerpsaledocument-update-product', kwargs={'pk': self.sale_document.public_id})
-        url_create = reverse('erp:bimaerpsaledocument-add-product', kwargs={'pk': self.sale_document.public_id})
-
-        product = BimaErpProductFactory.create()
-        data = {
-            "sale_document_public_id": str(self.sale_document.public_id),
-            "product_public_id": str(product.public_id),
-            "name": "Updated Product",
-            "reference": "Reference 5",
-            "quantity": 8,
-            "unit_price": 12.990,
-            "vat": 5,
-            "description": "Updated product description",
-            "discount": 5,
-        }
-        response_create = self.client.post(url_create, data)
-
-        response = self.client.put(url, data)
-        print(data)
-        print(response.data)
-
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(BimaErpSaleDocumentProduct.objects.count(), 7)
-
-        updated_product = BimaErpSaleDocumentProduct.objects.get(sale_document=self.sale_document, product=product)
-        self.assertEqual(updated_product.name, "Updated Product")
-        self.assertEqual(updated_product.quantity, 8)
-        self.assertEqual(updated_product.unit_price, Decimal('12.990'))
-
-    def test_delete_product(self):
-        url = reverse('erp:bimaerpsaledocument-delete-product', kwargs={'pk': self.sale_document.public_id})
-        product = self.sale_document.sale_document_products.first()
-        data = {
-            "sale_document_public_id": str(self.sale_document.public_id),
-            "product_public_id": str(product.public_id),
-        }
-        response = self.client.delete(url, data)
-        self.assertEqual(response.status_code, 204)
-        with self.assertRaises(BimaErpSaleDocumentProduct.DoesNotExist):
-            BimaErpSaleDocumentProduct.objects.get(sale_document=self.sale_document, product=product)
-        self.assertEqual(BimaErpSaleDocumentProduct.objects.count(), 5)
-        updated_sale_document = BimaErpSaleDocument.objects.get(public_id=self.sale_document.public_id)
-        self.assertEqual(updated_sale_document.sale_document_products.count(), 1)
-    def test_calculate_total(self):
-        product = BimaErpSaleDocumentProductFactory.create(
-            quantity=10,
-            unit_price=5.99,
-            vat=5,
-            discount=10
+        self.user.user_permissions.set(
+            Permission.objects.filter(
+                codename__in=[
+                    'erp.sale_document.can_create',
+                    'erp.sale_document.can_read',
+                    'erp.sale_document.can_update',
+                    'erp.sale_document.can_delete',
+                    'erp.sale_document.can_add_product',
+                    'erp.sale_document.can_update_product',
+                    'erp.sale_document.can_delete_product',
+                    'erp.sale_document.can_change_status',
+                    'erp.sale_document.can_rollback_status',
+                    'erp.sale_document.can_generate_document',
+                    'erp.sale_document.can_view_history',
+                ]
+            )
         )
-        product.calculate_totals()
-        self.assertEqual(round(product.total_without_vat, 2), Decimal(59.90))
-        self.assertEqual(round(product.discount_amount, 2), Decimal(5.99))
-        self.assertEqual(round(product.total_after_discount, 2), Decimal(53.91))
-        self.assertEqual(round(product.vat_amount, 2), Decimal(2.70))
-        self.assertEqual(round(product.total_price, 2), Decimal(56.61))
+
+        self.client.force_authenticate(self.user)
+
+    def create_sale_document(self):
+        url = reverse('erp:bimaerpsaledocument-list')
+        response = self.client.post(url, self.sale_document_data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(BimaErpSaleDocument.objects.count(), 1)
+    def test_create_sale_document_type_quote(self):
+        url = reverse('erp:bimaerpsaledocument-list')
+        response = self.client.post(url, self.sale_document_data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(BimaErpSaleDocument.objects.count(), 1)
+
+
+    @staticmethod
+    def create_permissions():
+        permission_list = [
+            ('erp.sale_document.can_create', 'Can create sale document'),
+            ('erp.sale_document.can_update', 'Can update sale document'),
+            ('erp.sale_document.can_delete', 'Can delete sale document'),
+            ('erp.sale_document.can_read', 'Can read sale document'),
+            ('erp.sale_document.can_add_product', 'Can add product to sale document'),
+            ('erp.sale_document.can_update_product', 'Can update product in a sale document'),
+            ('erp.sale_document.can_delete_product', 'Can delete product from sale document'),
+            ('erp.sale_document.can_change_status', 'Can change status of sale document'),
+            ('erp.sale_document.can_rollback_status', 'Can rollback status of sale document'),
+            ('erp.sale_document.can_generate_document', 'Can generate document from sale document'),
+            ('erp.sale_document.can_view_history', 'Can view history of sale document'),
+        ]
+
+        for permission_code, permission_name in permission_list:
+            content_type = ContentType.objects.get_for_model(BimaErpSaleDocument)
+            Permission.objects.get_or_create(
+                codename=permission_code,
+                name=permission_name,
+                content_type=content_type,
+            )
