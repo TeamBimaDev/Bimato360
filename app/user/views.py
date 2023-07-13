@@ -215,11 +215,11 @@ class UserViewSet(viewsets.ModelViewSet):
         user = self.get_object()
         favorite_image = get_favorite_user_profile_image(user)
         serialized_image = BimaCoreDocumentSerializer(favorite_image)
-        return Response(serialized_image, status=status.HTTP_200_OK)
+        return Response(serialized_image.data, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['post'],
             url_path='(?P<pk>[^/.]+)/make_favorite_image/(?P<document_public_id>[^/.]+)')
-    def make_favorite_image(self, request, user_public_id=None, document_public_id=None):
+    def make_favorite_image(self, request, pk=None, document_public_id=None):
         user = self.get_object()
         document_to_favorite = get_object_or_404(BimaCoreDocument, public_id=document_public_id)
 
