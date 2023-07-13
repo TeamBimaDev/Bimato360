@@ -2,6 +2,7 @@ version: '3'
 
 services:
   rabbitmq:
+    container_name: bima360_rabbitmq
     build:
       context: .
     ports:
