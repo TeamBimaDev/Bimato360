@@ -57,10 +57,15 @@ services:
 
   celery:
     image: bima360_app_image
-    command: python -m celery -A app worker -l info -E --pool=gevent
+    env_file:
+      - app/prod.env
+    environment:
+      - DB_HOST=bima360_db
+      - DJANGO_ENV=prod
     volumes:
       - .:/app
-    working_dir: /app
+    working_dir: /app/app
+    command: python -m celery -A app.celery worker -l info -E --pool=gevent
     networks:
         - bima360-network
     depends_on:
@@ -68,11 +73,16 @@ services:
 
   celery_beat:
     image: bima360_app_image
-    command: python -m celery -A app.celery beat -l info
+    env_file:
+      - app/prod.env
+    environment:
+      - DB_HOST=bima360_db
+      - DJANGO_ENV=prod
     volumes:
       - .:/app
       - ./celery_beat/:/var/lib/celery
-    working_dir: /app
+    working_dir: /app/app
+    command: python -m celery -A app.celery beat -l info
     networks:
       - bima360-network
     depends_on:

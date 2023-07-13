@@ -254,7 +254,7 @@ EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
 EMAIL_USE_TLS = config('EMAIL_USE_TLS', cast=bool, default=False)
 
 
-CELERY_BROKER_URL = 'amqp://bimauser:bimapass@localhost:5672//'
+CELERY_BROKER_URL = config('CELERY_BROKER_URL')
 CELERY_BROKER_BACKEND = "db+sqlite:///celery.sqlite"
 CELERY_CACHE_BACKEND = "db+sqlite:///celery.sqlite"
 CELERY_RESULT_BACKEND = "db+sqlite:///celery.sqlite"
