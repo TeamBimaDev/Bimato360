@@ -216,6 +216,27 @@ class UserViewSet(viewsets.ModelViewSet):
         favorite_image = get_favorite_user_profile_image(user)
         return Response(favorite_image, status=status.HTTP_200_OK)
 
+    @action(detail=False, methods=['post'],
+            url_path='(?P<pk>[^/.]+)/make_favorite_image/(?P<document_public_id>[^/.]+)')
+    def make_favorite_image(self, request, user_public_id=None, document_public_id=None):
+        user = self.get_object()
+        document_to_favorite = get_object_or_404(BimaCoreDocument, public_id=document_public_id)
+
+        if document_to_favorite.parent_id == user.id and \
+                document_to_favorite.parent_type == ContentType.objects.get_for_model(
+            user):
+
+            BimaCoreDocument.objects.filter(parent_id=user.id,
+                                            parent_type=ContentType.objects.get_for_model(user)).update(
+                is_favorite=False)
+
+            document_to_favorite.is_favorite = True
+            document_to_favorite.save()
+
+            return Response({"message": "Image has been set as favorite"}, status=status.HTTP_200_OK)
+        else:
+            return Response({"error": "The image does not belong to the user"}, status=status.HTTP_400_BAD_REQUEST)
+
 
 class UserActivationView(APIView):
     permission_classes = (IsAdminAndCanActivateAccount,)
@@ -289,7 +310,8 @@ class PasswordResetView(generics.GenericAPIView):
                 token = default_token_generator.make_token(user)
                 uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
 
-                reset_password_link = config('SITE_URL') + '/auth/reset-password/' + str(user.public_id) + "/" + str(uidb64) + "/" + str(token) + "/"
+                reset_password_link = config('SITE_URL') + '/auth/reset-password/' + str(user.public_id) + "/" + str(
+                    uidb64) + "/" + str(token) + "/"
 
                 user.reset_password_token = token
                 user.reset_password_uid = uidb64
@@ -345,5 +367,3 @@ class CreateUserPasswordForFirstTime(APIView):
             return Response({"detail": "Password has been reset."})
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-

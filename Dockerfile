@@ -1,5 +1,5 @@
 # Stage 1: Build Stage
-FROM python:3.8-alpine3.13 as builder
+FROM python:3.9-alpine3.13 as builder
 
 ENV PYTHONUNBUFFERED 1
 
@@ -27,7 +27,7 @@ RUN python -m venv /venv && \
 
 
 # Stage 2: Production Stage
-FROM python:3.8-alpine3.13
+FROM python:3.9-alpine3.13
 
 ENV PYTHONUNBUFFERED 1
 
