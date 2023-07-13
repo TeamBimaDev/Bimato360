@@ -5,6 +5,7 @@ services:
     container_name: bima360_app
     build:
       context: .
+    image: bima360_app_image
     ports:
       - "8500:8000"
     volumes:
@@ -55,13 +56,13 @@ services:
       - bima360-network
 
   celery:
-    build: .
+    image: bima360_app_image
     command: python -m celery -A app worker -l info -E --pool=gevent
     volumes:
       - .:/app
 
   celery_beat:
-    build: .
+    image: bima360_app_image
     command: python -m celery -A app beat -l info
     volumes:
       - .:/app
