@@ -53,8 +53,7 @@ def verify_user_credential_when_change_password(uidb64, token, public_id):
 
     if (user.reset_password_token is None or
             user.reset_password_uid is None or
-            user.reset_password_time is None or
-            user.is_password_change_when_created is True):
+            user.reset_password_time is None):
         return {"detail": _('User has been activated')}, status.HTTP_400_BAD_REQUEST
 
     if timezone.now() - user.reset_password_time > timedelta(hours=24):

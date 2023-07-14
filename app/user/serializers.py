@@ -182,7 +182,7 @@ class SetNewPasswordSerializer(serializers.Serializer):
 
             error, status_code = verify_user_credential_when_change_password(uidb64, token, public_id)
 
-            if status_code!= 200 and error:
+            if status_code != 200 and error:
                 raise serializers.ValidationError(error)
 
             user = User.objects.get(public_id=public_id)

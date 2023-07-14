@@ -343,7 +343,7 @@ class PasswordResetConfirmView(GenericAPIView):
         response, status_code = verify_user_credential_when_change_password(uidb64, token, public_id)
         return Response(response, status=status_code)
 
-    def patch(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
             return Response({"detail": _("Password has been reset.")})
