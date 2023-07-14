@@ -1,21 +1,17 @@
 """
 Serializers for the user API View.
 """
-import binascii
 
 from django.contrib.auth import (
     get_user_model,
 )
 from django.contrib.auth.password_validation import validate_password
-from django.utils.encoding import force_str
 from rest_framework.exceptions import ValidationError
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework import serializers
 from .models import User
 from .service import verify_user_credential_when_change_password
-from datetime import timedelta
 from django.utils import timezone
-from django.utils.http import urlsafe_base64_decode
 from django.utils.translation import gettext_lazy as _
 
 
@@ -184,9 +180,9 @@ class SetNewPasswordSerializer(serializers.Serializer):
             if password != confirm_password:
                 raise serializers.ValidationError({"confirm_password": "Passwords do not match"})
 
-            error, _ = verify_user_credential_when_change_password(uidb64, token, public_id)
+            error, status_code = verify_user_credential_when_change_password(uidb64, token, public_id)
 
-            if error:
+            if status_code!= 200 and error:
                 raise serializers.ValidationError(error)
 
             user = User.objects.get(public_id=public_id)
@@ -203,7 +199,7 @@ class SetNewPasswordSerializer(serializers.Serializer):
 
             return attrs
         except (TypeError, ValueError, OverflowError, User.DoesNotExist):
-            raise serializers.ValidationError({'password': 'Reset password failed'})
+            raise serializers.ValidationError({'password': _('Creation of new password has failed')})
 
     def validate_password(self, value):
         validate_password(value.strip())

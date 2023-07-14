@@ -5,8 +5,8 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
 from django.contrib.auth.tokens import default_token_generator
 from django.db import transaction
-from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
-from django.utils.encoding import force_bytes, force_str
+from django.utils.http import urlsafe_base64_encode
+from django.utils.encoding import force_bytes
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import permissions, viewsets, status, generics
 from rest_framework.decorators import action
@@ -14,6 +14,7 @@ from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from django.utils.translation import gettext_lazy as _
 
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.settings import api_settings
@@ -325,7 +326,7 @@ class PasswordResetView(generics.GenericAPIView):
                     reset_password_link=reset_password_link,
                 )
 
-            return Response({'success': 'We have sent you a link to reset your password'}, status=200)
+            return Response({'success': _("We have sent you a link to reset your password")}, status=200)
         else:
             return Response(serializer.errors, status=400)
 
@@ -345,7 +346,7 @@ class PasswordResetConfirmView(GenericAPIView):
     def patch(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
-            return Response({"detail": "Password has been reset."})
+            return Response({"detail": _("Password has been reset.")})
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -365,6 +366,6 @@ class CreateUserPasswordForFirstTime(APIView):
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
-            return Response({"detail": "Password has been reset."})
+            return Response({"detail": _("Creation of the new password succeed.")})
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
