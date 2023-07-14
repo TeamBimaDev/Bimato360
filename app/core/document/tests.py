@@ -24,7 +24,6 @@ class BimaCoreDocumentTest(APITestCase):
         self.user.user_permissions.add(permission)
         permission = Permission.objects.get(codename='core.document.can_read')
         self.user.user_permissions.add(permission)
-        self.partner = BimaErpPartnerFactory()
         self.file_content = "file_content".encode()
 
         # Give permissions to the user.
@@ -39,12 +38,12 @@ class BimaCoreDocumentTest(APITestCase):
             "file_path": SimpleUploadedFile("N0044410.jpg", self.file_content, content_type="N0044410/jpg"),
             "file_type": "PARTNER_PICTURE",
             "is_favorite": True,
-            "parent_type": ContentType.objects.get_for_model(self.partner).id,
-            "parent_id": self.partner.id,
         }
     def test_create_document_with_partner(self):
-
+        self.partner = BimaErpPartnerFactory()
         url = reverse('erp:bimaerppartner-list') + f'{self.partner.public_id}/documents/'
+        self.document_data['parent_type'] = ContentType.objects.get_for_model(self.partner).id
+        self.document_data['parent_id'] = self.partner.id
         response = self.client.post(url, self.document_data, format='multipart')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(BimaCoreDocument.objects.count(), 1)
@@ -54,6 +53,8 @@ class BimaCoreDocumentTest(APITestCase):
         self.partner = BimaErpPartner.objects.first()
         public_id = self.partner.public_id
         url = reverse('erp:bimaerppartner-list') + f'{public_id}/documents/'
+        self.document_data['parent_type'] = ContentType.objects.get_for_model(self.partner).id
+        self.document_data['parent_id'] = self.partner.id
         response = self.client.post(url, self.document_data, format='multipart')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(BimaCoreDocument.objects.count(), 1)
