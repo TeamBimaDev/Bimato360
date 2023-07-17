@@ -42,38 +42,38 @@ class BimaCompanyTest(APITestCase):
         self.user.user_permissions.add(permission)
         self.client.force_authenticate(self.user)
     def test_create_company(self):
-        url = reverse('company:bimacompany-list')
+        url = reverse('bimacompany-list')
         response = self.client.post(url, self.company_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(BimaCompany.objects.count(), 1)
     def test_get_companys(self):
         BimaCompanyFactory.create_batch(5)
-        url = reverse('company:bimacompany-list')
+        url = reverse('bimacompany-list')
         response = self.client.get(url, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['count'], 5)
         self.assertEqual(len(response.data['results']), 5)
     def test_update_company(self):
         company = BimaCompanyFactory()
-        url = reverse('company:bimacompany-detail', kwargs={'pk': str(company.public_id)})
+        url = reverse('bimacompany-detail', kwargs={'pk': str(company.public_id)})
         data = {'name': 'Updated Name'}
         response = self.client.patch(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(BimaCompany.objects.get(pk=company.pk).name, 'Updated Name')
     def test_delete_company(self):
         company = BimaCompanyFactory.create()
-        url = reverse('company:bimacompany-detail', kwargs={'pk': str(company.public_id)})
+        url = reverse('bimacompany-detail', kwargs={'pk': str(company.public_id)})
         response = self.client.delete(url, format='json')
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
     def test_unauthenticated(self):
         self.client.logout()
-        url = reverse('company:bimacompany-list')
+        url = reverse('bimacompany-list')
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
     def test_unauthorized_create(self):
         self.client.logout()
         self.client.force_authenticate(UserFactory())
-        url = reverse('company:bimacompany-list')
+        url = reverse('bimacompany-list')
         response = self.client.post(url, self.company_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
     def test_unauthorized_update(self):
@@ -81,7 +81,7 @@ class BimaCompanyTest(APITestCase):
         user_without_permission = UserFactory()
         self.client.force_authenticate(user_without_permission)
         company = BimaCompanyFactory()
-        url = reverse('company:bimacompany-detail', kwargs={'pk': str(company.public_id)})
+        url = reverse('bimacompany-detail', kwargs={'pk': str(company.public_id)})
         data = {'name': 'Updated Name'}
         response = self.client.patch(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
@@ -90,7 +90,7 @@ class BimaCompanyTest(APITestCase):
         user_without_permission = UserFactory()
         self.client.force_authenticate(user_without_permission)
         company = BimaCompanyFactory()
-        url = reverse('company:bimacompany-detail', kwargs={'pk': str(company.public_id)})
+        url = reverse('bimacompany-detail', kwargs={'pk': str(company.public_id)})
         response = self.client.delete(url, format='json')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
