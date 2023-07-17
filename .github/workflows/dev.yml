@@ -1,10 +1,6 @@
 name: deploy_bima360_backend_to_ovh
 
 on:
-  push:
-    branches:
-      - main
-      - developement
   pull_request:
     branches: [ main ]
 jobs:
