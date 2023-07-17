@@ -9,7 +9,7 @@ services:
     ports:
       - "8500:8000"
     volumes:
-      - ./bima360_static_file/:/app/media/
+      - ./media/:/app/media/
     command: >
       sh -c "
              chmod -R 777 /app/media &&

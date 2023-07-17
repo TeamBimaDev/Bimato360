@@ -53,17 +53,21 @@ COPY ./scripts /scripts
 
 WORKDIR /app
 
-# Add user and set permissions
+
 RUN adduser \
         --disabled-password \
         --no-create-home \
         django-user && \
     mkdir -p /vol/web/media && \
-    mkdir -p /vol/web/static && \
-    chown -R django-user:django-user /vol && \
+    mkdir -p /vol/web/static
+
+USER root
+
+RUN chown -R django-user:django-user /vol && \
     chown -R django-user:django-user ./* && \
     chmod -R 755 /vol && \
     chmod -R +x /scripts
+
 
 ENV PATH="/venv/bin:/scripts:$PATH"
 
