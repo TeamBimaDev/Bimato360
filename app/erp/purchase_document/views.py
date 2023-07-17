@@ -159,10 +159,8 @@ class BimaErpPurchaseDocumentViewSet(AbstractViewSet):
     def create_new_document_from_parent(self, request, *args, **kwargs):
         document_type, parent_public_ids = self.get_request_data(request)
         parents = self.get_parents(parent_public_ids)
-
         self.validate_parents(parents)
         self.validate_document_type(document_type)
-
         new_document = create_new_document(document_type, parents)
         reset_quantity = True if document_type.lower() == 'credit_note' else False
         self.create_products_from_parents(parents, new_document, reset_quantity)

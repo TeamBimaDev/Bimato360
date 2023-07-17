@@ -232,6 +232,84 @@ class BimaErpPurchaseDocumentTest(APITestCase):
         self.assertEqual(response.data['status'], new_status)
         purchase_document.refresh_from_db()
         self.assertEqual(BimaErpPurchaseDocument.objects.get(pk=purchase_document.pk).status, 'CONFIRMED')
+    def test_view_history_of_purchase_document(self):
+        self.create_purchase_document()
+        purchase_document = BimaErpPurchaseDocument.objects.first()
+        updated_data = {
+            'number': 'Updated Number',
+            'note': 'Updated Note',
+        }
+        url = reverse('erp:bimaerppurchasedocument-detail', kwargs={'pk': str(purchase_document.public_id)})
+        response = self.client.patch(url, updated_data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        new_data = {
+            'number': 'New Number',
+            'note': 'New Note',
+        }
+        response = self.client.patch(url, new_data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        url = reverse('erp:bimaerppurchasedocument-list') + f'{purchase_document.public_id}/get_history_diff/'
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn('differences', response.data)
+        differences = response.data['differences']
+        self.assertIsInstance(differences, list)
+        for difference in differences:
+            self.assertIsInstance(difference, dict)
+            self.assertIn('date', difference)
+            self.assertIn('changes', difference)
+            changes = difference['changes']
+            self.assertIsInstance(changes, list)
+            for change in changes:
+                self.assertIsInstance(change, dict)
+                self.assertIn('field', change)
+                self.assertIn('old_value', change)
+                self.assertIn('new_value', change)
+                self.assertIn('user', change)
+    def test_rollback_status_of_purchase_document(self):
+        self.add_product_for_purchase_document()
+        purchase_document = BimaErpPurchaseDocument.objects.first()
+        url = reverse('erp:bimaerppurchasedocument-detail', kwargs={'pk': str(purchase_document.public_id)})
+        data = {'status': 'CONFIRMED'}
+        response = self.client.patch(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['status'], 'CONFIRMED')
+        data = {'status': 'DRAFT'}
+        response = self.client.patch(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['status'], 'DRAFT')
+        purchase_document.refresh_from_db()
+        self.assertEqual(purchase_document.status, 'DRAFT')
+    def test_get_product_history(self):
+        self.add_product_for_purchase_document()
+        purchase_document = BimaErpPurchaseDocument.objects.first()
+        url = reverse('erp:bimaerppurchasedocument-list') + f'{purchase_document.public_id}/get_product_history_diff/'
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn('products_differences', response.data)
+        products_differences = response.data['products_differences']
+        self.assertIsInstance(products_differences, list)
+        for product_difference in products_differences:
+            self.assertIsInstance(product_difference, dict)
+            self.assertIn('product_id', product_difference)
+            self.assertIn('product_name', product_difference)
+            self.assertIn('differences', product_difference)
+            differences = product_difference['differences']
+            self.assertIsInstance(differences, list)
+            for difference in differences:
+                self.assertIsInstance(difference, dict)
+                self.assertIn('date', difference)
+                self.assertIn('changes', difference)
+                changes = difference['changes']
+                self.assertIsInstance(changes, list)
+                for change in changes:
+                    self.assertIsInstance(change, dict)
+                    self.assertIn('field', change)
+                    self.assertIn('old_value', change)
+                    self.assertIn('new_value', change)
+                    self.assertIn('history_type', change)
+                    self.assertIn('user', change)
+
     @staticmethod
     def create_permissions():
         permission_list = [

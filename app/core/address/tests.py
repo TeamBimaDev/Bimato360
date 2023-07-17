@@ -13,6 +13,9 @@ from core.state.factories import BimaCoreStateFactory
 from core.bank.models import BimaCoreBank
 from erp.partner.factories import BimaErpPartnerFactory
 from erp.partner.models import BimaErpPartner
+from company.factories import BimaCompanyFactory
+from company.models import BimaCompany
+
 
 class BimaCoreAddressTest(APITestCase):
 
@@ -30,7 +33,8 @@ class BimaCoreAddressTest(APITestCase):
         self.user.user_permissions.add(permission)
         permission = Permission.objects.get(codename='core.address.can_read')
         self.user.user_permissions.add(permission)
-
+        permission = Permission.objects.get(codename='company.company.can_add_address')
+        self.user.user_permissions.add(permission)
         self.address_data = {
             'number': '123',
             'street': 'Test Street',
@@ -104,6 +108,16 @@ class BimaCoreAddressTest(APITestCase):
         response = self.client.post(url2, self.address_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(BimaCoreAddress.objects.count(), 1)
+   # def test_add_address_for_company(self):
+    #    BimaCompanyFactory.create()
+     #   self.company = BimaCompany.objects.first()
+     #   public_id = self.company.public_id
+     #   url2 = reverse('company:bimacompany-list') + f'{public_id}/addresses/'
+     #   self.address_data['parent_type'] = ContentType.objects.get_for_model(self.company).id
+     #   self.address_data['parent_id'] = self.company.id
+     #   response = self.client.post(url2, self.address_data, format='json')
+     #   self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+     #   self.assertEqual(BimaCoreAddress.objects.count(), 1)
     def test_unauthenticated(self):
         self.client.logout()
         url = reverse('core:bimacoreaddress-list')
@@ -117,6 +131,7 @@ class BimaCoreAddressTest(APITestCase):
             ('core.address.can_update', 'Can update address'),
             ('core.address.can_delete', 'Can delete address'),
             ('core.address.can_read', 'Can read address'),
+            ('company.company.can_add_address', 'Can add address'),
         ]
 
         for permission_code, permission_name in permission_list:

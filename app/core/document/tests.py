@@ -8,6 +8,8 @@ from user.factories import UserFactory
 from erp.partner.factories import BimaErpPartnerFactory
 from django.core.files.uploadedfile import SimpleUploadedFile
 from erp.partner.models import BimaErpPartner
+from company.factories import BimaCompanyFactory
+from company.models import BimaCompany
 
 
 class BimaCoreDocumentTest(APITestCase):
@@ -23,6 +25,8 @@ class BimaCoreDocumentTest(APITestCase):
         permission = Permission.objects.get(codename='core.document.can_delete')
         self.user.user_permissions.add(permission)
         permission = Permission.objects.get(codename='core.document.can_read')
+        self.user.user_permissions.add(permission)
+        permission = Permission.objects.get(codename='company.company.can_add_document')
         self.user.user_permissions.add(permission)
         self.file_content = "file_content".encode()
 
@@ -69,7 +73,16 @@ class BimaCoreDocumentTest(APITestCase):
         response = self.client.patch(url, document_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(BimaCoreDocument.objects.get(pk=document.pk).document_name, 'update document name')
-
+    def test_add_document_for_company(self):
+        BimaCompanyFactory.create()
+        self.company = BimaCompany.objects.first()
+        public_id = self.company.public_id
+        url = reverse('company:bimacompany-list') + f'{public_id}/documents/'
+        self.document_data['parent_type'] = ContentType.objects.get_for_model(self.company).id
+        self.document_data['parent_id'] = self.company.id
+        response = self.client.post(url, self.document_data, format='multipart')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(BimaCoreDocument.objects.count(), 1)
     def test_delete_document(self):
         self.test_create_document_with_partner()
         document = BimaCoreDocument.objects.first()
@@ -83,6 +96,7 @@ class BimaCoreDocumentTest(APITestCase):
             ('core.document.can_update', 'Can update document'),
             ('core.document.can_delete', 'Can delete document'),
             ('core.document.can_read', 'Can read document'),
+            ('company.company.can_add_document', 'Can add document'),
         ]
 
         for permission_code, permission_name in permission_list:

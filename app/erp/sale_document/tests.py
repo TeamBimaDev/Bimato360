@@ -70,13 +70,243 @@ class BimaErpSaleDocumentTest(APITestCase):
         response = self.client.post(url, self.sale_document_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(BimaErpSaleDocument.objects.count(), 1)
+    def add_product_for_sale_document(self):
+        self.create_sale_document()
+        sale_document = BimaErpSaleDocument.objects.first()
+        public_id = sale_document.public_id
+        url = reverse('erp:bimaerpsaledocument-list') + f'{public_id}/add_product/'
+        category = BimaErpCategoryFactory.create()
+        vat = BimaErpVatFactory.create()
+        unit_of_measure = BimaErpUnitOfMeasureFactory.create()
+        product = BimaErpProductFactory.create(category=category, vat=vat, unit_of_measure=unit_of_measure)
+        data = {
+            "unit_of_measure": "Kilo",
+            "vat": 12,
+            "unit_price": 1200,
+            "discount": 0,
+            "quantity": 3,
+            "reference": "2313241564",
+            "name": "Sale",
+            "product_public_id": str(product.public_id),
+            "description": ""
+        }
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(BimaErpSaleDocumentProduct.objects.count(), 1)
+
     def test_create_sale_document_type_quote(self):
         url = reverse('erp:bimaerpsaledocument-list')
         response = self.client.post(url, self.sale_document_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(BimaErpSaleDocument.objects.count(), 1)
 
+    def test_get_sale_documents(self):
+        self.create_sale_document()
+        url = reverse('erp:bimaerpsaledocument-list')
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['count'], 1)
+        self.assertEqual(len(response.data['results']), 1)
 
+    def test_update_sale_document(self):
+        self.create_sale_document()
+        sale_document = BimaErpSaleDocument.objects.first()
+        url = reverse('erp:bimaerpsaledocument-detail', kwargs={'pk': str(sale_document.public_id)})
+        data = {'number': 'Updated number'}
+        response = self.client.patch(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(BimaErpSaleDocument.objects.get(pk=sale_document.pk).number, 'Updated number')
+
+    def test_delete_sale_document(self):
+        self.create_sale_document()
+        sale_document = BimaErpSaleDocument.objects.first()
+        url = reverse('erp:bimaerpsaledocument-detail', kwargs={'pk': str(sale_document.public_id)})
+        response = self.client.delete(url, format='json')
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+    def test_unauthenticated(self):
+        self.client.logout()
+        url = reverse('erp:bimaerpsaledocument-list')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_unauthorized_create_sale_document(self):
+        self.client.logout()
+        self.client.force_authenticate(UserFactory())
+        url = reverse('erp:bimaerpsaledocument-list')
+        response = self.client.post(url, self.sale_document_data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_unauthorized_update_sale_document(self):
+        self.create_sale_document()
+        self.client.logout()
+        user_without_permission = UserFactory()
+        self.client.force_authenticate(user_without_permission)
+        sale_document = BimaErpSaleDocument.objects.first()
+        url = reverse('erp:bimaerpsaledocument-detail', kwargs={'pk': str(sale_document.public_id)})
+        data = {'number': 'Updated number'}
+        response = self.client.patch(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_unauthorized_delete_sale_document(self):
+        self.create_sale_document()
+        self.client.logout()
+        user_without_permission = UserFactory()
+        self.client.force_authenticate(user_without_permission)
+        sale_document = BimaErpSaleDocument.objects.first()
+        url = reverse('erp:bimaerpsaledocument-detail', kwargs={'pk': str(sale_document.public_id)})
+        response = self.client.delete(url, format='json')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_add_product_for_sale_document(self):
+        self.create_sale_document()
+        sale_document = BimaErpSaleDocument.objects.first()
+        public_id = sale_document.public_id
+        url = reverse('erp:bimaerpsaledocument-list') + f'{public_id}/add_product/'
+        category = BimaErpCategoryFactory.create()
+        vat = BimaErpVatFactory.create()
+        unit_of_measure = BimaErpUnitOfMeasureFactory.create()
+        product = BimaErpProductFactory.create(category=category, vat=vat, unit_of_measure=unit_of_measure)
+        data = {
+            "unit_of_measure": "Kilo",
+            "vat": 12,
+            "unit_price": 1200,
+            "discount": 0,
+            "quantity": 3,
+            "reference": "2313241564",
+            "name": "Sale",
+            "product_public_id": str(product.public_id),
+            "description": ""
+        }
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(BimaErpSaleDocumentProduct.objects.count(), 1)
+
+    def test_delete_product_from_sale_document(self):
+        self.add_product_for_sale_document()
+        sale_document = BimaErpSaleDocument.objects.first()
+        sale_document_public_id = sale_document.public_id
+        product = BimaErpProduct.objects.first()
+        url = reverse('erp:bimaerpsaledocument-list') + f'{sale_document_public_id}/delete_product/'
+        data = {
+            "sale_document_public_id": str(sale_document.public_id),
+            "product_public_id": str(product.public_id)
+        }
+        response = self.client.delete(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+    def test_update_product_from_sale_document(self):
+        self.add_product_for_sale_document()
+        sale_document = BimaErpSaleDocument.objects.first()
+        public_id = sale_document.public_id
+        product = BimaErpProduct.objects.first()
+        url = reverse('erp:bimaerpsaledocument-list') + f'{public_id}/update_product/'
+        data = {
+            "sale_document_public_id": str(sale_document.public_id),
+            "product_public_id": str(product.public_id),
+            "unit_of_measure": "Kilo",
+            "vat": 12,
+            "unit_price": 1200,
+            "discount": 0,
+            "quantity": 3,
+            "reference": "2313241564",
+            "name": "sucre",
+            "description": ""
+        }
+        response = self.client.put(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(BimaErpSaleDocumentProduct.objects.get(pk=product.pk).name, 'sucre')
+
+    def test_change_status_of_purchase_document(self):
+        self.add_product_for_sale_document()
+        sale_document = BimaErpSaleDocument.objects.first()
+        url = reverse('erp:bimaerpsaledocument-detail', kwargs={'pk': str(sale_document.public_id)})
+        new_status = 'CONFIRMED'
+        data = {
+            'status': new_status
+        }
+        response = self.client.patch(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['status'], new_status)
+        sale_document.refresh_from_db()
+        self.assertEqual(BimaErpSaleDocument.objects.get(pk=sale_document.pk).status, 'CONFIRMED')
+    def test_view_history_of_sale_document(self):
+        self.create_sale_document()
+        sale_document = BimaErpSaleDocument.objects.first()
+        updated_data = {
+            'number': 'Updated Number',
+            'note': 'Updated Note',
+        }
+        url = reverse('erp:bimaerpsaledocument-detail', kwargs={'pk': str(sale_document.public_id)})
+        response = self.client.patch(url, updated_data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        new_data = {
+            'number': 'New Number',
+            'note': 'New Note',
+        }
+        response = self.client.patch(url, new_data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        url = reverse('erp:bimaerpsaledocument-list') + f'{sale_document.public_id}/get_history_diff/'
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn('differences', response.data)
+        differences = response.data['differences']
+        self.assertIsInstance(differences, list)
+        for difference in differences:
+            self.assertIsInstance(difference, dict)
+            self.assertIn('date', difference)
+            self.assertIn('changes', difference)
+            changes = difference['changes']
+            self.assertIsInstance(changes, list)
+            for change in changes:
+                self.assertIsInstance(change, dict)
+                self.assertIn('field', change)
+                self.assertIn('old_value', change)
+                self.assertIn('new_value', change)
+                self.assertIn('user', change)
+    def test_rollback_status_of_sale_document(self):
+        self.add_product_for_sale_document()
+        sale_document = BimaErpSaleDocument.objects.first()
+        url = reverse('erp:bimaerpsaledocument-detail', kwargs={'pk': str(sale_document.public_id)})
+        data = {'status': 'CONFIRMED'}
+        response = self.client.patch(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['status'], 'CONFIRMED')
+        data = {'status': 'DRAFT'}
+        response = self.client.patch(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['status'], 'DRAFT')
+        sale_document.refresh_from_db()
+        self.assertEqual(sale_document.status, 'DRAFT')
+    def test_get_product_history(self):
+        self.add_product_for_sale_document()
+        sale_document = BimaErpSaleDocument.objects.first()
+        url = reverse('erp:bimaerpsaledocument-list') + f'{sale_document.public_id}/get_product_history_diff/'
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn('products_differences', response.data)
+        products_differences = response.data['products_differences']
+        self.assertIsInstance(products_differences, list)
+        for product_difference in products_differences:
+            self.assertIsInstance(product_difference, dict)
+            self.assertIn('product_id', product_difference)
+            self.assertIn('product_name', product_difference)
+            self.assertIn('differences', product_difference)
+            differences = product_difference['differences']
+            self.assertIsInstance(differences, list)
+            for difference in differences:
+                self.assertIsInstance(difference, dict)
+                self.assertIn('date', difference)
+                self.assertIn('changes', difference)
+                changes = difference['changes']
+                self.assertIsInstance(changes, list)
+                for change in changes:
+                    self.assertIsInstance(change, dict)
+                    self.assertIn('field', change)
+                    self.assertIn('old_value', change)
+                    self.assertIn('new_value', change)
+                    self.assertIn('history_type', change)
+                    self.assertIn('user', change)
     @staticmethod
     def create_permissions():
         permission_list = [

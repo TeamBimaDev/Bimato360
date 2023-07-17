@@ -31,7 +31,7 @@ class BimaUserTest(APITestCase):
 
     def create_permissions(self):
         permission_list = [
-            ('core.user.can_create', 'Can create user'),
+            ('user.user.can_create', 'Can create user'),
         ]
 
         for permission_code, permission_name in permission_list:
