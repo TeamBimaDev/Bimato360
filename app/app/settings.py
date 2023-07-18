@@ -3,6 +3,7 @@ import coloredlogs
 from datetime import timedelta
 from pathlib import Path
 from decouple import Config, Csv, RepositoryEnv
+from django.utils.translation import gettext_lazy as _
 
 
 def get_env_path():
@@ -53,6 +54,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     # 'common.middlewares.error_handling_middleware.ErrorHandlingMiddleware',
@@ -62,7 +64,6 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'auditlog.middleware.AuditlogMiddleware',
-    'django.middleware.common.CommonMiddleware',
 ]
 
 ROOT_URLCONF = 'app.urls'
@@ -118,6 +119,12 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
+LANGUAGES = [
+    ('en', _('English')),
+    ('fr', _('French')),
+
+]
+
 TIME_ZONE = 'UTC'
 
 USE_I18N = True
@@ -125,6 +132,10 @@ USE_I18N = True
 USE_L10N = True
 
 USE_TZ = True
+
+LOCALE_PATHS = [
+    os.path.join(BASE_DIR, 'locale'),
+]
 
 STATIC_URL = '/static/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
@@ -230,21 +241,6 @@ INTERNAL_IPS = [
     "127.0.0.1",
 ]
 
-from django.utils.translation import gettext_lazy as _
-
-LANGUAGE_CODE = 'en-us'
-LANGUAGES = [
-    ('en', _('English')),
-    ('fr', _('French')),
-
-]
-
-USE_I18N = True
-USE_L10N = True
-LOCALE_PATHS = [
-    os.path.join(BASE_DIR, 'app', 'locale'),
-]
-
 EMAIL_BACKEND = config('EMAIL_BACKEND')
 EMAIL_HOST = config('EMAIL_HOST')
 EMAIL_PORT = config('EMAIL_PORT', cast=int)
@@ -253,7 +249,6 @@ EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
 EMAIL_USE_TLS = config('EMAIL_USE_TLS', cast=bool, default=False)
 
-
 CELERY_BROKER_URL = config('CELERY_BROKER_URL')
 CELERY_BROKER_BACKEND = "db+sqlite:///celery.sqlite"
 CELERY_CACHE_BACKEND = "db+sqlite:///celery.sqlite"
@@ -261,4 +256,3 @@ CELERY_RESULT_BACKEND = "db+sqlite:///celery.sqlite"
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
-

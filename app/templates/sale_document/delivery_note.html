@@ -1,3 +1,4 @@
+{% load i18n %}
 <!DOCTYPE html>
 <html>
     <head>
@@ -143,7 +144,7 @@
     </head>
     <body>
         <div id="header-left">
-            <img src="{{ request.scheme }}://{{ request.get_host }}{{ MEDIA_URL }}{{ company_data.favorite_logo.file_path }}" alt="Company Logo" class="logo"/>
+            <img src="{{ request.scheme }}://{{ request.get_host }}{{ MEDIA_URL }}{{ company_data.favorite_logo.file_path }}" alt="<th> {% trans "Company Logo" %} </th>" class="logo"/>
         </div>
         <div id="header-right">
             {{ company_data.company.header_note|safe }}
@@ -189,12 +190,12 @@
         <!-- SaleDocumentProducts table -->
         <table class="table_product_detail">
             <tr class="table_product_header" >
-                <th>Name / Ref.</th>
-                <th class="center">Qte.</th>
-                <th class="right">U. Price</th>
-                <th class="right">VAT</th>
-                <th class="right">Disc.</th>
-                <th class="right total">Total</th>
+                <th>{% trans "Name / Ref." %}</th>
+                <th class="center">{% trans "Qte." %}</th>
+                <th class="right">{% trans "U. Price" %}</th>
+                <th class="right">{% trans "VAT" %}</th>
+                <th class="right">{% trans "Disc." %}</th>
+                <th class="right total">{% trans "Total" %}</th>
             </tr>
             {% for product in sale_document.bimaerpsaledocumentproduct_set.all %}
             <tr>
@@ -210,21 +211,21 @@
         <div class="content-wrapper">
             <div class="totals_div">
                 <div class="totals_div_item">
-                    <span class="total_span_item_text">Total Without VAT:</span>
+                    <span class="total_span_item_text"><th class="right">{% trans "Total Without VAT" %}</th>:</span>
                     <span class="total_span_item_value total">{{ sale_document.total_amount_without_vat }}</span>
                 </div>
 
                 <div class="totals_div_item">
-                    <span class="total_span_item_text">Total Discount: </span>
+                    <span class="total_span_item_text">{% trans "Total Discount" %}: </span>
                     <span class="total_span_item_value total">{{ sale_document.total_discount }}</span>
 
                 </div>
                 <div class="totals_div_item">
-                    <span class="total_span_item_text">Total VAT:</span>
+                    <span class="total_span_item_text">{% trans "Total VAT" %}:</span>
                     <span class="total_span_item_value total">{{ sale_document.total_vat }}</span>
                 </div>
                 <div class="totals_div_item">
-                    <span class="total_span_item_text grand_total">Total Amount: </span>
+                    <span class="total_span_item_text grand_total">{% trans "Total Amount" %}: </span>
                     <span class="total_span_item_value grand_total total">{{ sale_document.total_amount }}</span>
                 </div>
             </div>

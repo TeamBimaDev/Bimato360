@@ -101,3 +101,4 @@ xhtml2pdf==0.2.11
 zope.event==5.0
 zope.interface==6.0
 zopfli==0.2.2
+pandas

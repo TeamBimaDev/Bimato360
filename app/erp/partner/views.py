@@ -32,6 +32,9 @@ from core.entity_tag.models import BimaCoreEntityTag, create_single_entity_tag, 
     get_entity_tags_for_parent_entity
 from common.permissions.action_base_permission import ActionBasedPermission
 
+from common.service.file_service import check_csv_file
+from django.utils.translation import gettext_lazy as _
+
 
 class PartnerFilter(django_filters.FilterSet):
     search = django_filters.CharFilter(method='filter_search')
@@ -237,13 +240,19 @@ class BimaErpPartnerViewSet(AbstractViewSet):
 
     @action(detail=False, methods=['post'])
     def generate_partner_from_csv(self, request):
-        file = request.FILES.get('file')
-
-        if not file:
-            return Response({'detail': 'CSV file is required.'}, status=status.HTTP_400_BAD_REQUEST)
+        csv_file = request.FILES.get('file')
 
         try:
-            create_partners_from_csv(file)
-            return Response({'detail': 'Successfully created partners.'}, status=status.HTTP_201_CREATED)
+            file_check = check_csv_file(csv_file)
+            if 'error' in file_check:
+                return Response(file_check, status=status.HTTP_400_BAD_REQUEST)
+            error_rows = create_partners_from_csv(csv_file)
+
+            if error_rows:
+                return Response({'detail': _('Errors occurred during import.'), 'errors': error_rows},
+                                status=status.HTTP_400_BAD_REQUEST)
+
+            return Response({'detail': _('Successfully created partners.')}, status=status.HTTP_201_CREATED)
+
         except Exception as e:
             return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)

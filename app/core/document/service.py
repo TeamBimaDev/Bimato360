@@ -1,7 +1,5 @@
 from enum import Enum
-
 from common.enums.file_type import FileTypeCompany
-from common.service.file_service import resize_image
 from common.enums.file_type import FileTypeUser
 
 
@@ -15,9 +13,10 @@ def resize_image(document_data, file, file_content_type):
         try:
             dimensions = get_dimensions_for_file_type(document_data)
             if dimensions is not None:
-                file = resize_image(file, *dimensions)
-        except Exception as e:
-            print(f"Failed to resize the image. Error: {str(e)}")
+                file = common.service.file_service.resize_image(file, *dimensions)
+        except Exception:
+            pass
+
     return file
 
 

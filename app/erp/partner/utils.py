@@ -7,16 +7,16 @@ from openpyxl.styles import Font, Border, Side, PatternFill
 from openpyxl.utils import get_column_letter
 import tablib
 
-
 import csv
-from django.core.exceptions import ValidationError
 from .models import BimaErpPartner
-
 
 from common.enums.company_type import get_company_type_choices
 from common.enums.entity_status import get_entity_status_choices
 from common.enums.gender import get_gender_choices
 from common.enums.partner_type import get_partner_type_choices
+
+from django.core.exceptions import ValidationError
+from django.db import transaction, IntegrityError
 
 
 def generate_xls_file(data_to_export, model_fields):
@@ -147,30 +147,54 @@ def validate_choice_value(value: str, choices):
     return value
 
 
-def create_partners_from_csv(file_path: str):
+def create_partners_from_csv(file):
+    error_rows = []
     partners = []
 
-    with open(file_path, mode='r') as file:
-        csv_reader = csv.DictReader(file)
+    csv_reader = csv.DictReader(file)
 
-        for row in csv_reader:
-            partner_data = {}
+    for i, row in enumerate(csv_reader, start=1):
+        partner_data = {}
 
-            for csv_header, value in row.items():
-                model_fields = CSV_TO_MODEL_MAP.get(csv_header.lower(), [])
+        for csv_header, value in row.items():
+            model_fields = CSV_TO_MODEL_MAP.get(csv_header.lower(), [])
 
-                for model_field in model_fields:
-                    if model_field in ['gender', 'partner_type', 'status', 'company_type']:
-                        choices = CHOICES_MAP[model_field]
+            for model_field in model_fields:
+                if model_field in ['gender', 'partner_type', 'status', 'company_type']:
+                    choices = CHOICES_MAP[model_field]
+                    try:
                         value = validate_choice_value(value, choices)
-                    partner_data[model_field] = value
+                    except ValueError as e:
+                        error_rows.append({
+                            'error': str(e),
+                            'row': i,
+                            'data': row
+                        })
+                        break
+                partner_data[model_field] = value
 
+        else:  # This else clause will run if no break statement was encountered in the for loop
             partner = BimaErpPartner(**partner_data)
 
             try:
                 partner.full_clean()
                 partners.append(partner)
             except ValidationError as e:
-                print(f"Failed to save partner: {e}")
+                error_rows.append({
+                    'error': str(e),
+                    'row': i,
+                    'data': row
+                })
 
-    BimaErpPartner.objects.bulk_create(partners)
+    if partners:  # Only attempt to save partners if there are valid ones to save
+        try:
+            with transaction.atomic():
+                BimaErpPartner.objects.bulk_create(partners)
+        except IntegrityError as e:
+            error_rows.append({
+                'error': 'Bulk create operation failed: {}'.format(e),
+                'row': 'N/A',
+                'data': 'N/A'
+            })
+
+    return error_rows

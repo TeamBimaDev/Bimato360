@@ -1,13 +1,14 @@
+{% load i18n %}
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Account Created</title>
+    <title>{% trans "Account Created" %}</title>
 </head>
 <body style="font-family: Arial, sans-serif; margin:0; padding:0; background-color: #f8f9fa;">
     <table align="center" border="0" cellpadding="0" cellspacing="0" width="600" style="border-collapse: collapse;">
         <tr>
             <td align="center" bgcolor="#70bbd9" style="padding: 40px 0 30px 0;">
-                <h3 style="color: white;">Your Account Activation</h3>
+                <h3 style="color: white;">{% trans "Your Account Activation" %}</h3>
             </td>
         </tr>
         <tr>
@@ -15,25 +16,23 @@
                 <table border="0" cellpadding="0" cellspacing="0" width="100%">
                     <tr>
                         <td style="color: #153643; font-size: 24px;">
-                            <b>Dear, {{ user_name }}!</b>
+                            <b>{% trans "Dear" %}, {{ user_name }}!</b>
                         </td>
                     </tr>
                     <tr>
                         <td style="padding: 20px 0 30px 0; color: #153643; line-height: 2; font-size: 16px;">
-							We regret to inform you that your account activation request on our platform has been declined by our administration.
+                            {% trans "We regret to inform you that your account activation request on our platform has been declined by our administration." %}
                             <br>
-                            Declined By: {{ admin_name }}
+                            {% trans "Declined By:" %} {{ admin_name }}
 							<br>
-							Time of Review: {{ activation_time }}
+                            {% trans "Time of Review:" %} {{ activation_time }}
 							<br/>
-							Please contact our support team if you have any questions or if you believe this was a mistake.
+                            {% trans "Please contact our support team if you have any questions or if you believe this was a mistake." %}
 			            </td>
                     </tr>
                     <tr>
                         <td>
-                            Best Regards,
-                            <br>
-                            <b>Your Team</b>
+                            {% trans "Best Regards," %}
                         </td>
                     </tr>
                 </table>

@@ -7,8 +7,10 @@ from django.contrib.auth import (
 )
 from django.contrib.auth.password_validation import validate_password
 from rest_framework.exceptions import ValidationError
+from rest_framework.response import Response
+from rest_framework import exceptions
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from rest_framework import serializers
+from rest_framework import serializers, status
 from .models import User
 from .service import verify_user_credential_when_change_password
 from django.utils import timezone
@@ -106,13 +108,18 @@ class AdminCreateUserSerializer(serializers.ModelSerializer):
 class AuthTokenSerializer(TokenObtainPairSerializer):
 
     def validate(self, attrs):
-        data = super().validate(attrs)
-        user = self.user
+        try:
+            data = super().validate(attrs)
+            user = self.user
 
-        if not user.is_active or not user.is_approved:
-            raise serializers.ValidationError(_("User is not active or not approved."))
+            if not user.is_active or not user.is_approved:
+                raise serializers.ValidationError(_("User is not active or not approved."))
 
-        return data
+            return data
+
+        except exceptions.AuthenticationFailed:
+            raise serializers.ValidationError(_("Invalid Username or Password."))
+
 
     @classmethod
     def get_token(cls, user):

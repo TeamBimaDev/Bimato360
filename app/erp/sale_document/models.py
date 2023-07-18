@@ -11,6 +11,9 @@ from erp.product.models import BimaErpProduct
 
 from core.abstract.models import AbstractModel
 
+from common.enums.sale_document_enum import SaleDocumentTypes
+from django.utils.translation import gettext_lazy as _
+
 
 class BimaErpSaleDocumentProduct(models.Model):
     sale_document = models.ForeignKey('BimaErpSaleDocument', on_delete=models.PROTECT)
@@ -107,6 +110,17 @@ class BimaErpSaleDocument(AbstractModel):
             if self.bimaerpsaledocument_set.exists():
                 raise ValidationError("Cannot modify a SaleDocument that has children.")
         super().save(*args, **kwargs)
+
+    TYPE_DISPLAY_MAPPING = {
+        SaleDocumentTypes.QUOTE.name: _("Quote"),
+        SaleDocumentTypes.ORDER.name: _("Order"),
+        SaleDocumentTypes.INVOICE.name: _("Invoice"),
+        SaleDocumentTypes.CREDIT_NOTE.name: _("Credit note"),
+    }
+
+    @property
+    def display_type(self):
+        return self.TYPE_DISPLAY_MAPPING.get(self.type, self.type)
 
 
 def update_sale_document_totals(sale_document):

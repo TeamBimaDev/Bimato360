@@ -1,3 +1,4 @@
+{% load i18n %}
 <html>
     <head>
         <style>
@@ -30,13 +31,12 @@
     <body>
         <table>
             <tr>
-                <th> S No </th>
-                <th> Type </th>
-                <th> First & last name </th>
-                <th> E-mail </th>
-
-                <th> Company name </th>
-                <th> Company Activity </th>
+                <th> {% trans "S No" %} </th>
+                <th> {% trans "Type" %} </th>
+                <th> {% trans "First & last name" %} </th>
+                <th> {% trans "E-mail" %} </th>
+                <th> {% trans "Company name" %} </th>
+                <th> {% trans "Company Activity" %} </th>
             </tr>
             {%for data in partners%}
             <tr>
