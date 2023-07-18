@@ -40,7 +40,9 @@ class BimaCoreCountryViewSet(AbstractViewSet):
 
     action_permissions = {
         'list': ['country.can_read'],
+        'export_data_to_csv': ['country.can_read'],
         'create': ['country.can_create'],
+        'import_from_csv': ['country.can_create'],
         'retrieve': ['country.can_read'],
         'update': ['country.can_update'],
         'partial_update': ['country.can_update'],
@@ -161,9 +163,9 @@ class BimaCoreCountryViewSet(AbstractViewSet):
         except Exception as e:
             errors.append(f"Error preparing states for bulk insertion: {str(e)}")
 
-    @action(detail=False, methods=["post"], url_path="import_form_csv")
+    @action(detail=False, methods=["POST"], url_path="import_from_csv")
     def import_from_csv(self, request, **kwargs):
-        csv_file = request.FILE.get("file")
+        csv_file = request.FILES.get("file")
 
         try:
             file_check = check_csv_file(csv_file)
@@ -176,16 +178,30 @@ class BimaCoreCountryViewSet(AbstractViewSet):
             if error_rows:
                 return Response({
                     'error': _('Some rows could not be processed'),
-                    _('error_rows'): error_rows,
-                    _('success_rows_count'): created_count,
+                    'error_rows': error_rows,
+                    'success_rows_count': created_count,
                 }, status=status.HTTP_400_BAD_REQUEST)
 
             return Response({'success': _('All rows processed successfully'),
-                             _('success_rows_count'): created_count})
+                             'success_rows_count': created_count})
 
         except Exception:
             return Response({"error", _("an error occurred while treating the file")},
                             status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=False, methods=['GET'], url_path="export_data_to_csv")
+    def export_data_to_csv(self, request):
+        query = BimaCoreCountry.objects.all()
+        opts = query.model._meta
+        model = BimaCoreCountry
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment;filename=countries.csv'
+        writer = csv.writer(response)
+        fields_names = [field.name for field in opts.fields]
+        writer.writerow(fields_names)
+        for obj in query:
+            writer.writerow(getattr(obj, field) for field in fields_names)
+        return response
 
 
 def create_response():

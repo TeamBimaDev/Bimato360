@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-07-17 12:18+0100\n"
+"POT-Creation-Date: 2023-07-18 12:00+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -237,6 +237,16 @@ msgstr "Revenu"
 msgid "Expense"
 msgstr "Dépense"
 
+#: .\common\service\file_service.py:22
+#, fuzzy
+#| msgid "Unable to get the item"
+msgid "unable to read the file"
+msgstr "Impossible d'obtenir l'élément"
+
+#: .\common\service\file_service.py:27
+msgid "Incorrect file type"
+msgstr "Type de fichier incorrect"
+
 #: .\common\utils\utils.py:21
 msgid "An error occurred during PDF generation:<pre>"
 msgstr "Une erreur s'est produite lors de la génération du PDF :<pre>"
@@ -323,6 +333,62 @@ msgstr "L'adresse e-mail doit être unique."
 msgid "BIC must be unique."
 msgstr "Le BIC doit être unique."
 
+#: .\core\country\service.py:28 .\core\currency\service.py:21
+msgid "Name is missing"
+msgstr "Nom manquant"
+
+#: .\core\country\service.py:32
+msgid "Code is missing"
+msgstr "Code manquant"
+
+#: .\core\country\service.py:37
+msgid "Currency with name or symbol {} does not exist"
+msgstr "Devise avec symbole {} inexistent"
+
+#: .\core\country\service.py:56
+msgid "Country with name {} already exists"
+msgstr "Pays avec nom {} existe déja"
+
+#: .\core\country\service.py:58
+msgid "Country with code {} already exists"
+msgstr "Pays avec code {} existe déja"
+
+#: .\core\country\service.py:60 .\core\currency\service.py:44
+#, fuzzy
+#| msgid "API exception occurred"
+msgid "Integrity error occurred"
+msgstr "Une exception API s'est produite"
+
+#: .\core\country\views.py:180 .\core\currency\views.py:55
+msgid "Some rows could not be processed"
+msgstr "Impossible de traiter tout les données"
+
+#: .\core\country\views.py:185 .\core\currency\views.py:60
+msgid "All rows processed successfully"
+msgstr "Tous les données sont traité"
+
+#: .\core\country\views.py:189 .\core\currency\views.py:64
+msgid "an error occurred while treating the file"
+msgstr "Une erreur est survenu lors la traitement du fichier"
+
+#: .\core\currency\service.py:21 .\core\currency\service.py:25
+#: .\core\currency\service.py:46 .\core\currency\service.py:48
+msgid "data"
+msgstr "Données"
+
+#: .\core\currency\service.py:25
+msgid "Symbol is missing"
+msgstr "Symbol obligatoire"
+
+#: .\core\currency\service.py:40
+msgid "Currency with name {} already exists"
+msgstr "Devise  avec ce nom {} existe déja"
+
+#: .\core\currency\service.py:42
+#, python-brace-format
+msgid "Currency with symbol {} already exists"
+msgstr "Devise  avec ce symbol {} existe déja"
+
 #: .\core\department\views.py:51
 msgid "A department cannot have its parent as its child."
 msgstr "Un département ne peut pas avoir son parent comme enfant."
@@ -338,6 +404,16 @@ msgstr "document introuvable"
 #: .\core\tag\serializers.py:35
 msgid "This field should be a valid hex color."
 msgstr "Ce champ doit être une couleur hexadécimale valide."
+
+#: .\erp\partner\views.py:252
+#, fuzzy
+#| msgid "An error occurred during PDF generation:<pre>"
+msgid "Errors occurred during import."
+msgstr "Une erreur s'est produite lors de la génération du PDF :<pre>"
+
+#: .\erp\partner\views.py:255
+msgid "Successfully created partners."
+msgstr "Création du partenaire terminer avec succées"
 
 #: .\erp\product\models.py:16 .\templates\product\pdf.html:35
 msgid "Name"
@@ -382,6 +458,7 @@ msgstr "Catégorie"
 
 #: .\erp\product\models.py:31 .\templates\sale_document\delivery_note.html:196
 #: .\templates\sale_document\sale_document.html:198
+#: .\templates\sale_document\sale_document_basic.html:198
 msgid "VAT"
 msgstr "TVA"
 
@@ -467,15 +544,15 @@ msgstr "Identifiant du document d'achat incorrect"
 msgid "Cannot find the item to edit"
 msgstr "Impossible de trouver l'élément à modifier"
 
-#: .\erp\purchase_document\views.py:170 .\erp\sale_document\views.py:159
+#: .\erp\purchase_document\views.py:168 .\erp\sale_document\views.py:159
 msgid "Item created"
 msgstr "Élément créé"
 
-#: .\erp\purchase_document\views.py:309 .\erp\sale_document\views.py:301
+#: .\erp\purchase_document\views.py:307 .\erp\sale_document\views.py:301
 msgid "Unauthorized"
 msgstr "Non autorisé"
 
-#: .\erp\purchase_document\views.py:338
+#: .\erp\purchase_document\views.py:336
 msgid ""
 "Error creating new PurchaseDocument for parent {purchase_document.id}: "
 "{str(e)}"
@@ -483,22 +560,22 @@ msgstr ""
 "Erreur lors de la création d'un nouveau PurchaseDocument pour le parent "
 "{purchase_document.id}: {str(e)}"
 
-#: .\erp\purchase_document\views.py:340
+#: .\erp\purchase_document\views.py:338
 #, python-brace-format
 msgid ""
 "Successfully created {num_new_purchase_documents} new purchase documents"
 msgstr ""
 "{num_new_purchase_documents} nouveaux documents d'achat créés avec succès"
 
-#: .\erp\purchase_document\views.py:352 .\erp\sale_document\views.py:317
+#: .\erp\purchase_document\views.py:350 .\erp\sale_document\views.py:317
 msgid "No valid parent documents found"
 msgstr "Aucun document parent valide trouvé"
 
-#: .\erp\purchase_document\views.py:355 .\erp\sale_document\views.py:320
+#: .\erp\purchase_document\views.py:353 .\erp\sale_document\views.py:320
 msgid "All documents should belong to the same partner"
 msgstr "Tous les documents doivent appartenir au même partenaire"
 
-#: .\erp\purchase_document\views.py:359 .\erp\sale_document\views.py:324
+#: .\erp\purchase_document\views.py:357 .\erp\sale_document\views.py:324
 msgid "Please give the type of the document"
 msgstr "Veuillez indiquer le type de document"
 
@@ -565,65 +642,103 @@ msgstr "EAN 13"
 
 #: .\templates\sale_document\delivery_note.html:147
 #: .\templates\sale_document\sale_document.html:147
+#: .\templates\sale_document\sale_document_basic.html:147
+#: .\templates\sale_document\sale_document_elegent.html:124
 msgid "Company Logo"
 msgstr "Logo de l'entreprise"
 
 #: .\templates\sale_document\delivery_note.html:193
 #: .\templates\sale_document\sale_document.html:195
+#: .\templates\sale_document\sale_document_basic.html:195
+#: .\templates\sale_document\sale_document_elegent.html:162
 msgid "Name / Ref."
 msgstr "Nom / Réf."
 
 #: .\templates\sale_document\delivery_note.html:194
 #: .\templates\sale_document\sale_document.html:196
+#: .\templates\sale_document\sale_document_basic.html:196
+#: .\templates\sale_document\sale_document_elegent.html:163
 msgid "Qte."
 msgstr "Qté."
 
 #: .\templates\sale_document\delivery_note.html:195
 #: .\templates\sale_document\sale_document.html:197
+#: .\templates\sale_document\sale_document_basic.html:197
+#: .\templates\sale_document\sale_document_elegent.html:165
 msgid "U. Price"
 msgstr "Prix Uni."
 
 #: .\templates\sale_document\delivery_note.html:197
 #: .\templates\sale_document\sale_document.html:199
+#: .\templates\sale_document\sale_document_basic.html:199
 msgid "Disc."
 msgstr "Rem."
 
 #: .\templates\sale_document\delivery_note.html:198
 #: .\templates\sale_document\sale_document.html:200
+#: .\templates\sale_document\sale_document_basic.html:200
+#: .\templates\sale_document\sale_document_elegent.html:166
 msgid "Total"
 msgstr "Total"
 
 #: .\templates\sale_document\delivery_note.html:214
 #: .\templates\sale_document\sale_document.html:216
+#: .\templates\sale_document\sale_document_basic.html:216
 msgid "Total Without VAT"
 msgstr "Total HT"
 
 #: .\templates\sale_document\delivery_note.html:219
 #: .\templates\sale_document\sale_document.html:221
+#: .\templates\sale_document\sale_document_basic.html:221
 msgid "Total Discount"
 msgstr "Total Remise"
 
 #: .\templates\sale_document\delivery_note.html:224
 #: .\templates\sale_document\sale_document.html:226
+#: .\templates\sale_document\sale_document_basic.html:226
 msgid "Total VAT"
 msgstr "Total TVA"
 
 #: .\templates\sale_document\delivery_note.html:228
 #: .\templates\sale_document\sale_document.html:230
+#: .\templates\sale_document\sale_document_basic.html:230
 msgid "Total Amount"
 msgstr "Montant Total"
 
 #: .\templates\sale_document\sale_document.html:17
+#: .\templates\sale_document\sale_document_basic.html:17
 msgid "Page"
 msgstr "Page"
 
 #: .\templates\sale_document\sale_document.html:17
+#: .\templates\sale_document\sale_document_basic.html:17
 msgid "of"
 msgstr "sur"
 
 #: .\templates\sale_document\sale_document.html:158
+#: .\templates\sale_document\sale_document_basic.html:158
 msgid "NUMBER"
 msgstr "Numéro"
+
+#: .\templates\sale_document\sale_document_elegent.html:164
+msgid "Unit"
+msgstr "Unité"
+
+#: .\templates\sale_document\sale_document_elegent.html:183
+msgid "SUB-TOTAL_WITHOUT_VAT"
+msgstr "Sous-total HT"
+
+#: .\templates\sale_document\sale_document_elegent.html:184
+msgid "DISCOUNT"
+msgstr "Remise"
+
+#: .\templates\sale_document\sale_document_elegent.html:185
+msgid "VAT_OF"
+msgstr "TVA de"
+
+#: .\templates\sale_document\sale_document_elegent.html:186
+msgid "TOTAL_PRICE"
+msgstr "Total"
 
 #: .\templates\user\activation_confirmation_email.html:5
 msgid "Account Created,"

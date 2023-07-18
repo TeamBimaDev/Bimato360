@@ -22,7 +22,7 @@ def import_data_from_csv_file(df):
             address_format = row.get('address_format')
             vat_label = row.get('vat_label')
             zip_required = row.get('zip_required', False)
-            currency_name_or_symbol = row.get('currency')
+            currency_name_or_symbol = eval(row.get('currency'))[0]
 
             if not name:
                 error_rows.append({'error': _('Name is missing'), 'data': row.to_dict()})
@@ -55,12 +55,12 @@ def import_data_from_csv_file(df):
             if 'name' in str(e):
                 error_message = _('Country with name {} already exists').format(name)
             elif 'code' in str(e):
-                error_message = _('Country with code {code} already exists').format(code)
+                error_message = _('Country with code {} already exists').format(code)
             else:
                 error_message = _('Integrity error occurred')
 
-            error_rows.append({'error': error_message, 'data': row.to_dict()})
+            error_rows.append({'error': str(error_message), 'data': name})
         except Exception as e:
-            error_rows.append({'error': str(e), 'data': row.to_dict()})
+            error_rows.append({'error': str(e), 'data': name})
 
     return error_rows, created_count

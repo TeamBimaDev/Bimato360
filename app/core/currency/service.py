@@ -43,8 +43,8 @@ def import_data_from_csv_file(df):
             else:
                 error_message = _('Integrity error occurred')
 
-            error_rows.append({'error': error_message, _('data'): row.to_dict()})
+            error_rows.append({'error': error_message, _('data'): name})
         except Exception as e:
-            error_rows.append({'error': str(e), _('data'): row.to_dict()})
+            error_rows.append({'error': str(e), _('data'): name})
 
     return error_rows, created_count
