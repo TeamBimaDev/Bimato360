@@ -4,6 +4,31 @@
     <head>
         <style>
 
+            @page {
+                @bottom-left {
+                    content: element(footer-left);
+                }
+                @bottom-right {
+                    content: "{% trans "Page" %}" counter(page) " {% trans "of" %} " counter(pages);
+                    font-size: 13px;
+                }
+                @top-left {
+                    content: element(header-left);
+                }
+                @top-right {
+                    content: element(header-right);
+                }
+
+            }
+
+            #footer-left {
+                position: running(footer-left);
+                font-size: 13px;
+                border-top: 2px solid #efefef;
+                padding-top: 0.3rem;
+                padding-bottom: 0.3rem;
+            }
+
      body{
         margin-inline: 5rem;
     }
@@ -88,14 +113,14 @@
         text-align: left;
     }
     .product_name{
-        width: 60%;
+        width: 50%;
         text-transform: uppercase;
     }
     .product_quantity{
-        width: 7%;
+        width: 9%;
     }
     .product_unit{
-        width: 7%;
+        width: 9%;
     }
     .table_totals{
         margin-top: 2.5rem;
@@ -113,11 +138,11 @@
     </head>
     <body>
     <div class="div_header">
-        <div id="company_name">
+        <div class="company_name" id="header-left">
             {{ company_data.company.name }}
         </div>
 
-        <div id="company_logo">
+        <div class="company_logo" id="header-right">
             <img src="{{ request.scheme }}://{{ request.get_host }}{{ MEDIA_URL }}{{ company_data.favorite_logo.file_path }}" alt="{% trans "Company Logo" %}" class="logo"/>
         </div>
 
@@ -217,7 +242,6 @@
 
 
     <div class="note">{{ sale_document.note }}</div>
-
 
 
     <div id="footer-left">

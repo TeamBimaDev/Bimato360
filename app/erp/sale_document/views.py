@@ -266,7 +266,7 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
 
     @action(detail=True, methods=['get'], url_path='generate_pdf')
     def generate_pdf(self, request, pk=None):
-        template_name = 'sale_document/sale_document_elegent.html'
+        template_name = 'sale_document/sale_document_basic.html'
         pdf_filename = "document.pdf"
         context = self._get_context(pk)
         context['document_title'] = context['sale_document'].type

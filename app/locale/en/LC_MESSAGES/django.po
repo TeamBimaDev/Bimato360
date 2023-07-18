@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-07-18 12:00+0100\n"
+"POT-Creation-Date: 2023-07-18 14:17+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -468,7 +468,6 @@ msgstr "Category"
 
 #: .\erp\product\models.py:31 .\templates\sale_document\delivery_note.html:196
 #: .\templates\sale_document\sale_document.html:198
-#: .\templates\sale_document\sale_document_basic.html:198
 msgid "VAT"
 msgstr "VAT"
 
@@ -599,14 +598,14 @@ msgid "Error creating new SaleDocument for parent {sale_document.id}: {str(e)}"
 msgstr ""
 
 #: .\erp\sale_document\signals.py:12
-#, python-brace-format
-msgid "Insufficient quantity for product {product.reference}"
+#, fuzzy
+#| msgid "Insufficient quantity for product {product.reference}"
+msgid "Insufficient quantity for product"
 msgstr "Insufficient quantity for product {product.reference}"
 
-#: .\erp\sale_document\signals.py:46
-#, python-brace-format
-msgid "Insufficient quantity for product {e.product.reference}"
-msgstr "Insufficient quantity for product {e.product.reference}"
+#: .\erp\sale_document\signals.py:69
+msgid "Cannot delete item because it contains products."
+msgstr ""
 
 #: .\erp\sale_document\views.py:114 .\erp\sale_document\views.py:136
 msgid "Mismatched sale_document_id"
@@ -646,101 +645,114 @@ msgstr "EAN 13"
 
 #: .\templates\sale_document\delivery_note.html:147
 #: .\templates\sale_document\sale_document.html:147
-#: .\templates\sale_document\sale_document_basic.html:147
-#: .\templates\sale_document\sale_document_elegent.html:124
+#: .\templates\sale_document\sale_document_basic.html:159
+#: .\templates\sale_document\sale_document_elegent.html:146
 msgid "Company Logo"
 msgstr "Company Logo"
 
 #: .\templates\sale_document\delivery_note.html:193
 #: .\templates\sale_document\sale_document.html:195
-#: .\templates\sale_document\sale_document_basic.html:195
-#: .\templates\sale_document\sale_document_elegent.html:162
+#: .\templates\sale_document\sale_document_basic.html:207
+#: .\templates\sale_document\sale_document_elegent.html:184
 msgid "Name / Ref."
 msgstr "Name / Ref."
 
 #: .\templates\sale_document\delivery_note.html:194
 #: .\templates\sale_document\sale_document.html:196
-#: .\templates\sale_document\sale_document_basic.html:196
-#: .\templates\sale_document\sale_document_elegent.html:163
+#: .\templates\sale_document\sale_document_basic.html:208
+#: .\templates\sale_document\sale_document_elegent.html:185
 msgid "Qte."
 msgstr "Qte."
 
 #: .\templates\sale_document\delivery_note.html:195
 #: .\templates\sale_document\sale_document.html:197
-#: .\templates\sale_document\sale_document_basic.html:197
-#: .\templates\sale_document\sale_document_elegent.html:165
+#: .\templates\sale_document\sale_document_basic.html:210
+#: .\templates\sale_document\sale_document_elegent.html:187
 msgid "U. Price"
 msgstr "U. Price"
 
 #: .\templates\sale_document\delivery_note.html:197
 #: .\templates\sale_document\sale_document.html:199
-#: .\templates\sale_document\sale_document_basic.html:199
 msgid "Disc."
 msgstr "Disc."
 
 #: .\templates\sale_document\delivery_note.html:198
 #: .\templates\sale_document\sale_document.html:200
-#: .\templates\sale_document\sale_document_basic.html:200
-#: .\templates\sale_document\sale_document_elegent.html:166
+#: .\templates\sale_document\sale_document_basic.html:211
+#: .\templates\sale_document\sale_document_elegent.html:188
 msgid "Total"
 msgstr "Total"
 
 #: .\templates\sale_document\delivery_note.html:214
 #: .\templates\sale_document\sale_document.html:216
-#: .\templates\sale_document\sale_document_basic.html:216
 msgid "Total Without VAT"
 msgstr "Total Without VAT"
 
 #: .\templates\sale_document\delivery_note.html:219
 #: .\templates\sale_document\sale_document.html:221
-#: .\templates\sale_document\sale_document_basic.html:221
 msgid "Total Discount"
 msgstr "Total Discount"
 
 #: .\templates\sale_document\delivery_note.html:224
 #: .\templates\sale_document\sale_document.html:226
-#: .\templates\sale_document\sale_document_basic.html:226
 msgid "Total VAT"
 msgstr "Total VAT"
 
 #: .\templates\sale_document\delivery_note.html:228
 #: .\templates\sale_document\sale_document.html:230
-#: .\templates\sale_document\sale_document_basic.html:230
 msgid "Total Amount"
 msgstr "Total Amount"
 
 #: .\templates\sale_document\sale_document.html:17
-#: .\templates\sale_document\sale_document_basic.html:17
+#: .\templates\sale_document\sale_document_basic.html:12
+#: .\templates\sale_document\sale_document_elegent.html:12
 msgid "Page"
 msgstr "Page"
 
 #: .\templates\sale_document\sale_document.html:17
-#: .\templates\sale_document\sale_document_basic.html:17
+#: .\templates\sale_document\sale_document_basic.html:12
+#: .\templates\sale_document\sale_document_elegent.html:12
 msgid "of"
 msgstr "of"
 
 #: .\templates\sale_document\sale_document.html:158
-#: .\templates\sale_document\sale_document_basic.html:158
 msgid "NUMBER"
 msgstr "NUMBER"
 
-#: .\templates\sale_document\sale_document_elegent.html:164
+#: .\templates\sale_document\sale_document_basic.html:190
+msgid "SALE_DOCUMENT_NUMBER"
+msgstr "Number"
+
+#: .\templates\sale_document\sale_document_basic.html:194
+msgid "SALE_DOCUMENT_DATE"
+msgstr "Date"
+
+#: .\templates\sale_document\sale_document_basic.html:198
+msgid "SALE_DOCUMENT_DUE_DATE"
+msgstr "Due Date"
+
+#: .\templates\sale_document\sale_document_basic.html:209
+#: .\templates\sale_document\sale_document_elegent.html:186
 msgid "Unit"
 msgstr "Unit"
 
-#: .\templates\sale_document\sale_document_elegent.html:183
+#: .\templates\sale_document\sale_document_basic.html:237
+#: .\templates\sale_document\sale_document_elegent.html:214
 msgid "SUB-TOTAL_WITHOUT_VAT"
 msgstr "Sub Total without vat"
 
-#: .\templates\sale_document\sale_document_elegent.html:184
+#: .\templates\sale_document\sale_document_basic.html:245
+#: .\templates\sale_document\sale_document_elegent.html:222
 msgid "DISCOUNT"
 msgstr "Discount"
 
-#: .\templates\sale_document\sale_document_elegent.html:185
+#: .\templates\sale_document\sale_document_basic.html:253
+#: .\templates\sale_document\sale_document_elegent.html:230
 msgid "VAT_OF"
 msgstr "Vat of"
 
-#: .\templates\sale_document\sale_document_elegent.html:186
+#: .\templates\sale_document\sale_document_basic.html:261
+#: .\templates\sale_document\sale_document_elegent.html:238
 msgid "TOTAL_PRICE"
 msgstr "Total price"
 
@@ -965,6 +977,10 @@ msgstr "Password has been reset."
 #: .\user\views.py:369
 msgid "Creation of the new password succeed."
 msgstr "Creation of the new password succeed."
+
+#, python-brace-format
+#~ msgid "Insufficient quantity for product {e.product.reference}"
+#~ msgstr "Insufficient quantity for product {e.product.reference}"
 
 #~ msgid "Canceled"
 #~ msgstr "Canceled"
