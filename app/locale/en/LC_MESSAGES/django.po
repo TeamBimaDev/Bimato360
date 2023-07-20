@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-07-18 14:17+0100\n"
+"POT-Creation-Date: 2023-07-20 09:15+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -217,7 +217,7 @@ msgstr "Confirmed"
 #: .\common\enums\purchase_document_enum.py:15
 #: .\common\enums\sale_document_enum.py:15
 msgid "CANCELED"
-msgstr ""
+msgstr "Canceled"
 
 #: .\common\enums\purchase_document_enum.py:19
 #: .\common\enums\sale_document_enum.py:19
@@ -415,6 +415,150 @@ msgstr "Document not found"
 msgid "This field should be a valid hex color."
 msgstr "This field should be a valid hex color."
 
+#: .\erp\partner\models.py:13
+msgid "Is Supplier"
+msgstr "Is Supplier"
+
+#: .\erp\partner\models.py:14
+msgid "Is Customer"
+msgstr "Is Customer"
+
+#: .\erp\partner\models.py:15
+msgid "Partner Type"
+msgstr "Partner Type"
+
+#: .\erp\partner\models.py:16
+#, fuzzy
+#| msgid "Company name"
+msgid "Company Type"
+msgstr "Company name"
+
+#: .\erp\partner\models.py:17
+#, fuzzy
+#| msgid "First & last name"
+msgid "First Name"
+msgstr "First & last name"
+
+#: .\erp\partner\models.py:18
+#, fuzzy
+#| msgid "Name"
+msgid "Last Name"
+msgstr "Name"
+
+#: .\erp\partner\models.py:19
+msgid "Gender"
+msgstr "Gender"
+
+#: .\erp\partner\models.py:20
+#, fuzzy
+#| msgid "Serial Number"
+msgid "Social Security Number"
+msgstr "Serial Number"
+
+#: .\erp\partner\models.py:21
+#, fuzzy
+#| msgid "Serial Number"
+msgid "ID Number"
+msgstr "Serial Number"
+
+#: .\erp\partner\models.py:22
+#, fuzzy
+#| msgid "E-mail"
+msgid "Email"
+msgstr "E-mail"
+
+#: .\erp\partner\models.py:23
+msgid "Phone"
+msgstr "Phone"
+
+#: .\erp\partner\models.py:24
+msgid "Fax"
+msgstr "Fax"
+
+#: .\erp\partner\models.py:25
+#, fuzzy
+#| msgid "Company name"
+msgid "Company Name"
+msgstr "Company name"
+
+#: .\erp\partner\models.py:26 .\templates\partner\pdf.html:39
+msgid "Company Activity"
+msgstr "Company Activity"
+
+#: .\erp\partner\models.py:27
+msgid "VAT ID Number"
+msgstr "VAT ID Number"
+
+#: .\erp\partner\models.py:28 .\erp\product\models.py:35
+msgid "Status"
+msgstr "Status"
+
+#: .\erp\partner\models.py:29
+msgid "Note"
+msgstr "Note"
+
+#: .\erp\partner\models.py:30
+#, fuzzy
+#| msgid "Company name"
+msgid "Company Date Creation"
+msgstr "Company name"
+
+#: .\erp\partner\models.py:31
+#, fuzzy
+#| msgid "Company name"
+msgid "Company Siren"
+msgstr "Company name"
+
+#: .\erp\partner\models.py:32
+#, fuzzy
+#| msgid "Company name"
+msgid "Company Siret"
+msgstr "Company name"
+
+#: .\erp\partner\models.py:33
+#, fuzzy
+#| msgid "New User Registration"
+msgid "Company Date Registration"
+msgstr "New User Registration"
+
+#: .\erp\partner\models.py:34
+#, fuzzy
+#| msgid "Serial Number"
+msgid "RCS Number"
+msgstr "Serial Number"
+
+#: .\erp\partner\models.py:35
+msgid "Company Date Struck Off"
+msgstr "Company Date Struck Off"
+
+#: .\erp\partner\models.py:36
+#, fuzzy
+#| msgid "Company name"
+msgid "Company APE Text"
+msgstr "Company name"
+
+#: .\erp\partner\models.py:37
+#, fuzzy
+#| msgid "Company name"
+msgid "Company APE Code"
+msgstr "Company name"
+
+#: .\erp\partner\models.py:38
+#, fuzzy
+#| msgid "Company name"
+msgid "Company Capital"
+msgstr "Company name"
+
+#: .\erp\partner\models.py:39
+#, fuzzy
+#| msgid "Credit note"
+msgid "Credit"
+msgstr "Credit note"
+
+#: .\erp\partner\models.py:40
+msgid "Balance"
+msgstr "Balance"
+
 #: .\erp\partner\views.py:252
 #, fuzzy
 #| msgid "An error occurred during PDF generation:<pre>"
@@ -474,10 +618,6 @@ msgstr "VAT"
 #: .\erp\product\models.py:33
 msgid "Unit of Measure"
 msgstr "Unit of Measure"
-
-#: .\erp\product\models.py:35
-msgid "Status"
-msgstr "Status"
 
 #: .\erp\product\models.py:37
 msgid "Minimum Stock Level"
@@ -597,16 +737,6 @@ msgstr "Not enough stock available for this product."
 msgid "Error creating new SaleDocument for parent {sale_document.id}: {str(e)}"
 msgstr ""
 
-#: .\erp\sale_document\signals.py:12
-#, fuzzy
-#| msgid "Insufficient quantity for product {product.reference}"
-msgid "Insufficient quantity for product"
-msgstr "Insufficient quantity for product {product.reference}"
-
-#: .\erp\sale_document\signals.py:69
-msgid "Cannot delete item because it contains products."
-msgstr ""
-
 #: .\erp\sale_document\views.py:114 .\erp\sale_document\views.py:136
 msgid "Mismatched sale_document_id"
 msgstr "Mismatched sale_document_id"
@@ -631,10 +761,6 @@ msgstr "E-mail"
 msgid "Company name"
 msgstr "Company name"
 
-#: .\templates\partner\pdf.html:39
-msgid "Company Activity"
-msgstr "Company Activity"
-
 #: .\templates\product\pdf.html:36
 msgid "Ref."
 msgstr "Ref."
@@ -645,28 +771,28 @@ msgstr "EAN 13"
 
 #: .\templates\sale_document\delivery_note.html:147
 #: .\templates\sale_document\sale_document.html:147
-#: .\templates\sale_document\sale_document_basic.html:159
+#: .\templates\sale_document\sale_document_basic.html:171
 #: .\templates\sale_document\sale_document_elegent.html:146
 msgid "Company Logo"
 msgstr "Company Logo"
 
 #: .\templates\sale_document\delivery_note.html:193
 #: .\templates\sale_document\sale_document.html:195
-#: .\templates\sale_document\sale_document_basic.html:207
+#: .\templates\sale_document\sale_document_basic.html:224
 #: .\templates\sale_document\sale_document_elegent.html:184
 msgid "Name / Ref."
 msgstr "Name / Ref."
 
 #: .\templates\sale_document\delivery_note.html:194
 #: .\templates\sale_document\sale_document.html:196
-#: .\templates\sale_document\sale_document_basic.html:208
+#: .\templates\sale_document\sale_document_basic.html:225
 #: .\templates\sale_document\sale_document_elegent.html:185
 msgid "Qte."
 msgstr "Qte."
 
 #: .\templates\sale_document\delivery_note.html:195
 #: .\templates\sale_document\sale_document.html:197
-#: .\templates\sale_document\sale_document_basic.html:210
+#: .\templates\sale_document\sale_document_basic.html:227
 #: .\templates\sale_document\sale_document_elegent.html:187
 msgid "U. Price"
 msgstr "U. Price"
@@ -678,7 +804,7 @@ msgstr "Disc."
 
 #: .\templates\sale_document\delivery_note.html:198
 #: .\templates\sale_document\sale_document.html:200
-#: .\templates\sale_document\sale_document_basic.html:211
+#: .\templates\sale_document\sale_document_basic.html:228
 #: .\templates\sale_document\sale_document_elegent.html:188
 msgid "Total"
 msgstr "Total"
@@ -719,39 +845,39 @@ msgstr "of"
 msgid "NUMBER"
 msgstr "NUMBER"
 
-#: .\templates\sale_document\sale_document_basic.html:190
+#: .\templates\sale_document\sale_document_basic.html:207
 msgid "SALE_DOCUMENT_NUMBER"
 msgstr "Number"
 
-#: .\templates\sale_document\sale_document_basic.html:194
+#: .\templates\sale_document\sale_document_basic.html:211
 msgid "SALE_DOCUMENT_DATE"
 msgstr "Date"
 
-#: .\templates\sale_document\sale_document_basic.html:198
+#: .\templates\sale_document\sale_document_basic.html:215
 msgid "SALE_DOCUMENT_DUE_DATE"
 msgstr "Due Date"
 
-#: .\templates\sale_document\sale_document_basic.html:209
+#: .\templates\sale_document\sale_document_basic.html:226
 #: .\templates\sale_document\sale_document_elegent.html:186
 msgid "Unit"
 msgstr "Unit"
 
-#: .\templates\sale_document\sale_document_basic.html:237
+#: .\templates\sale_document\sale_document_basic.html:254
 #: .\templates\sale_document\sale_document_elegent.html:214
 msgid "SUB-TOTAL_WITHOUT_VAT"
 msgstr "Sub Total without vat"
 
-#: .\templates\sale_document\sale_document_basic.html:245
+#: .\templates\sale_document\sale_document_basic.html:262
 #: .\templates\sale_document\sale_document_elegent.html:222
 msgid "DISCOUNT"
 msgstr "Discount"
 
-#: .\templates\sale_document\sale_document_basic.html:253
+#: .\templates\sale_document\sale_document_basic.html:270
 #: .\templates\sale_document\sale_document_elegent.html:230
 msgid "VAT_OF"
 msgstr "Vat of"
 
-#: .\templates\sale_document\sale_document_basic.html:261
+#: .\templates\sale_document\sale_document_basic.html:278
 #: .\templates\sale_document\sale_document_elegent.html:238
 msgid "TOTAL_PRICE"
 msgstr "Total price"
@@ -761,6 +887,7 @@ msgid "Account Created,"
 msgstr "Account Created,"
 
 #: .\templates\user\activation_confirmation_email.html:11
+#: .\user\receivers.py:100
 msgid "Account Activation Confirmation"
 msgstr "Account Activation Confirmation"
 
@@ -796,8 +923,7 @@ msgstr "Best Regards,"
 #: .\templates\user\reset_password_email.html:5
 #: .\templates\user\user_activate_account_and_change_password.html:5
 #: .\templates\user\user_activate_account_and_change_password.html:11
-#: .\templates\user\user_creation_email_notify.html:5
-#: .\templates\user\user_declined_email.html:5
+#: .\user\receivers.py:63 .\user\receivers.py:86
 msgid "Account Created"
 msgstr "Account Created"
 
@@ -875,6 +1001,10 @@ msgstr ""
 msgid "Activate Account"
 msgstr "Activate Account"
 
+#: .\templates\user\user_creation_email_notify.html:5
+msgid "Activation de votre compte avec succès"
+msgstr "Your account has been activated successfully"
+
 #: .\templates\user\user_creation_email_notify.html:11
 msgid "Welcome to Bima360!"
 msgstr "Welcome to Bima360!"
@@ -900,6 +1030,10 @@ msgstr "In the meantime, you can review our services on our website:"
 #: .\templates\user\user_creation_email_notify.html:28
 msgid "Our Website"
 msgstr "Our Website"
+
+#: .\templates\user\user_declined_email.html:5
+msgid "Refus d'activation de votre compte"
+msgstr "Refusal to activate your account"
 
 #: .\templates\user\user_declined_email.html:11
 msgid "Your Account Activation"
@@ -936,6 +1070,18 @@ msgstr "Sum of payment_terms_details value must be 100."
 #: .\user\models.py:17
 msgid "User must have an email address."
 msgstr "User must have an email address."
+
+#: .\user\receivers.py:27
+#, fuzzy
+#| msgid "Password has been reset."
+msgid "Password Reset"
+msgstr "Password has been reset."
+
+#: .\user\receivers.py:114
+#, fuzzy
+#| msgid "Your Account Activation"
+msgid "Account Activation Refused"
+msgstr "Your Account Activation"
 
 #: .\user\serializers.py:116
 msgid "User is not active or not approved."
@@ -977,6 +1123,11 @@ msgstr "Password has been reset."
 #: .\user\views.py:369
 msgid "Creation of the new password succeed."
 msgstr "Creation of the new password succeed."
+
+#, fuzzy
+#~| msgid "Insufficient quantity for product {product.reference}"
+#~ msgid "Insufficient quantity for product"
+#~ msgstr "Insufficient quantity for product {product.reference}"
 
 #, python-brace-format
 #~ msgid "Insufficient quantity for product {e.product.reference}"

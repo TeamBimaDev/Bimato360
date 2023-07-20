@@ -58,12 +58,16 @@ class BimaErpPartnerViewSet(AbstractViewSet):
     serializer_class = BimaErpPartnerSerializer
     permission_classes = []
     permission_classes = (ActionBasedPermission,)
-    ordering_fields = AbstractViewSet.ordering_fields + \
-                      ['first_name', 'email', 'phone', 'partner_type']
+    ordering_fields = ['first_name', 'email', 'phone', 'partner_type']
+    ordering = ['created']
     filterset_class = PartnerFilter
     action_permissions = {
         'list': ['partner.can_read'],
+        'export_csv': ['partner.can_read'],
+        'export_xls': ['partner.can_read'],
+        'export_pdf': ['partner.can_read'],
         'create': ['partner.can_create'],
+        'generate_partner_from_csv': ['partner.can_create'],
         'retrieve': ['partner.can_read'],
         'update': ['partner.can_update'],
         'partial_update': ['partner.can_update'],
@@ -223,12 +227,12 @@ class BimaErpPartnerViewSet(AbstractViewSet):
             template_name,
             {
                 "partners": data_to_export,
+                "request": request,
             },
             "partner.pdf"
         )
 
     def export_xls(self, request, **kwargs):
-        model_fields = BimaErpPartner._meta
 
         if kwargs.get('public_id') is not None:
             data_to_export = [BimaErpPartner.objects.
@@ -236,7 +240,7 @@ class BimaErpPartnerViewSet(AbstractViewSet):
         else:
             data_to_export = BimaErpPartner.objects.all()
 
-        return generate_xls_file(data_to_export, model_fields)
+        return generate_xls_file(data_to_export)
 
     @action(detail=False, methods=['post'])
     def generate_partner_from_csv(self, request):

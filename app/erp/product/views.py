@@ -48,6 +48,9 @@ class BimaErpProductViewSet(AbstractViewSet):
     filterset_class = ProductFilter
     action_permissions = {
         'list': ['product.can_read'],
+        'export_csv': ['product.can_read'],
+        'export_xls': ['product.can_read'],
+        'export_pdf': ['product.can_read'],
         'create': ['product.can_create'],
         'retrieve': ['product.can_read'],
         'update': ['product.can_update'],
@@ -106,6 +109,7 @@ class BimaErpProductViewSet(AbstractViewSet):
             template_name,
             {
                 "products": data_to_export,
+                "request": request,
             },
             "product.pdf"
         )

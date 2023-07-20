@@ -101,18 +101,30 @@ class AbstractViewSet(viewsets.ModelViewSet):
     filter_backends = [filters.OrderingFilter, DjangoFilterBackend]
     filterset_class = BaseFilter
     ordering_fields = ['updated', 'created']
-    ordering = ['-updated']
+    ordering = ['name']
     pagination_class = DefaultPagination
 
     def get_error_message(self, exc):
         if isinstance(exc, dict) or isinstance(exc, str):
             return self.format_error_message(exc)
+        try:
+            error_message = str(exc)
+            if exc.args:
+                formatted_messages = []
+                for arg in exc.args:
+                    if isinstance(arg, dict):
+                        for key, value in arg.items():
+                            formatted_messages.append(f"{key}: {value}")
+                    else:
+                        formatted_messages.append(self.format_error_message(error_message))
 
-        error_message = str(exc)
-        if exc.args:
-            formatted_messages = [self.format_error_message(arg) for arg in exc.args]
-            error_message = " ".join(formatted_messages)
-        return error_message or EXCEPTIONS_MAP.get(type(exc), {}).get('message', _("A server error occurred"))
+                error_message = " ".join(formatted_messages)
+
+            return error_message or EXCEPTIONS_MAP.get(type(exc), {}).get('message', _("A server error occurred"))
+        except Exception as e:
+            logger.error(f"Failed to format error message: {str(e)}")
+            return EXCEPTIONS_MAP.get(type(exc), {}).get('message', _("A server error occurred"))
+
 
     def handle_exception(self, exc):
         error_status_code = EXCEPTIONS_MAP.get(type(exc), {}).get('status_code', HTTP_500_INTERNAL_SERVER_ERROR)

@@ -6,12 +6,20 @@ class CustomResponseJSONRenderer(JSONRenderer):
         try:
             status_code = renderer_context['response'].status_code
             if not str(status_code).startswith('2'):
-                response = {
-                    'succeeded': False,
-                    "code": status_code,
-                    "data": None,
-                    "message": data
-                }
+                if verify_data_error_is_my_custom_type(data):
+                    response = {
+                        'succeeded': False,
+                        "code": data.get('code', status_code),
+                        "data": None,
+                        "message": data.get('message')
+                    }
+                else:
+                    response = {
+                        'succeeded': False,
+                        "code": data.get('code', status_code),
+                        "data": None,
+                        "message": data.get('message', data)
+                    }
                 return super(CustomResponseJSONRenderer, self).render(response, accepted_media_type, renderer_context)
 
             if data is None:
@@ -38,7 +46,6 @@ class CustomResponseJSONRenderer(JSONRenderer):
                 }
                 if not str(status_code).startswith('2'):
                     response["succeeded"] = False
-                    response["status"] = "error"
                     response["data"] = None
                     response["code"] = status_code
                     try:
@@ -52,3 +59,13 @@ class CustomResponseJSONRenderer(JSONRenderer):
         except:
             return super(CustomResponseJSONRenderer, self). \
                 render(data, accepted_media_type, renderer_context)
+
+
+def verify_data_error_is_my_custom_type(data):
+    if isinstance(data, dict) and len(data) == 4 and \
+            'succeeded' in data and \
+            'message' in data and \
+            'code' in data and \
+            'data' in data:
+        return True
+    return False

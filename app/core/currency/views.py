@@ -1,18 +1,41 @@
 import csv
+import django_filters
+from django.db.models import Q
+from pandas import read_csv
+from rest_framework import status
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from django.http import HttpResponse
+from django.utils.translation import gettext_lazy as _
 
 from core.abstract.views import AbstractViewSet
 from core.currency.models import BimaCoreCurrency
 from core.currency.serializers import BimaCoreCurrencySerializer
-from common.permissions.action_base_permission import ActionBasedPermission
-from django.http import HttpResponse
-from rest_framework import status
-from rest_framework.decorators import action
-from django.utils.translation import gettext_lazy as _
-from rest_framework.response import Response
-
-from .service import import_data_from_csv_file
-from pandas import read_csv
 from common.service.file_service import check_csv_file
+from common.permissions.action_base_permission import ActionBasedPermission
+from .service import import_data_from_csv_file
+
+
+class CurrencyFilter(django_filters.FilterSet):
+    search = django_filters.CharFilter(method='filter_search')
+    active = django_filters.ChoiceFilter(choices=[('True', 'True'), ('False', 'False'), ('all', 'all')],
+                                         method='filter_active')
+
+    class Meta:
+        model = BimaCoreCurrency
+        fields = ['active', 'search']
+
+    def filter_search(self, queryset, name, value):
+        return queryset.filter(
+            Q(name__icontains=value) |
+            Q(symbol__icontains=value)
+        )
+
+    def filter_active(self, queryset, name, value):
+        if value == 'all':
+            return queryset
+        else:
+            return queryset.filter(active=(value == 'True'))
 
 
 class BimaCoreCurrencyViewSet(AbstractViewSet):
@@ -20,6 +43,7 @@ class BimaCoreCurrencyViewSet(AbstractViewSet):
     serializer_class = BimaCoreCurrencySerializer
     permission_classes = []
     permission_classes = (ActionBasedPermission,)
+    filterset_class = CurrencyFilter
     ordering_fields = AbstractViewSet.ordering_fields + \
                       ['symbol', 'name', 'active', 'currency_unit_label', 'currency_subunit_label']
 

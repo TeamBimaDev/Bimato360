@@ -9,7 +9,7 @@ from django.utils.translation import gettext_lazy as _
 class InsufficientQuantityError(Exception):
     def __init__(self, product):
         self.product = product
-        super().__init__(_("Insufficient quantity for product"))
+        super().__init__(f"Insufficient quantity for product {product.reference}")
 
 
 def check_sale_document_contains_at_least_one_product_when_confirmed(instance):
@@ -66,4 +66,4 @@ def pre_save_sale_document(sender, instance, **kwargs):
 @receiver(pre_delete, sender=BimaErpSaleDocument)
 def check_products_before_delete(sender, instance, **kwargs):
     if instance.sale_document_products.count() > 0:
-        raise ValidationError(_("Cannot delete item because it contains products."))
+        raise ValidationError("Cannot delete item because it contains products.")

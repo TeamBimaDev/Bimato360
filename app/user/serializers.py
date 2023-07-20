@@ -118,7 +118,7 @@ class AuthTokenSerializer(TokenObtainPairSerializer):
             return data
 
         except exceptions.AuthenticationFailed:
-            raise serializers.ValidationError(_("Invalid Username or Password."))
+            raise serializers.ValidationError({"Login Error": _("Invalid Username or Password.")})
 
 
     @classmethod

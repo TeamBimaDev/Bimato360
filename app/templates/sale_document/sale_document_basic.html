@@ -15,10 +15,6 @@
                 @top-left {
                     content: element(header-left);
                 }
-                @top-right {
-                    content: element(header-right);
-                }
-
             }
 
             #footer-left {
@@ -39,8 +35,8 @@
     }
 
     .company_logo{
-        width: 300px;
-        height: 150px;
+        width: 200px;
+        height: 100px;
         object-fit: contain;
     }
 
@@ -171,7 +167,7 @@
     </head>
     <body>
     <div class="div_header">
-        <div class="company_logo" id="header-right">
+        <div class="company_logo" id="header-left">
             <img src="{{ request.scheme }}://{{ request.get_host }}{{ MEDIA_URL }}{{ company_data.favorite_logo.file_path }}" alt="{% trans "Company Logo" %}" class="logo"/>
         </div>
     </div>

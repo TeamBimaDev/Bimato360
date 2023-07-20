@@ -1,8 +1,13 @@
 import uuid
-
+from logging import getLogger
 from django.db import models
 from django.core.exceptions import ObjectDoesNotExist
+from django.forms import model_to_dict
 from django.http import Http404
+from django.utils.translation import gettext_lazy as _
+from rest_framework.exceptions import ValidationError
+
+logger = getLogger(__name__)
 
 
 class AbstractManager(models.Manager):
@@ -23,3 +28,21 @@ class AbstractModel(models.Model):
 
     class Meta:
         abstract = True
+
+    def save(self, *args, **kwargs):
+        if self.pk and 'active' in self.__dict__ and not self.active:
+            for rel in self._meta.related_objects:
+                if rel.get_accessor_name() is not None:
+                    try:
+                        related = getattr(self, rel.get_accessor_name())
+                        if hasattr(related, 'all'):
+                            if related.all().exists():
+                                raise ValidationError({'Active': _("L'élément est utilisé, impossible de changer vers "
+                                                                   "désactiver")})
+                        else:
+                            raise ValidationError({'Active': _("L'élément est utilisé, impossible de changer vers "
+                                                               "désactiver")})
+                    except ObjectDoesNotExist:
+                        pass
+
+        super().save(*args, **kwargs)

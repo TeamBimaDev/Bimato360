@@ -1,23 +1,50 @@
-from core.abstract.views import AbstractViewSet
-from core.bank.models import BimaCoreBank
-from core.bank.serializers import BimaCoreBankSerializer
+import django_filters
+
+from django.shortcuts import get_object_or_404
+from django.db.models import Q
+from django.utils.translation import gettext_lazy as _
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
-from core.address.serializers import BimaCoreAddressSerializer
-from django.shortcuts import get_object_or_404
-from core.bank.signals import post_create_bank
 
+from common.permissions.action_base_permission import ActionBasedPermission
+from core.address.serializers import BimaCoreAddressSerializer
+from core.abstract.views import AbstractViewSet
 from core.address.models import create_single_address, \
     get_addresses_for_parent, \
     BimaCoreAddress
-from django.utils.translation import gettext_lazy as _
-from common.permissions.action_base_permission import ActionBasedPermission
+
+from .models import BimaCoreBank
+from .serializers import BimaCoreBankSerializer
+from .signals import post_create_bank
+
+
+class BankFilter(django_filters.FilterSet):
+    search = django_filters.CharFilter(method='filter_search')
+    active = django_filters.ChoiceFilter(choices=[('True', 'True'), ('False', 'False'), ('all', 'all')],
+                                         method='filter_active')
+
+    class Meta:
+        model = BimaCoreBank
+        fields = ['active', 'search']
+
+    def filter_search(self, queryset, name, value):
+        return queryset.filter(
+            Q(name__icontains=value) |
+            Q(email__icontains=value)
+        )
+
+    def filter_active(self, queryset, name, value):
+        if value == 'all':
+            return queryset
+        else:
+            return queryset.filter(active=(value == 'True'))
 
 
 class BimaCoreBankViewSet(AbstractViewSet):
     queryset = BimaCoreBank.objects.all()
     serializer_class = BimaCoreBankSerializer
+    filterset_class = BankFilter
     permission_classes = []
     permission_classes = (ActionBasedPermission,)
     ordering_fields = AbstractViewSet.ordering_fields + \

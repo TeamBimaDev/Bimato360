@@ -13,6 +13,8 @@ from .signals import reset_password_signal, user_created_signal, user_activated_
 from .tasks import send_email_async
 from app.settings import config
 
+from django.utils.translation import gettext_lazy as _
+
 
 @receiver(reset_password_signal)
 def send_password_reset_email(sender, **kwargs):
@@ -22,7 +24,7 @@ def send_password_reset_email(sender, **kwargs):
         'reset_password_link': reset_password_link,
     }
     message = render_to_string('user/reset_password_email.html', context)
-    mail_subject = 'Password Reset'
+    mail_subject = _('Password Reset')
     send_email_async.delay(mail_subject, message, email, html_message=True)
 
 
@@ -58,7 +60,7 @@ def send_user_creation_email(sender, user, **kwargs):
         'site_url': config('SITE_URL')
     }
     message = render_to_string('user/user_creation_email_notify.html', context)
-    mail_subject = 'Account Created'
+    mail_subject = _('Account Created')
     send_email_async.delay(mail_subject, message, user.email, html_message=True)
 
 
@@ -81,7 +83,7 @@ def send_user_created_by_admin_creation_email(sender, user, **kwargs):
                            str(uidb64) + "/" + str(token) + "/"
     }
     message = render_to_string('user/user_activate_account_and_change_password.html', context)
-    mail_subject = 'Account Created'
+    mail_subject = _('Account Created')
     send_email_async.delay(mail_subject, message, user.email, html_message=True)
 
 
@@ -95,7 +97,7 @@ def send_activation_confirmation_email(sender, **kwargs):
         'activation_time': user.approved_at,
     }
     message = render_to_string('user/activation_confirmation_email.html', context)
-    mail_subject = 'Account Activation Confirmation'
+    mail_subject = _('Account Activation Confirmation')
     send_email_async.delay(mail_subject, message, user.email, html_message=True)
 
 
@@ -109,5 +111,5 @@ def send_declined_email_for_user(sender, **kwargs):
         'activation_time': user.approved_at,
     }
     message = render_to_string('user/user_declined_email.html', context)
-    mail_subject = 'Account Activation Confirmation'
+    mail_subject = _('Account Activation Refused')
     send_email_async.delay(mail_subject, message, user.email, html_message=True)

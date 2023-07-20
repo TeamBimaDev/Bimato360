@@ -38,6 +38,8 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
     serializer_class = BimaErpSaleDocumentSerializer
     permission_classes = []
     permission_classes = (ActionBasedPermission,)
+    ordering_fields = ['number', 'date', 'status', 'partner__name', 'total_amount']
+    ordering = ['date']
     filterset_class = SaleDocumentFilter
     action_permissions = {
         'list': ['sale_document.can_read'],

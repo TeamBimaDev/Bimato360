@@ -200,6 +200,12 @@ LOGGING = {
             'filename': os.path.join(BASE_DIR, 'logs', 'django_errors.log'),
             'formatter': 'verbose',
         },
+        'user_activity': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(BASE_DIR, 'logs', 'user_activity.log'),
+            'formatter': 'verbose',
+        },
     },
     'loggers': {
         'django': {

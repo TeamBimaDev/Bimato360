@@ -1,4 +1,5 @@
 from core.abstract.views import AbstractViewSet
+from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 
 from .models import BimaCoreDepartment
@@ -11,7 +12,7 @@ from common.permissions.action_base_permission import ActionBasedPermission
 
 
 class BimaCoreDepartmentViewSet(AbstractViewSet):
-    queryset = BimaCoreDepartment.objects.select_related('department').prefetch_related('children__children').all()
+    queryset = BimaCoreDepartment.objects.select_related('department').all()
     serializer_class = BimaCoreDepartmentSerializer
     permission_classes = []
     permission_classes = (ActionBasedPermission,)
@@ -32,23 +33,37 @@ class BimaCoreDepartmentViewSet(AbstractViewSet):
         serializer.save()
 
     def validate_department(self, data):
-        department_to_edit = BimaCoreDepartment.objects.get_object_by_public_id(data['id'])
+        department_to_edit = self.get_object()
+        proposed_parent_id = data.get('department_public_id')
 
-        if data.get('department_public_id') is None:
+        if not proposed_parent_id:
             return True
 
-        department_child = BimaCoreDepartment.objects.get_object_by_public_id(data['department_public_id'])
-        if department_child is None:
+        proposed_parent = BimaCoreDepartment.objects.get_object_by_public_id(proposed_parent_id)
+
+        if not proposed_parent or not proposed_parent.department:
             return True
 
-        if department_child.department is None:
-            return True
+        # Checks for the department that is being updated to not become a child of its own descendant
+        def is_descendant(department):
+            for child in department.children.all():
+                if child.public_id.hex == proposed_parent_id or is_descendant(child):
+                    return True
+            return False
 
-        if (
-                (data['department_public_id'] == department_child.public_id.hex) and \
-                (department_child.department.public_id.hex == data['id'])
-        ):
-            raise ValidationError(_("A department cannot have its parent as its child."))
+        if is_descendant(department_to_edit):
+            raise ValidationError(_("A department cannot have its descendant as its parent."))
+
+        # Checks for the department that is being updated to not become a parent of its own ancestor
+        def is_ancestor(department):
+            if department.department is None:
+                return False
+            if department.department.public_id.hex == data['id'] or is_ancestor(department.department):
+                return True
+            return False
+
+        if is_ancestor(proposed_parent):
+            raise ValidationError(_("A department cannot become a parent of its own ancestor."))
 
     def get_object(self):
         obj = BimaCoreDepartment.objects.get_object_by_public_id(self.kwargs['pk'])
@@ -58,4 +73,38 @@ class BimaCoreDepartmentViewSet(AbstractViewSet):
         department = BimaCoreDepartment.objects.get_object_by_public_id(self.kwargs['public_id'])
         posts = BimaCorePost.objects.filter(department=department)
         serializer = BimaCorePostSerializer(posts, many=True)
+        return Response(serializer.data)
+
+    @action(detail=True, methods=['GET'], url_path='all_parents')
+    def all_parents(self, request, pk=None):
+        department = self.get_object()
+        parents = []
+        current_department = department.department
+        while current_department is not None:
+            print(current_department)
+            parents.append(current_department)
+            current_department = current_department.department
+        serializer = BimaCoreDepartmentSerializer(parents, many=True)
+        return Response(serializer.data)
+
+    @action(detail=True, methods=['GET'], url_path='all_children')
+    def all_children(self, request, pk=None):
+        department = self.get_object()
+
+        def get_all_children(department):
+            children = []
+            for child in department.children.all():
+                children.append(child)
+                children.extend(get_all_children(child))
+            return children
+
+        children = get_all_children(department)
+        serializer = BimaCoreDepartmentSerializer(children, many=True)
+        return Response(serializer.data)
+
+    @action(detail=True, methods=['GET'], url_path='direct_children')
+    def direct_children(self, request, pk=None):
+        department = self.get_object()
+        children = department.children.all()
+        serializer = self.get_serializer(children, many=True)
         return Response(serializer.data)
