@@ -1,11 +1,12 @@
 from django.urls import reverse
 from rest_framework.test import APITestCase, APIClient
 from rest_framework import status
-from .models import  User
+from .models import User
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
 from user.factories import UserFactory
 from django.contrib.auth import get_user_model
+
 
 class BimaUserTest(APITestCase):
 
@@ -19,7 +20,6 @@ class BimaUserTest(APITestCase):
             "confirm_password": "12345",
         }
 
-
     def test_create_user(self):
         url = reverse('user:user-list')
         response = self.client.post(url, self.user_data, format='json')
@@ -27,7 +27,6 @@ class BimaUserTest(APITestCase):
         self.assertEqual(get_user_model().objects.count(), 1)
         self.assertEqual(response.data['email'], self.user_data['email'])
         self.assertEqual(response.data['name'], self.user_data['name'])
-
 
     def create_permissions(self):
         permission_list = [

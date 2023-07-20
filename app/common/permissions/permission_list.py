@@ -105,8 +105,7 @@ class PermissionsList:
     ERP_SALE_DOCUMENT_VIEW_HISTORY = ('erp.sale_document.can_view_history',
                                       'Can view history of sale document', 'ERP_SALE_DOCUMENT')
 
-    ERP_PURCHASE_DOCUMENT_CREATE = ('erp.purchase_document.can_create', 'Can create purchase document'
-                                    , 'ERP_PURCHASE_DOCUMENT')
+    ERP_PURCHASE_DOCUMENT_CREATE = ('erp.purchase_document.can_create', 'Can create purchase document', 'ERP_PURCHASE_DOCUMENT')
     ERP_PURCHASE_DOCUMENT_UPDATE = ('erp.purchase_document.can_update', 'Can update purchase document'
                                     , 'ERP_PURCHASE_DOCUMENT')
     ERP_PURCHASE_DOCUMENT_DELETE = ('erp.purchase_document.can_delete', 'Can delete purchase document'
@@ -156,7 +155,8 @@ class PermissionsList:
     USER_USER_READ = ('user.user.can_read', 'Can read user', 'USER_USER')
     USER_USER_ADD_PERMISSION = ('user.user.can_add_permission', 'Can add permission to user', 'USER_USER')
     USER_USER_UPDATE_OTHER_PASSWORD = ('user.user.can_edit_other_password', 'Can update other password', 'USER_USER')
-    USER_USER_ACTIVATE_ACCOUNT = ('user.user.can_activate_account', 'Can activate new created user account', 'USER_USER')
+    USER_USER_ACTIVATE_ACCOUNT = (
+        'user.user.can_activate_account', 'Can activate new created user account', 'USER_USER')
 
     COMPANY_COMPANY_CREATE = ('company.company.can_create', 'Can create company', 'COMPANY_COMPANY')
     COMPANY_COMPANY_UPDATE = ('company.company.can_update', 'Can update company', 'COMPANY_COMPANY')
@@ -164,5 +164,3 @@ class PermissionsList:
     COMPANY_COMPANY_READ = ('company.company.can_read', 'Can read company', 'COMPANY_COMPANY')
     COMPANY_COMPANY_ADD_DOCUMENT = ('company.company.can_add_document', 'Can add document', 'COMPANY_COMPANY')
     COMPANY_COMPANY_ADD_ADDRESS = ('company.company.can_add_address', 'Can add address', 'COMPANY_COMPANY')
-
-
