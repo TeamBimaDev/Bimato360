@@ -7,5 +7,5 @@ router.register('', BimaTreasuryTransactionPaymentMethodChequeDetailViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
-    path('<str:public_id>/bimatreasurytransactionpaymentmethod/', BimaTreasuryTransactionPaymentMethodViewSet.as_view({'get': 'get_bimatreasurytransactionpaymentmethod_by_bimatreasurytransactionpaymentmethodchequedetail'}), name='Bimatreasurytransactionpaymentmethod-By-BimaTreasuryTransactionPaymentMethodChequeDetail'),
+    # path('<str:public_id>/bimatreasurytransactionpaymentmethod/', BimaTreasuryTransactionPaymentMethodViewSet.as_view({'get': 'get_bimatreasurytransactionpaymentmethod_by_bimatreasurytransactionpaymentmethodchequedetail'}), name='Bimatreasurytransactionpaymentmethod-By-BimaTreasuryTransactionPaymentMethodChequeDetail'),
 ]

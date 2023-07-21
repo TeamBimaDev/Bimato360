@@ -17,13 +17,13 @@ from .service import import_data_from_csv_file
 
 
 class CurrencyFilter(django_filters.FilterSet):
-    search = django_filters.CharFilter(method='filter_search')
+    name = django_filters.CharFilter(field_name='name', lookup_expr='icontains')
     active = django_filters.ChoiceFilter(choices=[('True', 'True'), ('False', 'False'), ('all', 'all')],
                                          method='filter_active')
 
     class Meta:
         model = BimaCoreCurrency
-        fields = ['active', 'search']
+        fields = ['active', 'name']
 
     def filter_search(self, queryset, name, value):
         return queryset.filter(
