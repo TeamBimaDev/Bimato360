@@ -15,7 +15,8 @@ class BimaCoreTagSerializer(AbstractSerializer):
         source='parent',
         write_only=True,
         required=False,
-        allow_null=True
+        allow_null=True,
+        allow_empty=True
     )
     direct_children_count = serializers.SerializerMethodField()
 

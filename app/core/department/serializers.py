@@ -11,7 +11,9 @@ class BimaCoreDepartmentSerializer(AbstractSerializer):
         slug_field='public_id',
         source='department',
         write_only=True,
-        required=False
+        required=False,
+        allow_null=True,
+        allow_empty=True
     )
     direct_children_count = serializers.SerializerMethodField()
 

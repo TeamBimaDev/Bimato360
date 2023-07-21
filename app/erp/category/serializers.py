@@ -11,7 +11,9 @@ class BimaErpCategorySerializer(AbstractSerializer):
         slug_field='public_id',
         source='category',
         write_only=True,
-        required=False
+        required=False,
+        allow_empty=True,
+        allow_null=True
     )
 
     direct_children_count = serializers.SerializerMethodField()
