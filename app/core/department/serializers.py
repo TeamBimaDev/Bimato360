@@ -28,6 +28,11 @@ class BimaCoreDepartmentSerializer(AbstractSerializer):
             }
         return None
 
+    def to_internal_value(self, data):
+        if 'department_public_id' in data and data['department_public_id'] == "":
+            data['department_public_id'] = None
+        return super().to_internal_value(data)
+
     def get_direct_children_count(self, obj):
         return obj.children.count()
 
@@ -45,10 +50,17 @@ class BimaCoreDepartmentSerializer(AbstractSerializer):
 
         return value
 
-    @staticmethod
-    def is_descendant(department, department_to_check):
+    def is_descendant(self, department, department_to_check, visited=None):
+
+        if visited is None:
+            visited = set()
+
+        if department in visited:
+            return False
+
+        visited.add(department)
         for child in department.children.all():
             if child.public_id.hex == department_to_check.public_id.hex or \
-                    BimaCoreDepartmentSerializer.is_descendant(child, department_to_check):
+                    self.is_descendant(child, department_to_check, visited):
                 return True
         return False
