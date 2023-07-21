@@ -53,30 +53,6 @@ class BimaErpCategoryViewSet(AbstractViewSet):
         'destroy': ['category.can_delete'],
     }
 
-    def validate_category(self, data):
-        category_to_edit = self.get_object()
-        proposed_parent_id = data.get('category_public_id')
-
-        if not proposed_parent_id:
-            return True
-
-        proposed_parent = BimaErpCategory.objects.get_object_by_public_id(proposed_parent_id)
-
-        if not proposed_parent or not proposed_parent.category:
-            return True
-
-        def is_descendant(category):
-            for child in category.category_children.all():
-                if child.public_id.hex == proposed_parent_id or is_descendant(child):
-                    return True
-            return False
-
-        if is_descendant(category_to_edit):
-            raise ValidationError({"error":_("A category cannot have its descendant as its parent.")})
-
-    def perform_update(self, serializer):
-        self.validate_category(self.request.data)
-        serializer.save()
 
     def get_object(self):
         obj = BimaErpCategory.objects.get_object_by_public_id(self.kwargs['pk'])
@@ -139,4 +115,28 @@ class BimaErpCategoryViewSet(AbstractViewSet):
         category = self.get_object()
         direct_children = category.category_children.all()
         serializer = BimaErpCategorySerializer(direct_children, many=True)
+        return Response(serializer.data)
+
+    @action(detail=True, methods=['GET'], url_path='all_parents_nested')
+    def all_parents_nested(self, request, pk=None):
+        category = self.get_object()
+
+        def get_nested_parent(category):
+            if category.category is None:
+                return None
+            else:
+                parent_data = get_nested_parent(category.category)
+                category_serializer_data = self.get_serializer(category.category).data
+                if parent_data is not None:
+                    category_serializer_data['category'] = parent_data
+                return category_serializer_data
+
+        nested_parents = get_nested_parent(category)
+        return Response(nested_parents)
+
+    @action(detail=True, methods=['GET'], url_path='direct_children')
+    def direct_children(self, request, pk=None):
+        category = self.get_object()
+        children = category.children.all()
+        serializer = self.get_serializer(children, many=True)
         return Response(serializer.data)

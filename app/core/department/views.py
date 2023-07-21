@@ -1,6 +1,5 @@
 from rest_framework.response import Response
 from rest_framework.decorators import action
-from rest_framework.viewsets import ModelViewSet
 
 from core.abstract.views import AbstractViewSet
 from core.post.models import BimaCorePost

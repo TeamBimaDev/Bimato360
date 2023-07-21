@@ -17,6 +17,11 @@ class BimaCoreTagSerializer(AbstractSerializer):
         required=False,
         allow_null=True
     )
+    direct_children_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = BimaCoreTag
+        fields = ['id', 'name', 'public_id', 'parent', 'parent_public_id', 'color', 'direct_children_count']
 
     def get_parent(self, obj):
         if obj.parent:
@@ -26,14 +31,46 @@ class BimaCoreTagSerializer(AbstractSerializer):
             }
         return None
 
-    class Meta:
-        model = BimaCoreTag
-        fields = ['id', 'name', 'public_id', 'parent', 'parent_public_id', 'color']
-
     def validate_color(self, value):
         if value and not re.match('^([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$', value):
             raise serializers.ValidationError(_("This field should be a valid hex color."))
         return value
+
+    def to_internal_value(self, data):
+        if 'parent_public_id' in data and data['parent_public_id'] == "":
+            data['parent_public_id'] = None
+        return super().to_internal_value(data)
+
+    def validate_parent_public_id(self, value):
+        if not value:
+            return value
+
+        tag_to_edit = self.instance
+        proposed_parent = value
+
+        if proposed_parent:
+            if self.is_descendant(tag_to_edit, proposed_parent):
+                raise serializers.ValidationError({"Tag parent":
+                                                       _("A tag cannot have its descendant as its parent.")})
+
+        return value
+
+    def is_descendant(self, tag, tag_to_check, visited=None):
+        if visited is None:
+            visited = set()
+
+        if tag in visited:
+            return False
+
+        visited.add(tag)
+        for child in tag.children.all():
+            if child.public_id.hex == tag_to_check.public_id.hex or \
+                    self.is_descendant(child, tag_to_check, visited):
+                return True
+        return False
+
+    def get_direct_children_count(self, obj):
+        return obj.children.count()
 
     def create(self, validated_data):
         color = validated_data.get('color', None)
@@ -50,11 +87,6 @@ class BimaCoreTagSerializer(AbstractSerializer):
             validated_data['color'] = color
 
         return super().update(instance, validated_data)
-
-    def to_internal_value(self, data):
-        if 'parent_public_id' in data and data['parent_public_id'] == "":
-            data['parent_public_id'] = None
-        return super().to_internal_value(data)
 
     def _get_unique_color(self):
         while True:

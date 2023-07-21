@@ -27,31 +27,6 @@ class BimaCoreTagViewSet(AbstractViewSet):
         obj = BimaCoreTag.objects.get_object_by_public_id(self.kwargs['pk'])
         return obj
 
-    def validate_parent(self, data):
-        tag_to_edit = self.get_object()
-        proposed_parent_id = data.get('parent_public_id')
-
-        if not proposed_parent_id:
-            return True
-
-        proposed_parent = BimaCoreTag.objects.get_object_by_public_id(proposed_parent_id)
-
-        if not proposed_parent or not proposed_parent.parent:
-            return True
-
-        def is_descendant(tag):
-            for child in tag.children.all():
-                if child.public_id.hex == proposed_parent_id or is_descendant(child):
-                    return True
-            return False
-
-        if is_descendant(tag_to_edit):
-            raise ValidationError({"Error": _("A tag cannot have its descendant as its parent.")})
-
-    def perform_update(self, serializer):
-        self.validate_parent(self.request.data)
-        serializer.save()
-
     @action(detail=True)
     def all_parents(self, request, pk=None):
         tag = self.get_object()
