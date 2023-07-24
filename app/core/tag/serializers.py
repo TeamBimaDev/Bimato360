@@ -49,7 +49,7 @@ class BimaCoreTagSerializer(AbstractSerializer):
         tag_to_edit = self.instance
         proposed_parent = value
 
-        if proposed_parent:
+        if proposed_parent and self.instance:
             if self.is_descendant(tag_to_edit, proposed_parent):
                 raise serializers.ValidationError({"Tag parent":
                                                        _("A tag cannot have its descendant as its parent.")})

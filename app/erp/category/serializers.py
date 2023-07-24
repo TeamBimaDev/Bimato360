@@ -46,7 +46,7 @@ class BimaErpCategorySerializer(AbstractSerializer):
         category_to_edit = self.instance
         proposed_parent = value
 
-        if proposed_parent:
+        if proposed_parent and self.instance:
             if self.is_descendant(category_to_edit, proposed_parent):
                 raise serializers.ValidationError({"Categorie parent":
                                                        _("A Category cannot have its descendant as its parent.")})
