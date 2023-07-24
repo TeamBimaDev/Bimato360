@@ -1,7 +1,5 @@
 from rest_framework.decorators import action
-from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
-from django.utils.translation import gettext_lazy as _
 from core.abstract.views import AbstractViewSet
 from common.permissions.action_base_permission import ActionBasedPermission
 from .models import BimaCoreTag

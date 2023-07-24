@@ -43,6 +43,7 @@ class BimaCoreDocumentTest(APITestCase):
             "file_type": "PARTNER_PICTURE",
             "is_favorite": True,
         }
+
     def test_create_document_with_partner(self):
         self.partner = BimaErpPartnerFactory()
         url = reverse('erp:bimaerppartner-list') + f'{self.partner.public_id}/documents/'
@@ -73,6 +74,7 @@ class BimaCoreDocumentTest(APITestCase):
         response = self.client.patch(url, document_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(BimaCoreDocument.objects.get(pk=document.pk).document_name, 'update document name')
+
     def test_add_document_for_company(self):
         BimaCompanyFactory.create()
         self.company = BimaCompany.objects.first()
@@ -83,6 +85,7 @@ class BimaCoreDocumentTest(APITestCase):
         response = self.client.post(url, self.document_data, format='multipart')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(BimaCoreDocument.objects.count(), 1)
+
     def test_delete_document(self):
         self.test_create_document_with_partner()
         document = BimaCoreDocument.objects.first()

@@ -18,18 +18,17 @@ class BimaCoreCountryTest(APITestCase):
         self.currency = BimaCoreCurrencyFactory.create()
         self.country = BimaCoreCountryFactory.create()
         self.country_data = {
-                "name": "Test country",
-                "code": "TC",
-                "iso3": "iso3",
-                "iso2": "iso2",
-                "address_format": "Test address format",
-                "capital": "capital1",
-                "phone_code": 1234,
-                "vat_label": "VAT",
-                "zip_required": True,
-                "currency_public_id": str(self.currency.public_id)
-            }
-
+            "name": "Test country",
+            "code": "TC",
+            "iso3": "iso3",
+            "iso2": "iso2",
+            "address_format": "Test address format",
+            "capital": "capital1",
+            "phone_code": 1234,
+            "vat_label": "VAT",
+            "zip_required": True,
+            "currency_public_id": str(self.currency.public_id)
+        }
 
         # Give permissions to the user.
         permission = Permission.objects.get(codename='core.country.can_create')
@@ -49,7 +48,7 @@ class BimaCoreCountryTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(BimaCoreCountry.objects.count(), 2)
 
-    def test_get_countrys(self):
+    def test_get_countries(self):
         BimaCoreCountryFactory.create_batch(5)
         url = reverse('core:bimacorecountry-list')
         response = self.client.get(url, format='json')
@@ -72,6 +71,7 @@ class BimaCoreCountryTest(APITestCase):
         url = reverse('core:bimacorecountry-detail', kwargs={'pk': str(country.public_id)})
         response = self.client.delete(url, format='json')
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
     def test_unauthenticated(self):
         self.client.logout()
         url = reverse('core:bimacorecountry-list')
@@ -94,7 +94,7 @@ class BimaCoreCountryTest(APITestCase):
         data = {'name': 'Updated Name',
                 "currency_public_id": str(self.currency.public_id),
 
-        }
+                }
         response = self.client.patch(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
@@ -106,6 +106,7 @@ class BimaCoreCountryTest(APITestCase):
         url = reverse('core:bimacorecountry-detail', kwargs={'pk': str(country.public_id)})
         response = self.client.delete(url, format='json')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
     def test_unique_name(self):
         url = reverse('core:bimacorecountry-list')
         data = {
@@ -146,7 +147,6 @@ class BimaCoreCountryTest(APITestCase):
 
     def create_permissions(self):
         permission_list = [
-            # Add your permission tuples here.
             ('core.country.can_create', 'Can create country'),
             ('core.country.can_update', 'Can update country'),
             ('core.country.can_delete', 'Can delete country'),

@@ -58,6 +58,7 @@ class BimaCoreDepartmentTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['count'], 5)
         self.assertEqual(len(response.data['results']), 5)
+
     def test_update_department(self):
         department = BimaCoreDepartmentFactory()
         url = reverse('core:bimacoredepartment-detail', kwargs={'pk': str(department.public_id)})
@@ -73,6 +74,7 @@ class BimaCoreDepartmentTest(APITestCase):
         url = reverse('core:bimacoredepartment-detail', kwargs={'pk': str(department.public_id)})
         response = self.client.delete(url, format='json')
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
     def test_unauthenticated(self):
         self.client.logout()
         url = reverse('core:bimacoredepartment-list')
