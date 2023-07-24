@@ -1,0 +1,47 @@
+name: deploy_bima360_backend_to_ovh
+
+on:
+  pull_request:
+    branches: [ main ]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout the code
+        uses: actions/checkout@v2
+
+      - name: Setup SSH
+        run: |
+            mkdir -p ~/.ssh/
+            echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+            chmod 600 ~/.ssh/id_rsa
+            ssh-keyscan ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
+
+      - name: run deploy.sh to copy file and do docker compose up
+        run: |
+          chmod +x ./scripts/deploy.sh
+          ./scripts/deploy.sh ${{ secrets.SERVER_USER }} ${{ secrets.SERVER_IP }}
+#name: CI
+#
+#on:
+#  push:
+#    branches: [ main ]
+#  pull_request:
+#    branches: [ main ]
+#
+#jobs:
+#  build:
+#    runs-on: ubuntu-latest
+#
+#    steps:
+#    - name: Checkout code
+#      uses: actions/checkout@v2
+#
+#    - name: Copy code to OVH server
+#      run: |
+#        rsync -avz --exclude='.git/*' . ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }}:/home/ubuntu/bima360/backend
+#
+#    - name: Run docker-compose on OVH server
+#      run: |
+#        ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} "cd /home/ubuntu/bima360/backend && docker-compose down && docker-compose build --no-cache && docker-compose up -d"

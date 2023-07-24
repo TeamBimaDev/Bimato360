@@ -11,7 +11,7 @@ urlpatterns = [
         path('skilllevel/', include('hr.skill_level.urls')),
         path('activitytype/', include('hr.activity_type.urls')),
         path('activity/', include('hr.activity.urls')),
-        path('condidatposte/', include('hr.condidatposte.urls')),
+        path('applicant_post/', include('hr.applicant_post.urls')),
         path('refuse/', include('hr.refuse.urls')),
 
 ]

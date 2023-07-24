@@ -7,4 +7,5 @@ router.register('', BimaCoreStateViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
+
 ]

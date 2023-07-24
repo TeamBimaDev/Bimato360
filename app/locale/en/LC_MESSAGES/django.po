@@ -1,0 +1,1137 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-07-20 09:15+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: .\app\settings.py:123 .\common\enums\language.py:6
+msgid "English"
+msgstr "English"
+
+#: .\app\settings.py:124 .\common\enums\language.py:7
+msgid "French"
+msgstr "French"
+
+#: .\common\enums\company_type.py:6
+msgid "Sole proprietorship"
+msgstr "Sole proprietorship"
+
+#: .\common\enums\company_type.py:7
+msgid "General partnership"
+msgstr "General partnership"
+
+#: .\common\enums\company_type.py:8
+msgid "Limited partnership"
+msgstr "Limited partnership"
+
+#: .\common\enums\company_type.py:9
+#, fuzzy
+#| msgid "Public limited company (PLC)"
+msgid "Public limited company(PLC)"
+msgstr "Public limited company (PLC)"
+
+#: .\common\enums\company_type.py:10
+#, fuzzy
+#| msgid "Limited liability company (LLC)"
+msgid "Limited liability company(LLC)"
+msgstr "Limited liability company (LLC)"
+
+#: .\common\enums\company_type.py:11
+#, fuzzy
+#| msgid "Simplified joint-stock"
+msgid "Simplified joint - stock"
+msgstr "Simplified joint-stock"
+
+#: .\common\enums\company_type.py:12
+#, fuzzy
+#| msgid "Company partnership limited by shares"
+msgid "company Partnership limited by shares"
+msgstr "Company partnership limited by shares"
+
+#: .\common\enums\company_type.py:13
+msgid "Cooperative society"
+msgstr "Cooperative society"
+
+#: .\common\enums\company_type.py:14
+msgid "Unincorporated joint venture"
+msgstr "Unincorporated joint venture"
+
+#: .\common\enums\company_type.py:15
+#, fuzzy
+#| msgid "Joint-stock company"
+msgid "Joint - stock company"
+msgstr "Joint-stock company"
+
+#: .\common\enums\entity_status.py:6 .\common\enums\product_enum.py:17
+msgid "Active"
+msgstr "Active"
+
+#: .\common\enums\entity_status.py:7
+msgid "Inactive"
+msgstr "Inactive"
+
+#: .\common\enums\entity_status.py:8
+msgid "Blocked"
+msgstr "Blocked"
+
+#: .\common\enums\file_type.py:10
+msgid "PARTNER_PICTURE"
+msgstr "Partner picture"
+
+#: .\common\enums\file_type.py:11
+msgid "PARTNER_PRIVATE_DOCUMENT"
+msgstr "Partner private document"
+
+#: .\common\enums\file_type.py:12
+msgid "PARTNER_CIRET_DOCUMENT"
+msgstr "Partner Ciret document"
+
+#: .\common\enums\file_type.py:16
+msgid "Logo"
+msgstr "Logo"
+
+#: .\common\enums\file_type.py:17
+msgid "Documents"
+msgstr "Documents"
+
+#: .\common\enums\file_type.py:21
+msgid "EMPLOYEE_CV"
+msgstr "Employee CV"
+
+#: .\common\enums\file_type.py:22
+msgid "EMPLOYEE_RESUME"
+msgstr "Employee resume"
+
+#: .\common\enums\file_type.py:23
+msgid "EMPLOYEE_DRIVER_LICENCE"
+msgstr "Employee driver's license"
+
+#: .\common\enums\file_type.py:24
+msgid "EMPLOYEE_PICTURE"
+msgstr "Employee picture"
+
+#: .\common\enums\file_type.py:28
+msgid "USER_PROFILE_PICTURE"
+msgstr "User profile picture"
+
+#: .\common\enums\file_type.py:29
+msgid "USER_OTHER"
+msgstr "User other"
+
+#: .\common\enums\gender.py:6
+msgid "Male"
+msgstr "Male"
+
+#: .\common\enums\gender.py:7
+msgid "Female"
+msgstr "Female"
+
+#: .\common\enums\partner_type.py:6
+msgid "Individual"
+msgstr "Individual"
+
+#: .\common\enums\partner_type.py:7
+msgid "Company"
+msgstr "Company"
+
+#: .\common\enums\product_enum.py:6
+msgid "Manual Price"
+msgstr "Manual Price"
+
+#: .\common\enums\product_enum.py:7
+msgid "Price based on Percentage"
+msgstr "Price based on Percentage"
+
+#: .\common\enums\product_enum.py:11
+msgid "Stockable Products"
+msgstr "Stockable Products"
+
+#: .\common\enums\product_enum.py:12
+msgid "Service Products"
+msgstr "Service Products"
+
+#: .\common\enums\product_enum.py:13
+msgid "Production Products"
+msgstr "Production Products"
+
+#: .\common\enums\product_enum.py:18
+msgid "Out of Stock:"
+msgstr "Out of Stock:"
+
+#: .\common\enums\product_enum.py:19
+msgid "In transit"
+msgstr "In transit"
+
+#: .\common\enums\product_enum.py:20
+msgid "Discontinued"
+msgstr "Discontinued"
+
+#: .\common\enums\product_enum.py:21
+msgid "Not for sale"
+msgstr "Not for sale"
+
+#: .\common\enums\purchase_document_enum.py:6
+#: .\common\enums\sale_document_enum.py:6 .\erp\sale_document\models.py:115
+msgid "Quote"
+msgstr "Quote"
+
+#: .\common\enums\purchase_document_enum.py:7
+#: .\common\enums\sale_document_enum.py:7
+msgid "ORDER"
+msgstr "ORDER"
+
+#: .\common\enums\purchase_document_enum.py:8
+#: .\common\enums\sale_document_enum.py:8 .\erp\sale_document\models.py:117
+msgid "Invoice"
+msgstr "Invoice"
+
+#: .\common\enums\purchase_document_enum.py:9
+#: .\common\enums\sale_document_enum.py:9 .\erp\sale_document\models.py:118
+msgid "Credit note"
+msgstr "Credit note"
+
+#: .\common\enums\purchase_document_enum.py:13
+#: .\common\enums\sale_document_enum.py:13
+msgid "Draft"
+msgstr "Draft"
+
+#: .\common\enums\purchase_document_enum.py:14
+#: .\common\enums\sale_document_enum.py:14
+msgid "Confirmed"
+msgstr "Confirmed"
+
+#: .\common\enums\purchase_document_enum.py:15
+#: .\common\enums\sale_document_enum.py:15
+msgid "CANCELED"
+msgstr "Canceled"
+
+#: .\common\enums\purchase_document_enum.py:19
+#: .\common\enums\sale_document_enum.py:19
+msgid "30 days"
+msgstr "30 days"
+
+#: .\common\enums\purchase_document_enum.py:20
+#: .\common\enums\sale_document_enum.py:20
+msgid "15 days"
+msgstr "15 days"
+
+#: .\common\enums\purchase_document_enum.py:21
+#: .\common\enums\sale_document_enum.py:21
+msgid "10 days"
+msgstr "10 days"
+
+#: .\common\enums\purchase_document_enum.py:22
+#: .\common\enums\sale_document_enum.py:22
+msgid "45 days"
+msgstr "45 days"
+
+#: .\common\enums\transaction_enum.py:6
+msgid "Income"
+msgstr "Income"
+
+#: .\common\enums\transaction_enum.py:7
+msgid "Expense"
+msgstr "Expense"
+
+#: .\common\service\file_service.py:22
+#, fuzzy
+#| msgid "Unable to get the item"
+msgid "unable to read the file"
+msgstr "Unable to get the item"
+
+#: .\common\service\file_service.py:27
+msgid "Incorrect file type"
+msgstr "Incorrect file type"
+
+#: .\common\utils\utils.py:21
+msgid "An error occurred during PDF generation:<pre>"
+msgstr "An error occurred during PDF generation:<pre>"
+
+#: .\core\abstract\views.py:43
+msgid "Invalid input"
+msgstr "Invalid input"
+
+#: .\core\abstract\views.py:47
+msgid "Bad request"
+msgstr "Bad request"
+
+#: .\core\abstract\views.py:51
+msgid "API exception occurred"
+msgstr "API exception occurred"
+
+#: .\core\abstract\views.py:55
+msgid "Malformed request"
+msgstr "Malformed request"
+
+#: .\core\abstract\views.py:59
+msgid "Authentication failed"
+msgstr "Authentication failed"
+
+#: .\core\abstract\views.py:63
+msgid "Not authenticated"
+msgstr "Not authenticated"
+
+#: .\core\abstract\views.py:67
+msgid "Permission denied"
+msgstr "Permission denied"
+
+#: .\core\abstract\views.py:71
+msgid "Resource not found"
+msgstr "Resource not found"
+
+#: .\core\abstract\views.py:75
+msgid "Resource does not exist"
+msgstr "Resource does not exist"
+
+#: .\core\abstract\views.py:79
+msgid "Method not allowed"
+msgstr "Method not allowed"
+
+#: .\core\abstract\views.py:83
+msgid "Request not acceptable"
+msgstr "Request not acceptable"
+
+#: .\core\abstract\views.py:87
+msgid "Unsupported media type"
+msgstr "Unsupported media type"
+
+#: .\core\abstract\views.py:91
+msgid "Too many requests"
+msgstr "Too many requests"
+
+#: .\core\abstract\views.py:95
+msgid "Unable to get the item"
+msgstr "Unable to get the item"
+
+#: .\core\abstract\views.py:115
+msgid "A server error occurred"
+msgstr "A server error occurred"
+
+#: .\core\admin.py:13
+msgid "Personal Info"
+msgstr "Personal Info"
+
+#: .\core\admin.py:15
+msgid "Permissions"
+msgstr "Permissions"
+
+#: .\core\admin.py:24
+msgid "Important dates"
+msgstr "Important dates"
+
+#: .\core\bank\views.py:40 .\core\bank\views.py:54
+msgid "Email must be unique."
+msgstr "Email must be unique."
+
+#: .\core\bank\views.py:43 .\core\bank\views.py:57
+msgid "BIC must be unique."
+msgstr "BIC must be unique."
+
+#: .\core\country\service.py:28 .\core\currency\service.py:21
+msgid "Name is missing"
+msgstr "Name is missing"
+
+#: .\core\country\service.py:32
+msgid "Code is missing"
+msgstr "Code is missing"
+
+#: .\core\country\service.py:37
+msgid "Currency with name or symbol {} does not exist"
+msgstr "Currency with name or symbol {} does not exist"
+
+#: .\core\country\service.py:56
+msgid "Country with name {} already exists"
+msgstr "Country with name {} already exists"
+
+#: .\core\country\service.py:58
+msgid "Country with code {} already exists"
+msgstr "Country with code {} already exists"
+
+#: .\core\country\service.py:60 .\core\currency\service.py:44
+#, fuzzy
+#| msgid "A server error occurred"
+msgid "Integrity error occurred"
+msgstr "A server error occurred"
+
+#: .\core\country\views.py:180 .\core\currency\views.py:55
+msgid "Some rows could not be processed"
+msgstr "Some rows could not be processed"
+
+#: .\core\country\views.py:185 .\core\currency\views.py:60
+msgid "All rows processed successfully"
+msgstr "All rows processed successfully"
+
+#: .\core\country\views.py:189 .\core\currency\views.py:64
+msgid "an error occurred while treating the file"
+msgstr "An error occurred while treating the file"
+
+#: .\core\currency\service.py:21 .\core\currency\service.py:25
+#: .\core\currency\service.py:46 .\core\currency\service.py:48
+msgid "data"
+msgstr "Data"
+
+#: .\core\currency\service.py:25
+msgid "Symbol is missing"
+msgstr "Symbol is missing"
+
+#: .\core\currency\service.py:40
+msgid "Currency with name {} already exists"
+msgstr "Currency with name {} already exists"
+
+#: .\core\currency\service.py:42
+#, python-brace-format
+msgid "Currency with symbol {symbol} already exists"
+msgstr "Currency with symbol {symbol} already exists"
+
+#: .\core\department\views.py:51
+msgid "A department cannot have its parent as its child."
+msgstr "A department cannot have its parent as its child."
+
+#: .\core\document\models.py:74
+msgid "Invalid file content type."
+msgstr "Invalid file content type."
+
+#: .\core\document\views.py:41
+#, fuzzy
+#| msgid "Document not found"
+msgid "document not found"
+msgstr "Document not found"
+
+#: .\core\tag\serializers.py:35
+msgid "This field should be a valid hex color."
+msgstr "This field should be a valid hex color."
+
+#: .\erp\partner\models.py:13
+msgid "Is Supplier"
+msgstr "Is Supplier"
+
+#: .\erp\partner\models.py:14
+msgid "Is Customer"
+msgstr "Is Customer"
+
+#: .\erp\partner\models.py:15
+msgid "Partner Type"
+msgstr "Partner Type"
+
+#: .\erp\partner\models.py:16
+#, fuzzy
+#| msgid "Company name"
+msgid "Company Type"
+msgstr "Company name"
+
+#: .\erp\partner\models.py:17
+#, fuzzy
+#| msgid "First & last name"
+msgid "First Name"
+msgstr "First & last name"
+
+#: .\erp\partner\models.py:18
+#, fuzzy
+#| msgid "Name"
+msgid "Last Name"
+msgstr "Name"
+
+#: .\erp\partner\models.py:19
+msgid "Gender"
+msgstr "Gender"
+
+#: .\erp\partner\models.py:20
+#, fuzzy
+#| msgid "Serial Number"
+msgid "Social Security Number"
+msgstr "Serial Number"
+
+#: .\erp\partner\models.py:21
+#, fuzzy
+#| msgid "Serial Number"
+msgid "ID Number"
+msgstr "Serial Number"
+
+#: .\erp\partner\models.py:22
+#, fuzzy
+#| msgid "E-mail"
+msgid "Email"
+msgstr "E-mail"
+
+#: .\erp\partner\models.py:23
+msgid "Phone"
+msgstr "Phone"
+
+#: .\erp\partner\models.py:24
+msgid "Fax"
+msgstr "Fax"
+
+#: .\erp\partner\models.py:25
+#, fuzzy
+#| msgid "Company name"
+msgid "Company Name"
+msgstr "Company name"
+
+#: .\erp\partner\models.py:26 .\templates\partner\pdf.html:39
+msgid "Company Activity"
+msgstr "Company Activity"
+
+#: .\erp\partner\models.py:27
+msgid "VAT ID Number"
+msgstr "VAT ID Number"
+
+#: .\erp\partner\models.py:28 .\erp\product\models.py:35
+msgid "Status"
+msgstr "Status"
+
+#: .\erp\partner\models.py:29
+msgid "Note"
+msgstr "Note"
+
+#: .\erp\partner\models.py:30
+#, fuzzy
+#| msgid "Company name"
+msgid "Company Date Creation"
+msgstr "Company name"
+
+#: .\erp\partner\models.py:31
+#, fuzzy
+#| msgid "Company name"
+msgid "Company Siren"
+msgstr "Company name"
+
+#: .\erp\partner\models.py:32
+#, fuzzy
+#| msgid "Company name"
+msgid "Company Siret"
+msgstr "Company name"
+
+#: .\erp\partner\models.py:33
+#, fuzzy
+#| msgid "New User Registration"
+msgid "Company Date Registration"
+msgstr "New User Registration"
+
+#: .\erp\partner\models.py:34
+#, fuzzy
+#| msgid "Serial Number"
+msgid "RCS Number"
+msgstr "Serial Number"
+
+#: .\erp\partner\models.py:35
+msgid "Company Date Struck Off"
+msgstr "Company Date Struck Off"
+
+#: .\erp\partner\models.py:36
+#, fuzzy
+#| msgid "Company name"
+msgid "Company APE Text"
+msgstr "Company name"
+
+#: .\erp\partner\models.py:37
+#, fuzzy
+#| msgid "Company name"
+msgid "Company APE Code"
+msgstr "Company name"
+
+#: .\erp\partner\models.py:38
+#, fuzzy
+#| msgid "Company name"
+msgid "Company Capital"
+msgstr "Company name"
+
+#: .\erp\partner\models.py:39
+#, fuzzy
+#| msgid "Credit note"
+msgid "Credit"
+msgstr "Credit note"
+
+#: .\erp\partner\models.py:40
+msgid "Balance"
+msgstr "Balance"
+
+#: .\erp\partner\views.py:252
+#, fuzzy
+#| msgid "An error occurred during PDF generation:<pre>"
+msgid "Errors occurred during import."
+msgstr "An error occurred during PDF generation:<pre>"
+
+#: .\erp\partner\views.py:255
+msgid "Successfully created partners."
+msgstr "Successfully created partners."
+
+#: .\erp\product\models.py:16 .\templates\product\pdf.html:35
+msgid "Name"
+msgstr "Name"
+
+#: .\erp\product\models.py:17
+msgid "Reference"
+msgstr "Reference"
+
+#: .\erp\product\models.py:18
+msgid "Description"
+msgstr "Description"
+
+#: .\erp\product\models.py:19
+msgid "EAN13"
+msgstr "EAN13"
+
+#: .\erp\product\models.py:21 .\templates\partner\pdf.html:35
+#: .\templates\product\pdf.html:39
+msgid "Type"
+msgstr "Type"
+
+#: .\erp\product\models.py:23
+msgid "Purchase Price"
+msgstr "Purchase Price"
+
+#: .\erp\product\models.py:25 .\templates\product\pdf.html:38
+msgid "Sell Price"
+msgstr "Sell Price"
+
+#: .\erp\product\models.py:27
+msgid "Price Calculation Method"
+msgstr "Price Calculation Method"
+
+#: .\erp\product\models.py:29
+msgid "Sell Percentage"
+msgstr "Sell Percentage"
+
+#: .\erp\product\models.py:30
+msgid "Category"
+msgstr "Category"
+
+#: .\erp\product\models.py:31 .\templates\sale_document\delivery_note.html:196
+#: .\templates\sale_document\sale_document.html:198
+msgid "VAT"
+msgstr "VAT"
+
+#: .\erp\product\models.py:33
+msgid "Unit of Measure"
+msgstr "Unit of Measure"
+
+#: .\erp\product\models.py:37
+msgid "Minimum Stock Level"
+msgstr "Minimum Stock Level"
+
+#: .\erp\product\models.py:39
+msgid "Maximum Stock Level"
+msgstr "Maximum Stock Level"
+
+#: .\erp\product\models.py:40
+msgid "Dimension"
+msgstr "Dimension"
+
+#: .\erp\product\models.py:41
+msgid "Weight"
+msgstr "Weight"
+
+#: .\erp\product\models.py:42
+msgid "Reorder Point"
+msgstr "Reorder Point"
+
+#: .\erp\product\models.py:43
+msgid "Lead Time"
+msgstr "Lead Time"
+
+#: .\erp\product\models.py:44
+msgid "Serial Number"
+msgstr "Serial Number"
+
+#: .\erp\product\models.py:46
+msgid "Quantity"
+msgstr "Quantity"
+
+#: .\erp\product\models.py:48
+msgid "Virtual Quantity"
+msgstr "Virtual Quantity"
+
+#: .\erp\product\views.py:72
+msgid "Item exists in a sale document"
+msgstr "Item exists in a sale document"
+
+#: .\erp\purchase_document\serializers.py:129
+#: .\erp\sale_document\serializers.py:138
+#: .\erp\sale_document\serializers.py:147
+msgid "No product with this id exists."
+msgstr "No product with this id exists."
+
+#: .\erp\purchase_document\signals.py:11 .\erp\sale_document\signals.py:18
+msgid "Confirmed Item must contain at least one Product."
+msgstr "Confirmed Item must contain at least one Product."
+
+#: .\erp\purchase_document\views.py:63 .\erp\sale_document\views.py:65
+msgid "You do not have permission to change the status"
+msgstr "You do not have permission to change the status"
+
+#: .\erp\purchase_document\views.py:67 .\erp\sale_document\views.py:69
+msgid "You do not have permission to rollback the status"
+msgstr "You do not have permission to rollback the status"
+
+#: .\erp\purchase_document\views.py:77 .\erp\sale_document\views.py:79
+msgid "You do not have permission to set the status"
+msgstr "You do not have permission to set the status"
+
+#: .\erp\purchase_document\views.py:91 .\erp\sale_document\service.py:25
+msgid "Please provide all needed data"
+msgstr "Please provide all needed data"
+
+#: .\erp\purchase_document\views.py:122 .\erp\purchase_document\views.py:146
+msgid "Mismatched purchase_document_id"
+msgstr "Mismatched purchase_document_id"
+
+#: .\erp\purchase_document\views.py:131 .\erp\sale_document\views.py:122
+msgid "Cannot find the item to edit"
+msgstr "Cannot find the item to edit"
+
+#: .\erp\purchase_document\views.py:168 .\erp\sale_document\views.py:159
+msgid "Item created"
+msgstr "Item created"
+
+#: .\erp\purchase_document\views.py:307 .\erp\sale_document\views.py:301
+msgid "Unauthorized"
+msgstr "Unauthorized"
+
+#: .\erp\purchase_document\views.py:336
+msgid ""
+"Error creating new PurchaseDocument for parent {purchase_document.id}: "
+"{str(e)}"
+msgstr ""
+
+#: .\erp\purchase_document\views.py:338
+#, python-brace-format
+msgid ""
+"Successfully created {num_new_purchase_documents} new purchase documents"
+msgstr ""
+
+#: .\erp\purchase_document\views.py:350 .\erp\sale_document\views.py:317
+msgid "No valid parent documents found"
+msgstr "No valid parent documents found"
+
+#: .\erp\purchase_document\views.py:353 .\erp\sale_document\views.py:320
+msgid "All documents should belong to the same partner"
+msgstr "All documents should belong to the same partner"
+
+#: .\erp\purchase_document\views.py:357 .\erp\sale_document\views.py:324
+msgid "Please give the type of the document"
+msgstr "Please give the type of the document"
+
+#: .\erp\sale_document\models.py:116
+msgid "Order"
+msgstr "Order"
+
+#: .\erp\sale_document\serializers.py:142
+msgid "Not enough stock available for this product."
+msgstr "Not enough stock available for this product."
+
+#: .\erp\sale_document\service.py:71
+msgid "Error creating new SaleDocument for parent {sale_document.id}: {str(e)}"
+msgstr ""
+
+#: .\erp\sale_document\views.py:114 .\erp\sale_document\views.py:136
+msgid "Mismatched sale_document_id"
+msgstr "Mismatched sale_document_id"
+
+#: .\erp\sale_document\views.py:305
+msgid "Recurring sale documents generation process has started."
+msgstr "Recurring sale documents generation process has started."
+
+#: .\templates\partner\pdf.html:34 .\templates\product\pdf.html:34
+msgid "S No"
+msgstr "S No"
+
+#: .\templates\partner\pdf.html:36
+msgid "First & last name"
+msgstr "First & last name"
+
+#: .\templates\partner\pdf.html:37
+msgid "E-mail"
+msgstr "E-mail"
+
+#: .\templates\partner\pdf.html:38
+msgid "Company name"
+msgstr "Company name"
+
+#: .\templates\product\pdf.html:36
+msgid "Ref."
+msgstr "Ref."
+
+#: .\templates\product\pdf.html:37
+msgid "EAN 13"
+msgstr "EAN 13"
+
+#: .\templates\sale_document\delivery_note.html:147
+#: .\templates\sale_document\sale_document.html:147
+#: .\templates\sale_document\sale_document_basic.html:171
+#: .\templates\sale_document\sale_document_elegent.html:146
+msgid "Company Logo"
+msgstr "Company Logo"
+
+#: .\templates\sale_document\delivery_note.html:193
+#: .\templates\sale_document\sale_document.html:195
+#: .\templates\sale_document\sale_document_basic.html:224
+#: .\templates\sale_document\sale_document_elegent.html:184
+msgid "Name / Ref."
+msgstr "Name / Ref."
+
+#: .\templates\sale_document\delivery_note.html:194
+#: .\templates\sale_document\sale_document.html:196
+#: .\templates\sale_document\sale_document_basic.html:225
+#: .\templates\sale_document\sale_document_elegent.html:185
+msgid "Qte."
+msgstr "Qte."
+
+#: .\templates\sale_document\delivery_note.html:195
+#: .\templates\sale_document\sale_document.html:197
+#: .\templates\sale_document\sale_document_basic.html:227
+#: .\templates\sale_document\sale_document_elegent.html:187
+msgid "U. Price"
+msgstr "U. Price"
+
+#: .\templates\sale_document\delivery_note.html:197
+#: .\templates\sale_document\sale_document.html:199
+msgid "Disc."
+msgstr "Disc."
+
+#: .\templates\sale_document\delivery_note.html:198
+#: .\templates\sale_document\sale_document.html:200
+#: .\templates\sale_document\sale_document_basic.html:228
+#: .\templates\sale_document\sale_document_elegent.html:188
+msgid "Total"
+msgstr "Total"
+
+#: .\templates\sale_document\delivery_note.html:214
+#: .\templates\sale_document\sale_document.html:216
+msgid "Total Without VAT"
+msgstr "Total Without VAT"
+
+#: .\templates\sale_document\delivery_note.html:219
+#: .\templates\sale_document\sale_document.html:221
+msgid "Total Discount"
+msgstr "Total Discount"
+
+#: .\templates\sale_document\delivery_note.html:224
+#: .\templates\sale_document\sale_document.html:226
+msgid "Total VAT"
+msgstr "Total VAT"
+
+#: .\templates\sale_document\delivery_note.html:228
+#: .\templates\sale_document\sale_document.html:230
+msgid "Total Amount"
+msgstr "Total Amount"
+
+#: .\templates\sale_document\sale_document.html:17
+#: .\templates\sale_document\sale_document_basic.html:12
+#: .\templates\sale_document\sale_document_elegent.html:12
+msgid "Page"
+msgstr "Page"
+
+#: .\templates\sale_document\sale_document.html:17
+#: .\templates\sale_document\sale_document_basic.html:12
+#: .\templates\sale_document\sale_document_elegent.html:12
+msgid "of"
+msgstr "of"
+
+#: .\templates\sale_document\sale_document.html:158
+msgid "NUMBER"
+msgstr "NUMBER"
+
+#: .\templates\sale_document\sale_document_basic.html:207
+msgid "SALE_DOCUMENT_NUMBER"
+msgstr "Number"
+
+#: .\templates\sale_document\sale_document_basic.html:211
+msgid "SALE_DOCUMENT_DATE"
+msgstr "Date"
+
+#: .\templates\sale_document\sale_document_basic.html:215
+msgid "SALE_DOCUMENT_DUE_DATE"
+msgstr "Due Date"
+
+#: .\templates\sale_document\sale_document_basic.html:226
+#: .\templates\sale_document\sale_document_elegent.html:186
+msgid "Unit"
+msgstr "Unit"
+
+#: .\templates\sale_document\sale_document_basic.html:254
+#: .\templates\sale_document\sale_document_elegent.html:214
+msgid "SUB-TOTAL_WITHOUT_VAT"
+msgstr "Sub Total without vat"
+
+#: .\templates\sale_document\sale_document_basic.html:262
+#: .\templates\sale_document\sale_document_elegent.html:222
+msgid "DISCOUNT"
+msgstr "Discount"
+
+#: .\templates\sale_document\sale_document_basic.html:270
+#: .\templates\sale_document\sale_document_elegent.html:230
+msgid "VAT_OF"
+msgstr "Vat of"
+
+#: .\templates\sale_document\sale_document_basic.html:278
+#: .\templates\sale_document\sale_document_elegent.html:238
+msgid "TOTAL_PRICE"
+msgstr "Total price"
+
+#: .\templates\user\activation_confirmation_email.html:5
+msgid "Account Created,"
+msgstr "Account Created,"
+
+#: .\templates\user\activation_confirmation_email.html:11
+#: .\user\receivers.py:100
+msgid "Account Activation Confirmation"
+msgstr "Account Activation Confirmation"
+
+#: .\templates\user\activation_confirmation_email.html:19
+#: .\templates\user\activation_email.html:19
+#: .\templates\user\user_creation_email_notify.html:19
+#: .\templates\user\user_declined_email.html:19
+msgid "Dear"
+msgstr "Dear"
+
+#: .\templates\user\activation_confirmation_email.html:24
+msgid "Your account has been successfully activated by"
+msgstr "Your account has been successfully activated by"
+
+#: .\templates\user\activation_confirmation_email.html:24
+msgid "at"
+msgstr "at"
+
+#: .\templates\user\activation_confirmation_email.html:26
+msgid "You can now log in and start using our service."
+msgstr "You can now log in and start using our service."
+
+#: .\templates\user\activation_confirmation_email.html:31
+#: .\templates\user\activation_email.html:33
+#: .\templates\user\reset_password_email.html:35
+#: .\templates\user\user_activate_account_and_change_password.html:33
+#: .\templates\user\user_creation_email_notify.html:33
+#: .\templates\user\user_declined_email.html:35
+msgid "Best Regards,"
+msgstr "Best Regards,"
+
+#: .\templates\user\activation_email.html:5
+#: .\templates\user\reset_password_email.html:5
+#: .\templates\user\user_activate_account_and_change_password.html:5
+#: .\templates\user\user_activate_account_and_change_password.html:11
+#: .\user\receivers.py:63 .\user\receivers.py:86
+msgid "Account Created"
+msgstr "Account Created"
+
+#: .\templates\user\activation_email.html:11
+msgid "New User Registration"
+msgstr "New User Registration"
+
+#: .\templates\user\activation_email.html:24
+msgid "A new user"
+msgstr "A new user"
+
+#: .\templates\user\activation_email.html:24
+msgid "has registered on the site at"
+msgstr "has registered on the site at"
+
+#: .\templates\user\activation_email.html:26
+msgid ""
+"Please check their information and approve their account if everything looks "
+"correct."
+msgstr ""
+"Please check their information and approve their account if everything looks "
+"correct."
+
+#: .\templates\user\activation_email.html:28
+msgid "Approve user"
+msgstr "Approve user"
+
+#: .\templates\user\activation_email.html:28
+msgid "Click here to approve his account"
+msgstr "Click here to approve his account"
+
+#: .\templates\user\reset_password_email.html:11
+msgid "Reset your password"
+msgstr "Reset your password"
+
+#: .\templates\user\reset_password_email.html:19
+msgid "Hello,"
+msgstr "Hello,"
+
+#: .\templates\user\reset_password_email.html:24
+msgid "Please click on the link below to reset your password:"
+msgstr "Please click on the link below to reset your password:"
+
+#: .\templates\user\reset_password_email.html:26
+msgid "Reset password"
+msgstr "Reset password"
+
+#: .\templates\user\reset_password_email.html:26
+msgid "Click here to reset password"
+msgstr "Click here to reset password"
+
+#: .\templates\user\reset_password_email.html:28
+msgid "If you didn't request this, please ignore this email."
+msgstr "If you didn't request this, please ignore this email."
+
+#: .\templates\user\reset_password_email.html:30
+msgid "Your account is safe."
+msgstr "Your account is safe."
+
+#: .\templates\user\user_activate_account_and_change_password.html:19
+msgid "Dear,"
+msgstr "Dear,"
+
+#: .\templates\user\user_activate_account_and_change_password.html:24
+msgid "Your account has been successfully created on"
+msgstr "Your account has been successfully created on"
+
+#: .\templates\user\user_activate_account_and_change_password.html:26
+msgid ""
+"Please click the button below to activate your account and set your password."
+msgstr ""
+"Please click the button below to activate your account and set your password."
+
+#: .\templates\user\user_activate_account_and_change_password.html:28
+msgid "Activate Account"
+msgstr "Activate Account"
+
+#: .\templates\user\user_creation_email_notify.html:5
+msgid "Activation de votre compte avec succès"
+msgstr "Your account has been activated successfully"
+
+#: .\templates\user\user_creation_email_notify.html:11
+msgid "Welcome to Bima360!"
+msgstr "Welcome to Bima360!"
+
+#: .\templates\user\user_creation_email_notify.html:24
+msgid ""
+"We are happy to inform you that your account has been successfully created on"
+msgstr ""
+"We are happy to inform you that your account has been successfully created on"
+
+#: .\templates\user\user_creation_email_notify.html:26
+msgid ""
+"We are currently reviewing your account and will notify you once it has been "
+"approved. Thank you for your patience!"
+msgstr ""
+"We are currently reviewing your account and will notify you once it has been "
+"approved. Thank you for your patience!"
+
+#: .\templates\user\user_creation_email_notify.html:28
+msgid "In the meantime, you can review our services on our website:"
+msgstr "In the meantime, you can review our services on our website:"
+
+#: .\templates\user\user_creation_email_notify.html:28
+msgid "Our Website"
+msgstr "Our Website"
+
+#: .\templates\user\user_declined_email.html:5
+msgid "Refus d'activation de votre compte"
+msgstr "Refusal to activate your account"
+
+#: .\templates\user\user_declined_email.html:11
+msgid "Your Account Activation"
+msgstr "Your Account Activation"
+
+#: .\templates\user\user_declined_email.html:24
+msgid ""
+"We regret to inform you that your account activation request on our platform "
+"has been declined by our administration."
+msgstr ""
+"We regret to inform you that your account activation request on our platform "
+"has been declined by our administration."
+
+#: .\templates\user\user_declined_email.html:26
+msgid "Declined By:"
+msgstr "Declined By:"
+
+#: .\templates\user\user_declined_email.html:28
+msgid "Time of Review:"
+msgstr "Time of Review:"
+
+#: .\templates\user\user_declined_email.html:30
+msgid ""
+"Please contact our support team if you have any questions or if you believe "
+"this was a mistake."
+msgstr ""
+"Please contact our support team if you have any questions or if you believe "
+"this was a mistake."
+
+#: .\treasury\payment_terms\serializers.py:20
+msgid "Sum of payment_terms_details value must be 100."
+msgstr "Sum of payment_terms_details value must be 100."
+
+#: .\user\models.py:17
+msgid "User must have an email address."
+msgstr "User must have an email address."
+
+#: .\user\receivers.py:27
+#, fuzzy
+#| msgid "Password has been reset."
+msgid "Password Reset"
+msgstr "Password has been reset."
+
+#: .\user\receivers.py:114
+#, fuzzy
+#| msgid "Your Account Activation"
+msgid "Account Activation Refused"
+msgstr "Your Account Activation"
+
+#: .\user\serializers.py:116
+msgid "User is not active or not approved."
+msgstr "User is not active or not approved."
+
+#: .\user\serializers.py:121
+msgid "Invalid Username or Password."
+msgstr "Kindly verify you username and/or password."
+
+#: .\user\serializers.py:209
+msgid "Creation of new password has failed"
+msgstr "Creation of new password has failed"
+
+#: .\user\service.py:36
+msgid "Missing parameters."
+msgstr "Missing parameters."
+
+#: .\user\service.py:41 .\user\service.py:46 .\user\service.py:49
+#: .\user\service.py:52 .\user\service.py:63
+msgid "Unable to identify credential"
+msgstr "Unable to identify credential"
+
+#: .\user\service.py:57
+msgid "User has been activated"
+msgstr "User has been activated"
+
+#: .\user\service.py:60
+msgid "Your token has expired please contact the administrator"
+msgstr "Your token has expired please contact the administrator"
+
+#: .\user\views.py:329
+msgid "We have sent you a link to reset your password"
+msgstr "We have sent you a link to reset your password"
+
+#: .\user\views.py:349
+msgid "Password has been reset."
+msgstr "Password has been reset."
+
+#: .\user\views.py:369
+msgid "Creation of the new password succeed."
+msgstr "Creation of the new password succeed."
+
+#, fuzzy
+#~| msgid "Insufficient quantity for product {product.reference}"
+#~ msgid "Insufficient quantity for product"
+#~ msgstr "Insufficient quantity for product {product.reference}"
+
+#, python-brace-format
+#~ msgid "Insufficient quantity for product {e.product.reference}"
+#~ msgstr "Insufficient quantity for product {e.product.reference}"
+
+#~ msgid "Canceled"
+#~ msgstr "Canceled"

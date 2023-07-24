@@ -1,0 +1,53 @@
+{% load i18n %}
+<html>
+    <head>
+        <style>
+            * {
+                font-size: 15px;
+            }
+
+            table {
+                table-layout: fixed;
+                width: 100%;
+                border: 1px solid black;
+            }
+
+            table th {
+                text-align: left;
+                padding: 3px;
+                padding-bottom: 0;
+            }
+
+            table td {
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                padding: 3px;
+                padding-bottom: 0;
+            }
+        </style>
+    </head>
+
+    <body>
+        <table>
+            <tr>
+                <th> {% trans "S No" %} </th>
+                <th> {% trans "Name" %} </th>
+                <th> {% trans "Ref." %} </th>
+                <th> {% trans "EAN 13" %} </th>
+                <th> {% trans "Sell Price" %} </th>
+                <th> {% trans "Type" %} </th>
+            </tr>
+            {%for data in products%}
+            <tr>
+                <td style="width: 50px"> {{forloop.counter}} </td>
+                <td style="width: 20%"> {{data.name}} </td>
+                <td style="width: 20%"> {{data.reference}} </td>
+                <td style="width: 20%"> {{data.ean13}} </td>
+                <td style="width: 15%"> {{data.sell_price}} </td>
+                <td style="width: 15%"> {{data.type}} </td>
+            </tr>
+            {%endfor%}
+        </table>
+    </body>
+</html>

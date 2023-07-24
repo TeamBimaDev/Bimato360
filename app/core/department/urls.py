@@ -7,4 +7,8 @@ router.register('', BimaCoreDepartmentViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
+
+    path('<str:public_id>/posts/',
+         BimaCoreDepartmentViewSet.as_view({'get': 'get_posts_by_department'}),
+         name='Posts-By-Department'),
 ]
