@@ -1,22 +1,25 @@
 import django_filters
 from django.db import models
-
 from django.utils.translation import gettext_lazy as _
 from core.abstract.views import AbstractViewSet
 from django.shortcuts import get_object_or_404
 from rest_framework import status
+from rest_framework.decorators import action
 from rest_framework.response import Response
 from .models import BimaErpProduct
 from .serializers import BimaErpProductSerializer
-from django.http import JsonResponse
-from .utils import generate_xls_file, export_to_csv
+from .utils import generate_xls_file, export_to_csv, read_barcode_from_image, generate_file, enhance_image
 from common.utils.utils import render_to_pdf
 from erp.sale_document.models import BimaErpSaleDocumentProduct
-
 from core.entity_tag.models import get_entity_tags_for_parent_entity, create_single_entity_tag, BimaCoreEntityTag
 from core.entity_tag.serializers import BimaCoreEntityTagSerializer
 from common.permissions.action_base_permission import ActionBasedPermission
-
+import barcode
+from barcode.writer import ImageWriter
+from django.http import  JsonResponse
+import numpy as np
+import io
+from PIL import Image
 
 class ProductFilter(django_filters.FilterSet):
     name = django_filters.CharFilter(field_name='name', lookup_expr='icontains')
@@ -126,3 +129,29 @@ class BimaErpProductViewSet(AbstractViewSet):
         else:
             data_to_export = BimaErpProduct.objects.all()
         return data_to_export
+    @action(detail=False, methods=['POST'], url_path='generate_ena13_from_image')
+    def generate_ena13_from_image(self, request):
+        barcode_image = request.FILES.get('barcode_image')
+        if not barcode_image:
+            return JsonResponse({'error': 'Missing barcode_image field in the request.'}, status=400)
+        img_array = np.asarray(bytearray(barcode_image.read()), dtype=np.uint8)
+        image = Image.open(io.BytesIO(img_array))
+        enhanced_image = enhance_image(image)
+        enhanced_image = enhanced_image.convert('L')
+        enhanced_np_array = np.array(enhanced_image)
+        decoded_data = read_barcode_from_image(np.array(enhanced_np_array))
+
+        if decoded_data:
+            bar = barcode.get_barcode(name='code128', code=decoded_data, writer=ImageWriter())
+            barcode_file = bar.render()
+            generated_text = decoded_data
+
+            return JsonResponse({'generated_text': generated_text})
+        else:
+            return JsonResponse({'error': 'No barcode found in the image.'}, status=400)
+
+    def verify_file_exist_for_ean13(request):
+        barcode_image = request.FILES.get('barcode_image')
+        if not barcode_image:
+            raise ValueError("File is missing or unable to read the file")
+        return barcode_image

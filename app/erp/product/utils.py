@@ -1,13 +1,13 @@
 from django.http import HttpResponse
 from datetime import datetime
 from uuid import UUID
-
+from pyzbar.pyzbar import decode
 from openpyxl import Workbook
 from openpyxl.styles import Font, Border, Side, PatternFill
 from openpyxl.utils import get_column_letter
 import tablib
 import csv
-
+from PIL import ImageEnhance, ImageFilter
 from .models import BimaErpProduct
 
 
@@ -103,3 +103,19 @@ def export_to_csv(products, model_fields):
         writer.writerow([getattr(product, field) for field in field_names_to_show])
 
     return response
+def enhance_image(image):
+    enhancer = ImageEnhance.Contrast(image)
+    enhanced_image = enhancer.enhance(1.5)
+    enhanced_image = enhanced_image.filter(ImageFilter.MedianFilter)
+    return enhanced_image
+def generate_file(barcode_file):
+    response = HttpResponse(content_type="image/jpeg")
+    barcode_file.save(response, "JPEG")
+    return response
+
+def read_barcode_from_image(image_array):
+    decoded_objects = decode(image_array)
+    if decoded_objects:
+        return decoded_objects[0].data.decode('utf-8')
+    else:
+        return None

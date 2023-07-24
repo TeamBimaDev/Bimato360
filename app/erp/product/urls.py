@@ -2,7 +2,6 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import BimaErpProductViewSet
 
-
 router = DefaultRouter()
 router.register('', BimaErpProductViewSet)
 
@@ -31,6 +30,7 @@ urlpatterns = [
     path('export_xls',
          BimaErpProductViewSet.as_view({'get': 'export_xls'}),
          name='product-export_xls'),
+
     path('<str:public_id>/export_xls',
          BimaErpProductViewSet.as_view({'get': 'export_xls'}),
          name='product-export_xls'),

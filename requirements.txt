@@ -102,3 +102,16 @@ zope.event==5.0
 zope.interface==6.0
 zopfli==0.2.2
 pandas
+opencv-python
+asgiref
+colorama
+numpy
+opencv-python
+Pillow
+python-barcode
+python-dotenv
+pytz
+pyzbar
+qrcode
+six
+sqlparse
