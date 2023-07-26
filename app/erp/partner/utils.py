@@ -80,13 +80,6 @@ def generate_xls_file(queryset):
         raise e
 
 
-def validate_choice_value(value: str, choices):
-    choice_values = [item[0] for item in choices]
-    if value not in choice_values:
-        raise ValueError(f"Invalid value. Expected one of {choice_values}")
-    return value
-
-
 def import_partner_data_from_csv_file(df):
     error_rows = []
     created_count = 0
@@ -135,8 +128,10 @@ def import_partner_data_from_csv_file(df):
             company_ape_code = str(row.get('company_ape_code')) if pd.notnull(row.get('company_ape_code')) else ""
             company_capital = str(row.get('company_capital')) if pd.notnull(row.get('company_capital')) else ""
 
-            credit = row.get('credit') if isinstance(row.get('credit'), (int, float)) else 0
-            balance = row.get('balance') if isinstance(row.get('balance'), (int, float)) else 0
+            credit = row.get('credit') if isinstance(row.get('credit'), (int, float)) and pd.notnull(
+                row.get('credit')) else 0
+            balance = row.get('balance') if isinstance(row.get('balance'), (int, float)) and pd.notnull(
+                row.get('balance')) else 0
 
             partner_type_name = get_enum_value(PartnerType, partner_type)
             handler = partner_handlers.get(partner_type_name)
@@ -196,14 +191,6 @@ def import_partner_data_from_csv_file(df):
     return error_rows, created_count
 
 
-ENUM_MAPPINGS = {
-    "partner_type": PartnerType,
-    "gender": Gender,
-    "status": EntityStatus,
-    "company_type": CompanyType,
-}
-
-
 def export_to_csv(partners, model_fields):
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="partners.csv"'
@@ -231,7 +218,7 @@ def export_to_csv(partners, model_fields):
     return response
 
 
-def handle_individual(partner_type_name, first_name):
+def handle_individual(partner_type_name, first_name, optional=None):
     if not partner_type_name:
         return {'error': _('Partner Type does not exist'),
                 'data': handle_error(partner_type_name, first_name)}
@@ -245,7 +232,6 @@ def handle_company(partner_type_name, first_name, company_type):
     return None
 
 
-# Create a dictionary mapping partner_type to the correct function.
 partner_handlers = {
     PartnerType.INDIVIDUAL.name: handle_individual,
     PartnerType.COMPANY.name: handle_company,
@@ -253,13 +239,24 @@ partner_handlers = {
 
 
 def handle_error(partner_type, first_name):
-    """
-    Function to format error data. If partner_type or first_name is None,
-    it will be replaced with a string "None".
-    """
     if partner_type is None:
         partner_type = "None"
     if first_name is None:
         first_name = "None"
 
     return partner_type + " " + first_name
+
+
+def validate_choice_value(value: str, choices):
+    choice_values = [item[0] for item in choices]
+    if value not in choice_values:
+        raise ValueError(f"Invalid value. Expected one of {choice_values}")
+    return value
+
+
+ENUM_MAPPINGS = {
+    "partner_type": PartnerType,
+    "gender": Gender,
+    "status": EntityStatus,
+    "company_type": CompanyType,
+}

@@ -16,14 +16,14 @@ urlpatterns = [
     path('export_csv',
          BimaErpProductViewSet.as_view({'get': 'export_csv'}),
          name='product-export_csv'),
-    path('<str:public_id>/export_csv',
+    path('<str:public_id>/export_csv/',
          BimaErpProductViewSet.as_view({'get': 'export_csv'}),
          name='product-export_csv'),
 
     path('export_pdf',
          BimaErpProductViewSet.as_view({'get': 'export_pdf'}),
          name='product-export_pdf'),
-    path('<str:public_id>/export_pdf',
+    path('<str:public_id>/export_pdf/',
          BimaErpProductViewSet.as_view({'get': 'export_pdf'}),
          name='product-export_pdf'),
 
@@ -31,7 +31,7 @@ urlpatterns = [
          BimaErpProductViewSet.as_view({'get': 'export_xls'}),
          name='product-export_xls'),
 
-    path('<str:public_id>/export_xls',
+    path('<str:public_id>/export_xls/',
          BimaErpProductViewSet.as_view({'get': 'export_xls'}),
          name='product-export_xls'),
 ]
