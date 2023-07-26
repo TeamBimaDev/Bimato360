@@ -31,10 +31,10 @@ def import_data_from_csv_file(df):
 
             # Check if mandatory fields are provided
             if not name:
-                error_rows.append({'error': _('Name is missing'), 'data': row.to_dict()})
+                error_rows.append({'error': _('Name is missing'), 'data': name if name else ""})
                 continue
             if not code:
-                error_rows.append({'error': _('Code is missing'), 'data': row.to_dict()})
+                error_rows.append({'error': _('Code is missing'), 'data': name if name else ""})
                 continue
 
             # Check if currency exists
@@ -43,7 +43,7 @@ def import_data_from_csv_file(df):
             if not currency:
                 error_rows.append(
                     {'error': _('Currency with name or symbol {} does not exist').format(currency_name_or_symbol),
-                     'data': row.to_dict()})
+                     'data': name if name else ""})
                 continue
 
             # Create the object
@@ -63,14 +63,14 @@ def import_data_from_csv_file(df):
             created_count += 1
         except IntegrityError as e:
             if 'name' in str(e):
-                error_message = _('Country with name {} already exists').format(name)
+                error_message = _('Country with name {} already exists').format(name if name else "")
             elif 'code' in str(e):
-                error_message = _('Country with code {} already exists').format(code)
+                error_message = _('Country with code {} already exists').format(name if name else "")
             else:
                 error_message = _('Integrity error occurred')
-            error_rows.append({'error': error_message, 'data': row.to_dict()})
+            error_rows.append({'error': error_message, 'data': name if name else ""})
         except Exception as e:
-            error_rows.append({'error': str(e), 'data': row.to_dict()})
+            error_rows.append({'error': str(e), 'data': name if name else ""})
 
     return error_rows, created_count
 

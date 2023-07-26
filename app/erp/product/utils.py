@@ -237,12 +237,12 @@ def import_product_data_from_csv_file(df):
             virtual_quantity = validate_decimal(row.get('virtual_quantity'), 'virtual_quantity')
 
             if not name or not reference:
-                error_rows.append({'error': _('Name or reference is missing'), 'data': row.to_dict()})
+                error_rows.append({'error': _('Name or reference is missing'), 'data': ''})
                 continue
 
             if not type or not price_calculation_method or not status:
                 error_rows.append({'error': _('Product Type, Price Calculation Method or Status does not exist'),
-                                   'data': row.to_dict()})
+                                   'data': ''})
                 continue
 
             category = BimaErpCategory.objects.filter(name=category_name).first() if category_name else None
@@ -252,7 +252,7 @@ def import_product_data_from_csv_file(df):
 
             if not category or not vat or not unit_of_measure:
                 error_rows.append(
-                    {'error': _('Category, VAT or Unit of Measure does not exist'), 'data': name})
+                    {'error': _('Category, VAT or Unit of Measure does not exist'), 'data': name if name else ""})
                 continue
 
             with transaction.atomic():
@@ -284,12 +284,12 @@ def import_product_data_from_csv_file(df):
                 product.save()
             created_count += 1
         except ValidationError as e:
-            error_rows.append({'error': _('Invalid data: {}').format(e), 'data': name})
+            error_rows.append({'error': _('Invalid data: {}').format(e), 'data': name if name else ""})
         except IntegrityError as e:
             error_message = _('Integrity error occurred: {}').format(str(e))
-            error_rows.append({'error': str(error_message), 'data': name})
+            error_rows.append({'error': str(error_message), 'data': name if name else ""})
         except Exception as e:
-            error_rows.append({'error': str(e), 'data': name})
+            error_rows.append({'error': str(e), 'data': name if name else ""})
 
     return error_rows, created_count
 

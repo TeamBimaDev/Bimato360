@@ -185,12 +185,13 @@ def import_partner_data_from_csv_file(df):
                 partner.save()
             created_count += 1
         except ValidationError as e:
-            error_rows.append({'error': _('Invalid data: {}').format(e), 'data': partner_type + " " + first_name})
+            error_rows.append(
+                {'error': _('Invalid data: {}').format(e), 'data': handle_error(partner_type, first_name)})
         except IntegrityError as e:
             error_message = _('Integrity error occurred: {}').format(str(e))
-            error_rows.append({'error': str(error_message), 'data': partner_type + " " + first_name})
+            error_rows.append({'error': str(error_message), 'data': handle_error(partner_type, first_name)})
         except Exception as e:
-            error_rows.append({'error': str(e), 'data': partner_type + " " + first_name})
+            error_rows.append({'error': str(e), 'data': handle_error(partner_type, first_name)})
 
     return error_rows, created_count
 
@@ -233,14 +234,14 @@ def export_to_csv(partners, model_fields):
 def handle_individual(partner_type_name, first_name):
     if not partner_type_name:
         return {'error': _('Partner Type does not exist'),
-                'data': partner_type_name + " " + first_name}
+                'data': handle_error(partner_type_name, first_name)}
     return None
 
 
 def handle_company(partner_type_name, first_name, company_type):
     if not partner_type_name or not company_type:
         return {'error': _('Partner Type or Company Type does not exist'),
-                'data': partner_type_name + " " + first_name}
+                'data': handle_error(partner_type_name, first_name)}
     return None
 
 
@@ -249,3 +250,16 @@ partner_handlers = {
     PartnerType.INDIVIDUAL.name: handle_individual,
     PartnerType.COMPANY.name: handle_company,
 }
+
+
+def handle_error(partner_type, first_name):
+    """
+    Function to format error data. If partner_type or first_name is None,
+    it will be replaced with a string "None".
+    """
+    if partner_type is None:
+        partner_type = "None"
+    if first_name is None:
+        first_name = "None"
+
+    return partner_type + " " + first_name

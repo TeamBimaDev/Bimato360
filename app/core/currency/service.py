@@ -22,10 +22,10 @@ def import_data_from_csv_file(df):
             currency_subunit_label = str(row.get('currency_subunit_label', '')) if pd.notna(row.get('currency_subunit_label')) else ""
 
             if not name:
-                error_rows.append({'error': _('Name is missing'), 'data': row.to_dict()})
+                error_rows.append({'error': _('Name is missing'), 'data': name if name else ""})
                 continue
             if not symbol:
-                error_rows.append({'error': _('Symbol is missing'), 'data': row.to_dict()})
+                error_rows.append({'error': _('Symbol is missing'), 'data': name if name else ""})
                 continue
 
             # Create the object
@@ -41,14 +41,14 @@ def import_data_from_csv_file(df):
             created_count += 1
         except IntegrityError as e:
             if 'name' in str(e):
-                error_message = _('Currency with name {} already exists').format(name)
+                error_message = _('Currency with name {} already exists').format(name if name else "")
             elif 'symbol' in str(e):
-                error_message = _('Currency with symbol {} already exists').format(symbol)
+                error_message = _('Currency with symbol {} already exists').format(symbol if symbol else "")
             else:
                 error_message = _('Integrity error occurred')
-            error_rows.append({'error': error_message, 'data': row.to_dict()})
+            error_rows.append({'error': error_message, 'data': name if name else ""})
         except Exception as e:
-            error_rows.append({'error': str(e), 'data': row.to_dict()})
+            error_rows.append({'error': str(e), 'data': name if name else ""})
 
     return error_rows, created_count
 
