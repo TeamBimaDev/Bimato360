@@ -189,15 +189,18 @@ def export_to_csv(partners, model_fields):
     for partner in partners:
         row_data = []
         for field in field_names_to_show:
-            value = getattr(partner, field)
-            if hasattr(value, 'name'):
-                # This will handle foreign keys
-                value = getattr(value, 'name', None)
-            elif field in ENUM_MAPPINGS:
-                # This will handle enums
-                enum_value = getattr(partner, field, None)
-                value = ENUM_MAPPINGS[field][enum_value].value if enum_value is not None else None
-            row_data.append(value if value is not None else '')
+            try:
+                value = getattr(partner, field)
+                if hasattr(value, 'name'):
+                    # This will handle foreign keys
+                    value = getattr(value, 'name', None)
+                elif field in ENUM_MAPPINGS:
+                    # This will handle enums
+                    enum_value = getattr(partner, field, None)
+                    value = str(ENUM_MAPPINGS[field][enum_value].value) if enum_value is not None else None
+                row_data.append(value if value is not None else '')
+            except Exception as ex:
+                pass
         writer.writerow(row_data)
 
     return response
