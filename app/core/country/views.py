@@ -165,7 +165,7 @@ class BimaCoreCountryViewSet(AbstractViewSet):
 
     @action(detail=False, methods=["POST"], url_path="import_from_csv")
     def import_from_csv(self, request, **kwargs):
-        csv_file = request.FILES.get("file")
+        csv_file = request.FILES.get("csv_file")
 
         try:
             file_check = check_csv_file(csv_file)

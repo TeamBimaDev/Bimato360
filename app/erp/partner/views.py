@@ -242,9 +242,9 @@ class BimaErpPartnerViewSet(AbstractViewSet):
 
         return generate_xls_file(data_to_export)
 
-    @action(detail=False, methods=['post'])
-    def generate_partner_from_csv(self, request):
-        csv_file = request.FILES.get('file')
+    @action(detail=False, methods=['post'], url_path='import_from_csv')
+    def import_from_csv(self, request):
+        csv_file = request.FILES.get('csv_file')
 
         try:
             file_check = check_csv_file(csv_file)
@@ -259,4 +259,4 @@ class BimaErpPartnerViewSet(AbstractViewSet):
             return Response({'detail': _('Successfully created partners.')}, status=status.HTTP_201_CREATED)
 
         except Exception as e:
-            return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': _("Impossible de traiter le fichier")}, status=status.HTTP_400_BAD_REQUEST)

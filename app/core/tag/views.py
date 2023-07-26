@@ -55,3 +55,20 @@ class BimaCoreTagViewSet(AbstractViewSet):
         direct_children = tag.children.all()
         serializer = BimaCoreTagSerializer(direct_children, many=True)
         return Response(serializer.data)
+
+    @action(detail=True, methods=['GET'], url_path='all_parents_nested')
+    def all_parents_nested(self, request, pk=None):
+        tag = self.get_object()
+
+        def get_nested_parent(tag):
+            if tag.parent is None:
+                return None
+            else:
+                parent_data = get_nested_parent(tag.parent)
+                department_serializer_data = self.get_serializer(tag.parent).data
+                if parent_data is not None:
+                    department_serializer_data['tag'] = parent_data
+                return department_serializer_data
+
+        nested_parents = get_nested_parent(tag)
+        return Response(nested_parents)
