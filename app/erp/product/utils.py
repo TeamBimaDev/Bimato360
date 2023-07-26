@@ -1,3 +1,4 @@
+import pandas as pd
 import tablib
 import csv
 import io
@@ -210,28 +211,30 @@ def import_product_data_from_csv_file(df):
 
     for index, row in df.iterrows():
         try:
-            name = row.get('name')
-            reference = row.get('reference')
-            description = row.get('description')
-            ean13 = row.get('ean13')
-            type = get_enum_value(ProductType, row.get('type'))
-            purchase_price = row.get('purchase_price')
-            sell_price = row.get('sell_price')
-            price_calculation_method = get_enum_value(PriceCalculationMethod, row.get('price_calculation_method'))
-            sell_percentage = row.get('sell_percentage')
-            category_name = row.get('category')
-            vat_name = row.get('vat')
-            unit_of_measure_name = row.get('unit_of_measure')
-            status = get_enum_value(ProductStatus, row.get('status'))
-            minimum_stock_level = row.get('minimum_stock_level')
-            maximum_stock_level = row.get('maximum_stock_level')
-            dimension = row.get('dimension')
-            weight = row.get('weight')
-            reorder_point = row.get('reorder_point')
-            lead_time = row.get('lead_time')
-            serial_number = row.get('serial_number')
-            quantity = row.get('quantity')
-            virtual_quantity = row.get('virtual_quantity')
+            name = str(row.get('name')) if pd.notnull(row.get('name')) else ""
+            reference = str(row.get('reference')) if pd.notnull(row.get('reference')) else ""
+            description = str(row.get('description')) if pd.notnull(row.get('description')) else ""
+            ean13 = str(row.get('ean13')) if pd.notnull(row.get('ean13')) else ""
+            type = get_enum_value(ProductType, str(row.get('type'))) if pd.notnull(row.get('type')) else None
+            purchase_price = validate_decimal(row.get('purchase_price'), 'purchase_price')
+            sell_price = validate_decimal(row.get('sell_price'), 'sell_price')
+            price_calculation_method = get_enum_value(PriceCalculationMethod,
+                                                      str(row.get('price_calculation_method'))) if pd.notnull(
+                row.get('price_calculation_method')) else None
+            sell_percentage = validate_decimal(row.get('sell_percentage'), 'sell_percentage')
+            category_name = str(row.get('category')) if pd.notnull(row.get('category')) else ""
+            vat_name = str(row.get('vat')) if pd.notnull(row.get('vat')) else ""
+            unit_of_measure_name = str(row.get('unit_of_measure')) if pd.notnull(row.get('unit_of_measure')) else ""
+            status = get_enum_value(ProductStatus, str(row.get('status'))) if pd.notnull(row.get('status')) else None
+            minimum_stock_level = validate_integer(row.get('minimum_stock_level'), 'minimum_stock_level')
+            maximum_stock_level = validate_integer(row.get('maximum_stock_level'), 'maximum_stock_level')
+            dimension = str(row.get('dimension')) if pd.notnull(row.get('dimension')) else ""
+            weight = str(row.get('weight')) if pd.notnull(row.get('weight')) else ""
+            reorder_point = validate_integer(row.get('reorder_point'), 'reorder_point')
+            lead_time = validate_integer(row.get('lead_time'), 'lead_time')
+            serial_number = str(row.get('serial_number')) if pd.notnull(row.get('serial_number')) else ""
+            quantity = validate_decimal(row.get('quantity'), 'quantity')
+            virtual_quantity = validate_decimal(row.get('virtual_quantity'), 'virtual_quantity')
 
             if not name or not reference:
                 error_rows.append({'error': _('Name or reference is missing'), 'data': row.to_dict()})
@@ -242,9 +245,10 @@ def import_product_data_from_csv_file(df):
                                    'data': row.to_dict()})
                 continue
 
-            category = BimaErpCategory.objects.filter(name=category_name).first()
-            vat = BimaErpVat.objects.filter(name=vat_name).first()
-            unit_of_measure = BimaErpUnitOfMeasure.objects.filter(name=unit_of_measure_name).first()
+            category = BimaErpCategory.objects.filter(name=category_name).first() if category_name else None
+            vat = BimaErpVat.objects.filter(name=vat_name).first() if vat_name else None
+            unit_of_measure = BimaErpUnitOfMeasure.objects.filter(
+                name=unit_of_measure_name).first() if unit_of_measure_name else None
 
             if not category or not vat or not unit_of_measure:
                 error_rows.append(
@@ -288,3 +292,17 @@ def import_product_data_from_csv_file(df):
             error_rows.append({'error': str(e), 'data': name})
 
     return error_rows, created_count
+
+
+def validate_decimal(value, field_name, default=0.0):
+    try:
+        return float(value) if pd.notnull(value) else default
+    except ValueError:
+        return default
+
+
+def validate_integer(value, field_name, default=0):
+    try:
+        return int(value) if pd.notnull(value) else default
+    except ValueError:
+        return default

@@ -1,5 +1,7 @@
 import csv
 import logging
+
+import pandas as pd
 from django.core.exceptions import ValidationError
 from django.db import transaction, IntegrityError
 from django.http import HttpResponse
@@ -92,38 +94,54 @@ def import_partner_data_from_csv_file(df):
     for index, row in df.iterrows():
         try:
             # Load all the data from the row
-            is_supplier = row.get('is_supplier')
-            is_customer = row.get('is_customer')
-            partner_type = get_enum_value(PartnerType, row.get('partner_type'))
-            company_type = get_enum_value(CompanyType, row.get('company_type'))
-            first_name = row.get('first_name')
-            last_name = row.get('last_name')
-            gender = get_enum_value(Gender, row.get('gender'))
-            social_security_number = row.get('social_security_number')
-            id_number = row.get('id_number')
-            email = row.get('email')
-            phone = row.get('phone')
-            fax = row.get('fax')
-            company_name = row.get('company_name')
-            company_activity = row.get('company_activity')
-            vat_id_number = row.get('vat_id_number')
-            status = get_enum_value(EntityStatus, row.get('status'))
-            note = row.get('note')
-            company_date_creation = row.get('company_date_creation')
-            company_siren = row.get('company_siren')
-            company_siret = row.get('company_siret')
-            company_date_registration = row.get('company_date_registration')
-            rcs_number = row.get('rcs_number')
-            company_date_struck_off = row.get('company_date_struck_off')
-            company_ape_text = row.get('company_ape_text')
-            company_ape_code = row.get('company_ape_code')
-            company_capital = row.get('company_capital')
-            credit = row.get('credit')
-            balance = row.get('balance')
+            is_supplier = row.get('is_supplier') if isinstance(row.get('is_supplier'), bool) else False
+            is_customer = row.get('is_customer') if isinstance(row.get('is_customer'), bool) else False
+            partner_type = get_enum_value(PartnerType, str(row.get('partner_type')))
+            company_type = get_enum_value(CompanyType, str(row.get('company_type')))
+
+            first_name = str(row.get('first_name')) if pd.notnull(row.get('first_name')) else ""
+            last_name = str(row.get('last_name')) if pd.notnull(row.get('last_name')) else ""
+            gender = get_enum_value(Gender, str(row.get('gender')))
+
+            social_security_number = str(row.get('social_security_number')) if pd.notnull(
+                row.get('social_security_number')) else ""
+            id_number = str(row.get('id_number')) if pd.notnull(row.get('id_number')) else ""
+            email = str(row.get('email')) if pd.notnull(row.get('email')) else ""
+            phone = str(row.get('phone')) if pd.notnull(row.get('phone')) else ""
+            fax = str(row.get('fax')) if pd.notnull(row.get('fax')) else ""
+
+            company_name = str(row.get('company_name')) if pd.notnull(row.get('company_name')) else ""
+            company_activity = str(row.get('company_activity')) if pd.notnull(row.get('company_activity')) else ""
+            vat_id_number = str(row.get('vat_id_number')) if pd.notnull(row.get('vat_id_number')) else ""
+
+            status = get_enum_value(EntityStatus, str(row.get('status')))
+            if status is None:
+                status = 'ACTIVE'
+            note = str(row.get('note')) if pd.notnull(row.get('note')) else ""
+
+            company_date_creation = pd.to_datetime(row.get('company_date_creation'), errors='coerce') if pd.notnull(
+                row.get('company_date_creation')) else None
+            company_siren = str(row.get('company_siren')) if pd.notnull(row.get('company_siren')) else ""
+            company_siret = str(row.get('company_siret')) if pd.notnull(row.get('company_siret')) else ""
+            company_date_registration = pd.to_datetime(row.get('company_date_registration'),
+                                                       errors='coerce') if pd.notnull(
+                row.get('company_date_registration')) else None
+
+            rcs_number = str(row.get('rcs_number')) if pd.notnull(row.get('rcs_number')) else ""
+            company_date_struck_off = pd.to_datetime(row.get('company_date_struck_off'), errors='coerce') if pd.notnull(
+                row.get('company_date_struck_off')) else None
+
+            company_ape_text = str(row.get('company_ape_text')) if pd.notnull(row.get('company_ape_text')) else ""
+            company_ape_code = str(row.get('company_ape_code')) if pd.notnull(row.get('company_ape_code')) else ""
+            company_capital = str(row.get('company_capital')) if pd.notnull(row.get('company_capital')) else ""
+
+            credit = row.get('credit') if isinstance(row.get('credit'), (int, float)) else 0
+            balance = row.get('balance') if isinstance(row.get('balance'), (int, float)) else 0
 
             if not partner_type or not status or not company_type:
                 error_rows.append(
-                    {'error': _('Partner Type, Status, or Company Type does not exist'), 'data': row.to_dict()})
+                    {'error': _('Partner Type, Status, or Company Type does not exist'),
+                     'data': partner_type + " " + first_name})
                 continue
 
             with transaction.atomic():
@@ -157,16 +175,16 @@ def import_partner_data_from_csv_file(df):
                     credit=credit,
                     balance=balance
                 )
-                partner.full_clean()  # Validate the model instance
+                partner.full_clean()
                 partner.save()
             created_count += 1
         except ValidationError as e:
-            error_rows.append({'error': _('Invalid data: {}').format(e), 'data': row.to_dict()})
+            error_rows.append({'error': _('Invalid data: {}').format(e), 'data': partner_type + " " + first_name})
         except IntegrityError as e:
             error_message = _('Integrity error occurred: {}').format(str(e))
-            error_rows.append({'error': str(error_message), 'data': row.to_dict()})
+            error_rows.append({'error': str(error_message), 'data': partner_type + " " + first_name})
         except Exception as e:
-            error_rows.append({'error': str(e), 'data': row.to_dict()})
+            error_rows.append({'error': str(e), 'data': partner_type + " " + first_name})
 
     return error_rows, created_count
 

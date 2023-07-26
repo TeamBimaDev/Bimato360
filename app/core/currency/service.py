@@ -1,3 +1,4 @@
+import pandas as pd
 from django.db import transaction, IntegrityError
 
 from .models import BimaCoreCurrency
@@ -10,21 +11,21 @@ def import_data_from_csv_file(df):
 
     for index, row in df.iterrows():
         try:
-            name = row.get('name')
-            symbol = row.get('symbol')
-            decimal_places = row.get('decimal_places')
-            active = row.get('active', True)
-            currency_unit_label = row.get('currency_unit_label')
-            currency_subunit_label = row.get('currency_subunit_label')
+            name = str(row.get('name', '')) if pd.notna(row.get('name')) else ""
+            symbol = str(row.get('symbol', '')) if pd.notna(row.get('symbol')) else ""
+            decimal_places = int(row.get('decimal_places', 0)) if pd.notna(row.get('decimal_places')) else 0
+            active = bool(row.get('active', True)) if pd.notna(row.get('active')) else True
+            currency_unit_label = str(row.get('currency_unit_label', '')) if pd.notna(row.get('currency_unit_label')) else ""
+            currency_subunit_label = str(row.get('currency_subunit_label', '')) if pd.notna(row.get('currency_subunit_label')) else ""
 
             if not name:
-                error_rows.append({'error': _('Name is missing'), _('data'): row.to_dict()})
+                error_rows.append({'error': _('Name is missing'), 'data': row.to_dict()})
                 continue
-
             if not symbol:
-                error_rows.append({'error': _('Symbol is missing'), _('data'): row.to_dict()})
+                error_rows.append({'error': _('Symbol is missing'), 'data': row.to_dict()})
                 continue
 
+            # Create the object
             with transaction.atomic():
                 BimaCoreCurrency.objects.create(
                     name=name,
@@ -39,12 +40,11 @@ def import_data_from_csv_file(df):
             if 'name' in str(e):
                 error_message = _('Currency with name {} already exists').format(name)
             elif 'symbol' in str(e):
-                error_message = _('Currency with symbol {symbol} already exists').format(symbol)
+                error_message = _('Currency with symbol {} already exists').format(symbol)
             else:
                 error_message = _('Integrity error occurred')
-
-            error_rows.append({'error': error_message, _('data'): name})
+            error_rows.append({'error': error_message, 'data': row.to_dict()})
         except Exception as e:
-            error_rows.append({'error': str(e), _('data'): name})
+            error_rows.append({'error': str(e), 'data': row.to_dict()})
 
     return error_rows, created_count
