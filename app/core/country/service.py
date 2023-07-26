@@ -1,6 +1,9 @@
+import csv
+
 import pandas as pd
 from django.db import transaction, IntegrityError
-from django.db.models import Q
+from django.db.models import Q, ForeignKey
+from django.http import HttpResponse
 
 from .models import BimaCoreCountry
 from django.utils.translation import gettext_lazy as _
@@ -35,9 +38,12 @@ def import_data_from_csv_file(df):
                 continue
 
             # Check if currency exists
-            currency = BimaCoreCurrency.objects.filter(Q(name=currency_name_or_symbol) | Q(symbol=currency_name_or_symbol)).first()
+            currency = BimaCoreCurrency.objects.filter(
+                Q(name=currency_name_or_symbol) | Q(symbol=currency_name_or_symbol)).first()
             if not currency:
-                error_rows.append({'error': _('Currency with name or symbol {} does not exist').format(currency_name_or_symbol), 'data': row.to_dict()})
+                error_rows.append(
+                    {'error': _('Currency with name or symbol {} does not exist').format(currency_name_or_symbol),
+                     'data': row.to_dict()})
                 continue
 
             # Create the object
@@ -67,3 +73,23 @@ def import_data_from_csv_file(df):
             error_rows.append({'error': str(e), 'data': row.to_dict()})
 
     return error_rows, created_count
+
+
+def export_to_csv(queryset, model_fields):
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="data.csv"'
+    writer = csv.writer(response)
+
+    field_names_to_show = [fd.name for fd in model_fields.fields if not isinstance(fd, ForeignKey)]
+    related_fields_to_show = [fd.name for fd in model_fields.fields if isinstance(fd, ForeignKey)]
+
+    writer.writerow(field_names_to_show + [f'{field}_name' for field in related_fields_to_show])
+
+    for instance in queryset:
+        row_data = [getattr(instance, field) if getattr(instance, field) is not None else '' for field in
+                    field_names_to_show]
+        related_data = [getattr(getattr(instance, field), 'name', '') if getattr(instance, field) is not None else ''
+                        for field in related_fields_to_show]
+        writer.writerow(row_data + related_data)
+
+    return response

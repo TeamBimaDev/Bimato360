@@ -138,10 +138,16 @@ def import_partner_data_from_csv_file(df):
             credit = row.get('credit') if isinstance(row.get('credit'), (int, float)) else 0
             balance = row.get('balance') if isinstance(row.get('balance'), (int, float)) else 0
 
-            if not partner_type or not status or not company_type:
-                error_rows.append(
-                    {'error': _('Partner Type, Status, or Company Type does not exist'),
-                     'data': partner_type + " " + first_name})
+            partner_type_name = get_enum_value(PartnerType, partner_type)
+            handler = partner_handlers.get(partner_type_name)
+
+            if not handler:
+                continue
+
+            error = handler(partner_type_name, first_name, company_type)
+
+            if error is not None:
+                error_rows.append(error)
                 continue
 
             with transaction.atomic():
@@ -222,3 +228,24 @@ def export_to_csv(partners, model_fields):
         writer.writerow(row_data)
 
     return response
+
+
+def handle_individual(partner_type_name, first_name):
+    if not partner_type_name:
+        return {'error': _('Partner Type does not exist'),
+                'data': partner_type_name + " " + first_name}
+    return None
+
+
+def handle_company(partner_type_name, first_name, company_type):
+    if not partner_type_name or not company_type:
+        return {'error': _('Partner Type or Company Type does not exist'),
+                'data': partner_type_name + " " + first_name}
+    return None
+
+
+# Create a dictionary mapping partner_type to the correct function.
+partner_handlers = {
+    PartnerType.INDIVIDUAL.name: handle_individual,
+    PartnerType.COMPANY.name: handle_company,
+}

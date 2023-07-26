@@ -1,5 +1,8 @@
+import csv
+
 import pandas as pd
 from django.db import transaction, IntegrityError
+from django.http import HttpResponse
 
 from .models import BimaCoreCurrency
 from django.utils.translation import gettext_lazy as _
@@ -48,3 +51,18 @@ def import_data_from_csv_file(df):
             error_rows.append({'error': str(e), 'data': row.to_dict()})
 
     return error_rows, created_count
+
+
+def export_to_csv(queryset, model_fields):
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="data.csv"'
+    writer = csv.writer(response)
+
+    field_names_to_show = [fd.name for fd in model_fields.fields]
+    writer.writerow(field_names_to_show)
+
+    for instance in queryset:
+        row_data = [getattr(instance, field) if getattr(instance, field) is not None else '' for field in field_names_to_show]
+        writer.writerow(row_data)
+
+    return response
