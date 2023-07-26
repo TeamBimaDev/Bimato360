@@ -1,14 +1,19 @@
 import csv
-
-import pandas as pd
-from django.db import transaction, IntegrityError
 from django.db.models import Q, ForeignKey
-from django.http import HttpResponse
-
 from .models import BimaCoreCountry
-from django.utils.translation import gettext_lazy as _
-
 from core.currency.models import BimaCoreCurrency
+import pandas as pd
+from django.db import transaction, IntegrityError, models
+from django.http import HttpResponse
+from django.utils.translation import gettext_lazy as _
+from pandas import DataFrame
+import openpyxl
+from io import BytesIO
+from uuid import UUID
+from datetime import datetime
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def import_data_from_csv_file(df):
@@ -91,5 +96,51 @@ def export_to_csv(queryset, model_fields):
         related_data = [getattr(getattr(instance, field), 'name', '') if getattr(instance, field) is not None else ''
                         for field in related_fields_to_show]
         writer.writerow(row_data + related_data)
+
+    return response
+
+
+def generate_xls_file(queryset):
+    rows = []
+    for obj in queryset:
+        row = {}
+        for field in obj._meta.fields:
+            field_value = getattr(obj, field.name)
+
+            if isinstance(field, models.ForeignKey):
+                if field_value is not None:
+                    field_value = getattr(field_value, 'name', '')
+
+            elif isinstance(field_value, datetime):
+                field_value = field_value.replace(tzinfo=None)
+
+            elif isinstance(field_value, UUID):
+                field_value = str(field_value)
+
+            row[field.name] = field_value or ''
+        rows.append(row)
+
+    df = DataFrame(rows)
+    wb = openpyxl.Workbook()
+    ws = wb.active
+
+    headers = [field.verbose_name for field in BimaCoreCountry._meta.fields]
+    ws.append(headers)
+
+    for r in df.iterrows():
+        try:
+            ws.append(list(r[1]))
+        except Exception as e:
+            logger.error(f"Error writing row {r[0]} to Excel file: {e}")
+            continue
+
+    excel_file = BytesIO()
+    wb.save(excel_file)
+
+    response = HttpResponse(
+        excel_file.getvalue(),
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response['Content-Disposition'] = 'attachment; filename=export.xlsx'
 
     return response

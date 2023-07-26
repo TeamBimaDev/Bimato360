@@ -197,23 +197,22 @@ class BimaErpPartnerViewSet(AbstractViewSet):
         serialized_entity_tags = BimaCoreEntityTagSerializer(entity_tags)
         return JsonResponse(serialized_entity_tags.data)
 
-    def get_data_to_export(self, kwargs):
-        if kwargs.get('public_id') is not None:
-            data_to_export = [BimaErpPartner.objects.
-                              get_object_by_public_id(kwargs.get('public_id'))]
-        else:
-            data_to_export = BimaErpPartner.objects.all()
-        return data_to_export
-
-    def export_csv(self, request, **kwargs):
-        data_to_export = self.get_data_to_export(kwargs)
+    @action(detail=False, methods=['GET'], url_path='export_csv')
+    def export_csv(self, request):
+        data_to_export = self.get_queryset()
         model_fields = BimaErpPartner._meta
         return export_to_csv(data_to_export, model_fields)
 
-    def export_pdf(self, request, **kwargs):
-        template_name = "partner/pdf.html"
-        data_to_export = self.get_data_to_export(kwargs)
+    @action(detail=True, methods=['GET'], url_path='export_csv')
+    def detail_export_csv(self, request, pk=None):
+        data_to_export = [self.get_object()]
+        model_fields = BimaErpPartner._meta
+        return export_to_csv(data_to_export, model_fields)
 
+    @action(detail=False, methods=['GET'], url_path='export_pdf')
+    def export_pdf(self, request):
+        template_name = "partner/pdf.html"
+        data_to_export = self.get_queryset()
         return render_to_pdf(
             template_name,
             {
@@ -223,8 +222,27 @@ class BimaErpPartnerViewSet(AbstractViewSet):
             "partner.pdf"
         )
 
-    def export_xls(self, request, **kwargs):
-        data_to_export = self.get_data_to_export(kwargs)
+    @action(detail=True, methods=['GET'], url_path='export_pdf')
+    def detail_export_pdf(self, request, pk=None):
+        template_name = "partner/pdf.html"
+        data_to_export = [self.get_object()]
+        return render_to_pdf(
+            template_name,
+            {
+                "partners": data_to_export,
+                "request": request,
+            },
+            "partner.pdf"
+        )
+
+    @action(detail=False, methods=['GET'], url_path='export_xls')
+    def export_xls(self, request):
+        data_to_export = self.get_queryset()
+        return generate_xls_file(data_to_export)
+
+    @action(detail=True, methods=['GET'], url_path='export_xls')
+    def detail_export_xls(self, request, pk=None):
+        data_to_export = [self.get_object()]
         return generate_xls_file(data_to_export)
 
     @action(detail=False, methods=['POST'], url_path='import_from_csv')

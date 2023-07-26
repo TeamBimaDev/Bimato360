@@ -11,7 +11,7 @@ from core.currency.models import BimaCoreCurrency
 from core.currency.serializers import BimaCoreCurrencySerializer
 from common.service.file_service import check_csv_file
 from common.permissions.action_base_permission import ActionBasedPermission
-from .service import import_data_from_csv_file, export_to_csv
+from .service import import_data_from_csv_file, export_to_csv, generate_xls_file
 
 
 class CurrencyFilter(django_filters.FilterSet):
@@ -91,3 +91,8 @@ class BimaCoreCurrencyViewSet(AbstractViewSet):
         data_to_export = BimaCoreCurrency.objects.all()
         model_fields = BimaCoreCurrency._meta
         return export_to_csv(data_to_export, model_fields)
+
+    @action(detail=False, methods=['GET'], url_path='export_xls')
+    def export_xls(self, request):
+        data_to_export = BimaCoreCurrency.objects.all()
+        return generate_xls_file(data_to_export)

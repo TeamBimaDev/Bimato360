@@ -107,36 +107,6 @@ class BimaErpProductViewSet(AbstractViewSet):
         serialized_entity_tags = BimaCoreEntityTagSerializer(entity_tags)
         return JsonResponse(serialized_entity_tags.data)
 
-    def export_csv(self, request, **kwargs):
-        data_to_export = self.get_data_to_export(kwargs)
-        model_fields = BimaErpProduct._meta
-        return export_to_csv(data_to_export, model_fields)
-
-    def export_pdf(self, request, **kwargs):
-        template_name = "product/pdf.html"
-        data_to_export = self.get_data_to_export(kwargs)
-        return render_to_pdf(
-            template_name,
-            {
-                "products": data_to_export,
-                "request": request,
-            },
-            "product.pdf"
-        )
-
-    def export_xls(self, request, **kwargs):
-        model_fields = BimaErpProduct._meta
-        data_to_export = self.get_data_to_export(kwargs)
-        return generate_xls_file(data_to_export, model_fields)
-
-    def get_data_to_export(self, kwargs):
-        if kwargs.get('public_id') is not None:
-            data_to_export = [BimaErpProduct.objects.
-                              get_object_by_public_id(kwargs.get('public_id'))]
-        else:
-            data_to_export = BimaErpProduct.objects.all()
-        return data_to_export
-
     @action(detail=False, methods=['POST'], url_path='generate_ena13_from_image')
     def generate_ena13_from_image(self, request):
         try:
@@ -172,3 +142,53 @@ class BimaErpProductViewSet(AbstractViewSet):
         except Exception:
             return Response({"error", _("an error occurred while treating the file")},
                             status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=False, methods=['GET'], url_path='export_csv')
+    def export_csv(self, request):
+        data_to_export = self.get_queryset()
+        model_fields = BimaErpProduct._meta
+        return export_to_csv(data_to_export, model_fields)
+
+    @action(detail=False, methods=['GET'], url_path='export_pdf')
+    def export_pdf(self, request):
+        template_name = "product/pdf.html"
+        data_to_export = self.get_queryset()
+        return render_to_pdf(
+            template_name,
+            {
+                "products": data_to_export,
+                "request": request,
+            },
+            "product.pdf"
+        )
+
+    @action(detail=False, methods=['GET'], url_path='export_xls')
+    def export_xls(self, request):
+        model_fields = BimaErpProduct._meta
+        data_to_export = self.get_queryset()
+        return generate_xls_file(data_to_export, model_fields)
+
+    @action(detail=True, methods=['GET'], url_path='export_csv')
+    def detail_export_csv(self, request, pk=None):
+        data_to_export = [self.get_object()]
+        model_fields = BimaErpProduct._meta
+        return export_to_csv(data_to_export, model_fields)
+
+    @action(detail=True, methods=['GET'], url_path='export_pdf')
+    def detail_export_pdf(self, request, pk=None):
+        template_name = "product/pdf.html"
+        data_to_export = [self.get_object()]
+        return render_to_pdf(
+            template_name,
+            {
+                "products": data_to_export,
+                "request": request,
+            },
+            "product.pdf"
+        )
+
+    @action(detail=True, methods=['GET'], url_path='export_xls')
+    def detail_export_xls(self, request, pk=None):
+        model_fields = BimaErpProduct._meta
+        data_to_export = [self.get_object()]
+        return generate_xls_file(data_to_export, model_fields)

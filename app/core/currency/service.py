@@ -1,11 +1,19 @@
-import csv
-
-import pandas as pd
-from django.db import transaction, IntegrityError
-from django.http import HttpResponse
-
 from .models import BimaCoreCurrency
+import csv
+from .models import BimaCoreCountry
+from core.currency.models import BimaCoreCurrency
+import pandas as pd
+from django.db import transaction, IntegrityError, models
+from django.http import HttpResponse
 from django.utils.translation import gettext_lazy as _
+from pandas import DataFrame
+import openpyxl
+from io import BytesIO
+from uuid import UUID
+from datetime import datetime
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def import_data_from_csv_file(df):
@@ -18,8 +26,10 @@ def import_data_from_csv_file(df):
             symbol = str(row.get('symbol', '')) if pd.notna(row.get('symbol')) else ""
             decimal_places = int(row.get('decimal_places', 0)) if pd.notna(row.get('decimal_places')) else 0
             active = bool(row.get('active', True)) if pd.notna(row.get('active')) else True
-            currency_unit_label = str(row.get('currency_unit_label', '')) if pd.notna(row.get('currency_unit_label')) else ""
-            currency_subunit_label = str(row.get('currency_subunit_label', '')) if pd.notna(row.get('currency_subunit_label')) else ""
+            currency_unit_label = str(row.get('currency_unit_label', '')) if pd.notna(
+                row.get('currency_unit_label')) else ""
+            currency_subunit_label = str(row.get('currency_subunit_label', '')) if pd.notna(
+                row.get('currency_subunit_label')) else ""
 
             if not name:
                 error_rows.append({'error': _('Name is missing'), 'data': name if name else ""})
@@ -62,7 +72,51 @@ def export_to_csv(queryset, model_fields):
     writer.writerow(field_names_to_show)
 
     for instance in queryset:
-        row_data = [getattr(instance, field) if getattr(instance, field) is not None else '' for field in field_names_to_show]
+        row_data = [getattr(instance, field) if getattr(instance, field) is not None else '' for field in
+                    field_names_to_show]
         writer.writerow(row_data)
+
+    return response
+
+
+def generate_xls_file(queryset):
+    rows = []
+    for obj in queryset:
+        row = {}
+        for field in obj._meta.fields:
+            field_value = getattr(obj, field.name)
+
+            # Handle DateTimeField
+            if isinstance(field_value, datetime):
+                field_value = field_value.replace(tzinfo=None)
+
+            elif isinstance(field_value, UUID):
+                field_value = str(field_value)
+
+            row[field.name] = field_value or ''
+        rows.append(row)
+
+    df = DataFrame(rows)
+    wb = openpyxl.Workbook()
+    ws = wb.active
+
+    headers = [field.verbose_name for field in BimaCoreCurrency._meta.fields]
+    ws.append(headers)
+
+    for r in df.iterrows():
+        try:
+            ws.append(list(r[1]))
+        except Exception as e:
+            logger.error(f"Error writing row {r[0]} to Excel file: {e}")
+            continue
+
+    excel_file = BytesIO()
+    wb.save(excel_file)
+
+    response = HttpResponse(
+        excel_file.getvalue(),
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response['Content-Disposition'] = 'attachment; filename=export.xlsx'
 
     return response
