@@ -10,7 +10,8 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from .models import BimaErpProduct
 from .serializers import BimaErpProductSerializer
-from .utils import generate_xls_file, export_to_csv, verify_file_exist_for_ean13, generate_ean13_from_image
+from .utils import generate_xls_file, export_to_csv, verify_file_exist_for_ean13, generate_ean13_from_image, \
+    import_product_data_from_csv_file
 from common.utils.utils import render_to_pdf
 from erp.sale_document.models import BimaErpSaleDocumentProduct
 from core.entity_tag.models import get_entity_tags_for_parent_entity, create_single_entity_tag, BimaCoreEntityTag
@@ -157,7 +158,17 @@ class BimaErpProductViewSet(AbstractViewSet):
 
             csv_content_file = read_csv(csv_file)
 
+            error_rows, created_count = import_product_data_from_csv_file(csv_content_file)
+            if error_rows:
+                return Response({
+                    'error': _('Some rows could not be processed'),
+                    'error_rows': error_rows,
+                    'success_rows_count': created_count,
+                }, status=status.HTTP_400_BAD_REQUEST)
 
-        except Exception as ex:
-            logger.error(ex)
-            return Response({'error': _("Impoosible de traiter le fichier")}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'success': _('All rows processed successfully'),
+                             'success_rows_count': created_count})
+
+        except Exception:
+            return Response({"error", _("an error occurred while treating the file")},
+                            status=status.HTTP_400_BAD_REQUEST)

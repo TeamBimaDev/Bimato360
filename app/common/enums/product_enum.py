@@ -31,3 +31,10 @@ def get_product_types():
 
 def get_product_status():
     return [(prd.name, prd.value) for prd in ProductStatus]
+
+
+ENUM_MAPPINGS = {
+    "type": ProductType,
+    "status": ProductStatus,
+    "price_calculation_method": PriceCalculationMethod,
+}
