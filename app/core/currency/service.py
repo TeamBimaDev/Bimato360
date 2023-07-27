@@ -1,9 +1,8 @@
 from .models import BimaCoreCurrency
 import csv
-from .models import BimaCoreCountry
 from core.currency.models import BimaCoreCurrency
 import pandas as pd
-from django.db import transaction, IntegrityError, models
+from django.db import transaction, IntegrityError
 from django.http import HttpResponse
 from django.utils.translation import gettext_lazy as _
 from pandas import DataFrame

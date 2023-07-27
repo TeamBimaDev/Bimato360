@@ -80,22 +80,24 @@ def import_data_from_csv_file(df):
     return error_rows, created_count
 
 
-def export_to_csv(queryset, model_fields):
+def export_to_csv(partners, model_fields):
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="data.csv"'
+    field_names_to_show = [fd.name for fd in model_fields.fields]
     writer = csv.writer(response)
+    writer.writerow(field_names_to_show)
 
-    field_names_to_show = [fd.name for fd in model_fields.fields if not isinstance(fd, ForeignKey)]
-    related_fields_to_show = [fd.name for fd in model_fields.fields if isinstance(fd, ForeignKey)]
-
-    writer.writerow(field_names_to_show + [f'{field}_name' for field in related_fields_to_show])
-
-    for instance in queryset:
-        row_data = [getattr(instance, field) if getattr(instance, field) is not None else '' for field in
-                    field_names_to_show]
-        related_data = [getattr(getattr(instance, field), 'name', '') if getattr(instance, field) is not None else ''
-                        for field in related_fields_to_show]
-        writer.writerow(row_data + related_data)
+    for partner in partners:
+        row_data = []
+        for field in field_names_to_show:
+            try:
+                value = getattr(partner, field)
+                if hasattr(value, 'name'):
+                    value = getattr(value, 'name', None)
+                row_data.append(value if value is not None else '')
+            except Exception as ex:
+                pass
+        writer.writerow(row_data)
 
     return response
 
