@@ -3,23 +3,29 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 from core.abstract.views import AbstractViewSet
 from django.shortcuts import get_object_or_404
+from pandas import read_csv
 from rest_framework import status
 from rest_framework.decorators import action
+from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from .models import BimaErpProduct
 from .serializers import BimaErpProductSerializer
-from .utils import generate_xls_file, export_to_csv, read_barcode_from_image, generate_file, enhance_image
+from .utils import generate_xls_file, export_to_csv, verify_file_exist_for_ean13, generate_ean13_from_image, \
+    import_product_data_from_csv_file
 from common.utils.utils import render_to_pdf
 from erp.sale_document.models import BimaErpSaleDocumentProduct
 from core.entity_tag.models import get_entity_tags_for_parent_entity, create_single_entity_tag, BimaCoreEntityTag
 from core.entity_tag.serializers import BimaCoreEntityTagSerializer
 from common.permissions.action_base_permission import ActionBasedPermission
-import barcode
-from barcode.writer import ImageWriter
-from django.http import  JsonResponse
-import numpy as np
-import io
-from PIL import Image
+
+from django.http import JsonResponse
+
+import logging
+
+from common.service.file_service import check_csv_file
+
+logger = logging.getLogger(__name__)
+
 
 class ProductFilter(django_filters.FilterSet):
     name = django_filters.CharFilter(field_name='name', lookup_expr='icontains')
@@ -55,6 +61,7 @@ class BimaErpProductViewSet(AbstractViewSet):
         'export_xls': ['product.can_read'],
         'export_pdf': ['product.can_read'],
         'create': ['product.can_create'],
+        'generate_ena13_from_image': ['product.can_create'],
         'retrieve': ['product.can_read'],
         'update': ['product.can_update'],
         'partial_update': ['product.can_update'],
@@ -100,14 +107,52 @@ class BimaErpProductViewSet(AbstractViewSet):
         serialized_entity_tags = BimaCoreEntityTagSerializer(entity_tags)
         return JsonResponse(serialized_entity_tags.data)
 
-    def export_csv(self, request, **kwargs):
-        data_to_export = self.get_data_to_export(kwargs)
+    @action(detail=False, methods=['POST'], url_path='generate_ena13_from_image')
+    def generate_ena13_from_image(self, request):
+        try:
+            barcode_image = verify_file_exist_for_ean13(request)
+            response, status_code = generate_ean13_from_image(barcode_image)
+            return Response(response, status=status_code)
+        except ValidationError as ex:
+            logger.error(f'Validation error while generating barcode from file: {str(ex)}')
+            return Response({'error': str(ex)}, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=False, methods=['POST'], url_path='import_from_csv')
+    def import_from_csv(self, request):
+        csv_file = request.FILES.get('csv_file')
+
+        try:
+            file_check = check_csv_file(csv_file)
+            if 'error' in file_check:
+                return Response(file_check, status=status.HTTP_400_BAD_REQUEST)
+
+            csv_content_file = read_csv(csv_file)
+
+            error_rows, created_count = import_product_data_from_csv_file(csv_content_file)
+            if error_rows:
+                return Response({
+                    'error': _('Some rows could not be processed'),
+                    'error_rows': error_rows,
+                    'success_rows_count': created_count,
+                }, status=status.HTTP_400_BAD_REQUEST)
+
+            return Response({'success': _('All rows processed successfully'),
+                             'success_rows_count': created_count})
+
+        except Exception:
+            return Response({"error", _("an error occurred while treating the file")},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=False, methods=['GET'], url_path='export_csv')
+    def export_csv(self, request):
+        data_to_export = self.get_queryset()
         model_fields = BimaErpProduct._meta
         return export_to_csv(data_to_export, model_fields)
 
-    def export_pdf(self, request, **kwargs):
+    @action(detail=False, methods=['GET'], url_path='export_pdf')
+    def export_pdf(self, request):
         template_name = "product/pdf.html"
-        data_to_export = self.get_data_to_export(kwargs)
+        data_to_export = self.get_queryset()
         return render_to_pdf(
             template_name,
             {
@@ -117,41 +162,33 @@ class BimaErpProductViewSet(AbstractViewSet):
             "product.pdf"
         )
 
-    def export_xls(self, request, **kwargs):
+    @action(detail=False, methods=['GET'], url_path='export_xls')
+    def export_xls(self, request):
         model_fields = BimaErpProduct._meta
-        data_to_export = self.get_data_to_export(kwargs)
+        data_to_export = self.get_queryset()
         return generate_xls_file(data_to_export, model_fields)
 
-    def get_data_to_export(self, kwargs):
-        if kwargs.get('public_id') is not None:
-            data_to_export = [BimaErpProduct.objects.
-                              get_object_by_public_id(kwargs.get('public_id'))]
-        else:
-            data_to_export = BimaErpProduct.objects.all()
-        return data_to_export
-    @action(detail=False, methods=['POST'], url_path='generate_ena13_from_image')
-    def generate_ena13_from_image(self, request):
-        barcode_image = request.FILES.get('barcode_image')
-        if not barcode_image:
-            return JsonResponse({'error': 'Missing barcode_image field in the request.'}, status=400)
-        img_array = np.asarray(bytearray(barcode_image.read()), dtype=np.uint8)
-        image = Image.open(io.BytesIO(img_array))
-        enhanced_image = enhance_image(image)
-        enhanced_image = enhanced_image.convert('L')
-        enhanced_np_array = np.array(enhanced_image)
-        decoded_data = read_barcode_from_image(np.array(enhanced_np_array))
+    @action(detail=True, methods=['GET'], url_path='export_csv')
+    def detail_export_csv(self, request, pk=None):
+        data_to_export = [self.get_object()]
+        model_fields = BimaErpProduct._meta
+        return export_to_csv(data_to_export, model_fields)
 
-        if decoded_data:
-            bar = barcode.get_barcode(name='code128', code=decoded_data, writer=ImageWriter())
-            barcode_file = bar.render()
-            generated_text = decoded_data
+    @action(detail=True, methods=['GET'], url_path='export_pdf')
+    def detail_export_pdf(self, request, pk=None):
+        template_name = "product/pdf.html"
+        data_to_export = [self.get_object()]
+        return render_to_pdf(
+            template_name,
+            {
+                "products": data_to_export,
+                "request": request,
+            },
+            "product.pdf"
+        )
 
-            return JsonResponse({'generated_text': generated_text})
-        else:
-            return JsonResponse({'error': 'No barcode found in the image.'}, status=400)
-
-    def verify_file_exist_for_ean13(request):
-        barcode_image = request.FILES.get('barcode_image')
-        if not barcode_image:
-            raise ValueError("File is missing or unable to read the file")
-        return barcode_image
+    @action(detail=True, methods=['GET'], url_path='export_xls')
+    def detail_export_xls(self, request, pk=None):
+        model_fields = BimaErpProduct._meta
+        data_to_export = [self.get_object()]
+        return generate_xls_file(data_to_export, model_fields)

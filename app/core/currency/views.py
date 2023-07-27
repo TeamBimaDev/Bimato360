@@ -1,11 +1,9 @@
-import csv
 import django_filters
 from django.db.models import Q
 from pandas import read_csv
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from django.http import HttpResponse
 from django.utils.translation import gettext_lazy as _
 
 from core.abstract.views import AbstractViewSet
@@ -13,7 +11,7 @@ from core.currency.models import BimaCoreCurrency
 from core.currency.serializers import BimaCoreCurrencySerializer
 from common.service.file_service import check_csv_file
 from common.permissions.action_base_permission import ActionBasedPermission
-from .service import import_data_from_csv_file
+from .service import import_data_from_csv_file, export_to_csv, generate_xls_file
 
 
 class CurrencyFilter(django_filters.FilterSet):
@@ -64,7 +62,7 @@ class BimaCoreCurrencyViewSet(AbstractViewSet):
 
     @action(detail=False, methods=["POST"], url_path="import_from_csv")
     def import_from_csv(self, request):
-        csv_file = request.FILES.get("file")
+        csv_file = request.FILES.get("csv_file")
 
         try:
             file_check = check_csv_file(csv_file)
@@ -88,15 +86,13 @@ class BimaCoreCurrencyViewSet(AbstractViewSet):
             return Response({"error", _("an error occurred while treating the file")},
                             status=status.HTTP_400_BAD_REQUEST)
 
-    @action(detail=False, methods=['GET'], url_path='export_data_to_csv')
-    def export_data_to_csv(self, request):
-        query = BimaCoreCurrency.objects.all()
-        fields = query.model._meta
-        response = HttpResponse(content_type='text/csv')
-        response['Content-Disposition'] = 'attachment;filename=currencies.csv'
-        writer = csv.writer(response)
-        fields_names = [field.name for field in fields.fields]
-        writer.writerow(fields_names)
-        for obj in query:
-            writer.writerow(getattr(obj, field) for field in fields_names)
-        return response
+    @action(detail=False, methods=['GET'], url_path='export_csv')
+    def export_csv(self, request):
+        data_to_export = BimaCoreCurrency.objects.all()
+        model_fields = BimaCoreCurrency._meta
+        return export_to_csv(data_to_export, model_fields)
+
+    @action(detail=False, methods=['GET'], url_path='export_xls')
+    def export_xls(self, request):
+        data_to_export = BimaCoreCurrency.objects.all()
+        return generate_xls_file(data_to_export)

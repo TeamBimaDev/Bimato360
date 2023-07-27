@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-07-20 09:15+0100\n"
+"POT-Creation-Date: 2023-07-27 09:36+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -237,19 +237,37 @@ msgstr "Revenu"
 msgid "Expense"
 msgstr "Dépense"
 
-#: .\common\service\file_service.py:22
+#: .\common\service\file_service.py:21
 #, fuzzy
 #| msgid "Unable to get the item"
 msgid "unable to read the file"
 msgstr "Impossible d'obtenir l'élément"
 
-#: .\common\service\file_service.py:27
+#: .\common\service\file_service.py:26
 msgid "Incorrect file type"
 msgstr "Type de fichier incorrect"
 
 #: .\common\utils\utils.py:21
 msgid "An error occurred during PDF generation:<pre>"
 msgstr "Une erreur s'est produite lors de la génération du PDF :<pre>"
+
+#: .\common\validators\file_validators.py:8
+#, python-brace-format
+msgid "La taille maximale du fichier est de {limit_mb}MB"
+msgstr "La taille maximale du fichier est de {limit_mb}MB"
+
+#: .\common\validators\file_validators.py:16
+#: .\common\validators\file_validators.py:24
+msgid ""
+"Extension de fichier non valide, les extensions autorisées sont {\", \"."
+"join(valid_extensions)}"
+msgstr ""
+"Extension de fichier non valide, les extensions autorisées sont {\", \"."
+"join(valid_extensions)}"
+
+#: .\core\abstract\models.py:40 .\core\abstract\models.py:43
+msgid "L'élément est utilisé, impossible de changer vers désactiver"
+msgstr "L'élément est utilisé, impossible de changer vers désactiver"
 
 #: .\core\abstract\views.py:43
 msgid "Invalid input"
@@ -307,7 +325,7 @@ msgstr "Trop de demandes"
 msgid "Unable to get the item"
 msgstr "Impossible d'obtenir l'élément"
 
-#: .\core\abstract\views.py:115
+#: .\core\abstract\views.py:123 .\core\abstract\views.py:126
 #, fuzzy
 #| msgid "API exception occurred"
 msgid "A server error occurred"
@@ -325,73 +343,73 @@ msgstr "Permissions"
 msgid "Important dates"
 msgstr "Dates importantes"
 
-#: .\core\bank\views.py:40 .\core\bank\views.py:54
+#: .\core\bank\views.py:67 .\core\bank\views.py:81
 msgid "Email must be unique."
 msgstr "L'adresse e-mail doit être unique."
 
-#: .\core\bank\views.py:43 .\core\bank\views.py:57
+#: .\core\bank\views.py:70 .\core\bank\views.py:84
 msgid "BIC must be unique."
 msgstr "Le BIC doit être unique."
 
-#: .\core\country\service.py:28 .\core\currency\service.py:21
+#: .\core\country\service.py:39 .\core\currency\service.py:34
 msgid "Name is missing"
 msgstr "Nom manquant"
 
-#: .\core\country\service.py:32
+#: .\core\country\service.py:42
 msgid "Code is missing"
 msgstr "Code manquant"
 
-#: .\core\country\service.py:37
+#: .\core\country\service.py:50
 msgid "Currency with name or symbol {} does not exist"
 msgstr "Devise avec symbole {} inexistent"
 
-#: .\core\country\service.py:56
+#: .\core\country\service.py:71
 msgid "Country with name {} already exists"
 msgstr "Pays avec nom {} existe déja"
 
-#: .\core\country\service.py:58
+#: .\core\country\service.py:73
 msgid "Country with code {} already exists"
 msgstr "Pays avec code {} existe déja"
 
-#: .\core\country\service.py:60 .\core\currency\service.py:44
+#: .\core\country\service.py:75 .\core\currency\service.py:57
 #, fuzzy
 #| msgid "API exception occurred"
 msgid "Integrity error occurred"
-msgstr "Une exception API s'est produite"
+msgstr "Données dupliqués, merci de vérifier"
 
-#: .\core\country\views.py:180 .\core\currency\views.py:55
+#: .\core\country\views.py:179 .\core\currency\views.py:77
+#: .\erp\partner\views.py:262 .\erp\product\views.py:134
 msgid "Some rows could not be processed"
 msgstr "Impossible de traiter tout les données"
 
-#: .\core\country\views.py:185 .\core\currency\views.py:60
+#: .\core\country\views.py:184 .\core\currency\views.py:82
+#: .\erp\partner\views.py:267 .\erp\product\views.py:139
 msgid "All rows processed successfully"
 msgstr "Tous les données sont traité"
 
-#: .\core\country\views.py:189 .\core\currency\views.py:64
+#: .\core\country\views.py:188 .\core\currency\views.py:86
+#: .\erp\partner\views.py:271 .\erp\product\views.py:143
 msgid "an error occurred while treating the file"
 msgstr "Une erreur est survenu lors la traitement du fichier"
 
-#: .\core\currency\service.py:21 .\core\currency\service.py:25
-#: .\core\currency\service.py:46 .\core\currency\service.py:48
-msgid "data"
-msgstr "Données"
-
-#: .\core\currency\service.py:25
+#: .\core\currency\service.py:37
 msgid "Symbol is missing"
 msgstr "Symbol obligatoire"
 
-#: .\core\currency\service.py:40
+#: .\core\currency\service.py:53
 msgid "Currency with name {} already exists"
 msgstr "Devise  avec ce nom {} existe déja"
 
-#: .\core\currency\service.py:42
-#, fuzzy, python-brace-format
+#: .\core\currency\service.py:55
+#, fuzzy
 #| msgid "Currency with symbol {} already exists"
-msgid "Currency with symbol {symbol} already exists"
+msgid "Currency with symbol {} already exists"
 msgstr "Devise  avec ce symbol {} existe déja"
 
-#: .\core\department\views.py:51
-msgid "A department cannot have its parent as its child."
+#: .\core\department\serializers.py:51
+#, fuzzy
+#| msgid "A department cannot have its parent as its child."
+msgid "A department cannot have its descendant as its parent."
 msgstr "Un département ne peut pas avoir son parent comme enfant."
 
 #: .\core\document\models.py:74
@@ -402,9 +420,21 @@ msgstr "Type de contenu de fichier invalide."
 msgid "document not found"
 msgstr "document introuvable"
 
-#: .\core\tag\serializers.py:35
+#: .\core\tag\serializers.py:37
 msgid "This field should be a valid hex color."
 msgstr "Ce champ doit être une couleur hexadécimale valide."
+
+#: .\core\tag\serializers.py:55
+#, fuzzy
+#| msgid "A department cannot have its parent as its child."
+msgid "A tag cannot have its descendant as its parent."
+msgstr "Un département ne peut pas avoir son parent comme enfant."
+
+#: .\erp\category\serializers.py:52
+#, fuzzy
+#| msgid "A department cannot have its parent as its child."
+msgid "A Category cannot have its descendant as its parent."
+msgstr "Un département ne peut pas avoir son parent comme enfant."
 
 #: .\erp\partner\models.py:13
 msgid "Is Supplier"
@@ -550,15 +580,27 @@ msgstr "Avoir"
 msgid "Balance"
 msgstr "Solde"
 
-#: .\erp\partner\views.py:252
+#: .\erp\partner\utils.py:184 .\erp\product\utils.py:287
 #, fuzzy
-#| msgid "An error occurred during PDF generation:<pre>"
-msgid "Errors occurred during import."
-msgstr "Une erreur s'est produite lors de la génération du PDF :<pre>"
+#| msgid "Invalid input"
+msgid "Invalid data: {}"
+msgstr "Entrée invalide"
 
-#: .\erp\partner\views.py:255
-msgid "Successfully created partners."
-msgstr "Création du partenaire terminer avec succées"
+#: .\erp\partner\utils.py:186 .\erp\product\utils.py:289
+#, fuzzy
+#| msgid "API exception occurred"
+msgid "Integrity error occurred: {}"
+msgstr "Une exception API s'est produite"
+
+#: .\erp\partner\utils.py:223
+#, fuzzy
+#| msgid "Resource does not exist"
+msgid "Partner Type does not exist"
+msgstr "La ressource n'existe pas"
+
+#: .\erp\partner\utils.py:230
+msgid "Partner Type or Company Type does not exist"
+msgstr "Merci de vérifier le type de partenaire ou celui de la sociéte"
 
 #: .\erp\product\models.py:16 .\templates\product\pdf.html:35
 msgid "Name"
@@ -646,7 +688,29 @@ msgstr "Quantité"
 msgid "Virtual Quantity"
 msgstr "Quantité virtuelle"
 
-#: .\erp\product\views.py:72
+#: .\erp\product\utils.py:170
+msgid "Impossible de lire le fichier"
+msgstr "Impossible de lire le fichier"
+
+#: .\erp\product\utils.py:197 .\erp\product\utils.py:205
+msgid "Impossible de générer le code à barre"
+msgstr "Impossible de générer le code à barre"
+
+#: .\erp\product\utils.py:240
+#, fuzzy
+#| msgid "Name is missing"
+msgid "Name or reference is missing"
+msgstr "Nom manquant"
+
+#: .\erp\product\utils.py:244
+msgid "Product Type, Price Calculation Method or Status does not exist"
+msgstr "Merci de vérifier les données"
+
+#: .\erp\product\utils.py:255
+msgid "Category, VAT or Unit of Measure does not exist"
+msgstr "Merci de vérifier les données"
+
+#: .\erp\product\views.py:85
 msgid "Item exists in a sale document"
 msgstr "L'article existe dans un document de vente"
 
@@ -660,39 +724,39 @@ msgstr "Aucun produit avec cet identifiant n'existe."
 msgid "Confirmed Item must contain at least one Product."
 msgstr "L'élément confirmé doit contenir au moins un produit."
 
-#: .\erp\purchase_document\views.py:63 .\erp\sale_document\views.py:65
+#: .\erp\purchase_document\views.py:65 .\erp\sale_document\views.py:67
 msgid "You do not have permission to change the status"
 msgstr "Vous n'avez pas l'autorisation de modifier le statut"
 
-#: .\erp\purchase_document\views.py:67 .\erp\sale_document\views.py:69
+#: .\erp\purchase_document\views.py:69 .\erp\sale_document\views.py:71
 msgid "You do not have permission to rollback the status"
 msgstr "Vous n'avez pas l'autorisation de revenir en arrière sur le statut"
 
-#: .\erp\purchase_document\views.py:77 .\erp\sale_document\views.py:79
+#: .\erp\purchase_document\views.py:79 .\erp\sale_document\views.py:81
 msgid "You do not have permission to set the status"
 msgstr "Vous n'avez pas l'autorisation de définir le statut"
 
-#: .\erp\purchase_document\views.py:91 .\erp\sale_document\service.py:25
+#: .\erp\purchase_document\views.py:93 .\erp\sale_document\service.py:25
 msgid "Please provide all needed data"
 msgstr "Veuillez fournir toutes les données nécessaires"
 
-#: .\erp\purchase_document\views.py:122 .\erp\purchase_document\views.py:146
+#: .\erp\purchase_document\views.py:124 .\erp\purchase_document\views.py:148
 msgid "Mismatched purchase_document_id"
 msgstr "Identifiant du document d'achat incorrect"
 
-#: .\erp\purchase_document\views.py:131 .\erp\sale_document\views.py:122
+#: .\erp\purchase_document\views.py:133 .\erp\sale_document\views.py:124
 msgid "Cannot find the item to edit"
 msgstr "Impossible de trouver l'élément à modifier"
 
-#: .\erp\purchase_document\views.py:168 .\erp\sale_document\views.py:159
+#: .\erp\purchase_document\views.py:170 .\erp\sale_document\views.py:161
 msgid "Item created"
 msgstr "Élément créé"
 
-#: .\erp\purchase_document\views.py:307 .\erp\sale_document\views.py:301
+#: .\erp\purchase_document\views.py:309 .\erp\sale_document\views.py:303
 msgid "Unauthorized"
 msgstr "Non autorisé"
 
-#: .\erp\purchase_document\views.py:336
+#: .\erp\purchase_document\views.py:338
 msgid ""
 "Error creating new PurchaseDocument for parent {purchase_document.id}: "
 "{str(e)}"
@@ -700,22 +764,22 @@ msgstr ""
 "Erreur lors de la création d'un nouveau PurchaseDocument pour le parent "
 "{purchase_document.id}: {str(e)}"
 
-#: .\erp\purchase_document\views.py:338
+#: .\erp\purchase_document\views.py:340
 #, python-brace-format
 msgid ""
 "Successfully created {num_new_purchase_documents} new purchase documents"
 msgstr ""
 "{num_new_purchase_documents} nouveaux documents d'achat créés avec succès"
 
-#: .\erp\purchase_document\views.py:350 .\erp\sale_document\views.py:317
+#: .\erp\purchase_document\views.py:352 .\erp\sale_document\views.py:319
 msgid "No valid parent documents found"
 msgstr "Aucun document parent valide trouvé"
 
-#: .\erp\purchase_document\views.py:353 .\erp\sale_document\views.py:320
+#: .\erp\purchase_document\views.py:355 .\erp\sale_document\views.py:322
 msgid "All documents should belong to the same partner"
 msgstr "Tous les documents doivent appartenir au même partenaire"
 
-#: .\erp\purchase_document\views.py:357 .\erp\sale_document\views.py:324
+#: .\erp\purchase_document\views.py:359 .\erp\sale_document\views.py:326
 msgid "Please give the type of the document"
 msgstr "Veuillez indiquer le type de document"
 
@@ -733,11 +797,11 @@ msgstr ""
 "Erreur lors de la création d'un nouveau SaleDocument pour le parent "
 "{sale_document.id}: {str(e)}"
 
-#: .\erp\sale_document\views.py:114 .\erp\sale_document\views.py:136
+#: .\erp\sale_document\views.py:116 .\erp\sale_document\views.py:138
 msgid "Mismatched sale_document_id"
 msgstr "Identifiant du document de vente incorrect"
 
-#: .\erp\sale_document\views.py:305
+#: .\erp\sale_document\views.py:307
 msgid "Recurring sale documents generation process has started."
 msgstr ""
 "Le processus de génération de documents de vente récurrents a commencé."
@@ -768,28 +832,28 @@ msgstr "EAN 13"
 
 #: .\templates\sale_document\delivery_note.html:147
 #: .\templates\sale_document\sale_document.html:147
-#: .\templates\sale_document\sale_document_basic.html:171
+#: .\templates\sale_document\sale_document_basic.html:186
 #: .\templates\sale_document\sale_document_elegent.html:146
 msgid "Company Logo"
 msgstr "Logo de l'entreprise"
 
 #: .\templates\sale_document\delivery_note.html:193
 #: .\templates\sale_document\sale_document.html:195
-#: .\templates\sale_document\sale_document_basic.html:224
+#: .\templates\sale_document\sale_document_basic.html:239
 #: .\templates\sale_document\sale_document_elegent.html:184
 msgid "Name / Ref."
 msgstr "Nom / Réf."
 
 #: .\templates\sale_document\delivery_note.html:194
 #: .\templates\sale_document\sale_document.html:196
-#: .\templates\sale_document\sale_document_basic.html:225
+#: .\templates\sale_document\sale_document_basic.html:240
 #: .\templates\sale_document\sale_document_elegent.html:185
 msgid "Qte."
 msgstr "Qté."
 
 #: .\templates\sale_document\delivery_note.html:195
 #: .\templates\sale_document\sale_document.html:197
-#: .\templates\sale_document\sale_document_basic.html:227
+#: .\templates\sale_document\sale_document_basic.html:242
 #: .\templates\sale_document\sale_document_elegent.html:187
 msgid "U. Price"
 msgstr "Prix Uni."
@@ -801,7 +865,7 @@ msgstr "Rem."
 
 #: .\templates\sale_document\delivery_note.html:198
 #: .\templates\sale_document\sale_document.html:200
-#: .\templates\sale_document\sale_document_basic.html:228
+#: .\templates\sale_document\sale_document_basic.html:243
 #: .\templates\sale_document\sale_document_elegent.html:188
 msgid "Total"
 msgstr "Total"
@@ -842,39 +906,39 @@ msgstr "sur"
 msgid "NUMBER"
 msgstr "Numéro"
 
-#: .\templates\sale_document\sale_document_basic.html:207
+#: .\templates\sale_document\sale_document_basic.html:222
 msgid "SALE_DOCUMENT_NUMBER"
 msgstr "Numéro"
 
-#: .\templates\sale_document\sale_document_basic.html:211
+#: .\templates\sale_document\sale_document_basic.html:226
 msgid "SALE_DOCUMENT_DATE"
 msgstr "Date"
 
-#: .\templates\sale_document\sale_document_basic.html:215
+#: .\templates\sale_document\sale_document_basic.html:230
 msgid "SALE_DOCUMENT_DUE_DATE"
 msgstr "Date d'échéance"
 
-#: .\templates\sale_document\sale_document_basic.html:226
+#: .\templates\sale_document\sale_document_basic.html:241
 #: .\templates\sale_document\sale_document_elegent.html:186
 msgid "Unit"
 msgstr "Unité"
 
-#: .\templates\sale_document\sale_document_basic.html:254
+#: .\templates\sale_document\sale_document_basic.html:269
 #: .\templates\sale_document\sale_document_elegent.html:214
 msgid "SUB-TOTAL_WITHOUT_VAT"
 msgstr "Sous-total HT"
 
-#: .\templates\sale_document\sale_document_basic.html:262
+#: .\templates\sale_document\sale_document_basic.html:277
 #: .\templates\sale_document\sale_document_elegent.html:222
 msgid "DISCOUNT"
 msgstr "Remise"
 
-#: .\templates\sale_document\sale_document_basic.html:270
+#: .\templates\sale_document\sale_document_basic.html:285
 #: .\templates\sale_document\sale_document_elegent.html:230
 msgid "VAT_OF"
 msgstr "TVA de"
 
-#: .\templates\sale_document\sale_document_basic.html:278
+#: .\templates\sale_document\sale_document_basic.html:293
 #: .\templates\sale_document\sale_document_elegent.html:238
 msgid "TOTAL_PRICE"
 msgstr "Total"
@@ -1126,6 +1190,17 @@ msgstr "Le mot de passe a été réinitialisé."
 #: .\user\views.py:369
 msgid "Creation of the new password succeed."
 msgstr "La création du nouveau mot de passe a réussi."
+
+#~ msgid "data"
+#~ msgstr "Données"
+
+#, fuzzy
+#~| msgid "An error occurred during PDF generation:<pre>"
+#~ msgid "Errors occurred during import."
+#~ msgstr "Une erreur s'est produite lors de la génération du PDF :<pre>"
+
+#~ msgid "Successfully created partners."
+#~ msgstr "Création du partenaire terminer avec succées"
 
 #, fuzzy
 #~| msgid "Insufficient quantity for product {product.reference}"

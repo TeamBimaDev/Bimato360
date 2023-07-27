@@ -1,22 +1,16 @@
-
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from django.utils.translation import gettext_lazy as _
 
-from .models import BimaCompany
-from .serializers import BimaCompanySerializer
+from common.permissions.action_base_permission import ActionBasedPermission
 
 from core.document.serializers import BimaCoreDocumentSerializer
 from core.abstract.views import AbstractViewSet
 from core.document.models import BimaCoreDocument, create_single_document, \
     get_documents_for_parent_entity
 
-from common.enums.file_type import return_list_file_type_company
-from common.permissions.action_base_permission import ActionBasedPermission
-
-
-
+from .models import BimaCompany
+from .serializers import BimaCompanySerializer
 from .service import fetch_company_data
 
 
@@ -38,8 +32,8 @@ class BimaCompanyViewSet(AbstractViewSet):
     @action(detail=True, methods=['get'], url_path='documents')
     def list_documents(self, request, *args, **kwargs):
         company = self.get_object()
-        contacts = get_documents_for_parent_entity(company)
-        serialized_contact = BimaCoreDocumentSerializer(contacts, many=True)
+        documents = get_documents_for_parent_entity(company)
+        serialized_contact = BimaCoreDocumentSerializer(documents, many=True)
         return Response(serialized_contact.data)
 
     @action(detail=True, methods=['post'], url_path='documents')
@@ -71,5 +65,3 @@ class BimaCompanyViewSet(AbstractViewSet):
         company = self.get_object()
         response_data = fetch_company_data(company)
         return Response(response_data)
-
-

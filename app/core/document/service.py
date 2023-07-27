@@ -1,6 +1,10 @@
 from enum import Enum
 from common.enums.file_type import FileTypeCompany
 from common.enums.file_type import FileTypeUser
+from common.service.file_service import resize_image as image_resizer
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class FileType(Enum):
@@ -13,8 +17,9 @@ def resize_image(document_data, file, file_content_type):
         try:
             dimensions = get_dimensions_for_file_type(document_data)
             if dimensions is not None:
-                file = common.service.file_service.resize_image(file, *dimensions)
-        except Exception:
+                file = image_resizer(file, *dimensions)
+        except Exception as ex:
+            logger.error(f"error occurred when resizing the image {ex}")
             pass
 
     return file

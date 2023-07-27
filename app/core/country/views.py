@@ -22,12 +22,11 @@ from core.state.models import BimaCoreState
 
 from core.currency.models import BimaCoreCurrency
 
-
 from common.permissions.action_base_permission import ActionBasedPermission
 
 from common.service.file_service import check_csv_file
 
-from .service import import_data_from_csv_file
+from .service import import_data_from_csv_file, export_to_csv, generate_xls_file
 
 
 class BimaCoreCountryViewSet(AbstractViewSet):
@@ -165,7 +164,7 @@ class BimaCoreCountryViewSet(AbstractViewSet):
 
     @action(detail=False, methods=["POST"], url_path="import_from_csv")
     def import_from_csv(self, request, **kwargs):
-        csv_file = request.FILES.get("file")
+        csv_file = request.FILES.get("csv_file")
 
         try:
             file_check = check_csv_file(csv_file)
@@ -189,25 +188,19 @@ class BimaCoreCountryViewSet(AbstractViewSet):
             return Response({"error", _("an error occurred while treating the file")},
                             status=status.HTTP_400_BAD_REQUEST)
 
-    @action(detail=False, methods=['GET'], url_path="export_data_to_csv")
-    def export_data_to_csv(self, request):
-        query = BimaCoreCountry.objects.all()
-        opts = query.model._meta
-        model = BimaCoreCountry
-        response = HttpResponse(content_type='text/csv')
-        response['Content-Disposition'] = 'attachment;filename=countries.csv'
-        writer = csv.writer(response)
-        fields_names = [field.name for field in opts.fields]
-        writer.writerow(fields_names)
-        for obj in query:
-            writer.writerow(getattr(obj, field) for field in fields_names)
-        return response
+    @action(detail=False, methods=['GET'], url_path='export_csv')
+    def export_csv(self, request):
+        data_to_export = BimaCoreCurrency.objects.all()
+        model_fields = BimaCoreCountry._meta
+        return export_to_csv(data_to_export, model_fields)
+
+    @action(detail=False, methods=['GET'], url_path='export_xls')
+    def export_xls(self, request):
+        data_to_export = BimaCoreCountry.objects.all()
+        return generate_xls_file(data_to_export)
 
 
 def create_response():
     response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = 'attachment; filename="countries.pdf"'
     return response
-
-
-

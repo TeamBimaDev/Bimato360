@@ -1,7 +1,7 @@
 from django.urls import reverse
 from rest_framework.test import APITestCase, APIClient
 from rest_framework import status
-from .factories import  BimaCoreCashFactory
+from .factories import BimaCoreCashFactory
 from .models import BimaCoreCash
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType

@@ -1,10 +1,10 @@
-import csv
 import django_filters
 from core.abstract.views import AbstractViewSet
 from django.db.models import Q
+from pandas import read_csv
 from rest_framework.decorators import action
 
-from django.http import HttpResponse, JsonResponse
+from django.http import JsonResponse
 
 from django.shortcuts import get_object_or_404
 from rest_framework import status
@@ -13,7 +13,7 @@ from rest_framework.response import Response
 from .models import BimaErpPartner
 from .serializers import BimaErpPartnerSerializer
 from .signals import post_create_partner
-from .utils import generate_xls_file, create_partners_from_csv
+from .utils import generate_xls_file, import_partner_data_from_csv_file, export_to_csv
 
 from common.utils.utils import render_to_pdf
 from core.address.serializers import BimaCoreAddressSerializer
@@ -197,32 +197,22 @@ class BimaErpPartnerViewSet(AbstractViewSet):
         serialized_entity_tags = BimaCoreEntityTagSerializer(entity_tags)
         return JsonResponse(serialized_entity_tags.data)
 
-    def export_csv(self, request, **kwargs):
-        response = HttpResponse(content_type='text/csv')
-        response['Content-Disposition'] = 'attachment; filename="partners.csv"'
+    @action(detail=False, methods=['GET'], url_path='export_csv')
+    def export_csv(self, request):
+        data_to_export = self.get_queryset()
         model_fields = BimaErpPartner._meta
-        field_names_to_show = [fd.name for fd in model_fields.fields]
-        writer = csv.writer(response)
-        writer.writerow(field_names_to_show)
-        if kwargs.get('public_id') is not None:
-            data_to_export = [BimaErpPartner.objects.
-                              get_object_by_public_id(kwargs.get('public_id'))]
-        else:
-            data_to_export = BimaErpPartner.objects.all()
+        return export_to_csv(data_to_export, model_fields)
 
-        for partner in data_to_export:
-            writer.writerow([getattr(partner, field) for field in field_names_to_show])
+    @action(detail=True, methods=['GET'], url_path='export_csv')
+    def detail_export_csv(self, request, pk=None):
+        data_to_export = [self.get_object()]
+        model_fields = BimaErpPartner._meta
+        return export_to_csv(data_to_export, model_fields)
 
-        return response
-
-    def export_pdf(self, request, **kwargs):
+    @action(detail=False, methods=['GET'], url_path='export_pdf')
+    def export_pdf(self, request):
         template_name = "partner/pdf.html"
-        if kwargs.get('public_id') is not None:
-            data_to_export = [BimaErpPartner.objects.
-                              get_object_by_public_id(kwargs.get('public_id'))]
-        else:
-            data_to_export = BimaErpPartner.objects.all()
-
+        data_to_export = self.get_queryset()
         return render_to_pdf(
             template_name,
             {
@@ -232,31 +222,51 @@ class BimaErpPartnerViewSet(AbstractViewSet):
             "partner.pdf"
         )
 
-    def export_xls(self, request, **kwargs):
+    @action(detail=True, methods=['GET'], url_path='export_pdf')
+    def detail_export_pdf(self, request, pk=None):
+        template_name = "partner/pdf.html"
+        data_to_export = [self.get_object()]
+        return render_to_pdf(
+            template_name,
+            {
+                "partners": data_to_export,
+                "request": request,
+            },
+            "partner.pdf"
+        )
 
-        if kwargs.get('public_id') is not None:
-            data_to_export = [BimaErpPartner.objects.
-                              get_object_by_public_id(kwargs.get('public_id'))]
-        else:
-            data_to_export = BimaErpPartner.objects.all()
-
+    @action(detail=False, methods=['GET'], url_path='export_xls')
+    def export_xls(self, request):
+        data_to_export = self.get_queryset()
         return generate_xls_file(data_to_export)
 
-    @action(detail=False, methods=['post'])
-    def generate_partner_from_csv(self, request):
-        csv_file = request.FILES.get('file')
+    @action(detail=True, methods=['GET'], url_path='export_xls')
+    def detail_export_xls(self, request, pk=None):
+        data_to_export = [self.get_object()]
+        return generate_xls_file(data_to_export)
+
+    @action(detail=False, methods=['POST'], url_path='import_from_csv')
+    def import_from_csv(self, request):
+        csv_file = request.FILES.get('csv_file')
 
         try:
             file_check = check_csv_file(csv_file)
             if 'error' in file_check:
                 return Response(file_check, status=status.HTTP_400_BAD_REQUEST)
-            error_rows = create_partners_from_csv(csv_file)
 
+            csv_content_file = read_csv(csv_file)
+
+            error_rows, created_count = import_partner_data_from_csv_file(csv_content_file)
             if error_rows:
-                return Response({'detail': _('Errors occurred during import.'), 'errors': error_rows},
-                                status=status.HTTP_400_BAD_REQUEST)
+                return Response({
+                    'error': _('Some rows could not be processed'),
+                    'error_rows': error_rows,
+                    'success_rows_count': created_count,
+                }, status=status.HTTP_400_BAD_REQUEST)
 
-            return Response({'detail': _('Successfully created partners.')}, status=status.HTTP_201_CREATED)
+            return Response({'success': _('All rows processed successfully'),
+                             'success_rows_count': created_count})
 
-        except Exception as e:
-            return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception:
+            return Response({"error", _("an error occurred while treating the file")},
+                            status=status.HTTP_400_BAD_REQUEST)

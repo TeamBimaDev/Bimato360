@@ -125,7 +125,6 @@ class AbstractViewSet(viewsets.ModelViewSet):
             logger.error(f"Failed to format error message: {str(e)}")
             return EXCEPTIONS_MAP.get(type(exc), {}).get('message', _("A server error occurred"))
 
-
     def handle_exception(self, exc):
         error_status_code = EXCEPTIONS_MAP.get(type(exc), {}).get('status_code', HTTP_500_INTERNAL_SERVER_ERROR)
         error_message = self.get_error_message(exc)
