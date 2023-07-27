@@ -70,7 +70,7 @@ def import_data_from_csv_file(df):
             if 'name' in str(e):
                 error_message = _('Country with name {} already exists').format(name if name else "")
             elif 'code' in str(e):
-                error_message = _('Country with code {} already exists').format(name if name else "")
+                error_message = _('Country with code {} already exists').format(code if code else "")
             else:
                 error_message = _('Integrity error occurred')
             error_rows.append({'error': error_message, 'data': name if name else ""})

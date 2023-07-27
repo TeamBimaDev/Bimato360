@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-07-24 14:43+0100\n"
+"POT-Creation-Date: 2023-07-27 09:36+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -237,13 +237,13 @@ msgstr "Revenu"
 msgid "Expense"
 msgstr "Dépense"
 
-#: .\common\service\file_service.py:22
+#: .\common\service\file_service.py:21
 #, fuzzy
 #| msgid "Unable to get the item"
 msgid "unable to read the file"
 msgstr "Impossible d'obtenir l'élément"
 
-#: .\common\service\file_service.py:27
+#: .\common\service\file_service.py:26
 msgid "Incorrect file type"
 msgstr "Type de fichier incorrect"
 
@@ -351,61 +351,59 @@ msgstr "L'adresse e-mail doit être unique."
 msgid "BIC must be unique."
 msgstr "Le BIC doit être unique."
 
-#: .\core\country\service.py:28 .\core\currency\service.py:21
+#: .\core\country\service.py:39 .\core\currency\service.py:34
 msgid "Name is missing"
 msgstr "Nom manquant"
 
-#: .\core\country\service.py:32
+#: .\core\country\service.py:42
 msgid "Code is missing"
 msgstr "Code manquant"
 
-#: .\core\country\service.py:37
+#: .\core\country\service.py:50
 msgid "Currency with name or symbol {} does not exist"
 msgstr "Devise avec symbole {} inexistent"
 
-#: .\core\country\service.py:56
+#: .\core\country\service.py:71
 msgid "Country with name {} already exists"
 msgstr "Pays avec nom {} existe déja"
 
-#: .\core\country\service.py:58
+#: .\core\country\service.py:73
 msgid "Country with code {} already exists"
 msgstr "Pays avec code {} existe déja"
 
-#: .\core\country\service.py:60 .\core\currency\service.py:44
+#: .\core\country\service.py:75 .\core\currency\service.py:57
 #, fuzzy
 #| msgid "API exception occurred"
 msgid "Integrity error occurred"
-msgstr "Une exception API s'est produite"
+msgstr "Données dupliqués, merci de vérifier"
 
-#: .\core\country\views.py:180 .\core\currency\views.py:79
+#: .\core\country\views.py:179 .\core\currency\views.py:77
+#: .\erp\partner\views.py:262 .\erp\product\views.py:134
 msgid "Some rows could not be processed"
 msgstr "Impossible de traiter tout les données"
 
-#: .\core\country\views.py:185 .\core\currency\views.py:84
+#: .\core\country\views.py:184 .\core\currency\views.py:82
+#: .\erp\partner\views.py:267 .\erp\product\views.py:139
 msgid "All rows processed successfully"
 msgstr "Tous les données sont traité"
 
-#: .\core\country\views.py:189 .\core\currency\views.py:88
+#: .\core\country\views.py:188 .\core\currency\views.py:86
+#: .\erp\partner\views.py:271 .\erp\product\views.py:143
 msgid "an error occurred while treating the file"
 msgstr "Une erreur est survenu lors la traitement du fichier"
 
-#: .\core\currency\service.py:21 .\core\currency\service.py:25
-#: .\core\currency\service.py:46 .\core\currency\service.py:48
-msgid "data"
-msgstr "Données"
-
-#: .\core\currency\service.py:25
+#: .\core\currency\service.py:37
 msgid "Symbol is missing"
 msgstr "Symbol obligatoire"
 
-#: .\core\currency\service.py:40
+#: .\core\currency\service.py:53
 msgid "Currency with name {} already exists"
 msgstr "Devise  avec ce nom {} existe déja"
 
-#: .\core\currency\service.py:42
-#, fuzzy, python-brace-format
+#: .\core\currency\service.py:55
+#, fuzzy
 #| msgid "Currency with symbol {} already exists"
-msgid "Currency with symbol {symbol} already exists"
+msgid "Currency with symbol {} already exists"
 msgstr "Devise  avec ce symbol {} existe déja"
 
 #: .\core\department\serializers.py:51
@@ -582,15 +580,27 @@ msgstr "Avoir"
 msgid "Balance"
 msgstr "Solde"
 
-#: .\erp\partner\views.py:256
+#: .\erp\partner\utils.py:184 .\erp\product\utils.py:287
 #, fuzzy
-#| msgid "An error occurred during PDF generation:<pre>"
-msgid "Errors occurred during import."
-msgstr "Une erreur s'est produite lors de la génération du PDF :<pre>"
+#| msgid "Invalid input"
+msgid "Invalid data: {}"
+msgstr "Entrée invalide"
 
-#: .\erp\partner\views.py:259
-msgid "Successfully created partners."
-msgstr "Création du partenaire terminer avec succées"
+#: .\erp\partner\utils.py:186 .\erp\product\utils.py:289
+#, fuzzy
+#| msgid "API exception occurred"
+msgid "Integrity error occurred: {}"
+msgstr "Une exception API s'est produite"
+
+#: .\erp\partner\utils.py:223
+#, fuzzy
+#| msgid "Resource does not exist"
+msgid "Partner Type does not exist"
+msgstr "La ressource n'existe pas"
+
+#: .\erp\partner\utils.py:230
+msgid "Partner Type or Company Type does not exist"
+msgstr "Merci de vérifier le type de partenaire ou celui de la sociéte"
 
 #: .\erp\product\models.py:16 .\templates\product\pdf.html:35
 msgid "Name"
@@ -678,15 +688,29 @@ msgstr "Quantité"
 msgid "Virtual Quantity"
 msgstr "Quantité virtuelle"
 
-#: .\erp\product\utils.py:144
+#: .\erp\product\utils.py:170
 msgid "Impossible de lire le fichier"
 msgstr "Impossible de lire le fichier"
 
-#: .\erp\product\utils.py:171 .\erp\product\utils.py:179
+#: .\erp\product\utils.py:197 .\erp\product\utils.py:205
 msgid "Impossible de générer le code à barre"
 msgstr "Impossible de générer le code à barre"
 
-#: .\erp\product\views.py:80
+#: .\erp\product\utils.py:240
+#, fuzzy
+#| msgid "Name is missing"
+msgid "Name or reference is missing"
+msgstr "Nom manquant"
+
+#: .\erp\product\utils.py:244
+msgid "Product Type, Price Calculation Method or Status does not exist"
+msgstr "Merci de vérifier les données"
+
+#: .\erp\product\utils.py:255
+msgid "Category, VAT or Unit of Measure does not exist"
+msgstr "Merci de vérifier les données"
+
+#: .\erp\product\views.py:85
 msgid "Item exists in a sale document"
 msgstr "L'article existe dans un document de vente"
 
@@ -1166,6 +1190,17 @@ msgstr "Le mot de passe a été réinitialisé."
 #: .\user\views.py:369
 msgid "Creation of the new password succeed."
 msgstr "La création du nouveau mot de passe a réussi."
+
+#~ msgid "data"
+#~ msgstr "Données"
+
+#, fuzzy
+#~| msgid "An error occurred during PDF generation:<pre>"
+#~ msgid "Errors occurred during import."
+#~ msgstr "Une erreur s'est produite lors de la génération du PDF :<pre>"
+
+#~ msgid "Successfully created partners."
+#~ msgstr "Création du partenaire terminer avec succées"
 
 #, fuzzy
 #~| msgid "Insufficient quantity for product {product.reference}"

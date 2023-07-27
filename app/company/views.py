@@ -32,8 +32,8 @@ class BimaCompanyViewSet(AbstractViewSet):
     @action(detail=True, methods=['get'], url_path='documents')
     def list_documents(self, request, *args, **kwargs):
         company = self.get_object()
-        contacts = get_documents_for_parent_entity(company)
-        serialized_contact = BimaCoreDocumentSerializer(contacts, many=True)
+        documents = get_documents_for_parent_entity(company)
+        serialized_contact = BimaCoreDocumentSerializer(documents, many=True)
         return Response(serialized_contact.data)
 
     @action(detail=True, methods=['post'], url_path='documents')
