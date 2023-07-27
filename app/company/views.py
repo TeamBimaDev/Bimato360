@@ -1,3 +1,4 @@
+import pytz
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -65,3 +66,8 @@ class BimaCompanyViewSet(AbstractViewSet):
         company = self.get_object()
         response_data = fetch_company_data(company)
         return Response(response_data)
+
+    @action(detail=False, methods=['GET'], url_path='get_timezones')
+    def get_timezones(self, request):
+        timezones = [{'id': tz, 'name': tz} for tz in pytz.all_timezones]
+        return Response(timezones)
