@@ -1,4 +1,4 @@
-from django.db import models, transaction
+from django.db import models
 
 from core.abstract.models import AbstractModel
 
@@ -14,8 +14,7 @@ class BimaErpUnitOfMeasure(AbstractModel):
         default_permissions = ()
 
     def save(self, *args, **kwargs):
-        with transaction.atomic:
-            if self.is_default_for_service_product:
-                BimaErpUnitOfMeasure.objects.filter(is_default_for_service_product=True).\
-                    update(is_default_for_service_product=False)
-            super(BimaErpUnitOfMeasure, self).save(*args, **kwargs)
+        if self.is_default_for_service_product:
+            BimaErpUnitOfMeasure.objects.filter(is_default_for_service_product=True).\
+                update(is_default_for_service_product=False)
+        super(BimaErpUnitOfMeasure, self).save(*args, **kwargs)
