@@ -5,6 +5,8 @@ from core.currency.models import BimaCoreCurrency
 
 from common.enums.language import LanguageEnum
 
+from django.utils.translation import gettext_lazy as _
+
 
 class BimaCompany(AbstractModel):
     name = models.CharField(max_length=128, blank=False, unique=True)
@@ -18,7 +20,15 @@ class BimaCompany(AbstractModel):
     timezone = models.CharField(max_length=32, choices=[(tz, tz) for tz in pytz.all_timezones], default='UTC')
     header_note = models.TextField(blank=True, null=True)
     footer_note = models.TextField(blank=True, null=True)
-    company_registry = models.CharField(max_length=64, blank=True, null=True)
+    creation_date = models.DateTimeField(blank=True, null=True, verbose_name=_('Company Date Creation'))
+    siren = models.CharField(blank=True, null=True, verbose_name=_('Company Siren'))
+    siret = models.CharField(blank=True, null=True, verbose_name=_('Company Siret'))
+    date_registration = models.DateTimeField(blank=True, null=True, verbose_name=_('Company Date Registration'))
+    rcs_number = models.CharField(blank=True, null=True, verbose_name=_('RCS Number'))
+    date_struck_off = models.DateTimeField(blank=True, null=True, verbose_name=_('Company Date Struck Off'))
+    ape_text = models.CharField(blank=True, null=True, verbose_name=_('Company APE Text'))
+    ape_code = models.CharField(blank=True, null=True, verbose_name=_('Company APE Code'))
+    capital = models.CharField(blank=True, null=True, verbose_name=_('Company Capital'))
 
     def __str__(self):
         return f"{self.name, self.public_id}"

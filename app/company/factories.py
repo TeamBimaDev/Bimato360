@@ -19,6 +19,5 @@ class BimaCompanyFactory(factory.django.DjangoModelFactory):
     timezone = 'UTC'
     header_note = factory.Faker('text')
     footer_note = factory.Faker('text')
-    company_registry = factory.Faker('ean13')
 
 

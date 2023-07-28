@@ -16,7 +16,8 @@ from django.utils.translation import gettext_lazy as _
 from core.abstract.views import AbstractViewSet
 
 from .filter import SaleDocumentFilter
-from .service import SaleDocumentService, generate_recurring_sale_documents, create_products_from_parents
+from .service import SaleDocumentService, generate_recurring_sale_documents, create_products_from_parents, \
+    create_new_document
 
 from ..product.models import BimaErpProduct
 from .models import BimaErpSaleDocument, BimaErpSaleDocumentProduct
@@ -27,7 +28,6 @@ from common.utils.utils import render_to_pdf
 
 from core.address.models import BimaCoreAddress
 from common.permissions.action_base_permission import ActionBasedPermission
-
 
 from company.models import BimaCompany
 from company.service import fetch_company_data
@@ -264,6 +264,7 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
         pdf_filename = "delivery_note.pdf"
         context = self._get_context(pk)
         context['document_title'] = 'Delivery Note'
+        context['request'] = request
         return render_to_pdf(template_name, context, pdf_filename)
 
     @action(detail=True, methods=['get'], url_path='generate_pdf')
@@ -325,4 +326,16 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
         if not document_type:
             raise ValidationError({'error': _('Please give the type of the document')})
 
+    @action(detail=True, methods=['GET'], url_path='get_direct_parent')
+    def get_direct_parent(self, request, pk=None):
+        document = self.get_object()
+        parents = document.parents
+        serializer = self.get_serializer(parents, many=True)
+        return Response(serializer.data)
 
+    @action(detail=True, methods=['GET'], url_path='get_direct_child')
+    def get_direct_child(self, request, pk):
+        document = self.get_object()
+        child = document.bimaerpsaledocumnet_set.all()
+        serializer = self.get_serializer(child, many=True)
+        return Response(serializer.data)

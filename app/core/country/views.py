@@ -190,7 +190,7 @@ class BimaCoreCountryViewSet(AbstractViewSet):
 
     @action(detail=False, methods=['GET'], url_path='export_csv')
     def export_csv(self, request):
-        data_to_export = BimaCoreCurrency.objects.all()
+        data_to_export = BimaCoreCountry.objects.all()
         model_fields = BimaCoreCountry._meta
         return export_to_csv(data_to_export, model_fields)
 

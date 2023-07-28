@@ -80,18 +80,18 @@ def import_data_from_csv_file(df):
     return error_rows, created_count
 
 
-def export_to_csv(partners, model_fields):
+def export_to_csv(countries, model_fields):
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="data.csv"'
     field_names_to_show = [fd.name for fd in model_fields.fields]
     writer = csv.writer(response)
     writer.writerow(field_names_to_show)
 
-    for partner in partners:
+    for country in countries:
         row_data = []
         for field in field_names_to_show:
             try:
-                value = getattr(partner, field)
+                value = getattr(country, field)
                 if hasattr(value, 'name'):
                     value = getattr(value, 'name', None)
                 row_data.append(value if value is not None else '')
