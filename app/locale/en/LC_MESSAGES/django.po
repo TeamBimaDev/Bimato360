@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-07-27 09:36+0100\n"
+"POT-Creation-Date: 2023-07-27 14:40+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -273,9 +273,65 @@ msgid ""
 "join(valid_extensions)}"
 msgstr "File extension is not valid"
 
-#: .\core\abstract\models.py:40 .\core\abstract\models.py:43
+#: .\company\models.py:23 .\erp\partner\models.py:30
+#, fuzzy
+#| msgid "Company name"
+msgid "Company Date Creation"
+msgstr "Company name"
+
+#: .\company\models.py:24 .\erp\partner\models.py:31
+#, fuzzy
+#| msgid "Company name"
+msgid "Company Siren"
+msgstr "Company name"
+
+#: .\company\models.py:25 .\erp\partner\models.py:32
+#, fuzzy
+#| msgid "Company name"
+msgid "Company Siret"
+msgstr "Company name"
+
+#: .\company\models.py:26 .\erp\partner\models.py:33
+#, fuzzy
+#| msgid "New User Registration"
+msgid "Company Date Registration"
+msgstr "New User Registration"
+
+#: .\company\models.py:27 .\erp\partner\models.py:34
+#, fuzzy
+#| msgid "Serial Number"
+msgid "RCS Number"
+msgstr "Serial Number"
+
+#: .\company\models.py:28 .\erp\partner\models.py:35
+msgid "Company Date Struck Off"
+msgstr "Company Date Struck Off"
+
+#: .\company\models.py:29 .\erp\partner\models.py:36
+#, fuzzy
+#| msgid "Company name"
+msgid "Company APE Text"
+msgstr "Company name"
+
+#: .\company\models.py:30 .\erp\partner\models.py:37
+#, fuzzy
+#| msgid "Company name"
+msgid "Company APE Code"
+msgstr "Company name"
+
+#: .\company\models.py:31 .\erp\partner\models.py:38
+#, fuzzy
+#| msgid "Company name"
+msgid "Company Capital"
+msgstr "Company name"
+
+#: .\core\abstract\models.py:41 .\core\abstract\models.py:44
 msgid "L'élément est utilisé, impossible de changer vers désactiver"
 msgstr "Cannot deactivate a used item"
+
+#: .\core\abstract\models.py:55
+msgid "Impossible de supprimer cet élément car il est lié à un autre élément."
+msgstr "Cannot delete this item as it is linked to another item."
 
 #: .\core\abstract\views.py:43
 msgid "Invalid input"
@@ -526,58 +582,6 @@ msgstr "Status"
 msgid "Note"
 msgstr "Note"
 
-#: .\erp\partner\models.py:30
-#, fuzzy
-#| msgid "Company name"
-msgid "Company Date Creation"
-msgstr "Company name"
-
-#: .\erp\partner\models.py:31
-#, fuzzy
-#| msgid "Company name"
-msgid "Company Siren"
-msgstr "Company name"
-
-#: .\erp\partner\models.py:32
-#, fuzzy
-#| msgid "Company name"
-msgid "Company Siret"
-msgstr "Company name"
-
-#: .\erp\partner\models.py:33
-#, fuzzy
-#| msgid "New User Registration"
-msgid "Company Date Registration"
-msgstr "New User Registration"
-
-#: .\erp\partner\models.py:34
-#, fuzzy
-#| msgid "Serial Number"
-msgid "RCS Number"
-msgstr "Serial Number"
-
-#: .\erp\partner\models.py:35
-msgid "Company Date Struck Off"
-msgstr "Company Date Struck Off"
-
-#: .\erp\partner\models.py:36
-#, fuzzy
-#| msgid "Company name"
-msgid "Company APE Text"
-msgstr "Company name"
-
-#: .\erp\partner\models.py:37
-#, fuzzy
-#| msgid "Company name"
-msgid "Company APE Code"
-msgstr "Company name"
-
-#: .\erp\partner\models.py:38
-#, fuzzy
-#| msgid "Company name"
-msgid "Company Capital"
-msgstr "Company name"
-
 #: .\erp\partner\models.py:39
 #, fuzzy
 #| msgid "Credit note"
@@ -760,7 +764,7 @@ msgstr "Cannot find the item to edit"
 msgid "Item created"
 msgstr "Item created"
 
-#: .\erp\purchase_document\views.py:309 .\erp\sale_document\views.py:303
+#: .\erp\purchase_document\views.py:309 .\erp\sale_document\views.py:304
 msgid "Unauthorized"
 msgstr "Unauthorized"
 
@@ -777,15 +781,15 @@ msgid ""
 msgstr ""
 "Successfully created {num_new_purchase_documents} new purchase documents"
 
-#: .\erp\purchase_document\views.py:352 .\erp\sale_document\views.py:319
+#: .\erp\purchase_document\views.py:352 .\erp\sale_document\views.py:320
 msgid "No valid parent documents found"
 msgstr "No valid parent documents found"
 
-#: .\erp\purchase_document\views.py:355 .\erp\sale_document\views.py:322
+#: .\erp\purchase_document\views.py:355 .\erp\sale_document\views.py:323
 msgid "All documents should belong to the same partner"
 msgstr "All documents should belong to the same partner"
 
-#: .\erp\purchase_document\views.py:359 .\erp\sale_document\views.py:326
+#: .\erp\purchase_document\views.py:359 .\erp\sale_document\views.py:327
 msgid "Please give the type of the document"
 msgstr "Please give the type of the document"
 
@@ -805,7 +809,7 @@ msgstr "Error creating new SaleDocument for parent"
 msgid "Mismatched sale_document_id"
 msgstr "Mismatched sale_document_id"
 
-#: .\erp\sale_document\views.py:307
+#: .\erp\sale_document\views.py:308
 msgid "Recurring sale documents generation process has started."
 msgstr "Recurring sale documents generation process has started."
 

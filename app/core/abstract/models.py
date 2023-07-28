@@ -2,9 +2,10 @@ import uuid
 from logging import getLogger
 from django.db import models
 from django.core.exceptions import ObjectDoesNotExist
-from django.forms import model_to_dict
+from django.db.models import ProtectedError
 from django.http import Http404
 from django.utils.translation import gettext_lazy as _
+from rest_framework import status
 from rest_framework.exceptions import ValidationError
 
 logger = getLogger(__name__)
@@ -46,3 +47,9 @@ class AbstractModel(models.Model):
                         pass
 
         super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        try:
+            super().delete(*args, **kwargs)
+        except ProtectedError:
+            raise ValidationError({"Delete": _("Impossible de supprimer cet élément car il est lié à un autre élément.")})
