@@ -24,5 +24,5 @@ class BimaCompanySerializer(AbstractSerializer):
         fields = [
             'id', 'name', 'email', 'phone', 'mobile',
             'fax', 'website', 'currency', 'currency_public_id', 'language',
-            'timezone', 'header_note', 'footer_note', 'company_registry', 'created', 'updated'
+            'timezone', 'header_note', 'footer_note', 'created', 'updated'
         ]

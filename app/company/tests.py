@@ -28,8 +28,8 @@ class BimaCompanyTest(APITestCase):
             "currency_public_id": str(self.currency.public_id),
             "timezone": "America/New_York",
             "header_note": "Welcome to Acme Corporation",
-            "footer_note": "Thank you for choosing Acme Corporation",
-            "company_registry": "1234567890123"
+            "footer_note": "Thank you for choosing Acme Corporation"
+
         }
         # Give permissions to the user.
         permission = Permission.objects.get(codename='company.company.can_create')
