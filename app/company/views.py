@@ -1,4 +1,5 @@
 import pytz
+from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -30,16 +31,14 @@ class BimaCompanyViewSet(AbstractViewSet):
         'documents': ['company.can_add_document'],
     }
 
-    @action(detail=True, methods=['get'], url_path='documents')
     def list_documents(self, request, *args, **kwargs):
-        company = self.get_object()
+        company = BimaCompany.objects.get_object_by_public_id(self.kwargs['public_id'])
         documents = get_documents_for_parent_entity(company)
         serialized_contact = BimaCoreDocumentSerializer(documents, many=True)
         return Response(serialized_contact.data)
 
-    @action(detail=True, methods=['post'], url_path='documents')
     def create_document(self, request, *args, **kwargs):
-        company = self.get_object()
+        company = BimaCompany.objects.get_object_by_public_id(self.kwargs['public_id'])
         document_data = request.data
         document_data['file_path'] = request.FILES['file_path']
         document_data['is_favorite'] = request.data.get('is_favorite', False)
@@ -56,6 +55,14 @@ class BimaCompanyViewSet(AbstractViewSet):
             }, status=status.HTTP_201_CREATED)
         else:
             return Response(result, status=result.get("status", status.HTTP_500_INTERNAL_SERVER_ERROR))
+
+    def get_document(self, request, *args, **kwargs):
+        company = BimaCompany.objects.get_object_by_public_id(self.kwargs['public_id'])
+        document = get_object_or_404(BimaCoreDocument,
+                                     public_id=self.kwargs['document_public_id'],
+                                     parent_id=company.id)
+        serialized_document = BimaCoreDocumentSerializer(document)
+        return Response(serialized_document.data)
 
     def get_object(self):
         obj = BimaCompany.objects.get_object_by_public_id(self.kwargs['pk'])

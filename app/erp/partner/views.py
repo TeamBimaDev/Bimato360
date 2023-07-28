@@ -167,7 +167,7 @@ class BimaErpPartnerViewSet(AbstractViewSet):
         document = get_object_or_404(BimaCoreDocument,
                                      public_id=self.kwargs['document_public_id'],
                                      parent_id=partner.id)
-        serialized_document = BimaCoreContactSerializer(document)
+        serialized_document = BimaCoreDocumentSerializer(document)
         return Response(serialized_document.data)
 
     def list_tags(self, request, *args, **kwargs):

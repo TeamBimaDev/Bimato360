@@ -1,19 +1,26 @@
 import os
 from itertools import groupby
-
 from collections import defaultdict
-
-from django.contrib.contenttypes.models import ContentType
-from django.core.exceptions import ValidationError
-from django.db import transaction
-from django.http import JsonResponse
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import ValidationError
+from django.db import transaction
+from django.db.models import Case, When, Value, CharField, Count
+from django.db.models.functions import Concat, ExtractMonth
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, get_list_or_404
 from django.utils.translation import gettext_lazy as _
 
+from common.utils.utils import render_to_pdf
+from common.permissions.action_base_permission import ActionBasedPermission
+
 from core.abstract.views import AbstractViewSet
+from core.address.models import BimaCoreAddress
+
+from company.models import BimaCompany
+from company.service import fetch_company_data
 
 from .filter import SaleDocumentFilter
 from .service import SaleDocumentService, generate_recurring_sale_documents, create_products_from_parents, \
@@ -23,14 +30,6 @@ from ..product.models import BimaErpProduct
 from .models import BimaErpSaleDocument, BimaErpSaleDocumentProduct
 from .serializers import BimaErpSaleDocumentSerializer, BimaErpSaleDocumentProductSerializer, \
     BimaErpSaleDocumentHistorySerializer, BimaErpSaleDocumentProductHistorySerializer
-
-from common.utils.utils import render_to_pdf
-
-from core.address.models import BimaCoreAddress
-from common.permissions.action_base_permission import ActionBasedPermission
-
-from company.models import BimaCompany
-from company.service import fetch_company_data
 
 
 class BimaErpSaleDocumentViewSet(AbstractViewSet):
@@ -43,6 +42,8 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
     filterset_class = SaleDocumentFilter
     action_permissions = {
         'list': ['sale_document.can_read'],
+        'sale_documents_by_partner_for_chart': ['sale_document.can_read'],
+        'sale_documents_by_status_for_chart': ['sale_document.can_read'],
         'create': ['sale_document.can_create'],
         'retrieve': ['sale_document.can_read'],
         'update': ['sale_document.can_update'],
@@ -339,3 +340,35 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
         child = document.bimaerpsaledocumnet_set.all()
         serializer = self.get_serializer(child, many=True)
         return Response(serializer.data)
+
+    @action(detail=False, methods=['get'], url_path="data_by_status_for_chart")
+    def data_by_status_for_chart(self, request):
+        statuses = self.queryset.values('status').annotate(total=Count('status')).order_by('-total')
+        total_entries = self.queryset.count()
+        return Response({'statuses': statuses, 'total_entries': total_entries})
+
+    @action(detail=False, methods=['get'], url_path="data_by_partner_for_chart")
+    def data_by_partner_for_chart(self, request):
+        top_partners = request.query_params.get('show_top_result', None)
+        partners = self.queryset.annotate(
+            partner_name=Case(
+                When(partner__partner_type='INDIVIDUAL',
+                     then=Concat('partner__first_name', Value(' '), 'partner__last_name')),
+                When(partner__partner_type='COMPANY', then='partner__company_name'),
+                default='partner__company_name',
+                output_field=CharField(),
+            )
+        ).values('partner_name').annotate(total=Count('partner')).order_by('-total')
+
+        total_entries = self.queryset.count()
+
+        if top_partners:
+            partners = partners[:int(top_partners)]
+        return Response({'partners': partners, 'total_entries': total_entries})
+
+    @action(detail=False, methods=['get'], url_path="data_by_month_for_chart")
+    def data_by_month_for_chart(self, request):
+        months = self.queryset.annotate(month=ExtractMonth('date')).values('month').annotate(
+            total=Count('id')).order_by('month')
+        total_entries = self.queryset.count()
+        return Response({'months': months, 'total_entries': total_entries})
