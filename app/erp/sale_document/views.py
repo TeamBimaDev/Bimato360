@@ -1,4 +1,5 @@
 import os
+from datetime import timezone, timedelta
 from itertools import groupby
 from collections import defaultdict
 from rest_framework import status
@@ -7,8 +8,8 @@ from rest_framework.response import Response
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.db import transaction
-from django.db.models import Case, When, Value, CharField, Count
-from django.db.models.functions import Concat, ExtractMonth
+from django.db.models import Case, When, Value, CharField, Count, Max, Sum
+from django.db.models.functions import Concat, ExtractMonth, ExtractYear
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, get_list_or_404
 from django.utils.translation import gettext_lazy as _
@@ -372,3 +373,46 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
             total=Count('id')).order_by('month')
         total_entries = self.queryset.count()
         return Response({'months': months, 'total_entries': total_entries})
+
+    @action(detail=False, methods=['get'], url_path="top_selling_products")
+    def top_selling_products(self, request):
+        top_products_count = request.query_params.get('show_top_result', None)
+        products = BimaErpSaleDocumentProduct.objects.values('product__name').annotate(
+            total_sold=Sum('quantity')).order_by('-total_sold')
+        if top_products_count:
+            products = products[:int(top_products_count)]
+        return Response(products)
+
+    @action(detail=False, methods=['get'], url_path="product_sales_over_time")
+    def product_sales_over_time(self, request):
+        product_public_id = request.query_params.get('product_public_id', None)
+        if not product_public_id:
+            return Response({"error": "product_public_id parameter is required"}, status=400)
+        try:
+            product = BimaErpProduct.objects.get(public_id=product_public_id)
+        except BimaErpProduct.DoesNotExist:
+            return Response({"error": "Product does not exist"}, status=404)
+        sales = BimaErpSaleDocumentProduct.objects.filter(product_id=product.id).annotate(
+            month=ExtractMonth('sale_document__date'),
+            year=ExtractYear('sale_document__date'),
+            month_year=Concat(ExtractYear('sale_document__date'), Value('-'), ExtractMonth('sale_document__date'),
+                              output_field=CharField())
+        ).values('month_year').annotate(total_sold=Sum('quantity')).order_by('year', 'month')
+        return Response(sales)
+
+    @action(detail=False, methods=['get'], url_path="unsold_products")
+    def unsold_products(self, request):
+        unsold_products = BimaErpProduct.objects.exclude(
+            id__in=BimaErpSaleDocumentProduct.objects.values('product_id')
+        )
+
+        unsold_products = [
+            {
+                'id': product.id,
+                'name': product.name,
+                'reference': product.reference,
+            }
+            for product in unsold_products
+        ]
+
+        return Response(unsold_products)
