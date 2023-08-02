@@ -1,7 +1,9 @@
 import os
-from PIL import Image
 from io import BytesIO
+
+from PIL import Image
 from django.core.files.base import ContentFile
+from django.http import Http404
 from django.utils.translation import gettext_lazy as _
 
 
@@ -26,3 +28,15 @@ def check_csv_file(csv_file):
         return {'error', _('Incorrect file type')}
 
     return {'success', 'File is good'}
+
+
+def get_available_template(directory_file, file_extension, file_name_prefix):
+    if not os.path.exists(directory_file):
+        raise Http404({"error": _("Dossier template manquant")})
+
+    file_array = []
+    for file in os.listdir(directory_file):
+        if file.endswith(file_extension) and file.startswith(file_name_prefix):
+            file_name = file.replace(file_extension, '').replace(file_name_prefix, '')
+            file_array.append({'file_name': file_name, 'file_path': file})
+    return file_array

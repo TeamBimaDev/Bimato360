@@ -1,36 +1,34 @@
-import pandas as pd
-import tablib
 import csv
 import io
-import numpy as np
+import logging
+from datetime import datetime
+from uuid import UUID
+
 import barcode
+import numpy as np
+import pandas as pd
+import tablib
+from PIL import Image
+from PIL import ImageEnhance, ImageFilter
 from barcode.writer import ImageWriter
+from common.enums.global_enum import get_enum_value
+from common.enums.product_enum import ENUM_MAPPINGS
+from common.enums.product_enum import ProductType, PriceCalculationMethod, ProductStatus
+from common.validators.file_validators import validate_file_extension_is_image, validate_file_size
 from django.db import IntegrityError, transaction
 from django.http import HttpResponse
 from django.utils.translation import gettext_lazy as _
-from PIL import ImageEnhance, ImageFilter
-from PIL import Image
-from datetime import datetime
-from uuid import UUID
-from pyzbar.pyzbar import decode
+from erp.category.models import BimaErpCategory
+from erp.unit_of_measure.models import BimaErpUnitOfMeasure
+from erp.vat.models import BimaErpVat
 from openpyxl import Workbook
 from openpyxl.styles import Font, Border, Side, PatternFill
 from openpyxl.utils import get_column_letter
+from pyzbar.pyzbar import decode
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
 
 from .models import BimaErpProduct
-from common.validators.file_validators import validate_file_extension_is_image, validate_file_size
-import logging
-
-from erp.category.models import BimaErpCategory
-from erp.unit_of_measure.models import BimaErpUnitOfMeasure
-from erp.vat.models import BimaErpVat
-from common.enums.product_enum import ProductType, PriceCalculationMethod, ProductStatus
-
-from common.enums.product_enum import ENUM_MAPPINGS
-
-from common.enums.global_enum import get_enum_value
 
 logger = logging.getLogger(__name__)
 
@@ -205,6 +203,19 @@ def generate_ean13_from_image(barcode_image):
         return {'error': _('Impossible de générer le code à barre')}, status.HTTP_400_BAD_REQUEST
 
 
+def verify_all_required_filed_exist(**kwargs):
+    error_message = []
+    required_fields = ['name', 'reference', 'type', 'price_calculation_method', 'status']
+    for field in required_fields:
+        if not kwargs.get(field):
+            error_message.append({
+                'error': _('{} does not exist').format(field.replace('_', ' ').capitalize()),
+                'data': kwargs.get('name', "")
+            })
+
+    return len(error_message) > 0, error_message
+
+
 def import_product_data_from_csv_file(df):
     error_rows = []
     created_count = 0
@@ -236,14 +247,11 @@ def import_product_data_from_csv_file(df):
             quantity = validate_decimal(row.get('quantity'), 'quantity')
             virtual_quantity = validate_decimal(row.get('virtual_quantity'), 'virtual_quantity')
 
-            if not name or not reference:
-                error_rows.append({'error': _('Name or reference is missing'), 'data': ''})
-                continue
-
-            if not type or not price_calculation_method or not status:
-                error_rows.append({'error': _('Product Type, Price Calculation Method or Status does not exist'),
-                                   'data': ''})
-                continue
+            exist_errors, error_message = verify_all_required_filed_exist(name, reference, type,
+                                                                          price_calculation_method,
+                                                                          status)
+            if exist_errors:
+                error_rows = error_message
 
             category = BimaErpCategory.objects.filter(name=category_name).first() if category_name else None
             vat = BimaErpVat.objects.filter(name=vat_name).first() if vat_name else None

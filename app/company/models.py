@@ -1,11 +1,10 @@
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 import pytz
 from core.abstract.models import AbstractModel
 from core.currency.models import BimaCoreCurrency
 
 from common.enums.language import LanguageEnum
-
-from django.utils.translation import gettext_lazy as _
 
 
 class BimaCompany(AbstractModel):
@@ -29,6 +28,8 @@ class BimaCompany(AbstractModel):
     ape_text = models.CharField(blank=True, null=True, verbose_name=_('Company APE Text'))
     ape_code = models.CharField(blank=True, null=True, verbose_name=_('Company APE Code'))
     capital = models.CharField(blank=True, null=True, verbose_name=_('Company Capital'))
+    default_pdf_invoice_format = models.CharField(blank=True, null=True, default='sale_document_elegant.html',
+                                                  verbose_name=_('Default Invoice format'))
 
     def __str__(self):
         return f"{self.name, self.public_id}"

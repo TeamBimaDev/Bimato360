@@ -204,15 +204,14 @@ def export_to_csv(partners, model_fields):
             try:
                 value = getattr(partner, field)
                 if hasattr(value, 'name'):
-                    # This will handle foreign keys
                     value = getattr(value, 'name', None)
                 elif field in ENUM_MAPPINGS:
-                    # This will handle enums
                     enum_value = getattr(partner, field, None)
                     value = str(ENUM_MAPPINGS[field][enum_value].value) if enum_value is not None else None
                 row_data.append(value if value is not None else '')
-            except Exception as ex:
-                pass
+            except Exception as e:
+                logger.error(f"Error writing row {partner.id} to CSV file: {e}")
+                continue
         writer.writerow(row_data)
 
     return response

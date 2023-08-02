@@ -1,16 +1,20 @@
+import os
+
 import pytz
+from common.permissions.action_base_permission import ActionBasedPermission
+from common.service.file_service import get_available_template
+from common.utils.utils import render_to_pdf
+from core.abstract.views import AbstractViewSet
+from core.document.models import BimaCoreDocument, get_documents_for_parent_entity
+from core.document.serializers import BimaCoreDocumentSerializer
 from django.shortcuts import get_object_or_404
+from django.utils.translation import gettext_lazy as _
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from common.permissions.action_base_permission import ActionBasedPermission
-
-from core.document.serializers import BimaCoreDocumentSerializer
-from core.abstract.views import AbstractViewSet
-from core.document.models import BimaCoreDocument, create_single_document, \
-    get_documents_for_parent_entity
-
+from app import settings
+from .fake_sale import generate_fake_data
 from .models import BimaCompany
 from .serializers import BimaCompanySerializer
 from .service import fetch_company_data
@@ -78,3 +82,27 @@ class BimaCompanyViewSet(AbstractViewSet):
     def get_timezones(self, request):
         timezones = [{'id': tz, 'name': tz} for tz in pytz.all_timezones]
         return Response(timezones)
+
+    @action(detail=False, methods=['GET'], url_path='get_available_templates_for_sale')
+    def get_available_templates_for_sale(self, request):
+        directory_path = os.path.join(settings.BASE_DIR, 'templates', 'sale_document', 'sale_templates')
+        templates = get_available_template(directory_file=directory_path, file_extension='.html',
+                                           file_name_prefix='sale_document_')
+        return Response(templates)
+
+    @action(detail=False, methods=['get'], url_path='generate_pdf_with_fake_data')
+    def generate_pdf_with_fake_data(self, request, pk=None):
+        company = BimaCompany.objects.first()
+        context = generate_fake_data()
+        pdf_filename = "document.pdf"
+
+        context['document_title'] = context['sale_document'].type
+        context['request'] = request
+        context['company_data'] = fetch_company_data(company)
+
+        default_sale_document_pdf_format = request.data.get('template_name')
+        if default_sale_document_pdf_format is None:
+            return Response({'Error': _('Impossible de génrer un appreçu du template')},
+                            status=status.HTTP_400_BAD_REQUEST)
+        template_name = f'sale_document/sale_templates/{default_sale_document_pdf_format}'
+        return render_to_pdf(template_name, context, pdf_filename)

@@ -109,3 +109,4 @@ xhtml2pdf
 zope.event
 zope.interface
 zopfli
+black
