@@ -3,11 +3,12 @@ import os
 import pytz
 from common.permissions.action_base_permission import ActionBasedPermission
 from common.service.file_service import get_available_template
-from common.utils.utils import render_to_pdf
 from core.abstract.views import AbstractViewSet
 from core.document.models import BimaCoreDocument, get_documents_for_parent_entity
 from core.document.serializers import BimaCoreDocumentSerializer
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
+from django.template.loader import get_template
 from django.utils.translation import gettext_lazy as _
 from rest_framework import status
 from rest_framework.decorators import action
@@ -92,17 +93,21 @@ class BimaCompanyViewSet(AbstractViewSet):
 
     @action(detail=False, methods=['get'], url_path='generate_pdf_with_fake_data')
     def generate_pdf_with_fake_data(self, request, pk=None):
-        company = BimaCompany.objects.first()
-        context = generate_fake_data()
-        pdf_filename = "document.pdf"
-
-        context['document_title'] = context['sale_document'].type
-        context['request'] = request
-        context['company_data'] = fetch_company_data(company)
-
         default_sale_document_pdf_format = request.data.get('template_name')
         if default_sale_document_pdf_format is None:
             return Response({'Error': _('Impossible de génrer un appreçu du template')},
                             status=status.HTTP_400_BAD_REQUEST)
+
+        context = self._get_context(request)
         template_name = f'sale_document/sale_templates/{default_sale_document_pdf_format}'
-        return render_to_pdf(template_name, context, pdf_filename)
+        template = get_template(template_name)
+        html = template.render(context)
+        return HttpResponse(html)
+
+    def _get_context(self, request):
+        company = BimaCompany.objects.first()
+        context = generate_fake_data()
+        context['document_title'] = context['sale_document'].type
+        context['request'] = request
+        context['company_data'] = fetch_company_data(company)
+        return context

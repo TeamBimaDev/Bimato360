@@ -1,7 +1,8 @@
 import os
-import coloredlogs
 from datetime import timedelta
 from pathlib import Path
+
+import coloredlogs
 from decouple import Config, Csv, RepositoryEnv
 from django.utils.translation import gettext_lazy as _
 
@@ -35,7 +36,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'debug_toolbar',
+    # 'debug_toolbar',
     'django_filters',
     'django_extensions',
     'corsheaders',
@@ -58,7 +59,7 @@ MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'common.middlewares.error_handling_middleware.ErrorHandlingMiddleware',
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
+    # 'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
