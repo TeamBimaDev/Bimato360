@@ -39,9 +39,9 @@
 
         }
 
-        body {
+       .sale_main_body {
             margin-inline: 5rem;
-            font-family: company_data . company . default_font_family;
+            font-family: {{ company_data.company.default_font_family; }}
         }
 
         .div_header {
@@ -204,7 +204,7 @@
         }
     </style>
 </head>
-<body>
+<body class="sale_main_body">
 <div class="div_header">
     {% if company_data.company.show_template_logo %}
         <div class="company_logo" id="header-left">
