@@ -20,7 +20,7 @@ fake = faker.Faker()
 
 def fake_bima_erp_sale_document(partner):
     sale_document = BimaErpSaleDocument(
-        id=fake.unique.random_int(min=1, max=10),
+        id=fake.random_int(min=1, max=10),
         number=fake.random_number(digits=6, fix_len=True),
         date=fake.date_this_year(),
         status=random.choice([x[0] for x in get_sale_document_status()]),

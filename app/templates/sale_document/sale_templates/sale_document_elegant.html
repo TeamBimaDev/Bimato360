@@ -162,7 +162,7 @@
     <div class="company_name" id="header-left">
         {{ company_data.company.name }}
     </div>
-    {% if company_data.company.show_template_header %}
+    {% if company_data.company.show_template_logo %}
         <div class="company_logo" id="header-right">
             <img src="{{ request.scheme }}://{{ request.get_host }}{{ MEDIA_URL }}{{ company_data.favorite_logo.file_path }}"
                  alt="{% trans "Company Logo" %}" class="logo"/>
