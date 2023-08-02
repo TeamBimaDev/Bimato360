@@ -1,7 +1,8 @@
 from core.abstract.serializers import AbstractSerializer
 from core.currency.models import BimaCoreCurrency
-from .models import BimaCompany
 from rest_framework import serializers
+
+from .models import BimaCompany
 
 
 class BimaCompanySerializer(AbstractSerializer):
@@ -26,5 +27,6 @@ class BimaCompanySerializer(AbstractSerializer):
             'fax', 'website', 'currency', 'currency_public_id', 'language',
             'timezone', 'header_note', 'footer_note', 'creation_date',
             'siren', 'siret', 'date_registration', 'rcs_number', 'date_struck_off',
-            'ape_text', 'ape_code', 'capital', 'created', 'updated'
+            'ape_text', 'ape_code', 'capital', 'created', 'updated', 'default_pdf_invoice_format',
+            'default_font_family', 'show_template_header', 'show_template_footer', 'show_template_logo'
         ]

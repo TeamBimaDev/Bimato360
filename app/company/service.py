@@ -1,8 +1,11 @@
 from common.enums.file_type import FileTypeCompany
-from django.contrib.contenttypes.models import ContentType
-from .serializers import BimaCompanySerializer
-from core.document.serializers import BimaCoreDocumentSerializer
 from core.document.models import BimaCoreDocument
+from core.document.serializers import BimaCoreDocumentSerializer
+from django.contrib.contenttypes.models import ContentType
+
+from .fake_sale import generate_fake_data
+from .models import BimaCompany
+from .serializers import BimaCompanySerializer
 
 
 def fetch_company_data(company):
@@ -31,3 +34,16 @@ def get_favorite_logo(company):
 
 def return_default_sale_document_pdf_file():
     return "sale_document_elegant.html"
+
+
+def get_context(request, request_data):
+    company = BimaCompany.objects.first()
+    company.default_font_family = request_data.get('font_family')
+    company.show_template_header = request_data.get('show_template_header')
+    company.show_template_footer = request_data.get('show_template_footer')
+    company.show_template_logo = request_data.get('show_template_logo')
+    context = generate_fake_data()
+    context['document_title'] = context['sale_document'].type
+    context['request'] = request
+    context['company_data'] = fetch_company_data(company)
+    return context

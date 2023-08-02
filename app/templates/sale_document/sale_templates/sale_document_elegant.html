@@ -31,6 +31,7 @@
 
         body {
             margin-inline: 5rem;
+            font-family: {{ company_data.company.default_font_family }};
         }
 
         .div_header {
@@ -150,6 +151,10 @@
             font-size: 20px;
             font-weight: 800;
         }
+
+        .note {
+            margin-top: 1rem;
+        }
     </style>
 </head>
 <body>
@@ -157,12 +162,12 @@
     <div class="company_name" id="header-left">
         {{ company_data.company.name }}
     </div>
-
-    <div class="company_logo" id="header-right">
-        <img src="{{ request.scheme }}://
-                {{ request.get_host }}{{ MEDIA_URL }}{{ company_data.favorite_logo.file_path }}"
-             alt="{% trans "Company Logo" %}" class="logo"/>
-    </div>
+    {% if company_data.company.show_template_header %}
+        <div class="company_logo" id="header-right">
+            <img src="{{ request.scheme }}://{{ request.get_host }}{{ MEDIA_URL }}{{ company_data.favorite_logo.file_path }}"
+                 alt="{% trans "Company Logo" %}" class="logo"/>
+        </div>
+    {% endif %}
 
 </div>
 
@@ -262,9 +267,11 @@
 <div class="note">{{ sale_document.note }}</div>
 
 
-<div id="footer-left">
-    {{ company_data.company.footer_note|safe }}
-</div>
+{% if company_data.company.show_template_footer %}
+    <div id="footer-left">
+        {{ company_data.company.footer_note|safe }}
+    </div>
+{% endif %}
 
 
 </body>

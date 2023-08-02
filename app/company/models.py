@@ -1,10 +1,10 @@
-from django.db import models
-from django.utils.translation import gettext_lazy as _
 import pytz
+from common.enums.font_family import get_font_family_list
+from common.enums.language import LanguageEnum
 from core.abstract.models import AbstractModel
 from core.currency.models import BimaCoreCurrency
-
-from common.enums.language import LanguageEnum
+from django.db import models
+from django.utils.translation import gettext_lazy as _
 
 
 class BimaCompany(AbstractModel):
@@ -30,6 +30,13 @@ class BimaCompany(AbstractModel):
     capital = models.CharField(blank=True, null=True, verbose_name=_('Company Capital'))
     default_pdf_invoice_format = models.CharField(blank=True, null=True, default='sale_document_elegant.html',
                                                   verbose_name=_('Default Invoice format'))
+    default_font_family = models.CharField(blank=True, null=True, default='arial',
+                                           verbose_name=_('Police par défaut'),
+                                           choices=get_font_family_list())
+    show_template_header = models.BooleanField(default=True, blank=True, null=True, verbose_name=_("Afficher l'entête"))
+    show_template_footer = models.BooleanField(default=True, null=True, blank=True,
+                                               verbose_name=_("Afficher le pieds de page"))
+    show_template_logo = models.BooleanField(default=True, null=True, blank=True, verbose_name=_("Afficher le logo"))
 
     def __str__(self):
         return f"{self.name, self.public_id}"

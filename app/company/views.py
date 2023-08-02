@@ -1,6 +1,10 @@
+import logging
 import os
+from os.path import exists
 
 import pytz
+from common.converters.default_converters import str_to_bool
+from common.enums.font_family import get_font_family_list
 from common.permissions.action_base_permission import ActionBasedPermission
 from common.service.file_service import get_available_template
 from core.abstract.views import AbstractViewSet
@@ -15,10 +19,11 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from app import settings
-from .fake_sale import generate_fake_data
 from .models import BimaCompany
 from .serializers import BimaCompanySerializer
-from .service import fetch_company_data
+from .service import fetch_company_data, get_context
+
+logger = logging.getLogger(__name__)
 
 
 class BimaCompanyViewSet(AbstractViewSet):
@@ -29,6 +34,8 @@ class BimaCompanyViewSet(AbstractViewSet):
     action_permissions = {
         'list': ['company.can_read'],
         'create': ['company.can_create'],
+        'get_available_templates_for_sale': ['company.can_create'],
+        'generate_pdf_with_fake_data': ['company.can_create'],
         'retrieve': ['company.can_read'],
         'update': ['company.can_update'],
         'partial_update': ['company.can_update'],
@@ -84,6 +91,10 @@ class BimaCompanyViewSet(AbstractViewSet):
         timezones = [{'id': tz, 'name': tz} for tz in pytz.all_timezones]
         return Response(timezones)
 
+    @action(detail=False, methods=['GET'], url_path='get_font_families')
+    def get_font_families(self, request):
+        return Response(get_font_family_list())
+
     @action(detail=False, methods=['GET'], url_path='get_available_templates_for_sale')
     def get_available_templates_for_sale(self, request):
         directory_path = os.path.join(settings.BASE_DIR, 'templates', 'sale_document', 'sale_templates')
@@ -91,23 +102,41 @@ class BimaCompanyViewSet(AbstractViewSet):
                                            file_name_prefix='sale_document_')
         return Response(templates)
 
-    @action(detail=False, methods=['get'], url_path='generate_pdf_with_fake_data')
-    def generate_pdf_with_fake_data(self, request, pk=None):
-        default_sale_document_pdf_format = request.data.get('template_name')
+    @action(detail=False, methods=['GET'], url_path='generate_pdf_with_fake_data')
+    def generate_pdf_with_fake_data(self, request):
+        request_data = self._load_data_from_request(request)
+        default_sale_document_pdf_format = request_data.get('default_sale_document_pdf_format')
         if default_sale_document_pdf_format is None:
-            return Response({'Error': _('Impossible de génrer un appreçu du template')},
+            return Response({'Error': _('Impossible de générer un appreçu du template')},
                             status=status.HTTP_400_BAD_REQUEST)
 
-        context = self._get_context(request)
+        template_directory_path = os.path.join(settings.BASE_DIR, 'templates', 'sale_document', 'sale_templates',
+                                               default_sale_document_pdf_format)
+        if not exists(template_directory_path):
+            logger.error(
+                f"Unable to find template file {default_sale_document_pdf_format} under {template_directory_path} ")
+            return Response({'Error': _('Impossible de générer un appreçu du template')},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        context = get_context(request, request_data)
+
         template_name = f'sale_document/sale_templates/{default_sale_document_pdf_format}'
         template = get_template(template_name)
         html = template.render(context)
         return HttpResponse(html)
 
-    def _get_context(self, request):
-        company = BimaCompany.objects.first()
-        context = generate_fake_data()
-        context['document_title'] = context['sale_document'].type
-        context['request'] = request
-        context['company_data'] = fetch_company_data(company)
-        return context
+    def _load_data_from_request(self, request):
+        default_sale_document_pdf_format = request.query_params.get('template_name')
+        font_family = request.query_params.get('font_family', 'Arial')
+        if font_family not in get_font_family_list():
+            font_family = 'Arial'
+        show_template_header = str_to_bool(request.query_params.get('show_template_header', True))
+        show_template_logo = str_to_bool(request.query_params.get('show_template_logo', True))
+        show_template_footer = str_to_bool(request.query_params.get('show_template_footer', True))
+        return {
+            'default_sale_document_pdf_format': default_sale_document_pdf_format,
+            'font_family': font_family,
+            'show_template_header': show_template_header,
+            'show_template_footer': show_template_footer,
+            'show_template_logo': show_template_logo,
+        }

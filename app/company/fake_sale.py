@@ -46,7 +46,7 @@ def fake_bima_erp_sale_document(partner):
 
 def fake_bima_erp_sale_document_product(sale_document):
     product = BimaErpSaleDocumentProduct(
-        id=fake.unique.random_int(min=1, max=10000),
+        id=fake.random_int(min=1, max=10000),
         sale_document=sale_document,
         product=BimaErpProduct.objects.order_by("?").first(),
         sale_document_public_id=fake.uuid4(),
@@ -68,7 +68,7 @@ def fake_bima_erp_sale_document_product(sale_document):
 
 def fake_bima_erp_partner():
     partner = BimaErpPartner(
-        id=fake.unique.random_int(min=1, max=10),
+        id=fake.random_int(min=1, max=10),
         is_supplier=fake.boolean(),
         is_customer=fake.boolean(),
         partner_type=random.choice([x[0] for x in get_partner_type_choices()]),
@@ -105,7 +105,7 @@ def fake_bima_core_address():
     content_type = ContentType.objects.get_for_model(BimaErpPartner)
     parent_id = BimaErpPartner.objects.order_by("?").first().id
     address = BimaCoreAddress(
-        id=fake.unique.random_int(min=1, max=10),
+        id=fake.random_int(min=1, max=10),
         number=fake.building_number(),
         street=fake.street_name(),
         street2=fake.secondary_address(),
