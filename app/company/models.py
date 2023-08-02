@@ -37,6 +37,9 @@ class BimaCompany(AbstractModel):
     show_template_footer = models.BooleanField(default=True, null=True, blank=True,
                                                verbose_name=_("Afficher le pieds de page"))
     show_template_logo = models.BooleanField(default=True, null=True, blank=True, verbose_name=_("Afficher le logo"))
+    default_color = models.CharField(blank=True, null=True, default='#000000',
+                                     verbose_name=_('Couleur par défaut'),
+                                     choices=get_font_family_list())
 
     def __str__(self):
         return f"{self.name, self.public_id}"

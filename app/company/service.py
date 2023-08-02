@@ -39,6 +39,7 @@ def return_default_sale_document_pdf_file():
 def get_context(request, request_data):
     company = BimaCompany.objects.first()
     company.default_font_family = request_data.get('font_family')
+    company.default_color = request_data.get('default_color')
     company.show_template_header = request_data.get('show_template_header')
     company.show_template_footer = request_data.get('show_template_footer')
     company.show_template_logo = request_data.get('show_template_logo')

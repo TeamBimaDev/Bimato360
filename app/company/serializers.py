@@ -28,5 +28,5 @@ class BimaCompanySerializer(AbstractSerializer):
             'timezone', 'header_note', 'footer_note', 'creation_date',
             'siren', 'siret', 'date_registration', 'rcs_number', 'date_struck_off',
             'ape_text', 'ape_code', 'capital', 'created', 'updated', 'default_pdf_invoice_format',
-            'default_font_family', 'show_template_header', 'show_template_footer', 'show_template_logo'
+            'default_font_family', 'show_template_header', 'show_template_footer', 'show_template_logo', 'default_color'
         ]

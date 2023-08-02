@@ -130,12 +130,15 @@ class BimaCompanyViewSet(AbstractViewSet):
         font_family = request.query_params.get('font_family', 'Arial')
         if font_family not in get_font_family_list():
             font_family = 'Arial'
+        default_color = request.query_params.get('default_color', '#000000')
         show_template_header = str_to_bool(request.query_params.get('show_template_header', True))
         show_template_logo = str_to_bool(request.query_params.get('show_template_logo', True))
         show_template_footer = str_to_bool(request.query_params.get('show_template_footer', True))
+
         return {
             'default_sale_document_pdf_format': default_sale_document_pdf_format,
             'font_family': font_family,
+            'default_color': default_color,
             'show_template_header': show_template_header,
             'show_template_footer': show_template_footer,
             'show_template_logo': show_template_logo,
