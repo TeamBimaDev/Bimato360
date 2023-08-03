@@ -7,6 +7,7 @@ from common.converters.default_converters import str_to_bool
 from common.enums.font_family import get_font_family_list
 from common.permissions.action_base_permission import ActionBasedPermission
 from common.service.file_service import get_available_template
+from common.validators.general_validation import string_is_valid_hex_color
 from core.abstract.views import AbstractViewSet
 from core.document.models import BimaCoreDocument, get_documents_for_parent_entity
 from core.document.serializers import BimaCoreDocumentSerializer
@@ -130,7 +131,10 @@ class BimaCompanyViewSet(AbstractViewSet):
         font_family = request.query_params.get('font_family', 'Arial')
         if font_family not in get_font_family_list():
             font_family = 'Arial'
-        default_color = request.query_params.get('default_color', '#000000')
+        default_color = request.query_params.get('default_color', '000000')
+        default_color = '#' + default_color
+        if not string_is_valid_hex_color(default_color):
+            default_color = '#000000'
         show_template_header = str_to_bool(request.query_params.get('show_template_header', True))
         show_template_logo = str_to_bool(request.query_params.get('show_template_logo', True))
         show_template_footer = str_to_bool(request.query_params.get('show_template_footer', True))

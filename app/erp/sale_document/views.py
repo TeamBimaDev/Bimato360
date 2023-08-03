@@ -165,7 +165,7 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
         history = list(sale_document.history.all().select_related('history_user'))
 
         if len(history) < 2:
-            return Response({'error': 'Not enough history to compare.'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': _("Pas assez d'historique pour comparer .")}, status=status.HTTP_400_BAD_REQUEST)
 
         changes_by_date = {}
         for i in range(len(history) - 1):
@@ -184,8 +184,8 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
                     change_date = latest_serialized.get('history_date')
                     change = {
                         'field': field,
-                        'old_value': previous_value,
-                        'new_value': latest_value,
+                        'old_value': latest_value,
+                        'new_value': previous_value,
                         'user': latest_history.history_user.username if latest_history.history_user else None
                     }
 
