@@ -1,18 +1,25 @@
-from django.utils.translation import gettext_lazy as _
+import csv
+
 from django.core.exceptions import ValidationError
+from django.db import transaction
+from django.http import HttpResponse
+from django.utils.translation import gettext_lazy as _
+from django.db.models import Sum
+import logging
+from pandas import DataFrame
+import openpyxl
+from io import BytesIO
+from uuid import UUID
+from datetime import datetime
+from datetime import timedelta
 
 from erp.sale_document.models import BimaErpSaleDocument
-
-from datetime import datetime, timedelta
-from django.db import transaction
-from django.db.models import Sum
+from common.enums.sale_document_enum import SaleDocumentStatus
+from common.enums.partner_type import PartnerType
+from common.service.purchase_sale_service import SalePurchaseService
 
 from .models import BimaErpSaleDocument, BimaErpSaleDocumentProduct, update_sale_document_totals
-import logging
-from django.utils.translation import gettext as _
 
-from common.enums.sale_document_enum import SaleDocumentStatus
-from common.service.purchase_sale_service import SalePurchaseService
 
 logger = logging.getLogger(__name__)
 
@@ -124,3 +131,116 @@ def create_new_document(document_type, parents):
     )
     new_document.parents.add(*parents)
     return new_document
+
+
+def calculate_totals_for_selected_items(items):
+    sums = items.aggregate(
+        total_amount_without_vat=Sum('total_amount_without_vat'),
+        total_vat=Sum('total_vat'),
+        total_discount=Sum('total_discount'),
+        total_after_discount=Sum('total_after_discount'),
+        total_amount=Sum('total_amount')
+    )
+    total_amount_without_vat = sums['total_amount_without_vat']
+    total_vat = sums['total_vat']
+    total_discount = sums['total_discount']
+    total_after_discount = sums['total_after_discount']
+    total_amount = sums['total_amount']
+    totals = {
+        'total_amount_without_vat': total_amount_without_vat,
+        'total_vat': total_vat,
+        'total_discount': total_discount,
+        'total_after_discount': total_after_discount,
+        'total_amount': total_amount
+    }
+    return totals
+
+
+def generate_xls_report(data, fields):
+    rows = []
+    for sale_document in data:
+        try:
+            row = {}
+            for field in fields:
+                value = None
+                try:
+                    if field.name == 'partner':
+                        partner = sale_document.partner
+                        value = partner.company_name if partner.partner_type == PartnerType.COMPANY.name else \
+                            f"{partner.first_name} {partner.last_name}"
+                    elif field.choices:
+                        value = getattr(sale_document, f"get_{field.name}_display")()
+                    else:
+                        value = getattr(sale_document, field.name)
+
+                    if isinstance(value, UUID):
+                        value = str(value)
+                    elif isinstance(value, datetime):
+                        value = value.replace(tzinfo=None)
+
+                    row[field.name] = value
+                except Exception as e:
+                    logger.error(f"Error processing field {field.name} for object {sale_document.pk}: {e}")
+            rows.append(row)
+        except Exception as e:
+            logger.error(f"Error processing object {sale_document.pk}: {e}")
+            continue
+
+    try:
+        df = DataFrame(rows)
+
+        wb = openpyxl.Workbook()
+        ws = wb.active
+
+        headers = [str(field.verbose_name) for field in fields]
+        ws.append(headers)
+
+        for r in DataFrame(df).iterrows():
+            try:
+                ws.append(r[1].tolist())
+            except Exception as e:
+                logger.error(f"Error writing row {r[0]} to Excel file: {e}")
+                continue
+
+        excel_file = BytesIO()
+        wb.save(excel_file)
+
+        response = HttpResponse(
+            excel_file.getvalue(),
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
+        response['Content-Disposition'] = 'attachment; filename=export.xlsx'
+
+        return response
+
+    except Exception as e:
+        logger.error(f"Error generating Excel file: {e}")
+        raise e
+
+
+def generate_csv_report(data, fields):
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="sales.csv"'
+    field_name_to_show = [fd.name for fd in fields]
+    writer = csv.writer(response)
+    writer.writerow(field_name_to_show)
+
+    for sale_document in data:
+        row_data = []
+        for field in fields:
+            try:
+                if field.name == "partner":
+                    partner = sale_document.partner
+                    value = partner.company_name if partner.partner_type == PartnerType.COMPANY.name else \
+                        f"{partner.first_name} {partner.last_name}"
+                elif field.choices:
+                    value = getattr(sale_document, f"get_{field.name}_display")()
+                else:
+                    value = getattr(sale_document, field.name)
+                row_data.append(value if value is not None else '')
+            except Exception as e:
+                logger.error(f"Error writing row {sale_document.id} to CSV file: {e}")
+                continue
+        writer.writerow(row_data)
+
+    return response

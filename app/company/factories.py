@@ -1,7 +1,8 @@
 import factory
 from common.enums.language import LanguageEnum
-from .models import BimaCompany
 from core.currency.factories import BimaCoreCurrencyFactory
+
+from .models import BimaCompany
 
 
 class BimaCompanyFactory(factory.django.DjangoModelFactory):
@@ -19,5 +20,3 @@ class BimaCompanyFactory(factory.django.DjangoModelFactory):
     timezone = 'UTC'
     header_note = factory.Faker('text')
     footer_note = factory.Faker('text')
-
-

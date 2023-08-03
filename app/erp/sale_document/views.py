@@ -1,36 +1,32 @@
 import os
+from collections import defaultdict
 from itertools import groupby
 
-from collections import defaultdict
-
+from common.permissions.action_base_permission import ActionBasedPermission
+from common.utils.utils import render_to_pdf
+from company.models import BimaCompany
+from company.service import fetch_company_data
+from core.abstract.views import AbstractViewSet
+from core.address.models import BimaCoreAddress
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.db import transaction
+from django.db.models import Case, When, Value, CharField, Count, Sum
+from django.db.models.functions import Concat, ExtractMonth, ExtractYear
 from django.http import JsonResponse
+from django.shortcuts import get_object_or_404, get_list_or_404
+from django.utils.translation import gettext_lazy as _
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from django.shortcuts import get_object_or_404, get_list_or_404
-from django.utils.translation import gettext_lazy as _
-
-from core.abstract.views import AbstractViewSet
 
 from .filter import SaleDocumentFilter
-from .service import SaleDocumentService, generate_recurring_sale_documents, create_products_from_parents, \
-    create_new_document
-
-from ..product.models import BimaErpProduct
 from .models import BimaErpSaleDocument, BimaErpSaleDocumentProduct
 from .serializers import BimaErpSaleDocumentSerializer, BimaErpSaleDocumentProductSerializer, \
     BimaErpSaleDocumentHistorySerializer, BimaErpSaleDocumentProductHistorySerializer
-
-from common.utils.utils import render_to_pdf
-
-from core.address.models import BimaCoreAddress
-from common.permissions.action_base_permission import ActionBasedPermission
-
-from company.models import BimaCompany
-from company.service import fetch_company_data
+from .service import SaleDocumentService, generate_recurring_sale_documents, create_products_from_parents, \
+    create_new_document, calculate_totals_for_selected_items, generate_xls_report, generate_csv_report
+from ..product.models import BimaErpProduct
 
 
 class BimaErpSaleDocumentViewSet(AbstractViewSet):
@@ -43,6 +39,8 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
     filterset_class = SaleDocumentFilter
     action_permissions = {
         'list': ['sale_document.can_read'],
+        'sale_documents_by_partner_for_chart': ['sale_document.can_read'],
+        'sale_documents_by_status_for_chart': ['sale_document.can_read'],
         'create': ['sale_document.can_create'],
         'retrieve': ['sale_document.can_read'],
         'update': ['sale_document.can_update'],
@@ -167,7 +165,7 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
         history = list(sale_document.history.all().select_related('history_user'))
 
         if len(history) < 2:
-            return Response({'error': 'Not enough history to compare.'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': _("Pas assez d'historique pour comparer .")}, status=status.HTTP_400_BAD_REQUEST)
 
         changes_by_date = {}
         for i in range(len(history) - 1):
@@ -186,8 +184,8 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
                     change_date = latest_serialized.get('history_date')
                     change = {
                         'field': field,
-                        'old_value': previous_value,
-                        'new_value': latest_value,
+                        'old_value': latest_value,
+                        'new_value': previous_value,
                         'user': latest_history.history_user.username if latest_history.history_user else None
                     }
 
@@ -269,30 +267,35 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
 
     @action(detail=True, methods=['get'], url_path='generate_pdf')
     def generate_pdf(self, request, pk=None):
-        template_name = 'sale_document/sale_document_basic.html'
         pdf_filename = "document.pdf"
         context = self._get_context(pk)
         context['document_title'] = context['sale_document'].type
         context['request'] = request
+        company_data = context.get('company_data', None)
+        default_sale_document_pdf_format = company_data.get('default_sale_document_pdf_format')
+        template_name = f'sale_document/sale_templates/{default_sale_document_pdf_format}'
         return render_to_pdf(template_name, context, pdf_filename)
 
-    def _get_context(self, pk):
-        sale_document = self.get_object()
-        partner = sale_document.partner
+    @action(detail=False, methods=['GET'], url_path='generate_pdf_resume')
+    def generate_pdf_resume(self, request):
+        template_name = 'sale_document/sale_document_resume.html'
+        pdf_filename = 'resume.pdf'
+        context = self._get_context_resume(request)
+        context['document_title'] = _("Rapport")
+        context['request'] = request
+        return render_to_pdf(template_name, context, pdf_filename)
 
-        partner_content_type = ContentType.objects.get_for_model(partner)
-        first_address = BimaCoreAddress.objects.filter(
-            parent_type=partner_content_type,
-            parent_id=partner.id
-        ).select_related('state', 'country').first()
+    @action(detail=False, methods=['GET'], url_path='generate_exel_resume')
+    def generate_exel_resume(self, request):
+        model_fields = BimaErpSaleDocument._meta.fields
+        data_to_export = self.get_filtered_data(request)
+        return generate_xls_report(data_to_export, model_fields)
 
-        company = BimaCompany.objects.first()
-        company_data = fetch_company_data(company)
-
-        context = {'sale_document': sale_document, 'partner': partner, 'address': first_address,
-                   'company_data': company_data}
-
-        return context
+    @action(detail=False, methods=['GET'], url_path='generate_csv_resume')
+    def generate_csv_resume(self, request):
+        fields = BimaErpSaleDocument._meta.fields
+        data_to_export = self.get_filtered_data(request)
+        return generate_csv_report(data_to_export, fields)
 
     @transaction.atomic
     @action(detail=False, methods=['get'], url_path='generate_recurring_sale_documents', permission_classes=[])
@@ -307,25 +310,6 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
 
         return JsonResponse({'message': _('Recurring sale documents generation process has started.')})
 
-    def get_request_data(self, request):
-        document_type = request.data.get('document_type', '')
-        parent_public_ids = request.data.get('parent_public_ids', [])
-        return document_type, parent_public_ids
-
-    def get_parents(self, parent_public_ids):
-        return BimaErpSaleDocument.objects.filter(public_id__in=parent_public_ids)
-
-    def validate_parents(self, parents):
-        if not parents.exists():
-            raise ValidationError({'error': _('No valid parent documents found')})
-        unique_partners = parents.values('partner').distinct()
-        if len(unique_partners) > 1:
-            raise ValidationError({'error': _('All documents should belong to the same partner')})
-
-    def validate_document_type(self, document_type):
-        if not document_type:
-            raise ValidationError({'error': _('Please give the type of the document')})
-
     @action(detail=True, methods=['GET'], url_path='get_direct_parent')
     def get_direct_parent(self, request, pk=None):
         document = self.get_object()
@@ -339,3 +323,142 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
         child = document.bimaerpsaledocumnet_set.all()
         serializer = self.get_serializer(child, many=True)
         return Response(serializer.data)
+
+    @action(detail=False, methods=['get'], url_path="data_by_status_for_chart")
+    def data_by_status_for_chart(self, request):
+        statuses = self.queryset.values('status').annotate(total=Count('status')).order_by('-total')
+        total_entries = self.queryset.count()
+        return Response({'statuses': statuses, 'total_entries': total_entries})
+
+    @action(detail=False, methods=['get'], url_path="data_by_partner_for_chart")
+    def data_by_partner_for_chart(self, request):
+        top_partners = request.query_params.get('show_top_result', None)
+        partners = self.queryset.annotate(
+            partner_name=Case(
+                When(partner__partner_type='INDIVIDUAL',
+                     then=Concat('partner__first_name', Value(' '), 'partner__last_name')),
+                When(partner__partner_type='COMPANY', then='partner__company_name'),
+                default='partner__company_name',
+                output_field=CharField(),
+            )
+        ).values('partner_name').annotate(total=Count('partner')).order_by('-total')
+
+        total_entries = self.queryset.count()
+
+        if top_partners:
+            partners = partners[:int(top_partners)]
+        return Response({'partners': partners, 'total_entries': total_entries})
+
+    @action(detail=False, methods=['get'], url_path="data_by_month_for_chart")
+    def data_by_month_for_chart(self, request):
+        months = self.queryset.annotate(month=ExtractMonth('date')).values('month').annotate(
+            total=Count('id')).order_by('month')
+        total_entries = self.queryset.count()
+        return Response({'months': months, 'total_entries': total_entries})
+
+    @action(detail=False, methods=['get'], url_path="top_selling_products")
+    def top_selling_products(self, request):
+        from_date = self.request.query_params.get('date_from', None)
+        to_date = self.request.query_params.get('date_to', None)
+        top_products_count = request.query_params.get('show_top_result', None)
+
+        products = BimaErpSaleDocumentProduct.objects.values('product__name').annotate(total_sold=Sum('quantity'))
+
+        if from_date is not None:
+            products = products.filter(sale_document__date__gte=from_date)
+        if to_date is not None:
+            products = products.filter(sale_document__date__lte=to_date)
+
+        products = products.order_by('-total_sold')
+
+        if top_products_count:
+            products = products[:int(top_products_count)]
+
+        return Response(products)
+
+    @action(detail=False, methods=['get'], url_path="product_sales_over_time")
+    def product_sales_over_time(self, request):
+        product_public_id = request.query_params.get('product_public_id', None)
+        if not product_public_id:
+            return Response({"error": _("product_public_id parameter is required")}, status=400)
+        try:
+            product = BimaErpProduct.objects.get(public_id=product_public_id)
+        except BimaErpProduct.DoesNotExist:
+            return Response({"error": _("Product does not exist")}, status=404)
+        sales = BimaErpSaleDocumentProduct.objects.filter(product_id=product.id).annotate(
+            month=ExtractMonth('sale_document__date'),
+            year=ExtractYear('sale_document__date'),
+            month_year=Concat(ExtractYear('sale_document__date'), Value('-'), ExtractMonth('sale_document__date'),
+                              output_field=CharField())
+        ).values('month_year').annotate(total_sold=Sum('quantity')).order_by('year', 'month')
+        return Response(sales)
+
+    @action(detail=False, methods=['get'], url_path="unsold_products")
+    def unsold_products(self, request):
+        unsold_products = BimaErpProduct.objects.exclude(
+            id__in=BimaErpSaleDocumentProduct.objects.values('product_id')
+        )
+
+        unsold_products = [
+            {
+                'id': product.public_id,
+                'name': product.name,
+                'reference': product.reference,
+            }
+            for product in unsold_products
+        ]
+
+        return Response(unsold_products)
+
+    def get_request_data(self, request):
+        document_type = request.data.get('document_type', '')
+        parent_public_ids = request.data.get('parent_public_ids', [])
+        return document_type, parent_public_ids
+
+    def get_parents(self, parent_public_ids):
+        return BimaErpSaleDocument.objects.filter(public_id__in=parent_public_ids)
+
+    def validate_parents(self, parents):
+        if not parents.exists():
+            raise ValidationError({'error': _('No valid parent documents found')})
+        unique_partners = parents.values_list('partner__id', flat=True).distinct()
+        unique_ids = list(set(unique_partners))
+        if len(unique_ids) > 1:
+            raise ValidationError({'error': _('All documents should belong to the same partner')})
+
+    def validate_document_type(self, document_type):
+        if not document_type:
+            raise ValidationError({'error': _('Please give the type of the document')})
+
+    def _get_context(self, pk=None):
+        sale_document = self.get_object()
+        partner = sale_document.partner
+
+        partner_content_type = ContentType.objects.get_for_model(partner)
+        first_address = BimaCoreAddress.objects.filter(
+            parent_type=partner_content_type,
+            parent_id=partner.id
+        ).select_related('state', 'country').first()
+
+        company = BimaCompany.objects.first()
+        company_data = fetch_company_data(company)
+
+        context = {'sale_document': sale_document, 'partner': partner, 'address': first_address,
+                   'company_data': company_data, 'products': sale_document.bimaerpsaledocumentproduct_set.all}
+
+        return context
+
+    def _get_context_resume(self, request):
+        sale_documents = self.get_filtered_data(request)
+        company = BimaCompany.objects.first()
+        company_data = fetch_company_data(company)
+        totals = calculate_totals_for_selected_items(sale_documents)
+
+        context = {'sale_documents': sale_documents, 'company_data': company_data, 'totals': totals}
+
+        return context
+
+    def get_filtered_data(self, request):
+        queryset = BimaErpSaleDocument.objects.select_related('partner').all()
+        filtered_sale_document = SaleDocumentFilter(request.GET, queryset=queryset)
+        return filtered_sale_document.qs

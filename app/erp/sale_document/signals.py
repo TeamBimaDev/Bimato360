@@ -9,7 +9,7 @@ from django.utils.translation import gettext_lazy as _
 class InsufficientQuantityError(Exception):
     def __init__(self, product):
         self.product = product
-        super().__init__(f"Insufficient quantity for product {product.reference}")
+        super().__init__(f"Quantité insuffisante pour le produit {product.reference}")
 
 
 def check_sale_document_contains_at_least_one_product_when_confirmed(instance):
@@ -28,20 +28,21 @@ def update_product_quantities(sender, instance):
         try:
             for sale_document_product in sale_document.bimaerpsaledocumentproduct_set.all():
                 product = sale_document_product.product
-                if sale_document.type.lower() == 'quote':
-                    product.virtual_quantity = operation(product.virtual_quantity, sale_document_product.quantity)
-                elif sale_document.type.lower() in ['order', 'invoice']:
-                    new_virtual_quantity = operation(product.virtual_quantity, sale_document_product.quantity)
-                    new_quantity = operation(product.quantity, sale_document_product.quantity)
-                    if new_quantity < 0:
-                        raise InsufficientQuantityError(product)
+                if product.type == 'STOCKABLE_PRODUCT':
+                    if sale_document.type.lower() == 'quote':
+                        product.virtual_quantity = operation(product.virtual_quantity, sale_document_product.quantity)
+                    elif sale_document.type.lower() in ['order', 'invoice']:
+                        new_virtual_quantity = operation(product.virtual_quantity, sale_document_product.quantity)
+                        new_quantity = operation(product.quantity, sale_document_product.quantity)
+                        if new_quantity < 0:
+                            raise InsufficientQuantityError(product)
 
-                    product.virtual_quantity = new_virtual_quantity
-                    product.quantity = new_quantity
-                elif sale_document.type.lower() == 'credit_note':
-                    product.virtual_quantity = operation(product.virtual_quantity, -sale_document_product.quantity)
-                    product.quantity = operation(product.quantity, -sale_document_product.quantity)
-                product.save()
+                        product.virtual_quantity = new_virtual_quantity
+                        product.quantity = new_quantity
+                    elif sale_document.type.lower() == 'credit_note':
+                        product.virtual_quantity = operation(product.virtual_quantity, -sale_document_product.quantity)
+                        product.quantity = operation(product.quantity, -sale_document_product.quantity)
+                    product.save()
         except InsufficientQuantityError as e:
             raise
         except:
