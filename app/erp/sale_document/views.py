@@ -285,8 +285,8 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
         context['request'] = request
         return render_to_pdf(template_name, context, pdf_filename)
 
-    @action(detail=False, methods=['GET'], url_path='generate_exel_resume')
-    def generate_exel_resume(self, request):
+    @action(detail=False, methods=['GET'], url_path='generate_excel_resume')
+    def generate_excel_resume(self, request):
         model_fields = BimaErpSaleDocument._meta.fields
         data_to_export = self.get_filtered_data(request)
         return generate_xls_report(data_to_export, model_fields)

@@ -30,7 +30,7 @@ class BimaCompany(AbstractModel):
     capital = models.CharField(blank=True, null=True, verbose_name=_('Company Capital'))
     default_pdf_invoice_format = models.CharField(blank=True, null=True, default='sale_document_elegant.html',
                                                   verbose_name=_('Default Invoice format'))
-    default_font_family = models.CharField(blank=True, null=True, default='arial',
+    default_font_family = models.CharField(blank=True, null=True, default='Arial',
                                            verbose_name=_('Police par défaut'),
                                            choices=get_font_family_list())
     show_template_header = models.BooleanField(default=True, blank=True, null=True, verbose_name=_("Afficher l'entête"))
