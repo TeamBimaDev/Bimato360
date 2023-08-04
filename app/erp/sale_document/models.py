@@ -89,8 +89,10 @@ class BimaErpSaleDocument(AbstractModel):
     total_discount = models.DecimalField(max_digits=18, decimal_places=3, blank=True, null=True, default=0)
     parents = models.ManyToManyField('self', symmetrical=False, blank=True)
     is_recurring = models.BooleanField(default=False, blank=True, null=True)
-    recurring_initial_parent_id = models.PositiveIntegerField(blank=True, null=True)
-    recurring_initial_parent_public_id = models.UUIDField(blank=True, null=True)
+    is_recurring_parent = models.BooleanField(default=False, blank=True, null=True)
+    is_recurring_ended = models.BooleanField(default=False, blank=True, null=True)
+    recurring_initial_parent_id = models.PositiveIntegerField(blank=True, null=True, default=None)
+    recurring_initial_parent_public_id = models.UUIDField(blank=True, null=True, default=None)
     recurring_interval = models.CharField(
         blank=True,
         null=True,

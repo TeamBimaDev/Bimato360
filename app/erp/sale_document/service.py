@@ -1,25 +1,23 @@
 import csv
-
-from django.core.exceptions import ValidationError
-from django.db import transaction
-from django.http import HttpResponse
-from django.utils.translation import gettext_lazy as _
-from django.db.models import Sum
 import logging
-from pandas import DataFrame
-import openpyxl
-from io import BytesIO
-from uuid import UUID
 from datetime import datetime
 from datetime import timedelta
+from io import BytesIO
+from uuid import UUID
 
-from erp.sale_document.models import BimaErpSaleDocument
-from common.enums.sale_document_enum import SaleDocumentStatus
+import openpyxl
 from common.enums.partner_type import PartnerType
+from common.enums.sale_document_enum import SaleDocumentStatus
 from common.service.purchase_sale_service import SalePurchaseService
+from django.core.exceptions import ValidationError
+from django.db import transaction
+from django.db.models import Sum
+from django.http import HttpResponse
+from django.utils.translation import gettext_lazy as _
+from erp.sale_document.models import BimaErpSaleDocument
+from pandas import DataFrame
 
 from .models import BimaErpSaleDocument, BimaErpSaleDocumentProduct, update_sale_document_totals
-
 
 logger = logging.getLogger(__name__)
 
@@ -52,7 +50,10 @@ def generate_recurring_sale_documents():
     today = datetime.today()
     num_new_sale_documents = 0
 
-    recurring_sale_documents = BimaErpSaleDocument.objects.filter(is_recurring=True)
+    recurring_sale_documents = BimaErpSaleDocument.objects.filter(is_recurring=True, initial_parent_id=None,
+                                                                  initial_parent_public_id=None,
+                                                                  is_recurring_parent=True,
+                                                                  is_recurring_ended=False)
 
     for sale_document in recurring_sale_documents:
         logger.info(f"Treating sale document number: {sale_document.number}")
@@ -62,9 +63,18 @@ def generate_recurring_sale_documents():
         if next_creation_date <= today:
             try:
                 with transaction.atomic():
+                    initial_parent_id = None
+                    initial_parent_public_id = None
+                    if sale_document.initial_parent_id:
+                        initial_parent_id = sale_document.id
+                    if sale_document.initial_parent_public_id:
+                        initial_parent_public_id = sale_document.initial_parent_public_id
+
                     new_sale_document = create_new_document(
                         document_type=sale_document.type,
-                        parents=[sale_document]
+                        parents=[sale_document],
+                        initial_recurrent_parent_id=initial_parent_id,
+                        initial_recurrent_parent_public_id=initial_parent_public_id
                     )
                     create_products_from_parents(parents=[sale_document], new_document=new_sale_document)
 
@@ -121,13 +131,16 @@ def create_products_from_parents(parents, new_document, reset_quantity=False):
     new_document.save()
 
 
-def create_new_document(document_type, parents):
+def create_new_document(document_type, parents, initial_recurrent_parent_id=None,
+                        initial_recurrent_parent_public_id=None):
     new_document = BimaErpSaleDocument.objects.create(
         number=SalePurchaseService.generate_unique_number('sale', document_type.lower()),
         date=datetime.today().strftime('%Y-%m-%d'),
         status=SaleDocumentStatus.DRAFT.name,
         type=document_type,
         partner=parents.first().partner,
+        initial_parent_id=initial_recurrent_parent_id,
+        initial_parent_public_id=initial_recurrent_parent_public_id
     )
     new_document.parents.add(*parents)
     return new_document
