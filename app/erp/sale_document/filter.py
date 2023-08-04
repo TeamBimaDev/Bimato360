@@ -1,12 +1,16 @@
+import logging
 from datetime import timedelta
 from uuid import UUID
-from django.db.models import Q
-import django_filters
-from common.enums.sale_document_enum import SaleDocumentValidity
 
+import django_filters
+from common.converters.default_converters import str_to_bool
+from common.enums.sale_document_enum import SaleDocumentValidity
+from django.db.models import Q
 from django.utils import timezone
 
 from .models import BimaErpSaleDocument
+
+logger = logging.getLogger(__name__)
 
 
 class SaleDocumentFilter(django_filters.FilterSet):
@@ -20,6 +24,7 @@ class SaleDocumentFilter(django_filters.FilterSet):
     total_amount_lte = django_filters.NumberFilter(field_name='total_amount', lookup_expr='lte')
     validity_expired = django_filters.CharFilter(method='filter_validity_expired')
     product = django_filters.CharFilter(method='filter_product_hex')
+    is_recurring = django_filters.CharFilter(method='filter_by_recurring')
 
     class Meta:
         model = BimaErpSaleDocument
@@ -54,4 +59,11 @@ class SaleDocumentFilter(django_filters.FilterSet):
             product_public_id = UUID(hex=value)
             return queryset.filter(bimaerpsaledocumentproduct__product__public_id=product_public_id)
         except ValueError:
+            return queryset
+
+    def filter_by_recurring(self, queryset, name, value):
+        try:
+            return queryset.filter(is_recurring=str_to_bool(value))
+        except Exception as ex:
+            logger.log(f"Unable to log by filter recurring {ex}")
             return queryset

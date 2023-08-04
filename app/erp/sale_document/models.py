@@ -1,18 +1,15 @@
+from common.enums.sale_document_enum import SaleDocumentTypes
+from common.enums.sale_document_enum import get_sale_document_status, \
+    get_sale_document_types, get_sale_document_validity, get_sale_document_recurring_interval, \
+    get_sale_document_recurring_custom_unit, get_sale_document_recurring_cycle
+from core.abstract.models import AbstractModel
 from django.db import models
 from django.db.models import DecimalField, Sum
-from rest_framework.exceptions import ValidationError
-from simple_history.models import HistoricalRecords
-
-from common.enums.sale_document_enum import get_sale_document_status, \
-    get_sale_document_types, get_sale_document_validity, get_sale_document_recurring_interval
-
+from django.utils.translation import gettext_lazy as _
 from erp.partner.models import BimaErpPartner
 from erp.product.models import BimaErpProduct
-
-from core.abstract.models import AbstractModel
-
-from common.enums.sale_document_enum import SaleDocumentTypes
-from django.utils.translation import gettext_lazy as _
+from rest_framework.exceptions import ValidationError
+from simple_history.models import HistoricalRecords
 
 
 class BimaErpSaleDocumentProduct(models.Model):
@@ -91,12 +88,21 @@ class BimaErpSaleDocument(AbstractModel):
     total_discount = models.DecimalField(max_digits=18, decimal_places=3, blank=True, null=True, default=0)
     parents = models.ManyToManyField('self', symmetrical=False, blank=True)
     is_recurring = models.BooleanField(default=False, blank=True, null=True)
-    recurring_interval = models.PositiveIntegerField(
+    recurring_initial_parent_id = models.PositiveIntegerField(blank=True, null=True)
+    recurring_initial_parent_public_id = models.UUIDField(blank=True, null=True)
+    recurring_interval = models.CharField(
         blank=True,
         null=True,
         choices=get_sale_document_recurring_interval(),
         help_text="Interval for recurring sale documents"
     )
+    recurring_interval_type_custom_number = models.PositiveIntegerField(blank=True, null=True, default=0)
+    recurring_interval_type_custom_unit = models.CharField(blank=True, null=True,
+                                                           choices=get_sale_document_recurring_custom_unit())
+    recurring_cycle = models.CharField(blank=True, null=True, choices=get_sale_document_recurring_cycle())
+    recurring_cycle_number_to_repeat = models.PositiveIntegerField(blank=True, null=True, default=0)
+    recurring_cycle_stop_at = models.DateField(null=True, blank=True)
+    recurring_cycle_stopped_at = models.DateField(null=True, blank=True)
     history = HistoricalRecords()
     sale_document_products = models.ManyToManyField(BimaErpProduct, through=BimaErpSaleDocumentProduct)
 

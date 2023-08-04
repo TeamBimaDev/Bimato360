@@ -1,4 +1,5 @@
 from enum import Enum
+
 from django.utils.translation import gettext_lazy as _
 
 
@@ -23,14 +24,37 @@ class SaleDocumentValidity(Enum):
 
 
 class SaleDocumentRecurringInterval(Enum):
-    EVERY_DAY = 1
-    MONTHLY = 30
-    THREE_MONTHLY = 90
-    YEARLY = 365
+    DAILY = _('QUOTIDIEN')
+    WEEKLY = _('HEBDOMADAIRE')
+    MONTHLY = _('MENSUEL')
+    QUARTERLY = _('TRIMESTRIEL')
+    YEARLY = _('ANNUEL')
+    CUSTOM = _('PERSONNALISE')
+
+
+class SaleDocumentRecurringIntervalCustomUnit(Enum):
+    DAY = _('JOUR')
+    WEEK = _('SEMAINE')
+    MONTH = _("MOIS")
+    YEAR = _("ANNEE")
+
+
+class SaleDocumentRecurringIntervalCustomUnit(Enum):
+    UNDEFINED = _('INDEFINIE')
+    END_AT = _('TERMINE LE')
+    END_AFTER = _("TERMINE APRES")
+
+
+def get_sale_document_recurring_cycle():
+    return [(ri.name, ri.value) for ri in SaleDocumentRecurringInterval]
 
 
 def get_sale_document_recurring_interval():
-    return [(member.value, member.name.lower().replace('_', ' ')) for member in SaleDocumentRecurringInterval]
+    return [(ri.name, ri.value) for ri in SaleDocumentRecurringInterval]
+
+
+def get_sale_document_recurring_custom_unit():
+    return [(ut.name, ut.value) for ut in SaleDocumentRecurringIntervalCustomUnit]
 
 
 def get_sale_document_types():
