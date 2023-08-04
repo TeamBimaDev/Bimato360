@@ -1,7 +1,8 @@
 from common.enums.sale_document_enum import SaleDocumentTypes
 from common.enums.sale_document_enum import get_sale_document_status, \
     get_sale_document_types, get_sale_document_validity, get_sale_document_recurring_interval, \
-    get_sale_document_recurring_custom_unit, get_sale_document_recurring_cycle
+    get_sale_document_recurring_custom_unit, get_sale_document_recurring_cycle, SaleDocumentRecurringInterval, \
+    SaleDocumentRecurringCycle
 from core.abstract.models import AbstractModel
 from django.db import models
 from django.db.models import DecimalField, Sum
@@ -115,6 +116,7 @@ class BimaErpSaleDocument(AbstractModel):
         if self.pk is not None:  # only do this for existing instances, not when creating new ones
             if self.bimaerpsaledocument_set.exists():
                 raise ValidationError("Cannot modify a SaleDocument that has children.")
+        self.validate_all_required_field_for_recurring()
         super().save(*args, **kwargs)
 
     TYPE_DISPLAY_MAPPING = {
@@ -127,6 +129,25 @@ class BimaErpSaleDocument(AbstractModel):
     @property
     def display_type(self):
         return self.TYPE_DISPLAY_MAPPING.get(self.type, self.type)
+
+    def validate_all_required_field_for_recurring(self):
+        if self.is_recurring:
+            self.validate_custom_recurring_interval()
+            self.validate_recurring_cycle_end_at()
+            self.validate_recurring_cycle_end_after()
+
+    def validate_custom_recurring_interval(self):
+        if (self.recurring_interval == SaleDocumentRecurringInterval.CUSTOM.name and
+                (not self.recurring_interval_type_custom_number or not self.recurring_interval_type_custom_unit)):
+            raise ValidationError({'Error': _('CHOISIR_RECURRENT_CUSTOM_TYPE_UNIT_OR_NUMBER')})
+
+    def validate_recurring_cycle_end_at(self):
+        if self.recurring_cycle == SaleDocumentRecurringCycle.END_AT.name and not self.recurring_cycle_stop_at:
+            raise ValidationError({'Error': _('CHOISIR_RECURRENT_CYCLE_DATE_FIN')})
+
+    def validate_recurring_cycle_end_after(self):
+        if self.recurring_cycle == SaleDocumentRecurringCycle.END_AFTER.name and not self.recurring_cycle_number_to_repeat:
+            raise ValidationError({'Error': _('CHOISIR_RECURRENT_CYCLE_NOMBRE_CYCLE')})
 
 
 def update_sale_document_totals(sale_document):

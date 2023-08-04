@@ -39,14 +39,14 @@ class SaleDocumentRecurringIntervalCustomUnit(Enum):
     YEAR = _("ANNEE")
 
 
-class SaleDocumentRecurringIntervalCustomUnit(Enum):
+class SaleDocumentRecurringCycle(Enum):
     UNDEFINED = _('INDEFINIE')
     END_AT = _('TERMINE LE')
     END_AFTER = _("TERMINE APRES")
 
 
 def get_sale_document_recurring_cycle():
-    return [(ri.name, ri.value) for ri in SaleDocumentRecurringInterval]
+    return [(rc.name, rc.value) for rc in SaleDocumentRecurringCycle]
 
 
 def get_sale_document_recurring_interval():
