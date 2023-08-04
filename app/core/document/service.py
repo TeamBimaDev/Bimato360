@@ -1,8 +1,10 @@
+import logging
 from enum import Enum
+
+from common.converters.default_converters import str_to_bool
 from common.enums.file_type import FileTypeCompany
 from common.enums.file_type import FileTypeUser
 from common.service.file_service import resize_image as image_resizer
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -41,7 +43,7 @@ def get_supported_type_for_resize(document_data):
 def verify_is_favorite_item_exist(document_data, existing_docs):
     if (
             get_supported_type_for_resize(document_data)
-            and document_data.get('is_favorite', False)
+            and str_to_bool(document_data.get('is_favorite', False))
             and existing_docs is not None
     ):
         existing_docs.update(is_favorite=False)

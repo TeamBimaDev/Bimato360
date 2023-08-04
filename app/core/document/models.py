@@ -1,17 +1,18 @@
-from datetime import datetime
 import os
 import uuid
+from datetime import datetime
 
-from django.db import models
+from common.converters.default_converters import str_to_bool
+from common.enums.file_type import get_file_type_choices
+from common.validators.file_validators import validate_file_size, validate_file_extension
+from core.abstract.models import AbstractModel
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
+from django.db import models
 from django.utils.translation import gettext_lazy as _
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
 
-from core.abstract.models import AbstractModel
-from common.enums.file_type import get_file_type_choices
-from common.validators.file_validators import validate_file_size, validate_file_extension
 from .service import resize_image, verify_is_favorite_item_exist
 
 
@@ -85,7 +86,7 @@ class BimaCoreDocument(AbstractModel):
                 parent_id=parent.id,
                 file_name=filename,
                 file_extension=ext,
-                is_favorite=document_data.get('is_favorite', False)
+                is_favorite=str_to_bool(document_data.get('is_favorite', False))
             )
 
             document.file_path.save(os.path.join('uploads', 'documents', app_label, filename), file)
