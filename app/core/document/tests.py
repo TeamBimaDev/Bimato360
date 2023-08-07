@@ -79,7 +79,7 @@ class BimaCoreDocumentTest(APITestCase):
         BimaCompanyFactory.create()
         self.company = BimaCompany.objects.first()
         public_id = self.company.public_id
-        url = reverse('company:bimacompany-list') + f'{public_id}/documents/'
+        url = reverse('bimacompany-list') + f'{public_id}/documents/'
         self.document_data['parent_type'] = ContentType.objects.get_for_model(self.company).id
         self.document_data['parent_id'] = self.company.id
         response = self.client.post(url, self.document_data, format='multipart')

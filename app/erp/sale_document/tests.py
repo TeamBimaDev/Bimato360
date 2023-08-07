@@ -217,7 +217,7 @@ class BimaErpSaleDocumentTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(BimaErpSaleDocumentProduct.objects.get(pk=product.pk).name, 'sucre')
 
-    def test_change_status_of_purchase_document(self):
+    def test_change_status_of_sale_document(self):
         self.add_product_for_sale_document()
         sale_document = BimaErpSaleDocument.objects.first()
         url = reverse('erp:bimaerpsaledocument-detail', kwargs={'pk': str(sale_document.public_id)})
