@@ -1,5 +1,6 @@
 from enum import Enum
 
+from dateutil.relativedelta import relativedelta
 from django.utils.translation import gettext_lazy as _
 
 
@@ -30,6 +31,15 @@ class SaleDocumentRecurringInterval(Enum):
     QUARTERLY = _('TRIMESTRIEL')
     YEARLY = _('ANNUEL')
     CUSTOM = _('PERSONNALISE')
+
+
+time_interval_based_on_recurring_interval = {
+    SaleDocumentRecurringInterval.DAILY.name: relativedelta(days=1),
+    SaleDocumentRecurringInterval.WEEKLY.name: relativedelta(weeks=1),
+    SaleDocumentRecurringInterval.MONTHLY.name: relativedelta(months=1),
+    SaleDocumentRecurringInterval.QUARTERLY.name: relativedelta(months=3),
+    SaleDocumentRecurringInterval.YEARLY.name: relativedelta(years=1)
+}
 
 
 class SaleDocumentRecurringIntervalCustomUnit(Enum):

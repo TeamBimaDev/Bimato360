@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'auditlog',
     'simple_history',
     'drf_spectacular',
+    'django_celery_beat',
     'logging',
     'core',
     'user',
@@ -239,6 +240,10 @@ LOGGING = {
             'level': 'DEBUG',
             'propagate': False,
         },
+        'celery': {
+            'handlers': ['console', 'file'],
+            'level': 'DEBUG',
+        },
     },
 }
 
@@ -263,3 +268,6 @@ CELERY_RESULT_BACKEND = "db+sqlite:///celery.sqlite"
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
+CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
+CELERY_TIMEZONE = 'UTC'
+CELERY_ENABLE_UTC = True

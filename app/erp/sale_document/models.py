@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from common.enums.sale_document_enum import SaleDocumentTypes
 from common.enums.sale_document_enum import get_sale_document_status, \
     get_sale_document_types, get_sale_document_validity, get_sale_document_recurring_interval, \
@@ -106,6 +108,7 @@ class BimaErpSaleDocument(AbstractModel):
     recurring_cycle_number_to_repeat = models.PositiveIntegerField(blank=True, null=True, default=0)
     recurring_cycle_stop_at = models.DateField(null=True, blank=True)
     recurring_cycle_stopped_at = models.DateField(null=True, blank=True)
+    recurring_last_generated_day = models.DateField(null=True, blank=True, default=None)
     history = HistoricalRecords()
     sale_document_products = models.ManyToManyField(BimaErpProduct, through=BimaErpSaleDocumentProduct)
 
@@ -116,7 +119,7 @@ class BimaErpSaleDocument(AbstractModel):
 
     def save(self, *args, **kwargs):
         if self.pk is not None:  # only do this for existing instances, not when creating new ones
-            if self.bimaerpsaledocument_set.exists():
+            if self.bimaerpsaledocument_set.exists() and not self.is_recurring:
                 raise ValidationError("Cannot modify a SaleDocument that has children.")
         self.validate_all_required_field_for_recurring()
         super().save(*args, **kwargs)
@@ -146,9 +149,12 @@ class BimaErpSaleDocument(AbstractModel):
     def validate_recurring_cycle_end_at(self):
         if self.recurring_cycle == SaleDocumentRecurringCycle.END_AT.name and not self.recurring_cycle_stop_at:
             raise ValidationError({'Error': _('CHOISIR_RECURRENT_CYCLE_DATE_FIN')})
+        if self.recurring_cycle_stop_at and self.recurring_cycle_stop_at < datetime.now():
+            raise ValidationError({'Error': _('CHOISIR_RECURRENT_CYCLE_DATE_FIN_FUTURE')})
 
     def validate_recurring_cycle_end_after(self):
-        if self.recurring_cycle == SaleDocumentRecurringCycle.END_AFTER.name and not self.recurring_cycle_number_to_repeat:
+        if self.recurring_cycle == SaleDocumentRecurringCycle.END_AFTER.name and not \
+                self.recurring_cycle_number_to_repeat:
             raise ValidationError({'Error': _('CHOISIR_RECURRENT_CYCLE_NOMBRE_CYCLE')})
 
 

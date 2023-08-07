@@ -1,4 +1,5 @@
 import os
+
 from celery import Celery
 from celery.schedules import crontab
 
@@ -8,8 +9,10 @@ app.config_from_object("django.conf:settings", namespace="CELERY")
 app.autodiscover_tasks()
 
 app.conf.beat_schedule = {
-    'generate_recurring_sale_documents': {
-        'task': 'erp.sale_document.tasks.generate_recurring_sale_documents',
-        'schedule': crontab(hour=8, minute=30),
+    'generate_recurring_sale_documents_task': {
+        'task': 'erp.tasks.generate_recurring_sale_documents_task',
+        'schedule': crontab(hour='11', minute='10'),
+        'args': ('celer_beat_security_key_to_access_to_tasks',)
     },
+
 }

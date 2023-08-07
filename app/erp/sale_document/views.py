@@ -1,4 +1,3 @@
-import os
 from collections import defaultdict
 from itertools import groupby
 
@@ -300,11 +299,11 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
     @transaction.atomic
     @action(detail=False, methods=['get'], url_path='generate_recurring_sale_documents', permission_classes=[])
     def generate_recurring_sale_documents(self, request):
-        authorization_token = request.headers.get('Authorization')
-        expected_token = os.environ.get('AUTHORIZATION_TOKEN_FOR_CRON')
-
-        if authorization_token != expected_token:
-            return JsonResponse({'error': _('Unauthorized')}, status=401)
+        # authorization_token = request.headers.get('Authorization')
+        # expected_token = os.environ.get('AUTHORIZATION_TOKEN_FOR_CRON')
+        #
+        # if authorization_token != expected_token:
+        #     return JsonResponse({'error': _('Unauthorized')}, status=401)
 
         generate_recurring_sale_documents()
 

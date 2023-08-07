@@ -71,7 +71,8 @@ class BimaErpSaleDocumentSerializer(AbstractSerializer):
             'updated', 'total_vat', 'total_amount', 'total_discount', 'children', 'is_recurring',
             'recurring_initial_parent_id', 'recurring_initial_parent_public_id', 'recurring_interval',
             'recurring_interval_type_custom_number', 'recurring_interval_type_custom_unit', 'recurring_cycle',
-            'recurring_cycle_number_to_repeat', 'recurring_cycle_stop_at', 'recurring_cycle_stopped_at'
+            'recurring_cycle_number_to_repeat', 'recurring_cycle_stop_at', 'recurring_cycle_stopped_at',
+            'recurring_last_generated_day'
         ]
         read_only_fields = ('total_vat', 'total_amount', 'total_discount',)
 
