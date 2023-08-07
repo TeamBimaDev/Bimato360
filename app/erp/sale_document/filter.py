@@ -25,6 +25,7 @@ class SaleDocumentFilter(django_filters.FilterSet):
     validity_expired = django_filters.CharFilter(method='filter_validity_expired')
     product = django_filters.CharFilter(method='filter_product_hex')
     is_recurring = django_filters.CharFilter(method='filter_by_recurring')
+    is_recurring_parent = django_filters.CharFilter(method='filter_by_recurring_parent')
 
     class Meta:
         model = BimaErpSaleDocument
@@ -64,6 +65,13 @@ class SaleDocumentFilter(django_filters.FilterSet):
     def filter_by_recurring(self, queryset, name, value):
         try:
             return queryset.filter(is_recurring=str_to_bool(value))
+        except Exception as ex:
+            logger.log(f"Unable to log by filter recurring {ex}")
+            return queryset
+
+    def filter_by_recurring_parent(self, queryset, name, value):
+        try:
+            return queryset.filter(is_recurring_parent=str_to_bool(value))
         except Exception as ex:
             logger.log(f"Unable to log by filter recurring {ex}")
             return queryset
