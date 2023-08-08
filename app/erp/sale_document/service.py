@@ -99,7 +99,7 @@ def generate_recurring_sale_documents():
             except Exception as e:
                 logger.error(_(f"Error creating new SaleDocument for parent {sale_document.id}: {str(e)}"))
 
-            sale_document.last_generated_date = today
+            sale_document.recurring_last_generated_day = today
             sale_document.save()
 
     logger.info(f'Successfully created {num_new_sale_documents} new sale documents')
@@ -299,7 +299,7 @@ def get_custom_recurring_interval_value(unit, number):
 def verify_recurring_not_ended(sale_document):
     if sale_document.recurring_cycle != SaleDocumentRecurringCycle.END_AT.name:
         return True
-    if sale_document.recurring_cycle_stop_at < datetime.now():
+    if sale_document.recurring_cycle_stop_at > datetime.now().date():
         return True
 
     stop_recurring_sale_document(sale_document, sale_document.recurring_cycle_stop_at)

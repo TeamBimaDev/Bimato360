@@ -95,7 +95,7 @@ class BimaErpSaleDocumentSerializer(AbstractSerializer):
             'recurring_interval_type_custom_number', 'recurring_interval_type_custom_unit', 'recurring_cycle',
             'recurring_cycle_number_to_repeat', 'recurring_cycle_stop_at', 'recurring_cycle_stopped_at',
             'recurring_last_generated_day', 'recurring_reason_stop', 'recurring_reason_reactivated',
-            'recurring_reactivated_date', 'recurring_stopped_by_display', 'recurring_reactivated_by_display'
+            'recurring_reactivated_date', 'recurring_stopped_by_display', 'recurring_reactivated_by_display','is_recurring_ended'
         ]
         read_only_fields = ('total_vat', 'total_amount', 'total_discount',)
 
@@ -131,7 +131,7 @@ class BimaErpSaleDocumentHistorySerializer(serializers.ModelSerializer):
                   'recurring_cycle', 'recurring_cycle_number_to_repeat', 'recurring_cycle_stop_at',
                   'recurring_cycle_stopped_at', 'recurring_last_generated_day', 'recurring_reason_stop',
                   'recurring_reason_reactivated', 'recurring_reactivated_date', 'history_user_display',
-                  'recurring_stopped_by_display', 'recurring_reactivated_by_display']
+                  'recurring_stopped_by_display', 'recurring_reactivated_by_display','is_recurring_ended']
 
 
 class BimaErpSaleDocumentProductSerializer(serializers.Serializer):
