@@ -85,9 +85,10 @@ class BimaErpSaleDocumentSerializer(AbstractSerializer):
 
     class Meta:
         model = BimaErpSaleDocument
+
         fields = [
             'id', 'number', 'date', 'status', 'type', 'partner', 'partner_public_id', 'note',
-            'private_note', 'validity', 'payment_terms', 'delivery_terms', 'total_vat', 'total_amount',
+            'private_note', 'validity', 'payment_terms', 'delivery_terms', 'total_vat',
             'total_discount', 'parents', 'parent_public_ids', 'history', 'vat_label', 'vat_amount', 'created',
             'updated', 'total_vat', 'total_amount', 'total_discount', 'children', 'is_recurring', 'is_recurring_parent',
             'recurring_initial_parent_id', 'recurring_initial_parent_public_id', 'recurring_interval',
@@ -100,12 +101,36 @@ class BimaErpSaleDocumentSerializer(AbstractSerializer):
 
 
 class BimaErpSaleDocumentHistorySerializer(serializers.ModelSerializer):
+    recurring_stopped_by_display = serializers.SerializerMethodField(read_only=True)
+    recurring_reactivated_by_display = serializers.SerializerMethodField(read_only=True)
+
+    def get_recurring_stopped_by_display(self, obj):
+        if obj.recurring_stopped_by:
+            return {
+                'name': obj.recurring_stopped_by.name,
+                "public_id": obj.recurring_stopped_by.public_id
+            }
+        return None
+
+    def get_recurring_reactivated_by_display(self, obj):
+        if obj.recurring_reactivated_by:
+            return {
+                'name': obj.recurring_reactivated_by.name,
+                'public_id': obj.recurring_reactivated_by.public_id
+            }
+        return None
+
     class Meta:
         model = BimaErpSaleDocument.history.model
         fields = ['id', 'number', 'date', 'status', 'type', 'partner_id',
                   'note', 'private_note', 'validity', 'payment_terms', 'delivery_terms', 'vat_label', 'vat_amount',
-                  'total_amount', 'total_discount', 'total_vat', 'history_type', 'history_date',
-                  'history_user']
+                  'total_amount', 'total_discount', 'total_vat', 'history_type', 'history_date', 'is_recurring',
+                  'is_recurring_parent', 'recurring_initial_parent_id', 'recurring_initial_parent_public_id',
+                  'recurring_interval', 'recurring_interval_type_custom_number', 'recurring_interval_type_custom_unit',
+                  'recurring_cycle', 'recurring_cycle_number_to_repeat', 'recurring_cycle_stop_at',
+                  'recurring_cycle_stopped_at', 'recurring_last_generated_day', 'recurring_reason_stop',
+                  'recurring_reason_reactivated', 'recurring_reactivated_date', 'history_user',
+                  'recurring_stopped_by_display', 'recurring_reactivated_by_display']
 
 
 class BimaErpSaleDocumentProductSerializer(serializers.Serializer):
@@ -197,6 +222,6 @@ class BimaErpSaleDocumentProductHistorySerializer(serializers.ModelSerializer):
         model = BimaErpSaleDocumentProduct.history.model
         fields = [
             'id', 'sale_document_public_id', 'name', 'reference', 'quantity', 'unit_price', 'vat', 'vat_amount',
-            'description', 'discount', 'discount_amount', 'total_without_vat',
+            'description', 'discount', 'discount_amount', 'total_without_vat', 'unit_of_measure',
             'total_after_discount', 'total_price', 'history_type', 'history_date'
         ]
