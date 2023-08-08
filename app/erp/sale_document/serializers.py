@@ -44,6 +44,9 @@ class BimaErpSaleDocumentSerializer(AbstractSerializer):
             {
                 'id': parent.public_id.hex,
                 'number': parent.number,
+                'is_recurring': parent.is_recurring,
+                'is_recurring_parent': parent.is_recurring_parent,
+                'recurring_initial_parent_public_id': parent.recurring_initial_parent_public_id,
             }
             for parent in obj.parents.all()
         ] if obj.parents else []
