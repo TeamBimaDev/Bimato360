@@ -1,10 +1,13 @@
 from common.enums.company_type import get_company_type_choices
 from common.enums.entity_status import get_entity_status_choices
 from common.enums.gender import get_gender_choices
+from common.enums.partner_type import PartnerType
 from common.enums.partner_type import get_partner_type_choices
 from core.abstract.models import AbstractModel
 from django.db import models
+from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
+from rest_framework.exceptions import ValidationError
 
 
 class BimaErpPartner(AbstractModel):
@@ -57,4 +60,30 @@ class BimaErpPartner(AbstractModel):
         default_permissions = ()
 
     def save(self, *args, **kwargs):
+        self.validate_unique_data_if_company()
+        self.validate_unique_data_if_individual()
         super().save(*args, **kwargs)
+
+    def validate_unique_data_if_company(self):
+        if self.partner_type != PartnerType.COMPANY.name:
+            return True
+
+        query = Q(company_siren=self.company_siren) | Q(company_siret=self.company_siret)
+
+        if self.pk:
+            query = query & ~Q(pk=self.pk)
+
+        if BimaErpPartner.objects.filter(query).exists():
+            raise ValidationError(_("N° siren & siret doit être unique"))
+
+    def validate_unique_data_if_individual(self):
+        if self.partner_type != PartnerType.INDIVIDUAL.name:
+            return True
+
+        query = Q(id_number=self.id_number) | Q(social_security_number=self.social_security_number)
+
+        if self.pk:
+            query = query & ~Q(pk=self.pk)
+
+        if BimaErpPartner.objects.filter(query).exists():
+            raise ValidationError(_("N° identité et N° sécurité sociale doit être unique"))
