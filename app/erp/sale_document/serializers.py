@@ -104,20 +104,21 @@ class BimaErpSaleDocumentHistorySerializer(serializers.ModelSerializer):
     recurring_stopped_by_display = serializers.SerializerMethodField(read_only=True)
     recurring_reactivated_by_display = serializers.SerializerMethodField(read_only=True)
 
+    history_user_display = serializers.SerializerMethodField(read_only=True)
+
     def get_recurring_stopped_by_display(self, obj):
         if obj.recurring_stopped_by:
-            return {
-                'name': obj.recurring_stopped_by.name,
-                "public_id": obj.recurring_stopped_by.public_id
-            }
+            return obj.recurring_stopped_by.name
         return None
 
     def get_recurring_reactivated_by_display(self, obj):
         if obj.recurring_reactivated_by:
-            return {
-                'name': obj.recurring_reactivated_by.name,
-                'public_id': obj.recurring_reactivated_by.public_id
-            }
+            return obj.recurring_reactivated_by.name
+        return None
+
+    def get_history_user_display(self, obj):
+        if obj.history_user:
+            return obj.history_user.name
         return None
 
     class Meta:
@@ -129,7 +130,7 @@ class BimaErpSaleDocumentHistorySerializer(serializers.ModelSerializer):
                   'recurring_interval', 'recurring_interval_type_custom_number', 'recurring_interval_type_custom_unit',
                   'recurring_cycle', 'recurring_cycle_number_to_repeat', 'recurring_cycle_stop_at',
                   'recurring_cycle_stopped_at', 'recurring_last_generated_day', 'recurring_reason_stop',
-                  'recurring_reason_reactivated', 'recurring_reactivated_date', 'history_user',
+                  'recurring_reason_reactivated', 'recurring_reactivated_date', 'history_user_display',
                   'recurring_stopped_by_display', 'recurring_reactivated_by_display']
 
 

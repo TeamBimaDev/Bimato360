@@ -66,12 +66,12 @@ class SaleDocumentFilter(django_filters.FilterSet):
         try:
             return queryset.filter(is_recurring=str_to_bool(value))
         except Exception as ex:
-            logger.log(f"Unable to log by filter recurring {ex}")
+            logger.error(f"Unable to log by filter recurring {ex}")
             return queryset
 
     def filter_by_recurring_parent(self, queryset, name, value):
         try:
             return queryset.filter(is_recurring_parent=str_to_bool(value))
         except Exception as ex:
-            logger.log(f"Unable to log by filter recurring {ex}")
+            logger.error(f"Unable to log by filter recurring {ex}")
             return queryset

@@ -303,7 +303,7 @@ def verify_recurring_not_ended(sale_document):
         return True
 
     stop_recurring_sale_document(sale_document, sale_document.recurring_cycle_stop_at)
-    logger.log(
+    logger.error(
         f"Recurring sale document N° {sale_document.public_id} ended at {sale_document.recurring_cycle_stop_at} "
         f"current date is {datetime.now()}")
     return False
@@ -318,7 +318,7 @@ def verify_recurring_limit_number_not_attempt(sale_document):
         return True
 
     stop_recurring_sale_document(sale_document, datetime.now())
-    logger.log(
+    logger.error(
         f"Recurring sale document N° {sale_document.public_id} ended at {sale_document.recurring_cycle_stop_at} "
         f"after recurring {recurring_times_number} times ")
     return False
@@ -346,7 +346,7 @@ def stop_recurring_sale_document(sale_document, stop_date, reason=None, stopped_
         sale_document.save()
         return True
     except Exception as ex:
-        logger.log(f"Unable to stop sale_document {sale_document.public_id} for reason {ex.args}")
+        logger.error(f"Unable to stop sale_document {sale_document.public_id} for reason {ex.args}")
         return False
 
 
@@ -369,5 +369,5 @@ def reactivate_recurring_sale_document(sale_document, reactivation_date, reason=
         sale_document.save()
         return True
     except Exception as ex:
-        logger.log(f"Unable to reactivate sale_document {sale_document.public_id} for reason {ex.args}")
+        logger.error(f"Unable to reactivate sale_document {sale_document.public_id} for reason {ex.args}")
         return False

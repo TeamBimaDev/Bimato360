@@ -188,7 +188,7 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
                         'field': field,
                         'old_value': latest_value,
                         'new_value': previous_value,
-                        'user': latest_history.history_user.username if latest_history.history_user else None
+                        'user': latest_history.history_user.name if latest_history.history_user else None
                     }
 
                     if change_date in changes_by_date:
@@ -235,7 +235,7 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
                             'old_value': previous_value,
                             'new_value': latest_value,
                             'history_type': latest_serialized.get('history_type'),
-                            'user': latest_history.history_user.username if latest_history.history_user else None
+                            'user': latest_history.history_user.name if latest_history.history_user else None
                         }
                         product_differences.append(change)
 
