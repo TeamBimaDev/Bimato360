@@ -164,7 +164,7 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
     def get_history_diff(self, request, pk=None):
         sale_document = self.get_object()
 
-        history = list(sale_document.history.all().select_related('history_user'))
+        history = list(sale_document.history.all().select_related('history_user').order_by('-history_date'))
 
         if len(history) < 2:
             return Response({'error': _("Pas assez d'historique pour comparer .")}, status=status.HTTP_400_BAD_REQUEST)
@@ -188,7 +188,7 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
                         'field': field,
                         'old_value': latest_value,
                         'new_value': previous_value,
-                        'user': latest_history.history_user.name if latest_history.history_user else None
+                        'user': previous_history.history_user.name if previous_history.history_user else None
                     }
 
                     if change_date in changes_by_date:
