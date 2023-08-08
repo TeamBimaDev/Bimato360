@@ -6,6 +6,7 @@ from common.enums.sale_document_enum import get_sale_document_status, \
     get_sale_document_recurring_custom_unit, get_sale_document_recurring_cycle, SaleDocumentRecurringInterval, \
     SaleDocumentRecurringCycle
 from core.abstract.models import AbstractModel
+from django.contrib.auth import get_user_model
 from django.db import models
 from django.db.models import DecimalField, Sum
 from django.utils.translation import gettext_lazy as _
@@ -109,6 +110,14 @@ class BimaErpSaleDocument(AbstractModel):
     recurring_cycle_stop_at = models.DateField(null=True, blank=True)
     recurring_cycle_stopped_at = models.DateField(null=True, blank=True)
     recurring_last_generated_day = models.DateField(null=True, blank=True, default=None)
+    recurring_reason_stop = models.TextField(null=True, blank=True, default=None)
+    recurring_stopped_by = models.ForeignKey(get_user_model(), null=True, blank=True, on_delete=models.SET_NULL,
+                                             related_name="stopped_by")
+    recurring_reason_reactivated = models.TextField(null=True, blank=True, default=None)
+    recurring_reactivated_by = models.ForeignKey(get_user_model(), null=True, blank=True, on_delete=models.SET_NULL,
+                                                 related_name="reactivated_by")
+    recurring_reactivated_date = models.DateField(null=True, blank=True, default=None)
+
     history = HistoricalRecords()
     sale_document_products = models.ManyToManyField(BimaErpProduct, through=BimaErpSaleDocumentProduct)
 

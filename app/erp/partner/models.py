@@ -1,23 +1,25 @@
-from django.utils.translation import gettext_lazy as _
-from django.db import models
-
-from core.abstract.models import AbstractModel
-
 from common.enums.company_type import get_company_type_choices
 from common.enums.entity_status import get_entity_status_choices
 from common.enums.gender import get_gender_choices
 from common.enums.partner_type import get_partner_type_choices
+from core.abstract.models import AbstractModel
+from django.db import models
+from django.utils.translation import gettext_lazy as _
 
 
 class BimaErpPartner(AbstractModel):
     is_supplier = models.BooleanField(blank=True, null=True, verbose_name=_('Is Supplier'))
     is_customer = models.BooleanField(blank=True, null=True, verbose_name=_('Is Customer'))
-    partner_type = models.CharField(max_length=128, blank=False, null=False, choices=get_partner_type_choices(), verbose_name=_('Partner Type'))
-    company_type = models.CharField(max_length=256, blank=True, null=True, choices=get_company_type_choices(), verbose_name=_('Company Type'))
+    partner_type = models.CharField(max_length=128, blank=False, null=False, choices=get_partner_type_choices(),
+                                    verbose_name=_('Partner Type'))
+    company_type = models.CharField(max_length=256, blank=True, null=True, choices=get_company_type_choices(),
+                                    verbose_name=_('Company Type'))
     first_name = models.CharField(max_length=128, blank=True, null=True, verbose_name=_('First Name'))
     last_name = models.CharField(max_length=128, blank=True, null=True, verbose_name=_('Last Name'))
-    gender = models.CharField(max_length=32, blank=True, null=True, choices=get_gender_choices(), verbose_name=_('Gender'))
-    social_security_number = models.CharField(max_length=64, blank=True, null=True, verbose_name=_('Social Security Number'))
+    gender = models.CharField(max_length=32, blank=True, null=True, choices=get_gender_choices(),
+                              verbose_name=_('Gender'))
+    social_security_number = models.CharField(max_length=64, blank=True, null=True,
+                                              verbose_name=_('Social Security Number'))
     id_number = models.CharField(max_length=64, blank=True, null=True, verbose_name=_('ID Number'))
     email = models.EmailField(blank=True, null=True, verbose_name=_('Email'))
     phone = models.CharField(blank=True, null=True, verbose_name=_('Phone'))
@@ -25,7 +27,8 @@ class BimaErpPartner(AbstractModel):
     company_name = models.CharField(blank=True, null=True, verbose_name=_('Company Name'))
     company_activity = models.CharField(blank=True, null=True, verbose_name=_('Company Activity'))
     vat_id_number = models.CharField(blank=True, null=True, verbose_name=_('VAT ID Number'))
-    status = models.CharField(max_length=32, blank=True, null=True, choices=get_entity_status_choices(), verbose_name=_('Status'))
+    status = models.CharField(max_length=32, blank=True, null=True, choices=get_entity_status_choices(),
+                              verbose_name=_('Status'))
     note = models.CharField(blank=True, null=True, verbose_name=_('Note'))
     company_date_creation = models.DateTimeField(blank=True, null=True, verbose_name=_('Company Date Creation'))
     company_siren = models.CharField(blank=True, null=True, verbose_name=_('Company Siren'))
@@ -46,12 +49,12 @@ class BimaErpPartner(AbstractModel):
         self.save()
 
     def __str__(self):
-        return f"{self.public_id , self.partner_type, self.first_name}"
+        return f"{self.public_id, self.partner_type, self.first_name}"
 
     class Meta:
         ordering = ['-created']
         permissions = []
         default_permissions = ()
 
-
-from .signals import create_partner_related_entities
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)

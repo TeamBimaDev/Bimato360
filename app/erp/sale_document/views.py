@@ -1,4 +1,5 @@
 from collections import defaultdict
+from datetime import datetime
 from itertools import groupby
 
 from common.permissions.action_base_permission import ActionBasedPermission
@@ -24,7 +25,8 @@ from .models import BimaErpSaleDocument, BimaErpSaleDocumentProduct
 from .serializers import BimaErpSaleDocumentSerializer, BimaErpSaleDocumentProductSerializer, \
     BimaErpSaleDocumentHistorySerializer, BimaErpSaleDocumentProductHistorySerializer
 from .service import SaleDocumentService, generate_recurring_sale_documents, create_products_from_parents, \
-    create_new_document, calculate_totals_for_selected_items, generate_xls_report, generate_csv_report
+    create_new_document, calculate_totals_for_selected_items, generate_xls_report, generate_csv_report, \
+    stop_recurring_sale_document, reactivate_recurring_sale_document
 from ..product.models import BimaErpProduct
 
 
@@ -319,9 +321,30 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
     @action(detail=True, methods=['GET'], url_path='get_direct_child')
     def get_direct_child(self, request, pk):
         document = self.get_object()
-        child = document.bimaerpsaledocumnet_set.all()
+        child = document.bimaerpsaledocument_set.all()
         serializer = self.get_serializer(child, many=True)
         return Response(serializer.data)
+
+    @action(detail=True, methods=['POST'], url_path='stop_recurring_sale_document')
+    def stop_recurring_sale_document(self, request, pk):
+        document = self.get_object()
+        if not stop_recurring_sale_document(sale_document=document, stop_date=datetime.now(),
+                                            reason=request.data.get('reason'), stopped_by=True, request=request):
+            return Response({"Error": _("Impossible de stopper la facture récurrente")},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        return Response({"Succes": _("Facture récurrente arrêter")})
+
+    @action(detail=True, methods=['POST'], url_path='reactivate_recurring_sale_document')
+    def reactivate_recurring_sale_document(self, request, pk):
+        document = self.get_object()
+        if not reactivate_recurring_sale_document(sale_document=document, reactivation_date=datetime.now(),
+                                                  reason=request.data.get('reason'), reactivated_by=True,
+                                                  request=request):
+            return Response({"Error": _("Impossible de reactiver la facture récurrente")},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        return Response({"Succes": _("Facture récurrente reactiver")})
 
     @action(detail=False, methods=['get'], url_path="data_by_status_for_chart")
     def data_by_status_for_chart(self, request):

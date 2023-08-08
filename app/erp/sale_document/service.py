@@ -329,7 +329,44 @@ def get_number_recurrent_document_generated_from_parent(sale_document):
                                               is_recurring=True).count()
 
 
-def stop_recurring_sale_document(sale_document, stop_date):
-    sale_document.recurring_cycle_stopped_at = stop_date
-    sale_document.is_recurring_ended = True
-    sale_document.save()
+def stop_recurring_sale_document(sale_document, stop_date, reason=None, stopped_by=False, request=None):
+    try:
+        sale_document.recurring_cycle_stopped_at = stop_date
+        sale_document.is_recurring_ended = True
+        sale_document.recurring_reason_stop = reason
+        if stopped_by:
+            user = None
+            if request and hasattr(request, "user"):
+                user = request.user
+            sale_document.recurring_stopped_by = user
+
+        sale_document.recurring_reason_reactivated = None
+        sale_document.recurring_reactivated_by = None
+        sale_document.recurring_reactivated_date = None
+        sale_document.save()
+        return True
+    except Exception as ex:
+        logger.log(f"Unable to stop sale_document {sale_document.public_id} for reason {ex.args}")
+        return False
+
+
+def reactivate_recurring_sale_document(sale_document, reactivation_date, reason=None, reactivated_by=False,
+                                       request=None):
+    try:
+        sale_document.recurring_reactivated_date = reactivation_date
+        sale_document.recurring_reason_reactivated = reason
+        if reactivated_by:
+            user = None
+            if request and hasattr(request, "user"):
+                user = request.user
+            sale_document.recurring_reactivated_by = user
+
+        sale_document.recurring_stopped_by = None
+        sale_document.recurring_reason_stop = None
+        sale_document.is_recurring_ended = False
+        sale_document.recurring_cycle_stopped_at = None
+        sale_document.save()
+        return True
+    except Exception as ex:
+        logger.log(f"Unable to reactivate sale_document {sale_document.public_id} for reason {ex.args}")
+        return False
