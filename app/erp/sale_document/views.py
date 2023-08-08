@@ -6,6 +6,7 @@ from common.permissions.action_base_permission import ActionBasedPermission
 from common.utils.utils import render_to_pdf
 from company.models import BimaCompany
 from company.service import fetch_company_data
+from core.abstract.pagination import DefaultPagination
 from core.abstract.views import AbstractViewSet
 from core.address.models import BimaCoreAddress
 from django.contrib.contenttypes.models import ContentType
@@ -321,9 +322,11 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
     @action(detail=True, methods=['GET'], url_path='get_direct_child')
     def get_direct_child(self, request, pk):
         document = self.get_object()
-        child = document.bimaerpsaledocument_set.all()
+        paginator = DefaultPagination()
+        child = paginator.paginate_queryset(document.bimaerpsaledocument_set.all(), request)
+
         serializer = self.get_serializer(child, many=True)
-        return Response(serializer.data)
+        return paginator.get_paginated_response(serializer.data)
 
     @action(detail=True, methods=['POST'], url_path='stop_recurring_sale_document')
     def stop_recurring_sale_document(self, request, pk):
