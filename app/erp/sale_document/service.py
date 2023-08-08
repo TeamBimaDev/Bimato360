@@ -365,6 +365,7 @@ def reactivate_recurring_sale_document(sale_document, reactivation_date, reason=
         sale_document.recurring_reason_stop = None
         sale_document.is_recurring_ended = False
         sale_document.recurring_cycle_stopped_at = None
+
         sale_document.save()
         return True
     except Exception as ex:

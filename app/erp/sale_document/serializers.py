@@ -11,6 +11,8 @@ from ..partner.models import BimaErpPartner
 class BimaErpSaleDocumentSerializer(AbstractSerializer):
     history = serializers.SerializerMethodField()
     children = serializers.SerializerMethodField(read_only=True)
+    recurring_stopped_by_display = serializers.SerializerMethodField(read_only=True)
+    recurring_reactivated_by_display = serializers.SerializerMethodField(read_only=True)
 
     parents = serializers.SerializerMethodField(read_only=True)
     parent_public_ids = serializers.SlugRelatedField(
@@ -65,6 +67,22 @@ class BimaErpSaleDocumentSerializer(AbstractSerializer):
             for child in obj.bimaerpsaledocument_set.all()
         ] if obj.bimaerpsaledocument_set else []
 
+    def get_recurring_stopped_by_display(self, obj):
+        if obj.recurring_stopped_by:
+            return {
+                'name': obj.recurring_stopped_by.name,
+                "public_id": obj.recurring_stopped_by.public_id
+            }
+        return None
+
+    def get_recurring_reactivated_by_display(self, obj):
+        if obj.recurring_reactivated_by:
+            return {
+                'name': obj.recurring_reactivated_by.name,
+                'public_id': obj.recurring_reactivated_by.public_id
+            }
+        return None
+
     class Meta:
         model = BimaErpSaleDocument
         fields = [
@@ -76,7 +94,7 @@ class BimaErpSaleDocumentSerializer(AbstractSerializer):
             'recurring_interval_type_custom_number', 'recurring_interval_type_custom_unit', 'recurring_cycle',
             'recurring_cycle_number_to_repeat', 'recurring_cycle_stop_at', 'recurring_cycle_stopped_at',
             'recurring_last_generated_day', 'recurring_reason_stop', 'recurring_reason_reactivated',
-            'recurring_reactivated_date', 'recurring_stopped_by', 'recurring_reactivated_by',
+            'recurring_reactivated_date', 'recurring_stopped_by_display', 'recurring_reactivated_by_display'
         ]
         read_only_fields = ('total_vat', 'total_amount', 'total_discount',)
 
