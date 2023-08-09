@@ -11,7 +11,7 @@ app.autodiscover_tasks()
 app.conf.beat_schedule = {
     'generate_recurring_sale_documents_task': {
         'task': 'erp.tasks.generate_recurring_sale_documents_task',
-        'schedule': crontab(hour='11', minute='10'),
+        'schedule': crontab(hour='10', minute='00'),
         'args': ('celer_beat_security_key_to_access_to_tasks',)
     },
 

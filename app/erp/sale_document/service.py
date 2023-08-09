@@ -56,7 +56,8 @@ def generate_recurring_sale_documents():
     recurring_sale_documents = BimaErpSaleDocument.objects.filter(is_recurring=True, recurring_initial_parent_id=None,
                                                                   recurring_initial_parent_public_id=None,
                                                                   is_recurring_parent=True,
-                                                                  is_recurring_ended=False)
+                                                                  is_recurring_ended=False,
+                                                                  status=SaleDocumentStatus.CONFIRMED.name)
 
     for sale_document in recurring_sale_documents:
 
