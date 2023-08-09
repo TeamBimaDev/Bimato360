@@ -1,13 +1,11 @@
+from django.conf import settings
+from django.conf.urls.static import static
+from django.contrib import admin
+from django.urls import path, include
 from drf_spectacular.views import (
     SpectacularAPIView,
     SpectacularSwaggerView,
 )
-
-from django.contrib import admin
-from django.urls import path, include
-from django.conf.urls.static import static
-from django.conf import settings
-import debug_toolbar
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -19,10 +17,11 @@ urlpatterns = [
     ),
     path('api/user/', include('user.urls')),
     path('api/core/', include('core.urls')),
-    # path('api/hr/', include('hr.urls')),
     path('api/company/', include('company.urls')),
     path('api/erp/', include('erp.urls')),
-    path('__debug__/', include(debug_toolbar.urls)),
+    path('api/analysis/', include('analysis.urls')),
+    # path('api/hr/', include('hr.urls')),
+    # path('__debug__/', include(debug_toolbar.urls)),
 ]
 
 urlpatterns += static(

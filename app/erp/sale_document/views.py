@@ -12,8 +12,6 @@ from core.address.models import BimaCoreAddress
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.db import transaction
-from django.db.models import Case, When, Value, CharField, Count, Sum
-from django.db.models.functions import Concat, ExtractMonth, ExtractYear
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, get_list_or_404
 from django.utils.translation import gettext_lazy as _
@@ -348,92 +346,6 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
                             status=status.HTTP_400_BAD_REQUEST)
 
         return Response({"Succes": _("Facture récurrente reactiver")})
-
-    @action(detail=False, methods=['get'], url_path="data_by_status_for_chart")
-    def data_by_status_for_chart(self, request):
-        statuses = self.queryset.values('status').annotate(total=Count('status')).order_by('-total')
-        total_entries = self.queryset.count()
-        return Response({'statuses': statuses, 'total_entries': total_entries})
-
-    @action(detail=False, methods=['get'], url_path="data_by_partner_for_chart")
-    def data_by_partner_for_chart(self, request):
-        top_partners = request.query_params.get('show_top_result', None)
-        partners = self.queryset.annotate(
-            partner_name=Case(
-                When(partner__partner_type='INDIVIDUAL',
-                     then=Concat('partner__first_name', Value(' '), 'partner__last_name')),
-                When(partner__partner_type='COMPANY', then='partner__company_name'),
-                default='partner__company_name',
-                output_field=CharField(),
-            )
-        ).values('partner_name').annotate(total=Count('partner')).order_by('-total')
-
-        total_entries = self.queryset.count()
-
-        if top_partners:
-            partners = partners[:int(top_partners)]
-        return Response({'partners': partners, 'total_entries': total_entries})
-
-    @action(detail=False, methods=['get'], url_path="data_by_month_for_chart")
-    def data_by_month_for_chart(self, request):
-        months = self.queryset.annotate(month=ExtractMonth('date')).values('month').annotate(
-            total=Count('id')).order_by('month')
-        total_entries = self.queryset.count()
-        return Response({'months': months, 'total_entries': total_entries})
-
-    @action(detail=False, methods=['get'], url_path="top_selling_products")
-    def top_selling_products(self, request):
-        from_date = self.request.query_params.get('date_from', None)
-        to_date = self.request.query_params.get('date_to', None)
-        top_products_count = request.query_params.get('show_top_result', None)
-
-        products = BimaErpSaleDocumentProduct.objects.values('product__name').annotate(total_sold=Sum('quantity'))
-
-        if from_date is not None:
-            products = products.filter(sale_document__date__gte=from_date)
-        if to_date is not None:
-            products = products.filter(sale_document__date__lte=to_date)
-
-        products = products.order_by('-total_sold')
-
-        if top_products_count:
-            products = products[:int(top_products_count)]
-
-        return Response(products)
-
-    @action(detail=False, methods=['get'], url_path="product_sales_over_time")
-    def product_sales_over_time(self, request):
-        product_public_id = request.query_params.get('product_public_id', None)
-        if not product_public_id:
-            return Response({"error": _("product_public_id parameter is required")}, status=400)
-        try:
-            product = BimaErpProduct.objects.get(public_id=product_public_id)
-        except BimaErpProduct.DoesNotExist:
-            return Response({"error": _("Product does not exist")}, status=404)
-        sales = BimaErpSaleDocumentProduct.objects.filter(product_id=product.id).annotate(
-            month=ExtractMonth('sale_document__date'),
-            year=ExtractYear('sale_document__date'),
-            month_year=Concat(ExtractYear('sale_document__date'), Value('-'), ExtractMonth('sale_document__date'),
-                              output_field=CharField())
-        ).values('month_year').annotate(total_sold=Sum('quantity')).order_by('year', 'month')
-        return Response(sales)
-
-    @action(detail=False, methods=['get'], url_path="unsold_products")
-    def unsold_products(self, request):
-        unsold_products = BimaErpProduct.objects.exclude(
-            id__in=BimaErpSaleDocumentProduct.objects.values('product_id')
-        )
-
-        unsold_products = [
-            {
-                'id': product.public_id,
-                'name': product.name,
-                'reference': product.reference,
-            }
-            for product in unsold_products
-        ]
-
-        return Response(unsold_products)
 
     def get_request_data(self, request):
         document_type = request.data.get('document_type', '')
