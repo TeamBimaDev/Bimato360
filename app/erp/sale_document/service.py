@@ -53,24 +53,25 @@ def generate_recurring_sale_documents():
     today = datetime.today().date()
     num_new_sale_documents = 0
 
-    recurring_sale_documents = BimaErpSaleDocument.objects.filter(is_recurring=True, recurring_initial_parent_id=None,
-                                                                  recurring_initial_parent_public_id=None,
-                                                                  is_recurring_parent=True,
-                                                                  is_recurring_ended=False,
-                                                                  status=SaleDocumentStatus.CONFIRMED.name)
+    recurring_sale_documents = BimaErpSaleDocument.objects.filter(
+        is_recurring=True,
+        recurring_initial_parent_id=None,
+        recurring_initial_parent_public_id=None,
+        is_recurring_parent=True,
+        is_recurring_ended=False,
+        status=SaleDocumentStatus.CONFIRMED.name
+    )
 
     for sale_document in recurring_sale_documents:
-
         recurring_interval_time = get_recurring_interval_value(sale_document)
         if recurring_interval_time is None:
             continue
 
-        date_to_compare_with = sale_document.recurring_last_generated_day
-        if date_to_compare_with is None:
-            date_to_compare_with = sale_document.date
-        next_creation_date = date_to_compare_with + recurring_interval_time
+        if sale_document.recurring_next_generated_day is None:
+            sale_document.recurring_next_generated_day = sale_document.date + recurring_interval_time
+            sale_document.save()
 
-        if next_creation_date == today:
+        if sale_document.recurring_next_generated_day <= today:
             try:
                 if not verify_recurring_not_ended(sale_document):
                     continue
@@ -78,6 +79,7 @@ def generate_recurring_sale_documents():
                     continue
 
                 logger.info(f"Treating sale document number: {sale_document.number}")
+
                 with transaction.atomic():
                     initial_parent_id = sale_document.id
                     initial_parent_public_id = sale_document.public_id
@@ -89,17 +91,17 @@ def generate_recurring_sale_documents():
                         initial_recurrent_parent_public_id=initial_parent_public_id,
                         is_recurring=True
                     )
+
                     create_products_from_parents(parents=[sale_document], new_document=new_sale_document)
 
                     logger.info(
-                        f"{new_sale_document.type} N° {new_sale_document.number}"
-                        f" is created from {sale_document.number}")
-
+                        f"{new_sale_document.type} N° {new_sale_document.number} is created from {sale_document.number}")
                     num_new_sale_documents += 1
 
             except Exception as e:
-                logger.error(_(f"Error creating new SaleDocument for parent {sale_document.id}: {str(e)}"))
+                logger.error(f"Error creating new SaleDocument for parent {sale_document.id}: {str(e)}")
 
+            sale_document.recurring_next_generated_day = today + recurring_interval_time
             sale_document.recurring_last_generated_day = today
             sale_document.save()
 

@@ -1,9 +1,12 @@
 import logging
-from collections import defaultdict
+from calendar import monthrange
+from collections import defaultdict, OrderedDict
+from datetime import date
 
+from common.enums.partner_type import PartnerType
 from django.db import models
-from django.db.models import Sum, Count, Avg, DateField, Subquery
-from django.db.models.functions import TruncDay, TruncWeek, TruncMonth, TruncYear, Trunc
+from django.db.models import Sum, Count, Avg, DateField, Subquery, Case, When, Value, CharField, F
+from django.db.models.functions import TruncDay, TruncWeek, TruncMonth, TruncYear, Trunc, Concat
 from django.shortcuts import get_object_or_404
 from erp.product.models import BimaErpProduct
 from erp.sale_document.models import BimaErpSaleDocument
@@ -207,3 +210,83 @@ class BimaAnalysisService:
                     f"current_value:{current_value}  with message {ex.args}")
 
         return result
+
+    @staticmethod
+    def annotate_partner_name(queryset):
+        return queryset.annotate(
+            partner_name=Case(
+                When(partner__partner_type=PartnerType.INDIVIDUAL.name,
+                     then=Concat(F('partner__first_name'), Value(' '), F('partner__last_name'))
+                     ),
+                default=F('partner__company_name'),
+                output_field=CharField(),
+            )
+        )
+
+    @staticmethod
+    def get_top_partners(period='monthly', top_n=3, year=None, show_all_periods=False):
+        trunc_map = {
+            'daily': TruncDay,
+            'weekly': TruncWeek,
+            'monthly': TruncMonth,
+            'yearly': TruncYear
+        }
+
+        sales = BimaErpSaleDocument.objects.annotate(period=trunc_map[period]('date'))
+
+        if year:
+            sales = sales.filter(date__year=year)
+
+        data = (BimaAnalysisService.annotate_partner_name(sales)
+                .values('period', 'partner_name')
+                .annotate(total_amount=Sum('total_amount'))
+                .order_by('period', '-total_amount'))
+
+        grouped_data = OrderedDict()
+        for item in data:
+            period_str = item['period'].strftime('%Y-%m-%d') if isinstance(item['period'], date) else str(
+                item['period'])
+
+            if item['total_amount'] == 0:
+                continue
+
+            if period_str not in grouped_data:
+                grouped_data[period_str] = []
+
+            if len(grouped_data[period_str]) < top_n:
+                grouped_data[period_str].append({
+                    'name': item['partner_name'],
+                    'total': item['total_amount']
+                })
+
+        # If show_all_periods is True, fill in the gaps.
+        if show_all_periods and year:
+            if period == 'monthly':
+                for month in range(1, 13):
+                    month_str = f"{year}-{month:02}-01"
+                    if month_str not in grouped_data:
+                        grouped_data[month_str] = []
+
+            elif period == 'daily':
+                for day in range(1, monthrange(year, 12)[1] + 1):
+                    day_str = f"{year}-12-{day:02}"
+                    if day_str not in grouped_data:
+                        grouped_data[day_str] = []
+
+            elif period == 'weekly':
+                # Same weekly handling logic as before...
+                for week in range(1, 53):
+                    week_start = f"{year}-W{week}-1"
+                    if week_start not in grouped_data:
+                        grouped_data[week_start] = []
+        sorted_grouped_data = OrderedDict(sorted(grouped_data.items(), key=lambda x: x[0]))
+
+        # Ensure each period has top_n items
+        for key in sorted_grouped_data:
+            while len(sorted_grouped_data[key]) < top_n:
+                sorted_grouped_data[key].append({
+                    'name': "",
+                    'total': 0
+                })
+
+        return {'partners': dict(sorted_grouped_data)}

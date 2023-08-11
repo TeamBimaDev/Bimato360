@@ -1,3 +1,6 @@
+from datetime import datetime
+
+from common.converters.default_converters import str_to_bool
 from django.shortcuts import get_object_or_404
 from erp.partner.models import BimaErpPartner
 from erp.sale_document.models import BimaErpSaleDocument
@@ -33,7 +36,7 @@ class BimaAnalysisViewSet(viewsets.ViewSet):
     @action(detail=False, methods=['get'], url_path="most_sold_products")
     def most_sold_products(self, request):
         filter_period = request.query_params.get("filter_period", 'monthly').lower()
-        top_n = int(request.query_params.get("top_n", 10))
+        top_n = int(request.query_params.get("top_n", 3))
 
         sales_data = BimaErpSaleDocument.objects.all()
         result = BimaAnalysisService.get_most_sold_products_data(sales_data, filter_period, top_n)
@@ -83,3 +86,14 @@ class BimaAnalysisViewSet(viewsets.ViewSet):
             return Response({"error": str(ve)}, status=400)
         except Exception as e:
             return Response({"error": "An unexpected error occurred."}, status=500)
+
+    @action(detail=False, methods=['GET'], url_path="top_partners_sales")
+    def top_partners_sales(self, request):
+        today = datetime.now()
+        period = request.query_params.get('filter_period', 'monthly')
+        top_n = int(request.query_params.get('top_n', 3))
+        year = int(request.query_params.get('year', today.year))
+        show_all_periods = str_to_bool(request.query_params.get('show_all_periods', False))
+        print(year)
+        data = BimaAnalysisService.get_top_partners(period, top_n, year, show_all_periods)
+        return Response(data)

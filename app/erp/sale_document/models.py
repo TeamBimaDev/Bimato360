@@ -110,6 +110,7 @@ class BimaErpSaleDocument(AbstractModel):
     recurring_cycle_stop_at = models.DateField(null=True, blank=True)
     recurring_cycle_stopped_at = models.DateField(null=True, blank=True)
     recurring_last_generated_day = models.DateField(null=True, blank=True, default=None)
+    recurring_next_generated_day = models.DateField(null=True, blank=True, default=None)
     recurring_reason_stop = models.TextField(null=True, blank=True, default=None)
     recurring_stopped_by = models.ForeignKey(get_user_model(), null=True, blank=True, on_delete=models.SET_NULL,
                                              related_name="stopped_by")
@@ -127,7 +128,7 @@ class BimaErpSaleDocument(AbstractModel):
         default_permissions = ()
 
     def save(self, *args, **kwargs):
-        if self.pk is not None:  # only do this for existing instances, not when creating new ones
+        if self.pk is not None:
             if self.bimaerpsaledocument_set.exists() and not self.is_recurring:
                 raise ValidationError("Cannot modify a SaleDocument that has children.")
         self.validate_all_required_field_for_recurring()
