@@ -1,13 +1,26 @@
 import django_filters
+from common.converters.default_converters import str_to_bool
+from common.permissions.action_base_permission import ActionBasedPermission
+from common.service.file_service import check_csv_file
+from common.utils.utils import render_to_pdf
 from core.abstract.views import AbstractViewSet
+from core.address.models import BimaCoreAddress, get_addresses_for_parent, create_single_address
+from core.address.serializers import BimaCoreAddressSerializer
+from core.contact.models import BimaCoreContact, create_single_contact, \
+    get_contacts_for_parent_entity
+from core.contact.serializers import BimaCoreContactSerializer
+from core.document.models import BimaCoreDocument, get_documents_for_parent_entity
+from core.document.serializers import BimaCoreDocumentSerializer
+from core.entity_tag.models import BimaCoreEntityTag, create_single_entity_tag, \
+    get_entity_tags_for_parent_entity
+from core.entity_tag.serializers import BimaCoreEntityTagSerializer
 from django.db.models import Q
-from pandas import read_csv
-from rest_framework.decorators import action
-
 from django.http import JsonResponse
-
 from django.shortcuts import get_object_or_404
+from django.utils.translation import gettext_lazy as _
+from pandas import read_csv
 from rest_framework import status
+from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from .models import BimaErpPartner
@@ -15,31 +28,13 @@ from .serializers import BimaErpPartnerSerializer
 from .signals import post_create_partner
 from .utils import generate_xls_file, import_partner_data_from_csv_file, export_to_csv
 
-from common.utils.utils import render_to_pdf
-from core.address.serializers import BimaCoreAddressSerializer
-from core.address.models import BimaCoreAddress, get_addresses_for_parent, create_single_address
-
-from core.contact.serializers import BimaCoreContactSerializer
-from core.contact.models import BimaCoreContact, create_single_contact, \
-    get_contacts_for_parent_entity
-
-from core.document.serializers import BimaCoreDocumentSerializer
-from core.document.models import BimaCoreDocument, create_single_document, \
-    get_documents_for_parent_entity
-
-from core.entity_tag.serializers import BimaCoreEntityTagSerializer
-from core.entity_tag.models import BimaCoreEntityTag, create_single_entity_tag, \
-    get_entity_tags_for_parent_entity
-from common.permissions.action_base_permission import ActionBasedPermission
-
-from common.service.file_service import check_csv_file
-from django.utils.translation import gettext_lazy as _
-
 
 class PartnerFilter(django_filters.FilterSet):
     search = django_filters.CharFilter(method='filter_search')
     phone = django_filters.CharFilter(field_name='phone', lookup_expr='icontains')
     partner_type = django_filters.CharFilter(field_name='partner_type', lookup_expr='exact')
+    is_supplier = django_filters.BooleanFilter(method='filter_is_supplier')
+    is_customer = django_filters.BooleanFilter(method='filter_is_customer')
 
     class Meta:
         model = BimaErpPartner
@@ -51,6 +46,14 @@ class PartnerFilter(django_filters.FilterSet):
             Q(last_name__icontains=value) |
             Q(company_name__icontains=value)
         )
+
+    def filter_is_supplier(self, queryset, name, value):
+        if value is not None and value.lower() != "all":
+            return queryset.filter(is_supplier=str_to_bool(value))
+
+    def filter_is_customer(self, queryset, name, value):
+        if value is not None and value.lower() != "all":
+            return queryset.filter(is_customer=str_to_bool(value))
 
 
 class BimaErpPartnerViewSet(AbstractViewSet):
