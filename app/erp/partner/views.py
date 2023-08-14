@@ -48,11 +48,11 @@ class PartnerFilter(django_filters.FilterSet):
         )
 
     def filter_is_supplier(self, queryset, name, value):
-        if value is not None and value.lower() != "all":
+        if value is not None:
             return queryset.filter(is_supplier=str_to_bool(value))
 
     def filter_is_customer(self, queryset, name, value):
-        if value is not None and value.lower() != "all":
+        if value is not None:
             return queryset.filter(is_customer=str_to_bool(value))
 
 
