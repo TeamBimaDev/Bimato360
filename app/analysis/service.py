@@ -286,13 +286,13 @@ class BimaAnalysisService:
 
         sorted_grouped_data = OrderedDict(sorted(grouped_data.items(), key=lambda x: x[0]))
 
-        # Ensure each period has top_n items
-        for key in sorted_grouped_data:
-            while len(sorted_grouped_data[key]) < top_n:
-                sorted_grouped_data[key].append({
-                    'name': "",
-                    'total': 0
-                })
+        # # Ensure each period has top_n items
+        # for key in sorted_grouped_data:
+        #     while len(sorted_grouped_data[key]) < top_n:
+        #         sorted_grouped_data[key].append({
+        #             'name': "",
+        #             'total': 0
+        #         })
 
         # Change format
         formatted_data = []

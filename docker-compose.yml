@@ -26,6 +26,7 @@ services:
       - bima360_db
     networks:
       - bima360-network
+    restart: always
 
   bima360_db:
     container_name: bima360_db
@@ -33,13 +34,14 @@ services:
     env_file:
       - app/prod.env
     environment:
-        - DJANGO_ENV=prod
+      - DJANGO_ENV=prod
     ports:
       - "5432:5432"
     volumes:
       - ./bima360_db/:/var/lib/postgresql/data/
     networks:
       - bima360-network
+    restart: always
 
   bima360_db_admin:
     container_name: bima360_db_admin
@@ -67,9 +69,10 @@ services:
     working_dir: /app/app
     command: python -m celery -A app.celery worker -l info -E --pool=gevent
     networks:
-        - bima360-network
+      - bima360-network
     depends_on:
       - bima360_app
+    restart: always
 
   celery_beat:
     image: bima360_app_image
@@ -87,7 +90,7 @@ services:
       - bima360-network
     depends_on:
       - bima360_app
-
+    restart: always
 
 networks:
   bima360-network:
