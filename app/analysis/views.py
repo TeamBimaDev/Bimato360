@@ -76,9 +76,15 @@ class BimaAnalysisViewSet(viewsets.ViewSet):
     @action(detail=False, methods=['get'], url_path="sales_income_evolution_percentage")
     def sales_income_evolution_percentage(self, request):
         period = request.query_params.get('filter_period', 'monthly').lower()
+        partner_public_id = request.query_params.get('partner_public_id')
+
+        partner_id = None
+        if partner_public_id:
+            partner = get_object_or_404(BimaErpPartner, public_id=partner_public_id)
+            partner_id = partner.id
 
         try:
-            aggregated_sales = BimaAnalysisService.get_aggregated_sales(period)
+            aggregated_sales = BimaAnalysisService.get_aggregated_sales(period, partner_id)
             report = BimaAnalysisService.calculate_percentage_difference(aggregated_sales)
             return Response(report)
 
@@ -94,6 +100,5 @@ class BimaAnalysisViewSet(viewsets.ViewSet):
         top_n = int(request.query_params.get('top_n', 3))
         year = int(request.query_params.get('year', today.year))
         show_all_periods = str_to_bool(request.query_params.get('show_all_periods', False))
-        print(year)
         data = BimaAnalysisService.get_top_partners(period, top_n, year, show_all_periods)
         return Response(data)

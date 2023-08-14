@@ -172,12 +172,17 @@ class BimaAnalysisService:
         }.get(period)
 
     @classmethod
-    def get_aggregated_sales(cls, period):
+    def get_aggregated_sales(cls, period, partner_id=None):
         trunc_function = cls._get_trunc_mapper(period)
         if not trunc_function:
             raise ValueError("Invalid period provided.")
 
-        sales = (BimaErpSaleDocument.objects
+        sales = BimaErpSaleDocument.objects.all()
+
+        if partner_id:
+            sales = sales.filter(partner_id=partner_id)
+
+        sales = (sales
                  .annotate(period=trunc_function('date'))
                  .values('period')
                  .annotate(total=Sum('total_amount'))
