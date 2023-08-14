@@ -279,11 +279,11 @@ class BimaAnalysisService:
                         grouped_data[day_str] = []
 
             elif period == 'weekly':
-                # Same weekly handling logic as before...
                 for week in range(1, 53):
                     week_start = f"{year}-W{week}-1"
                     if week_start not in grouped_data:
                         grouped_data[week_start] = []
+
         sorted_grouped_data = OrderedDict(sorted(grouped_data.items(), key=lambda x: x[0]))
 
         # Ensure each period has top_n items
@@ -294,4 +294,12 @@ class BimaAnalysisService:
                     'total': 0
                 })
 
-        return {'partners': dict(sorted_grouped_data)}
+        # Change format
+        formatted_data = []
+        for key, value in sorted_grouped_data.items():
+            formatted_data.append({
+                'period': key,
+                'partners': value
+            })
+
+        return {'partners': formatted_data}
