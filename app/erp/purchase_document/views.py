@@ -23,7 +23,7 @@ from .models import BimaErpPurchaseDocument, BimaErpPurchaseDocumentProduct
 from .serializers import BimaErpPurchaseDocumentSerializer, BimaErpPurchaseDocumentProductSerializer, \
     BimaErpPurchaseDocumentHistorySerializer, BimaErpPurchaseDocumentProductHistorySerializer
 from .service import PurchaseDocumentService, create_products_from_parents, generate_xls_report, generate_csv_report, \
-    calculate_totals_for_selected_items
+    calculate_totals_for_selected_items, create_new_document
 
 
 class BimaErpPurchaseDocumentViewSet(AbstractViewSet):
@@ -260,7 +260,7 @@ class BimaErpPurchaseDocumentViewSet(AbstractViewSet):
     def generate_pdf(self, request, pk=None):
         pdf_filename = "document.pdf"
         context = self._get_context(pk)
-        context['document_title'] = context['purchase_document'].type
+        context['document_title'] = context['current_document'].display_type
         context['request'] = request
         company_data = context.get('company_data', None)
         default_sale_document_pdf_format = company_data.get('default_sale_document_pdf_format')

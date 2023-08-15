@@ -241,8 +241,7 @@
     {% if company_data.company.show_template_logo %}
         <div class="company_logo" id="header-left">
 
-            <img src="{{ request.scheme }}://
-                    {{ request.get_host }}{{ MEDIA_URL }}{{ company_data.favorite_logo.file_path }}"
+            <img src="{{ request.scheme }}://{{ request.get_host }}{{ MEDIA_URL }}{{ company_data.favorite_logo.file_path }}"
                  alt="{% trans "Company Logo" %}" class="logo"/>
         </div>
     {% endif %}
@@ -276,7 +275,7 @@
 
 <div class="div_invoice_details">
     <div class="invoice_type_and_number">
-        {{ current_document.display_type }}
+        {{ document_title }}
     </div>
     <table class="table_invoice_details">
         <tr class="invoice_date">
@@ -303,7 +302,7 @@
         {% if show_price %}
             <th class="text_right">{% trans "U. Price" %}</th>
             <th class="text_right">{% trans "Total" %}</th>
-        {% endif; %}
+        {% endif %}
     </tr>
 
     {% for product in products %}
@@ -314,7 +313,7 @@
             {% if show_price %}
                 <td class="product_prix text_right">{{ product.unit_price }}</td>
                 <td class="product_montant text_right">{{ product.total_price }}</td>
-            {% endif; %}
+            {% endif %}
         </tr>
     {% endfor %}
 </table>
@@ -359,7 +358,7 @@
             <td class="text_right total_bold header_total">{{ current_document.total_amount }}</td>
         </tr>
     </table>
-{% endif; %}
+{% endif %}
 
 <div class="note">{{ current_document.note }}</div>
 

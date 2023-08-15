@@ -193,8 +193,7 @@
     </div>
     {% if company_data.company.show_template_logo %}
         <div class="company_logo" id="header-right">
-            <img src="{{ request.scheme }}://
-                    {{ request.get_host }}{{ MEDIA_URL }}{{ company_data.favorite_logo.file_path }}"
+            <img src="{{ request.scheme }}://{{ request.get_host }}{{ MEDIA_URL }}{{ company_data.favorite_logo.file_path }}"
                  alt="{% trans "Company Logo" %}" class="logo"/>
         </div>
     {% endif %}
@@ -219,14 +218,14 @@
     </div>
     <div class="div_invoice_details">
         <div class="invoice_type_and_number">
-            {{ current_document.display_type|upper }} {{ current_document.number }}
+            {{ document_title|upper }} {{ current_document.number }}
         </div>
         <div class="invoice_date">
-            <span>Date de facture</span>
+            <span>{% trans "SALE_DOCUMENT_DATE" %}</span>
             <span>{{ current_document.date }}</span>
         </div>
         <div class="invoice_payment_date">
-            <span>Date d'échéance</span>
+            <span>{% trans "SALE_DOCUMENT_DUE_DATE" %}</span>
             <span>NA/NA/NANA</span>
         </div>
     </div>

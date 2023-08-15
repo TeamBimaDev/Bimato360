@@ -273,7 +273,7 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
     def generate_pdf(self, request, pk=None):
         pdf_filename = "document.pdf"
         context = self._get_context(pk)
-        context['document_title'] = context['sale_document'].type
+        context['document_title'] = context['current_document'].type
         context['request'] = request
         company_data = context.get('company_data', None)
         default_sale_document_pdf_format = company_data.get('default_sale_document_pdf_format')
