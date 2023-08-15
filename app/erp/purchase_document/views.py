@@ -164,7 +164,7 @@ class BimaErpPurchaseDocumentViewSet(AbstractViewSet):
         history = list(purchase_document.history.all().select_related('history_user').order_by('-history_date'))
 
         if len(history) < 2:
-            return Response(status=status.HTTP_204_NO_CONTENT)
+            return Response([], status=status.HTTP_200_OK)
 
         changes_by_date = {}
         for i in range(len(history) - 1):
