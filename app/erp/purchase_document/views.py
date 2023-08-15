@@ -311,7 +311,7 @@ class BimaErpPurchaseDocumentViewSet(AbstractViewSet):
     def get_direct_child(self, request, pk):
         document = self.get_object()
         paginator = DefaultPagination()
-        child = paginator.paginate_queryset(document.bimaerpsaledocument_set.all(), request)
+        child = paginator.paginate_queryset(document.bimaerppurchasedocument_set.all(), request)
 
         serializer = self.get_serializer(child, many=True)
         return paginator.get_paginated_response(serializer.data)
@@ -350,7 +350,7 @@ class BimaErpPurchaseDocumentViewSet(AbstractViewSet):
         company_data = fetch_company_data(company)
 
         context = {'current_document': purchase_document, 'partner': partner, 'address': first_address,
-                   'company_data': company_data, 'products': purchase_document.bimaerpsaledocumentproduct_set.all}
+                   'company_data': company_data, 'products': purchase_document.bimaerppurchasedocumentproduct_set.all}
 
         return context
 
