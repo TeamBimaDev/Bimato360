@@ -101,7 +101,11 @@
             font-weight: 600;
             font-style: italic;
             color: {{ company_data.company.default_color }};
+			width:180px;
         }
+		.invoice_date_span_label{
+			width:180px;
+		}
 
         .invoice_date, .invoice_payment_date {
             padding-top: .7rem;
@@ -221,11 +225,11 @@
             {{ document_title|upper }} {{ current_document.number }}
         </div>
         <div class="invoice_date">
-            <span>{% trans "SALE_DOCUMENT_DATE" %}</span>
+            <span class="invoice_date_span_label">{% trans "SALE_DOCUMENT_DATE" %}</span>
             <span>{{ current_document.date }}</span>
         </div>
         <div class="invoice_payment_date">
-            <span>{% trans "SALE_DOCUMENT_DUE_DATE" %}</span>
+            <span  class="invoice_date_span_label">{% trans "SALE_DOCUMENT_DUE_DATE" %}</span>
             <span>NA/NA/NANA</span>
         </div>
     </div>
