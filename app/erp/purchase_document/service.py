@@ -24,24 +24,24 @@ logger = logging.getLogger(__name__)
 class PurchaseDocumentService:
 
     @staticmethod
-    def validate_data(purchase_or_purchase, quotation_order_invoice):
-        if not purchase_or_purchase or not quotation_order_invoice:
+    def validate_data(sale_or_purchase, quotation_order_invoice):
+        if not sale_or_purchase or not quotation_order_invoice:
             raise ValidationError(_('Please provide all needed data'))
 
     @staticmethod
     def get_unique_number(request, **kwargs):
-        purchase_or_purchase = kwargs.get('sale_purchase', '')
+        sale_or_purchase = kwargs.get('sale_purchase', '')
         quotation_order_invoice = kwargs.get('quotation_order_invoice', '')
-        if not purchase_or_purchase:
-            purchase_or_purchase = request.query_params.get('sale_purchase', '')
+        if not sale_or_purchase:
+            sale_or_purchase = request.query_params.get('sale_purchase', '')
         if not quotation_order_invoice:
             quotation_order_invoice = request.query_params.get('quotation_order_invoice', '')
 
-        PurchaseDocumentService.validate_data(purchase_or_purchase, quotation_order_invoice)
+        PurchaseDocumentService.validate_data(sale_or_purchase, quotation_order_invoice)
 
-        unique_number = SalePurchaseService.generate_unique_number(purchase_or_purchase, quotation_order_invoice)
+        unique_number = SalePurchaseService.generate_unique_number(sale_or_purchase, quotation_order_invoice)
         while BimaErpPurchaseDocument.objects.filter(number=unique_number).exists():
-            unique_number = SalePurchaseService.generate_unique_number(purchase_or_purchase,
+            unique_number = SalePurchaseService.generate_unique_number(sale_or_purchase,
                                                                        quotation_order_invoice)
         return unique_number
 
