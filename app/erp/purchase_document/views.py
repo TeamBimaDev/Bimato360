@@ -1,34 +1,29 @@
-import os
+from collections import defaultdict
 from itertools import groupby
 
-import logging
-from collections import defaultdict
-from datetime import datetime, timedelta
-
+from common.permissions.action_base_permission import ActionBasedPermission
+from common.utils.utils import render_to_pdf
+from company.models import BimaCompany
+from company.service import fetch_company_data
+from core.abstract.pagination import DefaultPagination
+from core.abstract.views import AbstractViewSet
+from core.address.models import BimaCoreAddress
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.db import transaction
-from django.db.models import Sum
-from django.http import JsonResponse
+from django.shortcuts import get_object_or_404, get_list_or_404
+from django.utils.translation import gettext_lazy as _
+from erp.product.models import BimaErpProduct
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from django.shortcuts import get_object_or_404, get_list_or_404
-from django.utils.translation import gettext_lazy as _
 
-from core.abstract.views import AbstractViewSet
-from core.address.models import BimaCoreAddress
-
-from ..product.models import BimaErpProduct
-from .models import BimaErpPurchaseDocument, BimaErpPurchaseDocumentProduct, update_purchase_document_totals
+from .filter import PurchaseDocumentFilter
+from .models import BimaErpPurchaseDocument, BimaErpPurchaseDocumentProduct
 from .serializers import BimaErpPurchaseDocumentSerializer, BimaErpPurchaseDocumentProductSerializer, \
     BimaErpPurchaseDocumentHistorySerializer, BimaErpPurchaseDocumentProductHistorySerializer
-from .filter import PurchaseDocumentFilter
-
-from common.enums.purchase_document_enum import PurchaseDocumentStatus, get_purchase_document_recurring_interval
-from common.utils.utils import render_to_pdf
-from common.permissions.action_base_permission import ActionBasedPermission
-from common.service.purchase_sale_service import SalePurchaseService
+from .service import PurchaseDocumentService, create_products_from_parents, generate_xls_report, generate_csv_report, \
+    calculate_totals_for_selected_items
 
 
 class BimaErpPurchaseDocumentViewSet(AbstractViewSet):
@@ -83,20 +78,11 @@ class BimaErpPurchaseDocumentViewSet(AbstractViewSet):
 
     @action(detail=False, methods=['get'])
     def get_unique_number(self, request, **kwargs):
-        purchase_or_purchase = kwargs.get('purchase_purchase', '')
-        quotation_order_invoice = kwargs.get('quotation_order_invoice', '')
-        if not purchase_or_purchase:
-            purchase_or_purchase = request.query_params.get('purchase_purchase', '')
-        if not quotation_order_invoice:
-            quotation_order_invoice = request.query_params.get('quotation_order_invoice', '')
-        if not purchase_or_purchase or not quotation_order_invoice:
-            return Response({'error': _('Please provide all needed data')},
-                            status=status.HTTP_400_BAD_REQUEST)
-
-        unique_number = SalePurchaseService.generate_unique_number(purchase_or_purchase, quotation_order_invoice)
-        while BimaErpPurchaseDocument.objects.filter(number=unique_number).exists():
-            unique_number = SalePurchaseService.generate_unique_number(purchase_or_purchase, quotation_order_invoice)
-        return Response({"unique_number": unique_number})
+        try:
+            unique_number = PurchaseDocumentService.get_unique_number(request, **kwargs)
+            return Response({"unique_number": unique_number})
+        except ValidationError as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=True, methods=['get'], url_path='products')
     def get_products(self, request, pk=None):
@@ -161,11 +147,13 @@ class BimaErpPurchaseDocumentViewSet(AbstractViewSet):
     def create_new_document_from_parent(self, request, *args, **kwargs):
         document_type, parent_public_ids = self.get_request_data(request)
         parents = self.get_parents(parent_public_ids)
+
         self.validate_parents(parents)
         self.validate_document_type(document_type)
+
         new_document = create_new_document(document_type, parents)
         reset_quantity = True if document_type.lower() == 'credit_note' else False
-        self.create_products_from_parents(parents, new_document, reset_quantity)
+        create_products_from_parents(parents, new_document, reset_quantity)
 
         return Response({"success": _("Item created")}, status=status.HTTP_201_CREATED)
 
@@ -173,10 +161,10 @@ class BimaErpPurchaseDocumentViewSet(AbstractViewSet):
     def get_history_diff(self, request, pk=None):
         purchase_document = self.get_object()
 
-        history = list(purchase_document.history.all().select_related('history_user'))
+        history = list(purchase_document.history.all().select_related('history_user').order_by('-history_date'))
 
         if len(history) < 2:
-            return Response({'error': 'Not enough history to compare.'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(status=status.HTTP_204_NO_CONTENT)
 
         changes_by_date = {}
         for i in range(len(history) - 1):
@@ -195,9 +183,9 @@ class BimaErpPurchaseDocumentViewSet(AbstractViewSet):
                     change_date = latest_serialized.get('history_date')
                     change = {
                         'field': field,
-                        'old_value': previous_value,
-                        'new_value': latest_value,
-                        'user': latest_history.history_user.username if latest_history.history_user else None
+                        'old_value': latest_value,
+                        'new_value': previous_value,
+                        'user': previous_history.history_user.name if previous_history.history_user else None
                     }
 
                     if change_date in changes_by_date:
@@ -245,7 +233,7 @@ class BimaErpPurchaseDocumentViewSet(AbstractViewSet):
                             'old_value': previous_value,
                             'new_value': latest_value,
                             'history_type': latest_serialized.get('history_type'),
-                            'user': latest_history.history_user.username if latest_history.history_user else None
+                            'user': latest_history.history_user.name if latest_history.history_user else None
                         }
                         product_differences.append(change)
 
@@ -268,76 +256,65 @@ class BimaErpPurchaseDocumentViewSet(AbstractViewSet):
 
         return Response({'products_differences': all_products_differences}, status=status.HTTP_200_OK)
 
-    @action(detail=True, methods=['get'], url_path='generate_delivery_note')
-    def generate_delivery_note(self, request, pk=None):
-        template_name = 'purchase_document/delivery_note.html'
-        pdf_filename = "delivery_note.pdf"
-        context = self._get_context(pk)
-        context['document_title'] = 'Delivery Note'
-        return render_to_pdf(template_name, context, pdf_filename)
-
     @action(detail=True, methods=['get'], url_path='generate_pdf')
     def generate_pdf(self, request, pk=None):
-        template_name = 'purchase_document/purchase_document.html'
         pdf_filename = "document.pdf"
         context = self._get_context(pk)
         context['document_title'] = context['purchase_document'].type
+        context['request'] = request
+        company_data = context.get('company_data', None)
+        default_sale_document_pdf_format = company_data.get('default_sale_document_pdf_format')
+        template_name = f'sale_document/sale_templates/{default_sale_document_pdf_format}'
         return render_to_pdf(template_name, context, pdf_filename)
 
-    def _get_context(self, pk):
-        purchase_document = self.get_object()
-        partner = purchase_document.partner
+    @action(detail=True, methods=['get'], url_path='request_for_quotation')
+    def request_for_quotation(self, request, pk=None):
+        pdf_filename = "document.pdf"
+        context = self._get_context(pk)
+        context['document_title'] = str(_('Request for Quotation'))
+        context['request'] = request
+        context['show_price'] = False
+        company_data = context.get('company_data', None)
+        default_sale_document_pdf_format = company_data.get('default_sale_document_pdf_format')
+        template_name = f'sale_document/sale_templates/{default_sale_document_pdf_format}'
+        return render_to_pdf(template_name, context, pdf_filename)
 
-        partner_content_type = ContentType.objects.get_for_model(partner)
-        first_address = BimaCoreAddress.objects.filter(
-            parent_type=partner_content_type,
-            parent_id=partner.id
-        ).select_related('state', 'country').first()
+    @action(detail=False, methods=['GET'], url_path='generate_pdf_resume')
+    def generate_pdf_resume(self, request):
+        template_name = 'sale_document/sale_document_resume.html'
+        pdf_filename = 'resume.pdf'
+        context = self._get_context_resume(request)
+        context['document_title'] = _("Rapport")
+        context['request'] = request
+        return render_to_pdf(template_name, context, pdf_filename)
 
-        context = {'purchase_document': purchase_document, 'partner': partner, 'address': first_address}
+    @action(detail=False, methods=['GET'], url_path='generate_xls_resume')
+    def generate_xls_resume(self, request):
+        model_fields = BimaErpPurchaseDocument._meta.fields
+        data_to_export = self.get_filtered_data(request)
+        return generate_xls_report(data_to_export, model_fields)
 
-        return context
+    @action(detail=False, methods=['GET'], url_path='generate_csv_resume')
+    def generate_csv_resume(self, request):
+        fields = BimaErpPurchaseDocument._meta.fields
+        data_to_export = self.get_filtered_data(request)
+        return generate_csv_report(data_to_export, fields)
 
-    @transaction.atomic
-    @action(detail=False, methods=['get'], url_path='generate_recurring_purchase_documents', permission_classes=[])
-    def generate_recurring_purchase_documents(self, request):
+    @action(detail=True, methods=['GET'], url_path='get_direct_parent')
+    def get_direct_parent(self, request, pk=None):
+        document = self.get_object()
+        parents = document.parents
+        serializer = self.get_serializer(parents, many=True)
+        return Response(serializer.data)
 
-        authorization_token = request.headers.get('Authorization')
-        expected_token = os.environ.get('AUTHORIZATION_TOKEN_FOR_CRON')
+    @action(detail=True, methods=['GET'], url_path='get_direct_child')
+    def get_direct_child(self, request, pk):
+        document = self.get_object()
+        paginator = DefaultPagination()
+        child = paginator.paginate_queryset(document.bimaerpsaledocument_set.all(), request)
 
-        if authorization_token != expected_token:
-            return JsonResponse({'error': _('Unauthorized')}, status=401)
-
-        today = datetime.today()
-        num_new_purchase_documents = 0
-
-        recurring_purchase_documents = BimaErpPurchaseDocument.objects.filter(is_recurring=True)
-
-        logger = logging.getLogger(__name__)
-
-        for purchase_document in recurring_purchase_documents:
-            next_creation_date = purchase_document.date + timedelta(days=purchase_document.recurring_interval)
-
-            if next_creation_date <= today:
-                try:
-                    with transaction.atomic():
-                        new_purchase_document = create_new_document(
-                            document_type=purchase_document.type,
-                            parents=[purchase_document]
-                        )
-                        self.create_products_from_parents(parents=[purchase_document],
-                                                          new_document=new_purchase_document)
-
-                        logger.info(
-                            f"{new_purchase_document.type} N° {new_purchase_document.number}"
-                            f" is created from {purchase_document.number}")
-
-                        num_new_purchase_documents += 1
-
-                except Exception as e:
-                    logger.error(_(f"Error creating new PurchaseDocument for parent {purchase_document.id}: {str(e)}"))
-
-        return JsonResponse({'message': _(f'Successfully created {num_new_purchase_documents} new purchase documents')})
+        serializer = self.get_serializer(child, many=True)
+        return paginator.get_paginated_response(serializer.data)
 
     def get_request_data(self, request):
         document_type = request.data.get('document_type', '')
@@ -350,62 +327,44 @@ class BimaErpPurchaseDocumentViewSet(AbstractViewSet):
     def validate_parents(self, parents):
         if not parents.exists():
             raise ValidationError({'error': _('No valid parent documents found')})
-        unique_partners = parents.values('partner').distinct()
-        if len(unique_partners) > 1:
+        unique_partners = parents.values_list('partner__id', flat=True).distinct()
+        unique_ids = list(set(unique_partners))
+        if len(unique_ids) > 1:
             raise ValidationError({'error': _('All documents should belong to the same partner')})
 
     def validate_document_type(self, document_type):
         if not document_type:
             raise ValidationError({'error': _('Please give the type of the document')})
 
-    def create_products_from_parents(self, parents, new_document, reset_quantity=False):
-        product_ids = BimaErpPurchaseDocumentProduct.objects.filter(
-            purchase_document__in=parents
-        ).values_list('product', flat=True).distinct()
+    def _get_context(self, pk=None):
+        purchase_document = self.get_object()
+        partner = purchase_document.partner
 
-        new_products = []
-        for product_id in product_ids:
-            # Find first instance of this product
-            first_product = BimaErpPurchaseDocumentProduct.objects.filter(
-                purchase_document__in=parents,
-                product_id=product_id
-            ).first()
+        partner_content_type = ContentType.objects.get_for_model(partner)
+        first_address = BimaCoreAddress.objects.filter(
+            parent_type=partner_content_type,
+            parent_id=partner.id
+        ).select_related('state', 'country').first()
 
-            if first_product is None:
-                continue
+        company = BimaCompany.objects.first()
+        company_data = fetch_company_data(company)
 
-            total_quantity = BimaErpPurchaseDocumentProduct.objects.filter(
-                purchase_document__in=parents,
-                product_id=product_id
-            ).aggregate(total_quantity=Sum('quantity'))['total_quantity']
+        context = {'current_document': purchase_document, 'partner': partner, 'address': first_address,
+                   'company_data': company_data, 'products': purchase_document.bimaerpsaledocumentproduct_set.all}
 
-            new_product = BimaErpPurchaseDocumentProduct(
-                purchase_document=new_document,
-                name=first_product.name,
-                unit_of_measure=first_product.unit_of_measure,
-                reference=first_product.reference,
-                product_id=product_id,
-                quantity=1 if reset_quantity else total_quantity,
-                unit_price=first_product.unit_price,
-                vat=first_product.vat,
-                description=first_product.description,
-                discount=first_product.discount
-            )
-            new_product.calculate_totals()
-            new_products.append(new_product)
+        return context
 
-        BimaErpPurchaseDocumentProduct.objects.bulk_create(new_products)
-        update_purchase_document_totals(new_document)
-        new_document.save()
+    def _get_context_resume(self, request):
+        purchase_documents = self.get_filtered_data(request)
+        company = BimaCompany.objects.first()
+        company_data = fetch_company_data(company)
+        totals = calculate_totals_for_selected_items(purchase_documents)
 
+        context = {'documents': purchase_documents, 'company_data': company_data, 'totals': totals}
 
-def create_new_document(document_type, parents):
-    new_document = BimaErpPurchaseDocument.objects.create(
-        number=SalePurchaseService.generate_unique_number('purchase', document_type.lower()),
-        date=datetime.today().strftime('%Y-%m-%d'),
-        status=PurchaseDocumentStatus.DRAFT.name,
-        type=document_type,
-        partner=parents.first().partner,
-    )
-    new_document.parents.add(*parents)
-    return new_document
+        return context
+
+    def get_filtered_data(self, request):
+        queryset = BimaErpPurchaseDocument.objects.select_related('partner').all()
+        filtered_sale_document = PurchaseDocumentFilter(request.GET, queryset=queryset)
+        return filtered_sale_document.qs

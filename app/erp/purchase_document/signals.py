@@ -1,9 +1,9 @@
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db.models.signals import pre_save, pre_delete
 from django.dispatch import receiver
-from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.utils.translation import gettext_lazy as _
 
 from .models import BimaErpPurchaseDocument
-from django.utils.translation import gettext_lazy as _
 
 
 def check_purchase_document_contains_at_least_one_product_when_confirmed(instance):
@@ -21,15 +21,17 @@ def update_product_quantities(sender, instance):
         try:
             for purchase_document_product in purchase_document.bimaerppurchasedocumentproduct_set.all():
                 product = purchase_document_product.product
-                if purchase_document.type.lower() == 'quote':
-                    product.virtual_quantity = operation(product.virtual_quantity, purchase_document_product.quantity)
-                elif purchase_document.type.lower() in ['order', 'invoice']:
-                    new_virtual_quantity = operation(product.virtual_quantity, purchase_document_product.quantity)
-                    new_quantity = operation(product.quantity, purchase_document_product.quantity)
-                    product.virtual_quantity = new_virtual_quantity
-                    product.quantity = new_quantity
+                if product.type == 'STOCKABLE_PRODUCT':
+                    if purchase_document.type.lower() == 'quote':
+                        product.virtual_quantity = operation(product.virtual_quantity,
+                                                             purchase_document_product.quantity)
+                    elif purchase_document.type.lower() in ['order', 'invoice']:
+                        new_virtual_quantity = operation(product.virtual_quantity, purchase_document_product.quantity)
+                        new_quantity = operation(product.quantity, purchase_document_product.quantity)
+                        product.virtual_quantity = new_virtual_quantity
+                        product.quantity = new_quantity
 
-                product.save()
+                    product.save()
         except:
             pass
 

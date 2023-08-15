@@ -1,127 +1,136 @@
 {% load i18n custom_filters %}
 <!DOCTYPE html>
 <html>
-    <head>
-        <style>
+<head>
+    <style>
 
-            @page {
-                @bottom-left {
-                    content: element(footer-left);
-                }
-                @bottom-right {
-                    content: "{% trans "Page" %}" counter(page) " {% trans "of" %} " counter(pages);
-                    font-size: 13px;
-                }
-                @top-left {
-                    content: element(header-left);
-                }
-                @top-right {
-                    content: element(header-right);
-                }
-
+        @page {
+            @bottom-left {
+                content: element(footer-left);
             }
-
-            #footer-left {
-                position: running(footer-left);
+            @bottom-right {
+                content: "{% trans "Page" %}" counter(page) " {% trans "of" %} " counter(pages);
                 font-size: 13px;
-                border-top: 2px solid #efefef;
-                padding-top: 0.3rem;
-                padding-bottom: 0.3rem;
+            }
+            @top-left {
+                content: element(header-left);
+            }
+            @top-right {
+                content: element(header-right);
             }
 
-     body{
-        margin-inline: 5rem;
-    }
-    .div_header{
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-    .company_name{
-        font-size: 20px;
-        font-weight: 500;
-        text-transform: uppercase;
-    }
-    .company_logo{
-        width: 200px;
-        height: 100px;
-        object-fit: contain;
-    }
+        }
 
-    .products_table{
-        margin-top: 3rem;
-        width: 100%;
-        max-width: 100%;
-        border-collapse: collapse;
-    }
-     .products_table tr{
-        border-bottom: 2px solid #efefef;
-        padding: 1rem 0 1rem 0;
-    }
+        #footer-left {
+            position: running(footer-left);
+            font-size: 13px;
+            border-top: 2px solid #efefef;
+            padding-top: 0.3rem;
+            padding-bottom: 0.3rem;
+        }
 
-    .products_table td{
-        padding: 1rem 0 1rem 0;
-    }
+        body {
+            margin-inline: 5rem;
+        }
 
-    .products_table  th{
-        padding: 1rem 0 1rem 0;
-        font-style: italic;
-    }
+        .div_header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
 
-    .text_right{
-        text-align: right;
-    }
-    .text_center{
-        text-align: center;
-    }
+        .company_name {
+            font-size: 20px;
+            font-weight: 500;
+            text-transform: uppercase;
+        }
 
-    .sale_document_number, .sale_document_partner_name{
-        width: 10%;
-        text-transform: uppercase;
-    }
+        .company_logo {
+            width: 200px;
+            height: 100px;
+            object-fit: contain;
+        }
 
-    .table_totals{
-        margin-top: 2.5rem;
-        width: 100%;
-    }
-    .table_totals td{
-        padding-bottom: 0.7rem;
-    }
-    .sale_document_price{
-        font-weight: 700;
-        width: 15%;
-    }
+        .products_table {
+            margin-top: 3rem;
+            width: 100%;
+            max-width: 100%;
+            border-collapse: collapse;
+        }
 
-    .total_bold{
-        font-size: 20px;
-        font-weight: 800;
-    }
-        </style>
-    </head>
-    <body>
-    <div class="div_header">
-        <div class="company_name" id="header-left">
-            {{ company_data.company.name }}
-        </div>
+        .products_table tr {
+            border-bottom: 2px solid #efefef;
+            padding: 1rem 0 1rem 0;
+        }
 
-        <div class="company_logo" id="header-right">
-            <img src="{{ request.scheme }}://{{ request.get_host }}{{ MEDIA_URL }}{{ company_data.favorite_logo.file_path }}" alt="{% trans "Company Logo" %}" class="logo"/>
-        </div>
+        .products_table td {
+            padding: 1rem 0 1rem 0;
+        }
 
+        .products_table th {
+            padding: 1rem 0 1rem 0;
+            font-style: italic;
+        }
+
+        .text_right {
+            text-align: right;
+        }
+
+        .text_center {
+            text-align: center;
+        }
+
+        .sale_document_number, .sale_document_partner_name {
+            width: 10%;
+            text-transform: uppercase;
+        }
+
+        .table_totals {
+            margin-top: 2.5rem;
+            width: 100%;
+        }
+
+        .table_totals td {
+            padding-bottom: 0.7rem;
+        }
+
+        .sale_document_price {
+            font-weight: 700;
+            width: 15%;
+        }
+
+        .total_bold {
+            font-size: 20px;
+            font-weight: 800;
+        }
+    </style>
+</head>
+<body>
+<div class="div_header">
+    <div class="company_name" id="header-left">
+        {{ company_data.company.name }}
     </div>
 
+    <div class="company_logo" id="header-right">
+        <img src="{{ request.scheme }}://
+                {{ request.get_host }}{{ MEDIA_URL }}{{ company_data.favorite_logo.file_path }}"
+             alt="{% trans "Company Logo" %}" class="logo"/>
+    </div>
 
-    <table class="products_table">
-        <tr>
-            <th class="text_center">{% trans "NUMBER" %}</th>
-            <th class="text_center">{% trans "PARTNER" %}</th>
-            <th class="text_right">{% trans "TOTAL_VAT" %}</th>
-            <th class="text_right">{% trans 'DISCOUNT' %}</th>
-            <th class="text_right">{% trans 'TOTAL_PRICE' %}</th>
+</div>
 
-        </tr>
 
-        {% for sd in sale_documents %}
+<table class="products_table">
+    <tr>
+        <th class="text_center">{% trans "NUMBER" %}</th>
+        <th class="text_center">{% trans "PARTNER" %}</th>
+        <th class="text_right">{% trans "TOTAL_VAT" %}</th>
+        <th class="text_right">{% trans 'DISCOUNT' %}</th>
+        <th class="text_right">{% trans 'TOTAL_PRICE' %}</th>
+
+    </tr>
+
+    {% for sd in documents %}
         <tr>
             <td class="sale_document_number text_center">{{ sd.number }}</td>
             <td class="sale_document_partner_name text_center">{{ sd.partner.first_name }} {{ sd.partner.last_name }} {{ sd.partner.company_name }}</td>
@@ -129,54 +138,54 @@
             <td class="sale_document_price text_right">{{ sd.total_discount }}</td>
             <td class="sale_document_total text_right">{{ sd.total_amount }}</td>
         </tr>
-        {% endfor %}
-    </table>
+    {% endfor %}
+</table>
 
-    <table class="table_totals">
-        <tr>
-            <th></th>
-            <th></th>
-            <th></th>
-            <th></th>
-            <th></th>
-        </tr>
-        <tr>
-            <th></th>
-            <th></th>
-            <th></th>
-            <td class="text_right">{% trans 'SUB_TOTAL_WITHOUT_VAT' %}</td>
-            <td class="text_right">{{ totals.total_amount_without_vat }}</td>
-        </tr>
+<table class="table_totals">
+    <tr>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+    </tr>
+    <tr>
+        <th></th>
+        <th></th>
+        <th></th>
+        <td class="text_right">{% trans 'SUB_TOTAL_WITHOUT_VAT' %}</td>
+        <td class="text_right">{{ totals.total_amount_without_vat }}</td>
+    </tr>
 
-        <tr>
-            <th></th>
-            <th></th>
-            <th></th>
-            <td class="text_right">{% trans 'DISCOUNT' %}</td>
-            <td class="text_right">{{ totals.total_discount }}</td>
-        </tr>
+    <tr>
+        <th></th>
+        <th></th>
+        <th></th>
+        <td class="text_right">{% trans 'DISCOUNT' %}</td>
+        <td class="text_right">{{ totals.total_discount }}</td>
+    </tr>
 
-        <tr>
-            <th></th>
-            <th></th>
-            <th></th>
-            <td class="text_right">{% trans "TOTAL_VAT" %}</td>
-            <td class="text_right">{{ totals.total_vat }}</td>
-        </tr>
+    <tr>
+        <th></th>
+        <th></th>
+        <th></th>
+        <td class="text_right">{% trans "TOTAL_VAT" %}</td>
+        <td class="text_right">{{ totals.total_vat }}</td>
+    </tr>
 
-        <tr>
-            <th></th>
-            <th></th>
-            <th></th>
-            <td class="total_bold text_right" >{% trans 'TOTAL_PRICE' %}</td>
-            <td class="text_right total_bold">{{ totals.total_amount }}</td>
-        </tr>
-    </table>
+    <tr>
+        <th></th>
+        <th></th>
+        <th></th>
+        <td class="total_bold text_right">{% trans 'TOTAL_PRICE' %}</td>
+        <td class="text_right total_bold">{{ totals.total_amount }}</td>
+    </tr>
+</table>
 
-    <div id="footer-left">
-        {{ company_data.company.footer_note|safe }}
-    </div>
+<div id="footer-left">
+    {{ company_data.company.footer_note|safe }}
+</div>
 
 
-    </body>
+</body>
 </html>

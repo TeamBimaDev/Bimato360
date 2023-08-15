@@ -1,12 +1,10 @@
-from django.core.exceptions import ObjectDoesNotExist
+from core.abstract.serializers import AbstractSerializer
+from django.utils.translation import gettext_lazy as _
+from erp.product.models import BimaErpProduct
 from rest_framework import serializers
 
-from core.abstract.serializers import AbstractSerializer
-
-from erp.product.models import BimaErpProduct
 from .models import BimaErpPurchaseDocument, BimaErpPurchaseDocumentProduct
 from ..partner.models import BimaErpPartner
-from django.utils.translation import gettext_lazy as _
 
 
 class BimaErpPurchaseDocumentSerializer(AbstractSerializer):
@@ -66,21 +64,29 @@ class BimaErpPurchaseDocumentSerializer(AbstractSerializer):
     class Meta:
         model = BimaErpPurchaseDocument
         fields = [
-            'id', 'number', 'date', 'status', 'type', 'partner', 'partner_public_id', 'note',
-            'private_note', 'validity', 'payment_terms', 'delivery_terms', 'total_vat', 'total_amount',
-            'total_discount', 'parents', 'parent_public_ids', 'history', 'vat_label', 'vat_amount', 'created',
-            'updated', 'total_vat', 'total_amount', 'total_discount', 'children'
+            'id', 'number', 'number_at_partner', 'date', 'status', 'type', 'partner', 'partner_public_id', 'vat_label',
+            'vat_amount', 'note', 'private_note', 'validity', 'payment_terms', 'delivery_terms',
+            'total_amount_without_vat', 'total_after_discount', 'total_vat', 'total_amount', 'total_discount',
+            'parents', 'parent_public_ids', 'history', 'created', 'updated', 'children'
         ]
         read_only_fields = ('total_vat', 'total_amount', 'total_discount',)
 
 
 class BimaErpPurchaseDocumentHistorySerializer(serializers.ModelSerializer):
+    history_user_display = serializers.SerializerMethodField(read_only=True)
+
+    def get_history_user_display(self, obj):
+        if obj.history_user:
+            return obj.history_user.name
+        return None
+
     class Meta:
         model = BimaErpPurchaseDocument.history.model
-        fields = ['id', 'number', 'date', 'status', 'type', 'partner_id',
+        fields = ['id', 'number', 'number_at_partner', 'date', 'status', 'type', 'partner_id',
                   'note', 'private_note', 'validity', 'payment_terms', 'delivery_terms', 'vat_label', 'vat_amount',
-                  'total_amount', 'total_discount', 'total_vat', 'history_type', 'history_date',
-                  'history_user']
+                  'total_amount', 'total_discount', 'total_vat', 'history_type', 'history_date', 'is_recurring',
+                  'is_recurring_parent', 'recurring_initial_parent_id', 'recurring_initial_parent',
+                  'history_user_display']
 
 
 class BimaErpPurchaseDocumentProductSerializer(serializers.Serializer):

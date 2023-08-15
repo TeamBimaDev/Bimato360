@@ -1,15 +1,14 @@
+from common.enums.purchase_document_enum import PurchaseDocumentTypes
+from common.enums.purchase_document_enum import get_purchase_document_status, \
+    get_purchase_document_types, get_purchase_document_validity
+from core.abstract.models import AbstractModel
 from django.db import models
 from django.db.models import DecimalField, Sum
-from rest_framework.exceptions import ValidationError
-from simple_history.models import HistoricalRecords
-
-from common.enums.purchase_document_enum import get_purchase_document_status, \
-    get_purchase_document_types, get_purchase_document_validity, get_purchase_document_recurring_interval
-
+from django.utils.translation import gettext_lazy as _
 from erp.partner.models import BimaErpPartner
 from erp.product.models import BimaErpProduct
-
-from core.abstract.models import AbstractModel
+from rest_framework.exceptions import ValidationError
+from simple_history.models import HistoricalRecords
 
 
 class BimaErpPurchaseDocumentProduct(models.Model):
@@ -82,13 +81,6 @@ class BimaErpPurchaseDocument(AbstractModel):
     total_amount = models.DecimalField(max_digits=18, decimal_places=3, blank=True, null=True, default=0)
     total_discount = models.DecimalField(max_digits=18, decimal_places=3, blank=True, null=True, default=0)
     parents = models.ManyToManyField('self', symmetrical=False, blank=True)
-    is_recurring = models.BooleanField(default=False, blank=True, null=True)
-    recurring_interval = models.PositiveIntegerField(
-        blank=True,
-        null=True,
-        choices=get_purchase_document_recurring_interval(),
-        help_text="Interval for recurring purchase documents"
-    )
     history = HistoricalRecords()
     purchase_document_products = models.ManyToManyField(BimaErpProduct, through=BimaErpPurchaseDocumentProduct)
 
@@ -102,6 +94,18 @@ class BimaErpPurchaseDocument(AbstractModel):
             if self.bimaerppurchasedocument_set.exists():
                 raise ValidationError("Cannot modify a PurchaseDocument that has children.")
         super().save(*args, **kwargs)
+
+    TYPE_DISPLAY_MAPPING = {
+        PurchaseDocumentTypes.QUOTE.name: _("Quote"),
+        PurchaseDocumentTypes.ORDER.name: _("Order"),
+        PurchaseDocumentTypes.INVOICE.name: _("Invoice"),
+        PurchaseDocumentTypes.RFQ.name: _("Request for Quotation"),
+
+    }
+
+    @property
+    def display_type(self):
+        return self.TYPE_DISPLAY_MAPPING.get(self.type, self.type)
 
 
 def update_purchase_document_totals(purchase_document):

@@ -39,8 +39,6 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
     filterset_class = SaleDocumentFilter
     action_permissions = {
         'list': ['sale_document.can_read'],
-        'sale_documents_by_partner_for_chart': ['sale_document.can_read'],
-        'sale_documents_by_status_for_chart': ['sale_document.can_read'],
         'create': ['sale_document.can_create'],
         'retrieve': ['sale_document.can_read'],
         'update': ['sale_document.can_update'],
@@ -100,6 +98,7 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
     def add_product(self, request, pk=None):
         sale_document = self.get_object()
         serializer = BimaErpSaleDocumentProductSerializer(data=request.data, context={'sale_document': sale_document})
+
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -122,6 +121,7 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
             return Response({'error': _('Cannot find the item to edit')}, status=status.HTTP_404_NOT_FOUND)
 
         serializer = BimaErpSaleDocumentProductSerializer(sale_document_product, data=request.data, partial=True)
+
         if serializer.is_valid():
             serializer.save()
             return Response(request.data)
@@ -139,7 +139,8 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
         product = get_object_or_404(BimaErpProduct, public_id=product_public_id)
 
         sale_document_product = get_object_or_404(BimaErpSaleDocumentProduct,
-                                                  sale_document__public_id=sale_document_public_id, product=product)
+                                                  sale_document__public_id=sale_document_public_id,
+                                                  product=product)
         sale_document_product.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -165,7 +166,7 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
         history = list(sale_document.history.all().select_related('history_user').order_by('-history_date'))
 
         if len(history) < 2:
-            return Response({'error': _("Pas assez d'historique pour comparer .")}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(status=status.HTTP_204_NO_CONTENT)
 
         changes_by_date = {}
         for i in range(len(history) - 1):
@@ -202,7 +203,8 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
     def get_product_history_diff(self, request, pk=None):
         sale_document = self.get_object()
 
-        history_records = BimaErpSaleDocumentProduct.history.filter(sale_document_id=sale_document.id).order_by(
+        history_records = BimaErpSaleDocumentProduct.history.filter(
+            sale_document_id=sale_document.id).order_by(
             '-history_date')
 
         history_by_product = defaultdict(list)
@@ -258,11 +260,13 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
 
     @action(detail=True, methods=['get'], url_path='generate_delivery_note')
     def generate_delivery_note(self, request, pk=None):
-        template_name = 'sale_document/delivery_note.html'
-        pdf_filename = "delivery_note.pdf"
+        pdf_filename = "document.pdf"
         context = self._get_context(pk)
-        context['document_title'] = 'Delivery Note'
+        context['document_title'] = str(_('Delivery Note'))
         context['request'] = request
+        company_data = context.get('company_data', None)
+        default_sale_document_pdf_format = company_data.get('default_sale_document_pdf_format')
+        template_name = f'sale_document/sale_templates/{default_sale_document_pdf_format}'
         return render_to_pdf(template_name, context, pdf_filename)
 
     @action(detail=True, methods=['get'], url_path='generate_pdf')
@@ -380,7 +384,7 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
         company = BimaCompany.objects.first()
         company_data = fetch_company_data(company)
 
-        context = {'sale_document': sale_document, 'partner': partner, 'address': first_address,
+        context = {'current_document': sale_document, 'partner': partner, 'address': first_address,
                    'company_data': company_data, 'products': sale_document.bimaerpsaledocumentproduct_set.all}
 
         return context
@@ -391,7 +395,7 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
         company_data = fetch_company_data(company)
         totals = calculate_totals_for_selected_items(sale_documents)
 
-        context = {'sale_documents': sale_documents, 'company_data': company_data, 'totals': totals}
+        context = {'documents': sale_documents, 'company_data': company_data, 'totals': totals}
 
         return context
 

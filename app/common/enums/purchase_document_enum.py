@@ -1,4 +1,5 @@
 from enum import Enum
+
 from django.utils.translation import gettext_lazy as _
 
 
@@ -7,6 +8,7 @@ class PurchaseDocumentTypes(Enum):
     ORDER = _("ORDER")
     INVOICE = _("Invoice")
     CREDIT_NOTE = _("Credit note")
+    RFQ = _("Request for Quotation")
 
 
 class PurchaseDocumentStatus(Enum):
