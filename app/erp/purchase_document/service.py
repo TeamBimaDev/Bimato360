@@ -8,7 +8,6 @@ import openpyxl
 from common.enums.partner_type import PartnerType
 from common.enums.purchase_document_enum import PurchaseDocumentStatus
 from common.service.purchase_sale_service import SalePurchaseService
-from dateutil.relativedelta import relativedelta
 from django.db.models import Sum
 from django.http import HttpResponse
 from pandas import DataFrame
@@ -79,17 +78,13 @@ def create_products_from_parents(parents, new_document, reset_quantity=False):
     new_document.save()
 
 
-def create_new_document(document_type, parents, initial_recurrent_parent_id=None,
-                        initial_recurrent_parent_public_id=None, is_recurring=False):
+def create_new_document(document_type, parents):
     new_document = BimaErpPurchaseDocument.objects.create(
-        number=PurchasePurchaseService.generate_unique_number('purchase', document_type.lower()),
+        number=SalePurchaseService.generate_unique_number('purchase', document_type.lower()),
         date=datetime.today().strftime('%Y-%m-%d'),
         status=PurchaseDocumentStatus.DRAFT.name,
         type=document_type,
         partner=parents[0].partner,
-        recurring_initial_parent_id=initial_recurrent_parent_id,
-        recurring_initial_parent_public_id=initial_recurrent_parent_public_id,
-        is_recurring=is_recurring
     )
     new_document.parents.add(*parents)
     return new_document
@@ -206,102 +201,3 @@ def generate_csv_report(data, fields):
         writer.writerow(row_data)
 
     return response
-
-
-def get_recurring_interval_value(purchase_document):
-    recurring_interval_time = time_interval_based_on_recurring_interval.get(purchase_document.recurring_interval, None)
-
-    if recurring_interval_time is None and \
-            purchase_document.recurring_interval == PurchaseDocumentRecurringInterval.CUSTOM.name:
-        recurring_interval_time = get_custom_recurring_interval_value(
-            purchase_document.recurring_interval_type_custom_unit,
-            purchase_document.recurring_interval_type_custom_number)
-
-    return recurring_interval_time
-
-
-def get_custom_recurring_interval_value(unit, number):
-    time_interval_based_on_recurring_interval_custom_unit = {
-        PurchaseDocumentRecurringIntervalCustomUnit.DAY.name: relativedelta(days=number),
-        PurchaseDocumentRecurringIntervalCustomUnit.WEEK.name: relativedelta(weeks=number),
-        PurchaseDocumentRecurringIntervalCustomUnit.MONTH.name: relativedelta(months=number),
-        PurchaseDocumentRecurringIntervalCustomUnit.YEAR.name: relativedelta(years=number),
-    }
-    return time_interval_based_on_recurring_interval_custom_unit.get(unit, None)
-
-
-def verify_recurring_not_ended(purchase_document):
-    if purchase_document.recurring_cycle != PurchaseDocumentRecurringCycle.END_AT.name:
-        return True
-    if purchase_document.recurring_cycle_stop_at > datetime.now().date():
-        return True
-
-    stop_recurring_purchase_document(purchase_document, purchase_document.recurring_cycle_stop_at)
-    logger.error(
-        f"Recurring purchase document N° {purchase_document.public_id} ended at {purchase_document.recurring_cycle_stop_at} "
-        f"current date is {datetime.now()}")
-    return False
-
-
-def verify_recurring_limit_number_not_attempt(purchase_document):
-    if purchase_document.recurring_cycle != PurchaseDocumentRecurringCycle.END_AFTER.name:
-        return True
-
-    recurring_times_number = get_number_recurrent_document_generated_from_parent(purchase_document)
-    if recurring_times_number < purchase_document.recurring_cycle_number_to_repeat:
-        return True
-
-    stop_recurring_purchase_document(purchase_document, datetime.now())
-    logger.error(
-        f"Recurring purchase document N° {purchase_document.public_id} ended at {purchase_document.recurring_cycle_stop_at} "
-        f"after recurring {recurring_times_number} times ")
-    return False
-
-
-def get_number_recurrent_document_generated_from_parent(purchase_document):
-    return BimaErpPurchaseDocument.objects.filter(initial_parent_public_id=purchase_document.public_id,
-                                                  is_recurring=True).count()
-
-
-def stop_recurring_purchase_document(purchase_document, stop_date, reason=None, stopped_by=False, request=None):
-    try:
-        purchase_document.recurring_cycle_stopped_at = stop_date
-        purchase_document.is_recurring_ended = True
-        purchase_document.recurring_reason_stop = reason
-        if stopped_by:
-            user = None
-            if request and hasattr(request, "user"):
-                user = request.user
-            purchase_document.recurring_stopped_by = user
-
-        purchase_document.recurring_reason_reactivated = None
-        purchase_document.recurring_reactivated_by = None
-        purchase_document.recurring_reactivated_date = None
-        purchase_document.save()
-        return True
-    except Exception as ex:
-        logger.error(f"Unable to stop purchase_document {purchase_document.public_id} for reason {ex.args}")
-        return False
-
-
-def reactivate_recurring_purchase_document(purchase_document, reactivation_date, reason=None, reactivated_by=False,
-                                           request=None):
-    try:
-        purchase_document.recurring_reactivated_date = reactivation_date
-        purchase_document.recurring_reason_reactivated = reason
-        if reactivated_by:
-            user = None
-            if request and hasattr(request, "user"):
-                user = request.user
-            purchase_document.recurring_reactivated_by = user
-
-        purchase_document.recurring_stopped_by = None
-        purchase_document.recurring_reason_stop = None
-        purchase_document.is_recurring_ended = False
-        purchase_document.recurring_cycle_stopped_at = None
-
-        purchase_document.save()
-        return True
-    except Exception as ex:
-        logger.error(f"Unable to reactivate purchase_document {purchase_document.public_id} for reason {ex.args}")
-        return False

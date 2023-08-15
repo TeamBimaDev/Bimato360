@@ -84,9 +84,7 @@ class BimaErpPurchaseDocumentHistorySerializer(serializers.ModelSerializer):
         model = BimaErpPurchaseDocument.history.model
         fields = ['id', 'number', 'number_at_partner', 'date', 'status', 'type', 'partner_id',
                   'note', 'private_note', 'validity', 'payment_terms', 'delivery_terms', 'vat_label', 'vat_amount',
-                  'total_amount', 'total_discount', 'total_vat', 'history_type', 'history_date', 'is_recurring',
-                  'is_recurring_parent', 'recurring_initial_parent_id', 'recurring_initial_parent',
-                  'history_user_display']
+                  'total_amount', 'total_discount', 'total_vat', 'history_type', 'history_date', 'history_user_display']
 
 
 class BimaErpPurchaseDocumentProductSerializer(serializers.Serializer):
