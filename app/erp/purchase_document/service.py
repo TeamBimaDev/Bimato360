@@ -9,11 +9,8 @@ from common.enums.partner_type import PartnerType
 from common.enums.purchase_document_enum import PurchaseDocumentStatus
 from common.service.purchase_sale_service import SalePurchaseService
 from dateutil.relativedelta import relativedelta
-from django.core.exceptions import ValidationError
-from django.db import transaction
 from django.db.models import Sum
 from django.http import HttpResponse
-from django.utils.translation import gettext_lazy as _
 from pandas import DataFrame
 
 from .models import BimaErpPurchaseDocument, BimaErpPurchaseDocumentProduct, update_purchase_document_totals
@@ -24,11 +21,6 @@ logger = logging.getLogger(__name__)
 class PurchaseDocumentService:
 
     @staticmethod
-    def validate_data(sale_or_purchase, quotation_order_invoice):
-        if not sale_or_purchase or not quotation_order_invoice:
-            raise ValidationError(_('Please provide all needed data'))
-
-    @staticmethod
     def get_unique_number(request, **kwargs):
         sale_or_purchase = kwargs.get('sale_purchase', '')
         quotation_order_invoice = kwargs.get('quotation_order_invoice', '')
@@ -37,72 +29,13 @@ class PurchaseDocumentService:
         if not quotation_order_invoice:
             quotation_order_invoice = request.query_params.get('quotation_order_invoice', '')
 
-        PurchaseDocumentService.validate_data(sale_or_purchase, quotation_order_invoice)
+        SalePurchaseService.validate_data(sale_or_purchase, quotation_order_invoice)
 
         unique_number = SalePurchaseService.generate_unique_number(sale_or_purchase, quotation_order_invoice)
         while BimaErpPurchaseDocument.objects.filter(number=unique_number).exists():
             unique_number = SalePurchaseService.generate_unique_number(sale_or_purchase,
                                                                        quotation_order_invoice)
         return unique_number
-
-
-def generate_recurring_purchase_documents():
-    today = datetime.today().date()
-    num_new_purchase_documents = 0
-
-    recurring_purchase_documents = BimaErpPurchaseDocument.objects.filter(
-        is_recurring=True,
-        recurring_initial_parent_id=None,
-        recurring_initial_parent_public_id=None,
-        is_recurring_parent=True,
-        is_recurring_ended=False,
-        status=PurchaseDocumentStatus.CONFIRMED.name
-    )
-
-    for purchase_document in recurring_purchase_documents:
-        recurring_interval_time = get_recurring_interval_value(purchase_document)
-        if recurring_interval_time is None:
-            continue
-
-        if purchase_document.recurring_next_generated_day is None:
-            purchase_document.recurring_next_generated_day = purchase_document.date + recurring_interval_time
-            purchase_document.save()
-
-        if purchase_document.recurring_next_generated_day <= today:
-            try:
-                if not verify_recurring_not_ended(purchase_document):
-                    continue
-                if not verify_recurring_limit_number_not_attempt(purchase_document):
-                    continue
-
-                logger.info(f"Treating purchase document number: {purchase_document.number}")
-
-                with transaction.atomic():
-                    initial_parent_id = purchase_document.id
-                    initial_parent_public_id = purchase_document.public_id
-
-                    new_purchase_document = create_new_document(
-                        document_type=purchase_document.type,
-                        parents=[purchase_document],
-                        initial_recurrent_parent_id=initial_parent_id,
-                        initial_recurrent_parent_public_id=initial_parent_public_id,
-                        is_recurring=True
-                    )
-
-                    create_products_from_parents(parents=[purchase_document], new_document=new_purchase_document)
-
-                    logger.info(
-                        f"{new_purchase_document.type} N° {new_purchase_document.number} is created from {purchase_document.number}")
-                    num_new_purchase_documents += 1
-
-            except Exception as e:
-                logger.error(f"Error creating new PurchaseDocument for parent {purchase_document.id}: {str(e)}")
-
-            purchase_document.recurring_next_generated_day = today + recurring_interval_time
-            purchase_document.recurring_last_generated_day = today
-            purchase_document.save()
-
-    logger.info(f'Successfully created {num_new_purchase_documents} new purchase documents')
 
 
 def create_products_from_parents(parents, new_document, reset_quantity=False):

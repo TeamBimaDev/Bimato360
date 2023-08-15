@@ -12,11 +12,9 @@ from common.enums.sale_document_enum import SaleDocumentStatus
 from common.enums.sale_document_enum import time_interval_based_on_recurring_interval, SaleDocumentRecurringInterval
 from common.service.purchase_sale_service import SalePurchaseService
 from dateutil.relativedelta import relativedelta
-from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import Sum
 from django.http import HttpResponse
-from django.utils.translation import gettext_lazy as _
 from erp.sale_document.models import BimaErpSaleDocument
 from pandas import DataFrame
 
@@ -28,11 +26,6 @@ logger = logging.getLogger(__name__)
 class SaleDocumentService:
 
     @staticmethod
-    def validate_data(sale_or_purchase, quotation_order_invoice):
-        if not sale_or_purchase or not quotation_order_invoice:
-            raise ValidationError(_('Please provide all needed data'))
-
-    @staticmethod
     def get_unique_number(request, **kwargs):
         sale_or_purchase = kwargs.get('sale_purchase', '')
         quotation_order_invoice = kwargs.get('quotation_order_invoice', '')
@@ -41,7 +34,7 @@ class SaleDocumentService:
         if not quotation_order_invoice:
             quotation_order_invoice = request.query_params.get('quotation_order_invoice', '')
 
-        SaleDocumentService.validate_data(sale_or_purchase, quotation_order_invoice)
+        SalePurchaseService.validate_data(sale_or_purchase, quotation_order_invoice)
 
         unique_number = SalePurchaseService.generate_unique_number(sale_or_purchase, quotation_order_invoice)
         while BimaErpSaleDocument.objects.filter(number=unique_number).exists():

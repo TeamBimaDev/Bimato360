@@ -58,7 +58,7 @@ class BimaErpPurchaseDocumentProduct(models.Model):
 
 class BimaErpPurchaseDocument(AbstractModel):
     number = models.CharField(max_length=32, null=False, blank=False, unique=True)
-    number_at_partner = models.CharField(max_length=32, null=False, blank=False, unique=True)
+    number_at_partner = models.CharField(max_length=32, null=True, blank=True, unique=False)
     date = models.DateField(null=False, blank=False)
     status = models.CharField(max_length=128, null=False,
                               blank=False, default="DRAFT",
