@@ -4,11 +4,15 @@ from collections import defaultdict, OrderedDict
 from datetime import date
 
 from common.enums.partner_type import PartnerType
+from common.enums.purchase_document_enum import PurchaseDocumentTypes, PurchaseDocumentStatus
+from common.enums.sale_document_enum import SaleDocumentTypes, SaleDocumentStatus
 from django.db import models
 from django.db.models import Sum, Count, Avg, DateField, Subquery, Case, When, Value, CharField, F
 from django.db.models.functions import TruncDay, TruncWeek, TruncMonth, TruncYear, Trunc, Concat
 from django.shortcuts import get_object_or_404
 from erp.product.models import BimaErpProduct
+from erp.purchase_document.models import BimaErpPurchaseDocument
+from erp.purchase_document.models import BimaErpPurchaseDocumentProduct
 from erp.sale_document.models import BimaErpSaleDocument
 from erp.sale_document.models import BimaErpSaleDocumentProduct
 
@@ -18,7 +22,7 @@ logger = logging.getLogger(__name__)
 class BimaAnalysisService:
 
     @staticmethod
-    def filter_sales_by_period(queryset, filter_period):
+    def filter_query_by_period(queryset, filter_period):
         if filter_period == 'daily':
             return queryset.annotate(period=models.functions.TruncDay('date')), models.functions.TruncDay('date')
         elif filter_period == 'weekly':
@@ -48,7 +52,26 @@ class BimaAnalysisService:
                 'sale_document__date')
 
     @staticmethod
-    def aggregate_sales_data(queryset):
+    def filter_purchase_product_by_period(queryset, filter_period):
+        if filter_period == 'daily':
+            return queryset.annotate(
+                period=models.functions.TruncDay('date')), models.functions.TruncDay(
+                'purchase_document__date')
+        elif filter_period == 'weekly':
+            return queryset.annotate(
+                period=models.functions.TruncWeek('date')), models.functions.TruncWeek(
+                'purchase_document__date')
+        elif filter_period == 'yearly':
+            return queryset.annotate(
+                period=models.functions.TruncYear('date')), models.functions.TruncYear(
+                'purchase_document__date')
+        else:
+            return queryset.annotate(
+                period=models.functions.TruncMonth('date')), models.functions.TruncMonth(
+                'purchase_document__date')
+
+    @staticmethod
+    def aggregate_query_data(queryset):
         return queryset.values('period').annotate(
             total_sales=Sum('total_amount'),
             transaction_count=Count('id'),
@@ -82,6 +105,20 @@ class BimaAnalysisService:
                                                                                                   filter_period)
 
         products_data = BimaErpSaleDocumentProduct.objects.filter(sale_document__in=filtered_sales_documents) \
+            .annotate(period=trunc_date) \
+            .values('period', 'product__public_id', 'product__reference', 'product__name') \
+            .annotate(total_sold=Sum('quantity')) \
+            .order_by('period', '-total_sold')
+
+        return BimaAnalysisService._format_top_n_products(products_data, top_n)
+
+    @staticmethod
+    def get_most_bought_products_data(purchases_documents, filter_period, top_n):
+        filtered_purchases_documents, trunc_date = BimaAnalysisService.filter_purchase_product_by_period(
+            purchases_documents, filter_period)
+
+        products_data = BimaErpPurchaseDocumentProduct.objects.filter(
+            purchase_document__in=filtered_purchases_documents) \
             .annotate(period=trunc_date) \
             .values('period', 'product__public_id', 'product__reference', 'product__name') \
             .annotate(total_sold=Sum('quantity')) \
@@ -147,6 +184,47 @@ class BimaAnalysisService:
         return results
 
     @staticmethod
+    def get_product_count_aggregated_purchases(product_public_id, period):
+        product = get_object_or_404(BimaErpProduct, public_id=product_public_id)
+        period_mapping = {
+            "daily": "day",
+            "weekly": "week",
+            "monthly": "month",
+            "yearly": "year"
+        }
+
+        trunc_type = period_mapping.get(period, "day")
+
+        trunc_date = Trunc('purchase_document__date', trunc_type, output_field=DateField())
+
+        purchases = (
+            BimaErpPurchaseDocumentProduct.objects
+            .filter(product_id=product.id)
+            .annotate(period=trunc_date)
+            .values('period')
+            .annotate(total_quantity=Sum('quantity'))
+            .order_by('period')
+        )
+
+        results = []
+        for purchase in purchases:
+            if period == "daily":
+                format_str = '%d/%m/%Y'
+            elif period == "yearly":
+                format_str = '%Y'
+            elif period == "weekly":
+                format_str = 'Week starting %d/%m/%Y'
+            else:  # monthly
+                format_str = '%m/%Y'
+
+            results.append({
+                "period": purchase["period"].strftime(format_str),
+                "quantity": purchase["total_quantity"]
+            })
+
+        return results
+
+    @staticmethod
     def get_unsold_products(self, start_date=None, end_date=None):
         sale_document_query = BimaErpSaleDocument.objects.all()
         if start_date:
@@ -177,7 +255,7 @@ class BimaAnalysisService:
         if not trunc_function:
             raise ValueError("Invalid period provided.")
 
-        sales = BimaErpSaleDocument.objects.all()
+        sales = BimaAnalysisService.get_only_confirmed_sale_invoice()
 
         if partner_id:
             sales = sales.filter(partner_id=partner_id)
@@ -188,6 +266,24 @@ class BimaAnalysisService:
                  .annotate(total=Sum('total_amount'))
                  .order_by('period'))
         return sales
+
+    @classmethod
+    def get_aggregated_purchases(cls, period, partner_id=None):
+        trunc_function = cls._get_trunc_mapper(period)
+        if not trunc_function:
+            raise ValueError("Invalid period provided.")
+
+        purchases = BimaAnalysisService.get_only_confirmed_purchase_invoice()
+
+        if partner_id:
+            purchases = purchases.filter(partner_id=partner_id)
+
+        purchases = (purchases
+                     .annotate(period=trunc_function('date'))
+                     .values('period')
+                     .annotate(total=Sum('total_amount'))
+                     .order_by('period'))
+        return purchases
 
     @staticmethod
     def calculate_percentage_difference(sales):
@@ -303,3 +399,13 @@ class BimaAnalysisService:
             })
 
         return {'partners': formatted_data}
+
+    @staticmethod
+    def get_only_confirmed_sale_invoice():
+        return BimaErpSaleDocument.objects.filter(type=SaleDocumentTypes.INVOICE.name,
+                                                  status=SaleDocumentStatus.CONFIRMED.name)
+
+    @staticmethod
+    def get_only_confirmed_purchase_invoice():
+        return BimaErpPurchaseDocument.objects.filter(type=PurchaseDocumentTypes.INVOICE.name,
+                                                      status=PurchaseDocumentStatus.CONFIRMED.name)
