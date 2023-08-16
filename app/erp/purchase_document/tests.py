@@ -12,6 +12,8 @@ from erp.product.models import BimaErpProduct
 from erp.unit_of_measure.factories import BimaErpUnitOfMeasureFactory
 from erp.vat.factories import BimaErpVatFactory
 
+from ..sale_document.models import BimaErpSaleDocumentProduct, BimaErpSaleDocument
+
 
 class BimaErpPurchaseDocumentTest(APITestCase):
     @classmethod
@@ -27,7 +29,7 @@ class BimaErpPurchaseDocumentTest(APITestCase):
             "number_at_partner": "Document-1-partner",
             "date": "2023-07-13",
             "status": "DRAFT",
-            "type": "QUOTE",
+            "type": "INVOICE",
             "partner_public_id": str(self.partner.public_id),
             "vat_label": "VAT",
             "vat_amount": "123.456",
@@ -77,10 +79,7 @@ class BimaErpPurchaseDocumentTest(APITestCase):
         purchase_document = BimaErpPurchaseDocument.objects.first()
         public_id = purchase_document.public_id
         url = reverse('erp:bimaerppurchasedocument-list') + f'{public_id}/add_product/'
-        category = BimaErpCategoryFactory.create()
-        vat = BimaErpVatFactory.create()
-        unit_of_measure = BimaErpUnitOfMeasureFactory.create()
-        product = BimaErpProductFactory.create(category=category, vat=vat, unit_of_measure=unit_of_measure)
+        product = BimaErpProductFactory.create(quantity=100, type="STOCKABLE_PRODUCT")
         data = {
             "unit_of_measure": "Kilo",
             "vat": 12,
@@ -165,10 +164,8 @@ class BimaErpPurchaseDocumentTest(APITestCase):
         purchase_document = BimaErpPurchaseDocument.objects.first()
         public_id = purchase_document.public_id
         url = reverse('erp:bimaerppurchasedocument-list') + f'{public_id}/add_product/'
-        category = BimaErpCategoryFactory.create()
-        vat = BimaErpVatFactory.create()
-        unit_of_measure = BimaErpUnitOfMeasureFactory.create()
-        product = BimaErpProductFactory.create(category=category, vat=vat, unit_of_measure=unit_of_measure)
+        product = BimaErpProductFactory.create(quantity=100, type="STOCKABLE_PRODUCT")
+
         data = {
             "unit_of_measure": "Kilo",
             "vat": 12,
@@ -309,7 +306,39 @@ class BimaErpPurchaseDocumentTest(APITestCase):
                     self.assertIn('new_value', change)
                     self.assertIn('history_type', change)
                     self.assertIn('user', change)
+    def test_verifies_quantity_of_product(self):
+        self.create_purchase_document()
+        product = BimaErpProductFactory.create(quantity=100, type="STOCKABLE_PRODUCT")
+        purchase_document = BimaErpPurchaseDocument.objects.first()
 
+        save_bima_erp_purchase_document_product_url = reverse(
+            'erp:bimaerppurchasedocument-list') + f'{purchase_document.public_id}/add_product/'
+        save_bima_erp_purchase_document_product_data = {
+            "unit_of_measure": "Kilo",
+            "vat": 12,
+            "unit_price": 1200,
+            "discount": 0,
+            "quantity": 30,
+            "reference": "2313241564cqqsqsqsqs",
+            "name": "Sale2",
+            "product_public_id": str(product.public_id),
+            "description": "sqdqsdzaeazezae"
+        }
+        save_bima_erp_purchase_document_product_response = self.client.post(save_bima_erp_purchase_document_product_url,
+                                                                        save_bima_erp_purchase_document_product_data,
+                                                                        format='json')
+        self.assertEqual(save_bima_erp_purchase_document_product_response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(BimaErpPurchaseDocumentProduct.objects.count(), 1)
+
+        save_bima_erp_sale_document_url = reverse('erp:bimaerppurchasedocument-detail',
+                                                  kwargs={'pk': str(purchase_document.public_id)})
+        data = {'status': 'CONFIRMED'}
+        response = self.client.patch(save_bima_erp_sale_document_url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        product.refresh_from_db()
+        print(product.quantity)
+        self.assertEqual(product.quantity, 130)
     @staticmethod
     def create_permissions():
         permission_list = [

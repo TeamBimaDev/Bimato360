@@ -82,11 +82,8 @@ class BimaErpSaleDocumentTest(APITestCase):
         sale_document = BimaErpSaleDocument.objects.first()
         public_id = sale_document.public_id
         url = reverse('erp:bimaerpsaledocument-list') + f'{public_id}/add_product/'
-        category = BimaErpCategoryFactory.create()
-        vat = BimaErpVatFactory.create()
-        unit_of_measure = BimaErpUnitOfMeasureFactory.create()
-        product = BimaErpProductFactory.create(category=category, vat=vat, unit_of_measure=unit_of_measure,
-                                               quantity=0, type="SERVICE_PRODUCTS")
+        product = BimaErpProductFactory.create(quantity=100, type="STOCKABLE_PRODUCT")
+
         data = {
             "unit_of_measure": "Kilo",
             "vat": 12,
@@ -171,11 +168,8 @@ class BimaErpSaleDocumentTest(APITestCase):
         sale_document = BimaErpSaleDocument.objects.first()
         public_id = sale_document.public_id
         url = reverse('erp:bimaerpsaledocument-list') + f'{public_id}/add_product/'
-        category = BimaErpCategoryFactory.create()
-        vat = BimaErpVatFactory.create()
-        unit_of_measure = BimaErpUnitOfMeasureFactory.create()
-        product = BimaErpProductFactory.create(category=category, vat=vat, unit_of_measure=unit_of_measure, quantity=1,
-                                               type="STOCKABLE_PRODUCT")
+        product = BimaErpProductFactory.create(quantity=100, type="STOCKABLE_PRODUCT")
+
         data = {
             "unit_of_measure": "Kilo",
             "vat": 12,
