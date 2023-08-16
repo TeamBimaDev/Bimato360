@@ -1,20 +1,17 @@
-from django.urls import reverse
-from rest_framework.test import APITestCase, APIClient
-from rest_framework import status
-
-from .factories import BimaCoreAddressFactory
-from .models import BimaCoreAddress
-from django.contrib.auth.models import Permission
-from django.contrib.contenttypes.models import ContentType
-from user.factories import UserFactory
 from core.bank.factories import BimaCoreBankFactory
+from core.bank.models import BimaCoreBank
 from core.country.factories import BimaCoreCountryFactory
 from core.state.factories import BimaCoreStateFactory
-from core.bank.models import BimaCoreBank
+from django.contrib.auth.models import Permission
+from django.contrib.contenttypes.models import ContentType
+from django.urls import reverse
 from erp.partner.factories import BimaErpPartnerFactory
 from erp.partner.models import BimaErpPartner
-from company.factories import BimaCompanyFactory
-from company.models import BimaCompany
+from rest_framework import status
+from rest_framework.test import APITestCase, APIClient
+from user.factories import UserFactory
+
+from .models import BimaCoreAddress
 
 
 class BimaCoreAddressTest(APITestCase):
@@ -53,6 +50,7 @@ class BimaCoreAddressTest(APITestCase):
         }
         # Give permissions to the user.
         self.client.force_authenticate(self.user)
+
     def test_create_address_with_bank(self):
         self.bank = BimaCoreBankFactory()
         public_id = self.bank.public_id
@@ -62,6 +60,7 @@ class BimaCoreAddressTest(APITestCase):
         response = self.client.post(url, self.address_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(BimaCoreAddress.objects.count(), 1)
+
     def test_create_address_with_partner(self):
         self.partner = BimaErpPartnerFactory()
         public_id = self.partner.public_id
@@ -71,6 +70,7 @@ class BimaCoreAddressTest(APITestCase):
         response = self.client.post(url, self.address_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(BimaCoreAddress.objects.count(), 1)
+
     def test_update_address(self):
         self.test_create_address_with_bank()
         address = BimaCoreAddress.objects.first()
@@ -81,6 +81,7 @@ class BimaCoreAddressTest(APITestCase):
         response3 = self.client.patch(url, address_data, format='json')
         self.assertEqual(response3.status_code, status.HTTP_200_OK)
         self.assertEqual(BimaCoreAddress.objects.get(pk=address.pk).contact_name, 'update contact name')
+
     def test_delete_address(self):
         self.test_create_address_with_bank()
         address = BimaCoreAddress.objects.first()
@@ -98,6 +99,7 @@ class BimaCoreAddressTest(APITestCase):
         response = self.client.post(url2, self.address_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(BimaCoreAddress.objects.count(), 1)
+
     def test_add_address_for_partner(self):
         BimaErpPartnerFactory.create()
         self.partner = BimaErpPartner.objects.first()
@@ -108,16 +110,7 @@ class BimaCoreAddressTest(APITestCase):
         response = self.client.post(url2, self.address_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(BimaCoreAddress.objects.count(), 1)
-   # def test_add_address_for_company(self):
-    #    BimaCompanyFactory.create()
-     #   self.company = BimaCompany.objects.first()
-     #   public_id = self.company.public_id
-     #   url2 = reverse('company:bimacompany-list') + f'{public_id}/addresses/'
-     #   self.address_data['parent_type'] = ContentType.objects.get_for_model(self.company).id
-     #   self.address_data['parent_id'] = self.company.id
-     #   response = self.client.post(url2, self.address_data, format='json')
-     #   self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-     #   self.assertEqual(BimaCoreAddress.objects.count(), 1)
+
     def test_unauthenticated(self):
         self.client.logout()
         url = reverse('core:bimacoreaddress-list')

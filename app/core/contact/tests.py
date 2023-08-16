@@ -1,12 +1,13 @@
-from django.urls import reverse
-from rest_framework.test import APITestCase, APIClient
-from rest_framework import status
-from .models import BimaCoreContact
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
-from user.factories import UserFactory
+from django.urls import reverse
 from erp.partner.factories import BimaErpPartnerFactory
 from erp.partner.models import BimaErpPartner
+from rest_framework import status
+from rest_framework.test import APITestCase, APIClient
+from user.factories import UserFactory
+
+from .models import BimaCoreContact
 
 
 class BimaCoreContactTest(APITestCase):
@@ -37,6 +38,7 @@ class BimaCoreContactTest(APITestCase):
         }
         # Give permissions to the user.
         self.client.force_authenticate(self.user)
+
     def test_create_contact_with_partner(self):
         self.partner = BimaErpPartnerFactory()
         public_id = self.partner.public_id
@@ -46,6 +48,7 @@ class BimaCoreContactTest(APITestCase):
         response = self.client.post(url, self.contact_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(BimaCoreContact.objects.count(), 1)
+
     def test_add_contact_for_partner(self):
         BimaErpPartnerFactory.create()
         self.partner = BimaErpPartner.objects.first()
@@ -56,6 +59,7 @@ class BimaCoreContactTest(APITestCase):
         response = self.client.post(url2, self.contact_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(BimaCoreContact.objects.count(), 1)
+
     def test_update_contact(self):
         self.test_create_contact_with_partner()
         contact = BimaCoreContact.objects.first()
@@ -66,35 +70,14 @@ class BimaCoreContactTest(APITestCase):
         response3 = self.client.patch(url, contact_data, format='json')
         self.assertEqual(response3.status_code, status.HTTP_200_OK)
         self.assertEqual(BimaCoreContact.objects.get(pk=contact.pk).name, 'update contact name')
+
     def test_delete_contact(self):
         self.test_create_contact_with_partner()
         contact = BimaCoreContact.objects.first()
         url = reverse('core:bimacorecontact-detail', kwargs={'pk': str(contact.public_id)})
         response = self.client.delete(url, format='json')
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
-   # def test_unauthorized_create_contact_with_partner(self):
-    #    self.client.logout()
-    #    user_without_permission = UserFactory()
-    #    self.client.force_authenticate(user_without_permission)
-    #    BimaErpPartnerFactory.create()
-    #    self.partner = BimaErpPartner.objects.first()
-    #    public_id = self.partner.public_id
-    #    url2 = reverse('erp:bimaerppartner-list') + f'{public_id}/contacts/'
-    #    self.contact_data['parent_type'] = ContentType.objects.get_for_model(self.partner).id
-    #    self.contact_data['parent_id'] = self.partner.id
-    #    response = self.client.post(url2, self.contact_data, format='json')
-    #    self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-    #def test_unauthorized_add_contact_for_partner(self):
-    #    self.client.logout()
-    #    user_without_permission = UserFactory()
-    #    self.client.force_authenticate(user_without_permission)
-    #    self.partner = BimaErpPartnerFactory()
-    #    public_id = self.partner.public_id
-    #    url = reverse('erp:bimaerppartner-list') + f'{public_id}/contacts/'
-    #    self.contact_data['parent_type'] = ContentType.objects.get_for_model(self.partner).id
-    #    self.contact_data['parent_id'] = self.partner.id
-    #    response = self.client.post(url, self.contact_data, format='json')
-    #    self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
     def test_unauthenticated(self):
         self.client.logout()
         url = reverse('core:bimacorecontact-list')

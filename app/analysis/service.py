@@ -83,12 +83,12 @@ class BimaAnalysisService:
         for data in aggregated_data:
             period = data['period']
 
-            period_sales_for_partner = partner_sales.filter(period=period).aggregate(total_sales=Sum('total_amount'))[
-                'total_sales']
+            period_sales_for_partner = partner_sales.filter(period=period).aggregate(total_amounts=Sum('total_amount'))[
+                'total_amounts']
             period_transaction_for_partner = partner_sales.filter(period=period).count()
 
-            period_total_sales = all_sales.filter(period=period).aggregate(total_sales=Sum('total_amount'))[
-                'total_sales']
+            period_total_sales = all_sales.filter(period=period).aggregate(total_amounts=Sum('total_amount'))[
+                'total_amounts']
             period_total_transactions = all_sales.filter(period=period).count()
 
             data['partner_percentage'] = BimaAnalysisService._percentage(period_sales_for_partner, period_total_sales)
@@ -107,8 +107,8 @@ class BimaAnalysisService:
         products_data = BimaErpSaleDocumentProduct.objects.filter(sale_document__in=filtered_sales_documents) \
             .annotate(period=trunc_date) \
             .values('period', 'product__public_id', 'product__reference', 'product__name') \
-            .annotate(total_sold=Sum('quantity')) \
-            .order_by('period', '-total_sold')
+            .annotate(total_quantity=Sum('quantity')) \
+            .order_by('period', '-total_quantity')
 
         return BimaAnalysisService._format_top_n_products(products_data, top_n)
 
@@ -121,8 +121,8 @@ class BimaAnalysisService:
             purchase_document__in=filtered_purchases_documents) \
             .annotate(period=trunc_date) \
             .values('period', 'product__public_id', 'product__reference', 'product__name') \
-            .annotate(total_sold=Sum('quantity')) \
-            .order_by('period', '-total_sold')
+            .annotate(total_quantity=Sum('quantity')) \
+            .order_by('period', '-total_quantity')
 
         return BimaAnalysisService._format_top_n_products(products_data, top_n)
 
@@ -136,7 +136,7 @@ class BimaAnalysisService:
                     'product_public_id': item['product__public_id'],
                     'product_name': item['product__name'],
                     'product_reference': item['product__reference'],
-                    'total_sold': item['total_sold']
+                    'total_quantity': item['total_quantity']
                 })
 
         formatted_result = [{"period": period, "products": products} for period, products in result.items()]
