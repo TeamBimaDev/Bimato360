@@ -73,7 +73,7 @@ class BimaAnalysisService:
     @staticmethod
     def aggregate_query_data(queryset):
         return queryset.values('period').annotate(
-            total_sales=Sum('total_amount'),
+            total_amounts=Sum('total_amount'),
             transaction_count=Count('id'),
             avg_transaction_value=Avg('total_amount')
         ).order_by('period')
