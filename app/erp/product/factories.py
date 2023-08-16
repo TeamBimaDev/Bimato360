@@ -1,11 +1,13 @@
 import factory
-from .models import BimaErpProduct
 from common.enums.product_enum import get_product_types, \
     get_product_price_calculation_method, \
     get_product_status
-from erp.unit_of_measure.factories import BimaErpUnitOfMeasureFactory
 from erp.category.factories import BimaErpCategoryFactory
+from erp.unit_of_measure.factories import BimaErpUnitOfMeasureFactory
 from erp.vat.factories import BimaErpVatFactory
+
+from .models import BimaErpProduct
+
 
 class BimaErpProductFactory(factory.django.DjangoModelFactory):
     class Meta:

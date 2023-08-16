@@ -1,18 +1,19 @@
-from datetime import timezone
 import itertools
-from django.urls import reverse
-from rest_framework.test import APITestCase, APIClient
-from rest_framework import status
-from .models import BimaErpSaleDocument, BimaErpSaleDocumentProduct
+
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
-from user.factories import UserFactory
-from erp.partner.factories import BimaErpPartnerFactory
+from django.urls import reverse
 from erp.category.factories import BimaErpCategoryFactory
+from erp.partner.factories import BimaErpPartnerFactory
 from erp.product.factories import BimaErpProductFactory
 from erp.product.models import BimaErpProduct
 from erp.unit_of_measure.factories import BimaErpUnitOfMeasureFactory
 from erp.vat.factories import BimaErpVatFactory
+from rest_framework import status
+from rest_framework.test import APITestCase, APIClient
+from user.factories import UserFactory
+
+from .models import BimaErpSaleDocument, BimaErpSaleDocumentProduct
 
 
 class BimaErpSaleDocumentTest(APITestCase):
@@ -28,7 +29,7 @@ class BimaErpSaleDocumentTest(APITestCase):
             "number": "Document-1",
             "date": "2023-07-13",
             "status": "DRAFT",
-            "type": "QUOTE",
+            "type": "INVOICE",
             "partner_public_id": str(self.partner.public_id),
             "vat_label": "VAT",
             "vat_amount": "123.456",
@@ -75,6 +76,7 @@ class BimaErpSaleDocumentTest(APITestCase):
         self.sale_document_data['number'] = document_number
         response = self.client.post(url, self.sale_document_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
     def add_product_for_sale_document(self):
         self.create_sale_document()
         sale_document = BimaErpSaleDocument.objects.first()
@@ -83,7 +85,8 @@ class BimaErpSaleDocumentTest(APITestCase):
         category = BimaErpCategoryFactory.create()
         vat = BimaErpVatFactory.create()
         unit_of_measure = BimaErpUnitOfMeasureFactory.create()
-        product = BimaErpProductFactory.create(category=category, vat=vat, unit_of_measure=unit_of_measure)
+        product = BimaErpProductFactory.create(category=category, vat=vat, unit_of_measure=unit_of_measure,
+                                               quantity=0, type="SERVICE_PRODUCTS")
         data = {
             "unit_of_measure": "Kilo",
             "vat": 12,
@@ -171,20 +174,21 @@ class BimaErpSaleDocumentTest(APITestCase):
         category = BimaErpCategoryFactory.create()
         vat = BimaErpVatFactory.create()
         unit_of_measure = BimaErpUnitOfMeasureFactory.create()
-        product = BimaErpProductFactory.create(category=category, vat=vat, unit_of_measure=unit_of_measure)
+        product = BimaErpProductFactory.create(category=category, vat=vat, unit_of_measure=unit_of_measure, quantity=1,
+                                               type="STOCKABLE_PRODUCT")
         data = {
             "unit_of_measure": "Kilo",
             "vat": 12,
             "unit_price": 1200,
             "discount": 0,
             "quantity": 3,
-            "reference": "2313241564",
-            "name": "Sale",
+            "reference": "2313241564cqqsqsqsqs",
+            "name": "Sale2",
             "product_public_id": str(product.public_id),
-            "description": ""
+            "description": "sqdqsdzaeazezae"
         }
         response = self.client.post(url, data, format='json')
-        #self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(BimaErpSaleDocumentProduct.objects.count(), 1)
 
     def test_delete_product_from_sale_document(self):
@@ -235,6 +239,7 @@ class BimaErpSaleDocumentTest(APITestCase):
         self.assertEqual(response.data['status'], new_status)
         sale_document.refresh_from_db()
         self.assertEqual(BimaErpSaleDocument.objects.get(pk=sale_document.pk).status, 'CONFIRMED')
+
     def test_view_history_of_sale_document(self):
         self.create_sale_document()
         sale_document = BimaErpSaleDocument.objects.first()
@@ -269,6 +274,7 @@ class BimaErpSaleDocumentTest(APITestCase):
                 self.assertIn('old_value', change)
                 self.assertIn('new_value', change)
                 self.assertIn('user', change)
+
     def test_rollback_status_of_sale_document(self):
         self.add_product_for_sale_document()
         sale_document = BimaErpSaleDocument.objects.first()
@@ -283,6 +289,7 @@ class BimaErpSaleDocumentTest(APITestCase):
         self.assertEqual(response.data['status'], 'DRAFT')
         sale_document.refresh_from_db()
         self.assertEqual(sale_document.status, 'DRAFT')
+
     def test_get_product_history(self):
         self.add_product_for_sale_document()
         sale_document = BimaErpSaleDocument.objects.first()
@@ -315,34 +322,37 @@ class BimaErpSaleDocumentTest(APITestCase):
 
     def test_verifies_quantity_of_product(self):
         self.create_sale_document()
-        self.add_product_for_sale_document()
+        product = BimaErpProductFactory.create(quantity=100, type="STOCKABLE_PRODUCT")
         sale_document = BimaErpSaleDocument.objects.first()
-        url = reverse('erp:bimaerpsaledocument-detail', kwargs={'pk': str(sale_document.public_id)})
-        data = {'status': 'CONFIRMED'}
-        response = self.client.patch(url, data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-        product = BimaErpSaleDocumentProduct.objects.first()
-        url = reverse('erp:bimaerpsaledocument-list') + f'{sale_document.public_id}/update_product/'
-        updated_quantity = 5
-
-        data = {
-            "sale_document_public_id": str(sale_document.public_id),
-            "product_public_id": str(product.product.public_id),
-            "unit_of_measure": product.unit_of_measure,
-            "vat": product.vat,
-            "unit_price": product.unit_price,
-            "discount": product.discount,
-            "quantity": updated_quantity,
-            "reference": product.reference,
-            "name": product.name,
-            "description": product.description,
+        save_bima_erp_sale_document_product_url = reverse(
+            'erp:bimaerpsaledocument-list') + f'{sale_document.public_id}/add_product/'
+        save_bima_erp_sale_document_product_data = {
+            "unit_of_measure": "Kilo",
+            "vat": 12,
+            "unit_price": 1200,
+            "discount": 0,
+            "quantity": 30,
+            "reference": "2313241564cqqsqsqsqs",
+            "name": "Sale2",
+            "product_public_id": str(product.public_id),
+            "description": "sqdqsdzaeazezae"
         }
+        save_bima_erp_sale_document_product_response = self.client.post(save_bima_erp_sale_document_product_url,
+                                                                        save_bima_erp_sale_document_product_data,
+                                                                        format='json')
+        self.assertEqual(save_bima_erp_sale_document_product_response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(BimaErpSaleDocumentProduct.objects.count(), 1)
 
-        response = self.client.put(url, data, format='json')
+        save_bima_erp_sale_document_url = reverse('erp:bimaerpsaledocument-detail',
+                                                  kwargs={'pk': str(sale_document.public_id)})
+        data = {'status': 'CONFIRMED'}
+        response = self.client.patch(save_bima_erp_sale_document_url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
         product.refresh_from_db()
-        self.assertEqual(product.quantity, updated_quantity)
+        print(product.quantity)
+        self.assertEqual(product.quantity, 70)
 
     @staticmethod
     def create_permissions():
