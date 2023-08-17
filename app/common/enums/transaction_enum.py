@@ -20,3 +20,12 @@ class PaymentTermDetailType(Enum):
 
 def get_payment_term_detail_types():
     return [(ptd.name, ptd.value) for ptd in PaymentTermDetailType]
+
+
+class TransactionTypeIncomeOutcome(Enum):
+    INCOME = _('INCOME')
+    OUTCOME = _('OUTCOME')
+
+
+def get_transaction_type_income_outcome():
+    return [(ptd.name, ptd.value) for ptd in TransactionTypeIncomeOutcome]

@@ -5,6 +5,7 @@ app_name = 'treasury'
 urlpatterns = [
     path('cash/', include('treasury.cash.urls')),
     path('bank_account/', include('treasury.bank_account.urls')),
+    path('transaction_type/', include('treasury.transaction_type.urls')),
     path('payment_term/', include('treasury.payment_term.urls')),
     path('payment_term_detail/', include('treasury.payment_term_detail.urls')),
     # path('payment_method/', include('treasury.payment_method.urls')),
