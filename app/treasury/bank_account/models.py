@@ -16,7 +16,8 @@ class BimaTreasuryBankAccount(AbstractModel):
     balance = models.DecimalField(max_digits=14, decimal_places=3, verbose_name=_("Balance"), default=0)
     account_holder_name = models.CharField(max_length=255, verbose_name=_("Account Holder Name"), blank=False,
                                            null=False)
-    notes = models.TextField(null=True, blank=True, verbose_name=_("Notes"))
+    active = models.BooleanField(default=True)
+    note = models.TextField(null=True, blank=True, verbose_name=_("Notes"))
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField()
     content_object = GenericForeignKey('content_type', 'object_id')

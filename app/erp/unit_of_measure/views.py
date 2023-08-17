@@ -1,25 +1,25 @@
 import django_filters
+from common.converters.default_converters import str_to_bool
+from common.permissions.action_base_permission import ActionBasedPermission
 from core.abstract.views import AbstractViewSet
 
 from .models import BimaErpUnitOfMeasure
 from .serializers import BimaErpUnitOfMeasureSerializer
-from common.permissions.action_base_permission import ActionBasedPermission
 
 
 class UnitOfMeasureFilter(django_filters.FilterSet):
     name = django_filters.CharFilter(field_name='name', lookup_expr='icontains')
-    active = django_filters.ChoiceFilter(choices=[('True', 'True'), ('False', 'False'), ('all', 'all')],
-                                         method='filter_active')
+    active = django_filters.CharFilter(method='filter_active')
 
     class Meta:
         model = BimaErpUnitOfMeasure
         fields = ['active', 'name']
 
     def filter_active(self, queryset, name, value):
-        if value == 'all':
+        if value == 'all' or value is None:
             return queryset
         else:
-            return queryset.filter(active=(value == 'True'))
+            return queryset.filter(active=str_to_bool(value))
 
 
 class BimaErpUnitOfMeasureViewSet(AbstractViewSet):

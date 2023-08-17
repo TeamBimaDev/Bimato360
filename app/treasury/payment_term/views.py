@@ -2,17 +2,19 @@ from common.permissions.action_base_permission import ActionBasedPermission
 from core.abstract.views import AbstractViewSet
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from treasury.payment_term_detail.models import BimaTreasuryPaymentTermDetail
+from treasury.payment_term_detail.serializers import BimaTreasuryPaymentTermDetailSerializer
 
+from .filter import BimaTreasuryPaymentTermFilter
 from .models import BimaTreasuryPaymentTerm
 from .serializers import BimaTreasuryPaymentTermSerializer
-from ..payment_term_detail.models import BimaTreasuryPaymentTermDetail
-from ..payment_term_detail.serializers import BimaTreasuryPaymentTermDetailSerializer
 
 
 class BimaTreasuryPaymentTermViewSet(AbstractViewSet):
     queryset = BimaTreasuryPaymentTerm.objects.all()
     serializer_class = BimaTreasuryPaymentTermSerializer
     permission_classes = (ActionBasedPermission,)
+    filterset_class = BimaTreasuryPaymentTermFilter
 
     action_permissions = {
         'list': ['payment_term.can_read'],

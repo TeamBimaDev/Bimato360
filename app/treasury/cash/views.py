@@ -1,6 +1,7 @@
 from common.permissions.action_base_permission import ActionBasedPermission
 from core.abstract.views import AbstractViewSet
 
+from .filter import BimaTreasuryCashFilter
 from .models import BimaTreasuryCash
 from .serializers import BimaTreasuryCashSerializer
 
@@ -9,6 +10,7 @@ class BimaTreasuryCashViewSet(AbstractViewSet):
     queryset = BimaTreasuryCash.objects.all()
     serializer_class = BimaTreasuryCashSerializer
     permission_classes = (ActionBasedPermission,)
+    filterset_class = BimaTreasuryCashFilter
 
     action_permissions = {
         'list': ['cash.can_read'],

@@ -38,6 +38,6 @@ class BimaTreasuryBankAccountSerializer(AbstractSerializer):
     class Meta:
         model = BimaTreasuryBankAccount
         fields = [
-            'id', 'name', 'account_number', 'iban', 'balance', 'account_holder_name', 'notes',
+            'id', 'name', 'account_number', 'iban', 'balance', 'account_holder_name', 'note', 'active',
             'currency', 'currency_public_id', 'bank', 'bank_public_id', 'created', 'updated'
         ]

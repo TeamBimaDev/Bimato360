@@ -1,25 +1,23 @@
 import django_filters
-from django.shortcuts import get_object_or_404
-from django.db.models import Q
-from django.http import JsonResponse
-from django.utils.translation import gettext_lazy as _
-from rest_framework.decorators import action
-from rest_framework.exceptions import ValidationError
-from rest_framework import status
-from rest_framework.response import Response
-
+from common.converters.default_converters import str_to_bool
+from common.permissions.action_base_permission import ActionBasedPermission
+from core.abstract.views import AbstractViewSet
 from core.entity_tag.models import get_entity_tags_for_parent_entity, create_single_entity_tag, BimaCoreEntityTag
 from core.entity_tag.serializers import BimaCoreEntityTagSerializer
-from core.abstract.views import AbstractViewSet
-from common.permissions.action_base_permission import ActionBasedPermission
+from django.db.models import Q
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
+from rest_framework import status
+from rest_framework.decorators import action
+from rest_framework.response import Response
+
 from .models import BimaErpCategory
 from .serializers import BimaErpCategorySerializer
 
 
 class CategoryFilter(django_filters.FilterSet):
     search = django_filters.CharFilter(method='filter_search')
-    active = django_filters.ChoiceFilter(choices=[('True', 'True'), ('False', 'False'), ('all', 'all')],
-                                         method='filter_active')
+    active = django_filters.CharFilter(method='filter_active')
 
     class Meta:
         model = BimaErpCategory
@@ -32,10 +30,10 @@ class CategoryFilter(django_filters.FilterSet):
         )
 
     def filter_active(self, queryset, name, value):
-        if value == 'all':
+        if value == 'all' or value is None:
             return queryset
         else:
-            return queryset.filter(active=(value == 'True'))
+            return queryset.filter(active=str_to_bool(value))
 
 
 class BimaErpCategoryViewSet(AbstractViewSet):
@@ -52,7 +50,6 @@ class BimaErpCategoryViewSet(AbstractViewSet):
         'partial_update': ['category.can_update'],
         'destroy': ['category.can_delete'],
     }
-
 
     def get_object(self):
         obj = BimaErpCategory.objects.get_object_by_public_id(self.kwargs['pk'])

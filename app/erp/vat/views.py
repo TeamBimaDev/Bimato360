@@ -1,16 +1,16 @@
 import django_filters
+from common.converters.default_converters import str_to_bool
+from common.permissions.action_base_permission import ActionBasedPermission
+from core.abstract.views import AbstractViewSet
 from django.db.models import Q
 
-from core.abstract.views import AbstractViewSet
-from common.permissions.action_base_permission import ActionBasedPermission
 from .models import BimaErpVat
 from .serializers import BimaErpVatSerializer
 
 
 class VatFilter(django_filters.FilterSet):
     search = django_filters.CharFilter(method='filter_search')
-    active = django_filters.ChoiceFilter(choices=[('True', 'True'), ('False', 'False'), ('all', 'all')],
-                                         method='filter_active')
+    active = django_filters.CharFilter(method='filter_active')
 
     class Meta:
         model = BimaErpVat
@@ -23,10 +23,10 @@ class VatFilter(django_filters.FilterSet):
         )
 
     def filter_active(self, queryset, name, value):
-        if value == 'all':
+        if value == 'all' or value is None:
             return queryset
         else:
-            return queryset.filter(active=(value == 'True'))
+            return queryset.filter(active=str_to_bool(value))
 
 
 class BimaErpVatViewSet(AbstractViewSet):

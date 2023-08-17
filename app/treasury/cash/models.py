@@ -7,7 +7,7 @@ class BimaTreasuryCash(AbstractModel):
     name = models.CharField(max_length=128, blank=False, unique=True)
     active = models.BooleanField(default=True)
     company = models.ForeignKey(BimaCompany, on_delete=models.PROTECT)
-    notes = models.TextField(null=True, blank=True)
+    note = models.TextField(null=True, blank=True)
 
     class Meta:
         ordering = ['id']
