@@ -22,6 +22,9 @@ from pandas import read_csv
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from treasury.bank_account.models import BimaTreasuryBankAccount
+from treasury.bank_account.serializers import BimaTreasuryBankAccountSerializer
+from treasury.bank_account.service import BimaTreasuryBankAccountService
 
 from .models import BimaErpPartner
 from .serializers import BimaErpPartnerSerializer
@@ -199,6 +202,33 @@ class BimaErpPartnerViewSet(AbstractViewSet):
                                         parent_id=partner.id)
         serialized_entity_tags = BimaCoreEntityTagSerializer(entity_tags)
         return JsonResponse(serialized_entity_tags.data)
+
+    def list_bank_account(self, request, *args, **kwargs):
+        partner = BimaErpPartner.objects.get_object_by_public_id(self.kwargs['public_id'])
+        bank_accounts = BimaTreasuryBankAccountService.get_bank_accounts_for_parent_entity(partner)
+        serialized_contact = BimaTreasuryBankAccountSerializer(bank_accounts, many=True)
+        return Response(serialized_contact.data)
+
+    def create_bank_account(self, request, *args, **kwargs):
+        partner = BimaErpPartner.objects.get_object_by_public_id(self.kwargs['public_id'])
+        bank_account_data = request.data
+        result = BimaTreasuryBankAccountService.create_bank_account(partner, bank_account_data)
+        if isinstance(result, BimaTreasuryBankAccount):
+            serialized_document = BimaTreasuryBankAccountSerializer(result)
+            return Response(serialized_document.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(result, status=result.get("status", status.HTTP_500_INTERNAL_SERVER_ERROR))
+
+    def get_bank_account(self, request, *args, **kwargs):
+        partner = BimaErpPartner.objects.get_object_by_public_id(self.kwargs['public_id'])
+        bank_account = BimaTreasuryBankAccountService.get_bank_account_by_public_id_and_parent(
+            public_id=self.kwargs['bank_account_public_id'],
+            parent_id=partner.id)
+        if not bank_account:
+            return Response({"error": "Not Found"}, status=status.HTTP_404_NOT_FOUND)
+
+        serialized_account = BimaTreasuryBankAccountSerializer(bank_account)
+        return Response(serialized_account.data)
 
     @action(detail=False, methods=['GET'], url_path='export_csv')
     def export_csv(self, request):

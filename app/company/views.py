@@ -18,6 +18,9 @@ from django.utils.translation import gettext_lazy as _
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from treasury.bank_account.models import BimaTreasuryBankAccount
+from treasury.bank_account.serializers import BimaTreasuryBankAccountSerializer
+from treasury.bank_account.service import BimaTreasuryBankAccountService
 
 from app import settings
 from .models import BimaCompany
@@ -76,6 +79,33 @@ class BimaCompanyViewSet(AbstractViewSet):
                                      parent_id=company.id)
         serialized_document = BimaCoreDocumentSerializer(document)
         return Response(serialized_document.data)
+
+    def list_bank_account(self, request, *args, **kwargs):
+        company = BimaCompany.objects.get_object_by_public_id(self.kwargs['public_id'])
+        bank_accounts = BimaTreasuryBankAccountService.get_bank_accounts_for_parent_entity(company)
+        serialized_contact = BimaTreasuryBankAccountSerializer(bank_accounts, many=True)
+        return Response(serialized_contact.data)
+
+    def create_bank_account(self, request, *args, **kwargs):
+        company = BimaCompany.objects.get_object_by_public_id(self.kwargs['public_id'])
+        bank_account_data = request.data
+        result = BimaTreasuryBankAccountService.create_bank_account(company, bank_account_data)
+        if isinstance(result, BimaTreasuryBankAccount):
+            serialized_document = BimaTreasuryBankAccountSerializer(result)
+            return Response(serialized_document.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(result, status=result.get("status", status.HTTP_500_INTERNAL_SERVER_ERROR))
+
+    def get_bank_account(self, request, *args, **kwargs):
+        company = BimaCompany.objects.get_object_by_public_id(self.kwargs['public_id'])
+        bank_account = BimaTreasuryBankAccountService.get_bank_account_by_public_id_and_parent(
+            public_id=self.kwargs['bank_account_public_id'],
+            parent_id=company.id)
+        if not bank_account:
+            return Response({"error": "Not Found"}, status=status.HTTP_404_NOT_FOUND)
+
+        serialized_account = BimaTreasuryBankAccountSerializer(bank_account)
+        return Response(serialized_account.data)
 
     def get_object(self):
         obj = BimaCompany.objects.get_object_by_public_id(self.kwargs['pk'])

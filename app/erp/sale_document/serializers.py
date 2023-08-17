@@ -88,7 +88,7 @@ class BimaErpSaleDocumentSerializer(AbstractSerializer):
 
         fields = [
             'id', 'number', 'date', 'status', 'type', 'partner', 'partner_public_id', 'note',
-            'private_note', 'validity', 'payment_term', 'delivery_terms', 'total_vat',
+            'private_note', 'validity', 'payment_terms', 'delivery_terms', 'total_vat',
             'total_discount', 'parents', 'parent_public_ids', 'history', 'vat_label', 'vat_amount', 'created',
             'updated', 'total_vat', 'total_amount', 'total_discount', 'children', 'is_recurring', 'is_recurring_parent',
             'recurring_initial_parent_id', 'recurring_initial_parent_public_id', 'recurring_interval',
@@ -125,7 +125,7 @@ class BimaErpSaleDocumentHistorySerializer(serializers.ModelSerializer):
     class Meta:
         model = BimaErpSaleDocument.history.model
         fields = ['id', 'number', 'date', 'status', 'type', 'partner_id',
-                  'note', 'private_note', 'validity', 'payment_term', 'delivery_terms', 'vat_label', 'vat_amount',
+                  'note', 'private_note', 'validity', 'payment_terms', 'delivery_terms', 'vat_label', 'vat_amount',
                   'total_amount', 'total_discount', 'total_vat', 'history_type', 'history_date', 'is_recurring',
                   'is_recurring_parent', 'recurring_initial_parent_id', 'recurring_initial_parent_public_id',
                   'recurring_interval', 'recurring_interval_type_custom_number', 'recurring_interval_type_custom_unit',

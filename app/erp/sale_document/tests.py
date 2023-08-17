@@ -33,7 +33,7 @@ class BimaErpSaleDocumentTest(APITestCase):
             "note": "Sample note",
             "private_note": "Sample private note",
             "validity": "day_30",
-            "payment_term": "Payment terms",
+            "payment_terms": "Payment terms",
             "delivery_terms": "Delivery terms",
             "total_amount_without_vat": "789.012",
             "total_after_discount": "345.678",
