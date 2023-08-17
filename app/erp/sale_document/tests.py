@@ -3,12 +3,9 @@ import itertools
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
 from django.urls import reverse
-from erp.category.factories import BimaErpCategoryFactory
 from erp.partner.factories import BimaErpPartnerFactory
 from erp.product.factories import BimaErpProductFactory
 from erp.product.models import BimaErpProduct
-from erp.unit_of_measure.factories import BimaErpUnitOfMeasureFactory
-from erp.vat.factories import BimaErpVatFactory
 from rest_framework import status
 from rest_framework.test import APITestCase, APIClient
 from user.factories import UserFactory
@@ -36,7 +33,7 @@ class BimaErpSaleDocumentTest(APITestCase):
             "note": "Sample note",
             "private_note": "Sample private note",
             "validity": "day_30",
-            "payment_terms": "Payment terms",
+            "payment_term": "Payment terms",
             "delivery_terms": "Delivery terms",
             "total_amount_without_vat": "789.012",
             "total_after_discount": "345.678",

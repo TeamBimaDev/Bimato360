@@ -20,6 +20,7 @@ urlpatterns = [
     path('api/company/', include('company.urls')),
     path('api/erp/', include('erp.urls')),
     path('api/analysis/', include('analysis.urls')),
+    path('api/treasury/', include('treasury.urls')),
     # path('api/hr/', include('hr.urls')),
     # path('__debug__/', include(debug_toolbar.urls)),
 ]

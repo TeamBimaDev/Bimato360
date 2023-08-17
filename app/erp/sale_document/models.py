@@ -83,7 +83,7 @@ class BimaErpSaleDocument(AbstractModel):
     note = models.TextField(blank=True, null=True)
     private_note = models.TextField(blank=True, null=True)
     validity = models.CharField(blank=True, null=True, choices=get_sale_document_validity())
-    payment_terms = models.CharField(max_length=100, blank=True, null=True)
+    payment_term = models.CharField(max_length=100, blank=True, null=True)
     delivery_terms = models.CharField(max_length=100, blank=True, null=True)
     total_amount_without_vat = models.DecimalField(max_digits=18, decimal_places=3, blank=True, null=True, default=0)
     total_after_discount = models.DecimalField(max_digits=18, decimal_places=3, blank=True, null=True, default=0)

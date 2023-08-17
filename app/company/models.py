@@ -3,6 +3,7 @@ from common.enums.font_family import get_font_family_list
 from common.enums.language import LanguageEnum
 from core.abstract.models import AbstractModel
 from core.currency.models import BimaCoreCurrency
+from django.contrib.contenttypes.fields import GenericRelation
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
@@ -39,6 +40,7 @@ class BimaCompany(AbstractModel):
     show_template_logo = models.BooleanField(default=True, null=True, blank=True, verbose_name=_("Afficher le logo"))
     default_color = models.CharField(blank=True, null=True, default='#000000',
                                      verbose_name=_('Couleur par défaut'))
+    bank_accounts = GenericRelation('treasury.BimaTreasuryBankAccount')
 
     def __str__(self):
         return f"{self.name, self.public_id}"

@@ -1,14 +1,15 @@
-from django.urls import reverse
-from rest_framework.test import APITestCase, APIClient
-from rest_framework import status
-from .factories import BimaCoreCashFactory
-from .models import BimaCoreCash
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
+from django.urls import reverse
+from rest_framework import status
+from rest_framework.test import APITestCase, APIClient
 from user.factories import UserFactory
 
+from .factories import BimaTreasuryCashFactory
+from .models import BimaTreasuryCash
 
-class BimaCoreCashTest(APITestCase):
+
+class BimaTreasuryCashTest(APITestCase):
 
     def setUp(self):
         self.create_permissions()
@@ -33,43 +34,37 @@ class BimaCoreCashTest(APITestCase):
         self.client.force_authenticate(self.user)
 
     def test_create_cash(self):
-        url = reverse('core:bimacorecash-list')
+        url = reverse('core:bimatreasurycash-list')
         response = self.client.post(url, self.cash_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(BimaCoreCash.objects.count(), 1)
+        self.assertEqual(BimaTreasuryCash.objects.count(), 1)
 
     def test_get_cashs(self):
-        BimaCoreCashFactory.create_batch(5)
-        url = reverse('core:bimacorecash-list')
+        BimaTreasuryCashFactory.create_batch(5)
+        url = reverse('core:bimatreasurycash-list')
         response = self.client.get(url, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['count'], 5)
         self.assertEqual(len(response.data['results']), 5)
 
     def test_update_cash(self):
-        cash = BimaCoreCashFactory()
-        url = reverse('core:bimacorecash-detail', kwargs={'pk': str(cash.public_id)})
+        cash = BimaTreasuryCashFactory()
+        url = reverse('core:bimatreasurycash-detail', kwargs={'pk': str(cash.public_id)})
         data = {'name': 'Updated Name'}
         response = self.client.patch(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(BimaCoreCash.objects.get(pk=cash.pk).name, 'Updated Name')
-
-   # def test_delete_cash(self):
-    #    cash = BimaCoreCashFactory()
-     #   url = reverse('core:bimacorecash-detail', kwargs={'pk': str(cash.public_id)})
-      #  response = self.client.delete(url, format='json')
-       # self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(BimaTreasuryCash.objects.get(pk=cash.pk).name, 'Updated Name')
 
     def test_unauthenticated(self):
         self.client.logout()
-        url = reverse('core:bimacorecash-list')
+        url = reverse('core:bimatreasurycash-list')
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_unauthorized_create(self):
         self.client.logout()
         self.client.force_authenticate(UserFactory())
-        url = reverse('core:bimacorecash-list')
+        url = reverse('core:bimatreasurycash-list')
         response = self.client.post(url, self.cash_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
@@ -77,8 +72,8 @@ class BimaCoreCashTest(APITestCase):
         self.client.logout()
         user_without_permission = UserFactory()
         self.client.force_authenticate(user_without_permission)
-        cash = BimaCoreCashFactory()
-        url = reverse('core:bimacorecash-detail', kwargs={'pk': str(cash.public_id)})
+        cash = BimaTreasuryCashFactory()
+        url = reverse('core:bimatreasurycash-detail', kwargs={'pk': str(cash.public_id)})
         data = {'name': 'Updated Name'}
         response = self.client.patch(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
@@ -87,14 +82,13 @@ class BimaCoreCashTest(APITestCase):
         self.client.logout()
         user_without_permission = UserFactory()
         self.client.force_authenticate(user_without_permission)
-        cash = BimaCoreCashFactory()
-        url = reverse('core:bimacorecash-detail', kwargs={'pk': str(cash.public_id)})
+        cash = BimaTreasuryCashFactory()
+        url = reverse('core:bimatreasurycash-detail', kwargs={'pk': str(cash.public_id)})
         response = self.client.delete(url, format='json')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def create_permissions(self):
         permission_list = [
-            # Add your permission tuples here.
             ('core.cash.can_create', 'Can create cash'),
             ('core.cash.can_update', 'Can update cash'),
             ('core.cash.can_delete', 'Can delete cash'),
@@ -102,7 +96,7 @@ class BimaCoreCashTest(APITestCase):
         ]
 
         for permission_code, permission_name in permission_list:
-            content_type = ContentType.objects.get_for_model(BimaCoreCash)
+            content_type = ContentType.objects.get_for_model(BimaTreasuryCash)
             Permission.objects.get_or_create(
                 codename=permission_code,
                 name=permission_name,

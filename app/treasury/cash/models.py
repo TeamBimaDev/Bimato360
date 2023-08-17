@@ -1,11 +1,13 @@
+from company.models import BimaCompany
+from core.abstract.models import AbstractModel
 from django.db import models
 
-from core.abstract.models import AbstractModel
 
-
-class BimaCoreCash(AbstractModel):
+class BimaTreasuryCash(AbstractModel):
     name = models.CharField(max_length=128, blank=False, unique=True)
     active = models.BooleanField(default=True)
+    company = models.ForeignKey(BimaCompany, on_delete=models.PROTECT)
+    notes = models.TextField(null=True, blank=True)
 
     class Meta:
         ordering = ['id']

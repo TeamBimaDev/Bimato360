@@ -4,6 +4,7 @@ from common.enums.gender import get_gender_choices
 from common.enums.partner_type import PartnerType
 from common.enums.partner_type import get_partner_type_choices
 from core.abstract.models import AbstractModel
+from django.contrib.contenttypes.fields import GenericRelation
 from django.db import models
 from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
@@ -44,6 +45,7 @@ class BimaErpPartner(AbstractModel):
     company_capital = models.CharField(blank=True, null=True, verbose_name=_('Company Capital'))
     credit = models.DecimalField(max_digits=18, decimal_places=3, default=0, verbose_name=_('Credit'))
     balance = models.DecimalField(max_digits=18, decimal_places=3, default=0, verbose_name=_('Balance'))
+    bank_accounts = GenericRelation('treasury.BimaTreasuryBankAccount')
 
     def update_balance(self):
         total_income = sum(transaction.amount for transaction in self.transactions.filter(transaction_type='INCOME'))

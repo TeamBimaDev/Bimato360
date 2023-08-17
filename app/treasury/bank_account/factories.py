@@ -1,8 +1,10 @@
-from factory.django import DjangoModelFactory
 from factory import Faker
+from factory.django import DjangoModelFactory
+
 from .models import BimaCoreCash
 
-class BimaCoreCashFactory(DjangoModelFactory):
+
+class BimaTreasuryCashFactory(DjangoModelFactory):
     class Meta:
         model = BimaCoreCash
 

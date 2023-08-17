@@ -59,11 +59,6 @@ class PermissionsList:
     CORE_TAG_DELETE = ('core.tag.can_delete', 'Can delete tag', 'CORE_TAG')
     CORE_TAG_READ = ('core.tag.can_read', 'Can read tag', 'CORE_TAG')
 
-    CORE_CASH_CREATE = ('core.cash.can_create', 'Can create cash', 'CORE_CASH')
-    CORE_CASH_UPDATE = ('core.cash.can_update', 'Can update cash', 'CORE_CASH')
-    CORE_CASH_DELETE = ('core.cash.can_delete', 'Can delete cash', 'CORE_CASH')
-    CORE_CASH_READ = ('core.cash.can_read', 'Can read cash', 'CORE_CASH')
-
     ERP_CATEGORY_CREATE = ('erp.category.can_create', 'Can create category', 'ERP_CATEGORY')
     ERP_CATEGORY_UPDATE = ('erp.category.can_update', 'Can update category', 'ERP_CATEGORY')
     ERP_CATEGORY_DELETE = ('erp.category.can_delete', 'Can delete category', 'ERP_CATEGORY')
@@ -73,11 +68,6 @@ class PermissionsList:
     ERP_PARTNER_UPDATE = ('erp.partner.can_update', 'Can update partner', 'ERP_PARTNER')
     ERP_PARTNER_DELETE = ('erp.partner.can_delete', 'Can delete partner', 'ERP_PARTNER')
     ERP_PARTNER_READ = ('erp.partner.can_read', 'Can read partner', 'ERP_PARTNER')
-
-    ERP_PAYMENT_TERMS_CREATE = ('erp.payment_terms.can_create', 'Can create payment terms', 'ERP_PAYMENT_TERMS')
-    ERP_PAYMENT_TERMS_UPDATE = ('erp.payment_terms.can_update', 'Can update payment terms', 'ERP_PAYMENT_TERMS')
-    ERP_PAYMENT_TERMS_DELETE = ('erp.payment_terms.can_delete', 'Can delete payment terms', 'ERP_PAYMENT_TERMS')
-    ERP_PAYMENT_TERMS_READ = ('erp.payment_terms.can_read', 'Can read payment terms', 'ERP_PAYMENT_TERMS')
 
     ERP_PRODUCT_CREATE = ('erp.product.can_create', 'Can create product', 'ERP_PRODUCT')
     ERP_PRODUCT_UPDATE = ('erp.product.can_update', 'Can update product', 'ERP_PRODUCT')
@@ -105,7 +95,8 @@ class PermissionsList:
     ERP_SALE_DOCUMENT_VIEW_HISTORY = ('erp.sale_document.can_view_history',
                                       'Can view history of sale document', 'ERP_SALE_DOCUMENT')
 
-    ERP_PURCHASE_DOCUMENT_CREATE = ('erp.purchase_document.can_create', 'Can create purchase document', 'ERP_PURCHASE_DOCUMENT')
+    ERP_PURCHASE_DOCUMENT_CREATE = (
+        'erp.purchase_document.can_create', 'Can create purchase document', 'ERP_PURCHASE_DOCUMENT')
     ERP_PURCHASE_DOCUMENT_UPDATE = ('erp.purchase_document.can_update', 'Can update purchase document'
                                     , 'ERP_PURCHASE_DOCUMENT')
     ERP_PURCHASE_DOCUMENT_DELETE = ('erp.purchase_document.can_delete', 'Can delete purchase document'
@@ -164,3 +155,24 @@ class PermissionsList:
     COMPANY_COMPANY_READ = ('company.company.can_read', 'Can read company', 'COMPANY_COMPANY')
     COMPANY_COMPANY_ADD_DOCUMENT = ('company.company.can_add_document', 'Can add document', 'COMPANY_COMPANY')
     COMPANY_COMPANY_ADD_ADDRESS = ('company.company.can_add_address', 'Can add address', 'COMPANY_COMPANY')
+
+    TREASURY_CASH_CREATE = ('treasury.cash.can_create', 'Can create cash', 'TREASURY_CASH')
+    TREASURY_CASH_UPDATE = ('treasury.cash.can_update', 'Can update cash', 'TREASURY_CASH')
+    TREASURY_CASH_DELETE = ('treasury.cash.can_delete', 'Can delete cash', 'TREASURY_CASH')
+    TREASURY_CASH_READ = ('treasury.cash.can_read', 'Can read cash', 'TREASURY_CASH')
+
+    TREASURY_BANK_ACCOUNT_CREATE = (
+        'treasury.bank_account.can_create', 'Can create bank account', 'TREASURY_BANK_ACCOUNT')
+    TREASURY_BANK_ACCOUNT_UPDATE = (
+        'treasury.bank_account.can_update', 'Can update bank account', 'TREASURY_BANK_ACCOUNT')
+    TREASURY_BANK_ACCOUNT_DELETE = (
+        'treasury.bank_account.can_delete', 'Can delete bank account', 'TREASURY_BANK_ACCOUNT')
+    TREASURY_BANK_ACCOUNT_READ = ('treasury.bank_account.can_read', 'Can read bank account', 'TREASURY_BANK_ACCOUNT')
+
+    TREASURY_PAYMENT_TERM_CREATE = (
+        'treasury.payment_term.can_create', 'Can create payment term', 'TREASURY_PAYMENT_TERM')
+    TREASURY_PAYMENT_TERM_UPDATE = (
+        'treasury.payment_term.can_update', 'Can update payment term', 'TREASURY_PAYMENT_TERM')
+    TREASURY_PAYMENT_TERM_DELETE = (
+        'treasury.payment_term.can_delete', 'Can delete payment term', 'TREASURY_PAYMENT_TERM')
+    TREASURY_PAYMENT_TERM_READ = ('treasury.payment_term.can_read', 'Can read payment term', 'TREASURY_PAYMENT_TERM')

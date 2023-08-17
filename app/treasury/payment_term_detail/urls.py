@@ -1,9 +1,10 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import BimaCoreCashViewSet
+
+from .views import BimaTreasuryPaymentTermDetailViewSet
 
 router = DefaultRouter()
-router.register('', BimaCoreCashViewSet)
+router.register('', BimaTreasuryPaymentTermDetailViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),

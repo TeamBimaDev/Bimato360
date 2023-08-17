@@ -1,18 +1,14 @@
-from django.urls import reverse
-from rest_framework.test import APITestCase, APIClient
-from rest_framework import status
-from .models import BimaErpPurchaseDocument, BimaErpPurchaseDocumentProduct
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
-from user.factories import UserFactory
+from django.urls import reverse
 from erp.partner.factories import BimaErpPartnerFactory
-from erp.category.factories import BimaErpCategoryFactory
 from erp.product.factories import BimaErpProductFactory
 from erp.product.models import BimaErpProduct
-from erp.unit_of_measure.factories import BimaErpUnitOfMeasureFactory
-from erp.vat.factories import BimaErpVatFactory
+from rest_framework import status
+from rest_framework.test import APITestCase, APIClient
+from user.factories import UserFactory
 
-from ..sale_document.models import BimaErpSaleDocumentProduct, BimaErpSaleDocument
+from .models import BimaErpPurchaseDocument, BimaErpPurchaseDocumentProduct
 
 
 class BimaErpPurchaseDocumentTest(APITestCase):
@@ -36,7 +32,7 @@ class BimaErpPurchaseDocumentTest(APITestCase):
             "note": "Sample note",
             "private_note": "Sample private note",
             "validity": "day_30",
-            "payment_terms": "Payment terms",
+            "payment_term": "Payment terms",
             "delivery_terms": "Delivery terms",
             "total_amount_without_vat": "789.012",
             "total_after_discount": "345.678",
@@ -229,6 +225,7 @@ class BimaErpPurchaseDocumentTest(APITestCase):
         self.assertEqual(response.data['status'], new_status)
         purchase_document.refresh_from_db()
         self.assertEqual(BimaErpPurchaseDocument.objects.get(pk=purchase_document.pk).status, 'CONFIRMED')
+
     def test_view_history_of_purchase_document(self):
         self.create_purchase_document()
         purchase_document = BimaErpPurchaseDocument.objects.first()
@@ -263,6 +260,7 @@ class BimaErpPurchaseDocumentTest(APITestCase):
                 self.assertIn('old_value', change)
                 self.assertIn('new_value', change)
                 self.assertIn('user', change)
+
     def test_rollback_status_of_purchase_document(self):
         self.add_product_for_purchase_document()
         purchase_document = BimaErpPurchaseDocument.objects.first()
@@ -277,6 +275,7 @@ class BimaErpPurchaseDocumentTest(APITestCase):
         self.assertEqual(response.data['status'], 'DRAFT')
         purchase_document.refresh_from_db()
         self.assertEqual(purchase_document.status, 'DRAFT')
+
     def test_get_product_history(self):
         self.add_product_for_purchase_document()
         purchase_document = BimaErpPurchaseDocument.objects.first()
@@ -306,6 +305,7 @@ class BimaErpPurchaseDocumentTest(APITestCase):
                     self.assertIn('new_value', change)
                     self.assertIn('history_type', change)
                     self.assertIn('user', change)
+
     def test_verifies_quantity_of_product(self):
         self.create_purchase_document()
         product = BimaErpProductFactory.create(quantity=100, type="STOCKABLE_PRODUCT")
@@ -325,8 +325,8 @@ class BimaErpPurchaseDocumentTest(APITestCase):
             "description": "sqdqsdzaeazezae"
         }
         save_bima_erp_purchase_document_product_response = self.client.post(save_bima_erp_purchase_document_product_url,
-                                                                        save_bima_erp_purchase_document_product_data,
-                                                                        format='json')
+                                                                            save_bima_erp_purchase_document_product_data,
+                                                                            format='json')
         self.assertEqual(save_bima_erp_purchase_document_product_response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(BimaErpPurchaseDocumentProduct.objects.count(), 1)
 
@@ -339,6 +339,7 @@ class BimaErpPurchaseDocumentTest(APITestCase):
         product.refresh_from_db()
         print(product.quantity)
         self.assertEqual(product.quantity, 130)
+
     @staticmethod
     def create_permissions():
         permission_list = [

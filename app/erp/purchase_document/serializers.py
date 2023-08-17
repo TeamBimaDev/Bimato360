@@ -65,7 +65,7 @@ class BimaErpPurchaseDocumentSerializer(AbstractSerializer):
         model = BimaErpPurchaseDocument
         fields = [
             'id', 'number', 'number_at_partner', 'date', 'status', 'type', 'partner', 'partner_public_id', 'vat_label',
-            'vat_amount', 'note', 'private_note', 'validity', 'payment_terms', 'delivery_terms',
+            'vat_amount', 'note', 'private_note', 'validity', 'payment_term', 'delivery_terms',
             'total_amount_without_vat', 'total_after_discount', 'total_vat', 'total_amount', 'total_discount',
             'parents', 'parent_public_ids', 'history', 'created', 'updated', 'children'
         ]
@@ -83,7 +83,7 @@ class BimaErpPurchaseDocumentHistorySerializer(serializers.ModelSerializer):
     class Meta:
         model = BimaErpPurchaseDocument.history.model
         fields = ['id', 'number', 'number_at_partner', 'date', 'status', 'type', 'partner_id',
-                  'note', 'private_note', 'validity', 'payment_terms', 'delivery_terms', 'vat_label', 'vat_amount',
+                  'note', 'private_note', 'validity', 'payment_term', 'delivery_terms', 'vat_label', 'vat_amount',
                   'total_amount', 'total_discount', 'total_vat', 'history_type', 'history_date', 'history_user_display']
 
 

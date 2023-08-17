@@ -88,14 +88,15 @@ class BimaErpSaleDocumentSerializer(AbstractSerializer):
 
         fields = [
             'id', 'number', 'date', 'status', 'type', 'partner', 'partner_public_id', 'note',
-            'private_note', 'validity', 'payment_terms', 'delivery_terms', 'total_vat',
+            'private_note', 'validity', 'payment_term', 'delivery_terms', 'total_vat',
             'total_discount', 'parents', 'parent_public_ids', 'history', 'vat_label', 'vat_amount', 'created',
             'updated', 'total_vat', 'total_amount', 'total_discount', 'children', 'is_recurring', 'is_recurring_parent',
             'recurring_initial_parent_id', 'recurring_initial_parent_public_id', 'recurring_interval',
             'recurring_interval_type_custom_number', 'recurring_interval_type_custom_unit', 'recurring_cycle',
             'recurring_cycle_number_to_repeat', 'recurring_cycle_stop_at', 'recurring_cycle_stopped_at',
             'recurring_last_generated_day', 'recurring_reason_stop', 'recurring_reason_reactivated',
-            'recurring_reactivated_date', 'recurring_stopped_by_display', 'recurring_reactivated_by_display','is_recurring_ended'
+            'recurring_reactivated_date', 'recurring_stopped_by_display', 'recurring_reactivated_by_display',
+            'is_recurring_ended'
         ]
         read_only_fields = ('total_vat', 'total_amount', 'total_discount',)
 
@@ -124,14 +125,14 @@ class BimaErpSaleDocumentHistorySerializer(serializers.ModelSerializer):
     class Meta:
         model = BimaErpSaleDocument.history.model
         fields = ['id', 'number', 'date', 'status', 'type', 'partner_id',
-                  'note', 'private_note', 'validity', 'payment_terms', 'delivery_terms', 'vat_label', 'vat_amount',
+                  'note', 'private_note', 'validity', 'payment_term', 'delivery_terms', 'vat_label', 'vat_amount',
                   'total_amount', 'total_discount', 'total_vat', 'history_type', 'history_date', 'is_recurring',
                   'is_recurring_parent', 'recurring_initial_parent_id', 'recurring_initial_parent_public_id',
                   'recurring_interval', 'recurring_interval_type_custom_number', 'recurring_interval_type_custom_unit',
                   'recurring_cycle', 'recurring_cycle_number_to_repeat', 'recurring_cycle_stop_at',
                   'recurring_cycle_stopped_at', 'recurring_last_generated_day', 'recurring_reason_stop',
                   'recurring_reason_reactivated', 'recurring_reactivated_date', 'history_user_display',
-                  'recurring_stopped_by_display', 'recurring_reactivated_by_display','is_recurring_ended']
+                  'recurring_stopped_by_display', 'recurring_reactivated_by_display', 'is_recurring_ended']
 
 
 class BimaErpSaleDocumentProductSerializer(serializers.Serializer):

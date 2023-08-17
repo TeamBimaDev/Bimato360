@@ -1,12 +1,13 @@
-from core.abstract.views import AbstractViewSet
-from .models import BimaCoreCash
-from .serializers import BimaCoreCashSerializer
 from common.permissions.action_base_permission import ActionBasedPermission
+from core.abstract.views import AbstractViewSet
+
+from .models import BimaTreasuryCash
+from .serializers import BimaTreasuryCashSerializer
 
 
-class BimaCoreCashViewSet(AbstractViewSet):
-    queryset = BimaCoreCash.objects.all()
-    serializer_class = BimaCoreCashSerializer
+class BimaTreasuryCashViewSet(AbstractViewSet):
+    queryset = BimaTreasuryCash.objects.all()
+    serializer_class = BimaTreasuryCashSerializer
     permission_classes = (ActionBasedPermission,)
 
     action_permissions = {
@@ -19,5 +20,5 @@ class BimaCoreCashViewSet(AbstractViewSet):
     }
 
     def get_object(self):
-        obj = BimaCoreCash.objects.get_object_by_public_id(self.kwargs['pk'])
+        obj = BimaTreasuryCash.objects.get_object_by_public_id(self.kwargs['pk'])
         return obj

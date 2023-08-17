@@ -1275,7 +1275,7 @@ msgstr ""
 "this was a mistake."
 
 #: .\treasury\payment_terms\serializers.py:20
-msgid "Sum of payment_terms_details value must be 100."
+msgid "Sum of payment_term_detail value must be 100."
 msgstr "Sum of payment terms details value must be 100."
 
 #: .\user\models.py:17
