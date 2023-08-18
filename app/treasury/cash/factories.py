@@ -1,12 +1,15 @@
 from factory import Faker
 from factory.django import DjangoModelFactory
-
-from .models import BimaCoreCash
+import factory
+from .models import BimaTreasuryCash
+from company.factories import BimaCompanyFactory
 
 
 class BimaTreasuryCashFactory(DjangoModelFactory):
     class Meta:
-        model = BimaCoreCash
+        model = BimaTreasuryCash
 
     name = Faker('company')
     active = Faker('boolean')
+    company = factory.SubFactory(BimaCompanyFactory)
+
