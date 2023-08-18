@@ -1,4 +1,5 @@
-from common.enums.transaction_enum import get_transaction_type_income_outcome
+from common.enums.transaction_enum import get_transaction_type_for_cash_or_bank, get_transaction_type_income_outcome
+
 from core.abstract.models import AbstractModel
 from django.db import models
 from django.utils.translation import gettext_lazy as _
@@ -13,6 +14,9 @@ class BimaTreasuryTransactionType(AbstractModel):
     income_outcome = models.CharField(max_length=32, blank=False, null=False,
                                       choices=get_transaction_type_income_outcome(),
                                       verbose_name=_('INCOME_OUTCOME'))
+    cash_bank = models.CharField(max_length=32, blank=False, null=False,
+                                 choices=get_transaction_type_for_cash_or_bank(),
+                                 verbose_name=_('INCOME_OUTCOME'))
 
     class Meta:
         ordering = ['name']

@@ -8,6 +8,7 @@ from .models import BimaTreasuryTransactionType
 class BimaTreasuryTransactionTypeFilter(django_filters.FilterSet):
     search = django_filters.CharFilter(method='filter_search')
     active = django_filters.CharFilter(method='filter_active')
+    income_outcome = django_filters.CharFilter(method='filter_income_outcome')
 
     class Meta:
         model = BimaTreasuryTransactionType
@@ -23,3 +24,7 @@ class BimaTreasuryTransactionTypeFilter(django_filters.FilterSet):
             return queryset
         else:
             return queryset.filter(active=str_to_bool(value))
+
+    def filter_income_outcome(self, queryset, name, value):
+        if value.lower() in ['income', 'outcome']:
+            return queryset.filter(income_outcome=value.upper())

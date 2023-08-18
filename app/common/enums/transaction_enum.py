@@ -29,3 +29,30 @@ class TransactionTypeIncomeOutcome(Enum):
 
 def get_transaction_type_income_outcome():
     return [(ptd.name, ptd.value) for ptd in TransactionTypeIncomeOutcome]
+
+
+class TransactionTypeForCashOrBank(Enum):
+    Cash = _('Cash')
+    Bank = _('Bank')
+
+
+def get_transaction_type_for_cash_or_bank():
+    return [(ptd.name, ptd.value) for ptd in TransactionTypeForCashOrBank]
+
+
+class TransactionNature(Enum):
+    CASH = _('Cash')
+    BANK = _('Bank')
+
+
+def get_transaction_nature_cash_or_bank():
+    return [(ptd.name, ptd.value) for ptd in TransactionNature]
+
+
+class TransactionDirection(Enum):
+    INCOME = _('Income')
+    OUTCOME = _('Outcome')
+
+
+def get_transaction_direction_income_or_outcome():
+    return [(ptd.name, ptd.value) for ptd in TransactionDirection]
