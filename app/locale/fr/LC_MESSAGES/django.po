@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-08-18 10:03+0100\n"
+"POT-Creation-Date: 2023-08-18 13:53+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -197,7 +197,7 @@ msgid "Credit note"
 msgstr "Avoir"
 
 #: .\common\enums\purchase_document_enum.py:11
-#: .\erp\purchase_document\models.py:102 .\erp\purchase_document\views.py:274
+#: .\erp\purchase_document\models.py:102 .\erp\purchase_document\views.py:275
 msgid "Request for Quotation"
 msgstr "Demande de prix"
 
@@ -355,7 +355,7 @@ msgstr "Impossible de trouver le modèle"
 msgid "Please provide all needed data"
 msgstr "Veuillez fournir toutes les données nécessaires"
 
-#: .\common\utils\utils.py:21
+#: .\common\utils\utils.py:20
 msgid "An error occurred during PDF generation:<pre>"
 msgstr "Une erreur s'est produite lors de la génération du PDF :<pre>"
 
@@ -461,7 +461,9 @@ msgstr "L'élément est utilisé, impossible de changer vers désactiver"
 
 #: .\core\abstract\models.py:55
 msgid "Impossible de supprimer cet élément car il est lié à un autre élément."
-msgstr "Impossible de supprimer cet élément car il est lié à un autre élément."
+msgstr ""
+"Impossible de supprimer cet élément, vérifier si il ne conteint pas des sous-"
+"element ou il est liée a d'autre element"
 
 #: .\core\abstract\views.py:43
 msgid "Invalid input"
@@ -872,43 +874,43 @@ msgstr "Aucun produit avec cet identifiant n'existe."
 msgid "Confirmed Item must contain at least one Product."
 msgstr "L'élément confirmé doit contenir au moins un produit."
 
-#: .\erp\purchase_document\views.py:60 .\erp\sale_document\views.py:63
+#: .\erp\purchase_document\views.py:61 .\erp\sale_document\views.py:63
 msgid "You do not have permission to change the status"
 msgstr "Vous n'avez pas l'autorisation de modifier le statut"
 
-#: .\erp\purchase_document\views.py:64 .\erp\sale_document\views.py:67
+#: .\erp\purchase_document\views.py:65 .\erp\sale_document\views.py:67
 msgid "You do not have permission to rollback the status"
 msgstr "Vous n'avez pas l'autorisation de revenir en arrière sur le statut"
 
-#: .\erp\purchase_document\views.py:74 .\erp\sale_document\views.py:77
+#: .\erp\purchase_document\views.py:75 .\erp\sale_document\views.py:77
 msgid "You do not have permission to set the status"
 msgstr "Vous n'avez pas l'autorisation de définir le statut"
 
-#: .\erp\purchase_document\views.py:110 .\erp\purchase_document\views.py:134
+#: .\erp\purchase_document\views.py:111 .\erp\purchase_document\views.py:135
 msgid "Mismatched purchase_document_id"
 msgstr "Identifiant du document d'achat incorrect"
 
-#: .\erp\purchase_document\views.py:119 .\erp\sale_document\views.py:121
+#: .\erp\purchase_document\views.py:120 .\erp\sale_document\views.py:121
 msgid "Cannot find the item to edit"
 msgstr "Impossible de trouver l'élément à modifier"
 
-#: .\erp\purchase_document\views.py:158 .\erp\sale_document\views.py:160
+#: .\erp\purchase_document\views.py:159 .\erp\sale_document\views.py:160
 msgid "Item created"
 msgstr "Élément créé"
 
-#: .\erp\purchase_document\views.py:287 .\erp\sale_document\views.py:288
+#: .\erp\purchase_document\views.py:288 .\erp\sale_document\views.py:288
 msgid "Rapport"
 msgstr "Rapport"
 
-#: .\erp\purchase_document\views.py:329 .\erp\sale_document\views.py:364
+#: .\erp\purchase_document\views.py:330 .\erp\sale_document\views.py:364
 msgid "No valid parent documents found"
 msgstr "Aucun document parent valide trouvé"
 
-#: .\erp\purchase_document\views.py:333 .\erp\sale_document\views.py:368
+#: .\erp\purchase_document\views.py:334 .\erp\sale_document\views.py:368
 msgid "All documents should belong to the same partner"
 msgstr "Tous les documents doivent appartenir au même partenaire"
 
-#: .\erp\purchase_document\views.py:337 .\erp\sale_document\views.py:372
+#: .\erp\purchase_document\views.py:338 .\erp\sale_document\views.py:372
 msgid "Please give the type of the document"
 msgstr "Veuillez indiquer le type de document"
 
@@ -1152,26 +1154,26 @@ msgstr "EAN 13"
 
 #: .\templates\sale_document\delivery_note.html:168
 #: .\templates\sale_document\sale_document_resume.html:117
-#: .\templates\sale_document\sale_templates\sale_document_basic.html:245
-#: .\templates\sale_document\sale_templates\sale_document_elegant.html:202
+#: .\templates\sale_document\sale_templates\sale_document_basic.html:253
+#: .\templates\sale_document\sale_templates\sale_document_elegant.html:215
 msgid "Company Logo"
 msgstr "Logo de l'entreprise"
 
 #: .\templates\sale_document\delivery_note.html:214
-#: .\templates\sale_document\sale_templates\sale_document_basic.html:299
-#: .\templates\sale_document\sale_templates\sale_document_elegant.html:241
+#: .\templates\sale_document\sale_templates\sale_document_basic.html:307
+#: .\templates\sale_document\sale_templates\sale_document_elegant.html:254
 msgid "Name / Ref."
 msgstr "Nom / Réf."
 
 #: .\templates\sale_document\delivery_note.html:215
-#: .\templates\sale_document\sale_templates\sale_document_basic.html:300
-#: .\templates\sale_document\sale_templates\sale_document_elegant.html:242
+#: .\templates\sale_document\sale_templates\sale_document_basic.html:308
+#: .\templates\sale_document\sale_templates\sale_document_elegant.html:255
 msgid "Qte."
 msgstr "Qté."
 
 #: .\templates\sale_document\delivery_note.html:216
-#: .\templates\sale_document\sale_templates\sale_document_basic.html:303
-#: .\templates\sale_document\sale_templates\sale_document_elegant.html:244
+#: .\templates\sale_document\sale_templates\sale_document_basic.html:311
+#: .\templates\sale_document\sale_templates\sale_document_elegant.html:258
 msgid "U. Price"
 msgstr "Prix Uni."
 
@@ -1180,8 +1182,8 @@ msgid "Disc."
 msgstr "Rem."
 
 #: .\templates\sale_document\delivery_note.html:219
-#: .\templates\sale_document\sale_templates\sale_document_basic.html:304
-#: .\templates\sale_document\sale_templates\sale_document_elegant.html:245
+#: .\templates\sale_document\sale_templates\sale_document_basic.html:312
+#: .\templates\sale_document\sale_templates\sale_document_elegant.html:259
 msgid "Total"
 msgstr "Total"
 
@@ -1220,15 +1222,15 @@ msgstr "Total HT"
 
 #: .\templates\sale_document\sale_document_resume.html:128
 #: .\templates\sale_document\sale_document_resume.html:164
-#: .\templates\sale_document\sale_templates\sale_document_basic.html:341
-#: .\templates\sale_document\sale_templates\sale_document_elegant.html:279
+#: .\templates\sale_document\sale_templates\sale_document_basic.html:349
+#: .\templates\sale_document\sale_templates\sale_document_elegant.html:296
 msgid "DISCOUNT"
 msgstr "Remise"
 
 #: .\templates\sale_document\sale_document_resume.html:129
 #: .\templates\sale_document\sale_document_resume.html:180
-#: .\templates\sale_document\sale_templates\sale_document_basic.html:357
-#: .\templates\sale_document\sale_templates\sale_document_elegant.html:295
+#: .\templates\sale_document\sale_templates\sale_document_basic.html:365
+#: .\templates\sale_document\sale_templates\sale_document_elegant.html:312
 msgid "TOTAL_PRICE"
 msgstr "Total"
 
@@ -1238,32 +1240,32 @@ msgstr "Total"
 msgid "SUB_TOTAL_WITHOUT_VAT"
 msgstr "Sous-total HT"
 
-#: .\templates\sale_document\sale_templates\sale_document_basic.html:282
+#: .\templates\sale_document\sale_templates\sale_document_basic.html:290
 msgid "SALE_DOCUMENT_NUMBER"
 msgstr "Numéro"
 
-#: .\templates\sale_document\sale_templates\sale_document_basic.html:286
-#: .\templates\sale_document\sale_templates\sale_document_elegant.html:229
+#: .\templates\sale_document\sale_templates\sale_document_basic.html:294
+#: .\templates\sale_document\sale_templates\sale_document_elegant.html:242
 msgid "SALE_DOCUMENT_DATE"
 msgstr "Date :"
 
-#: .\templates\sale_document\sale_templates\sale_document_basic.html:290
-#: .\templates\sale_document\sale_templates\sale_document_elegant.html:233
+#: .\templates\sale_document\sale_templates\sale_document_basic.html:298
+#: .\templates\sale_document\sale_templates\sale_document_elegant.html:246
 msgid "SALE_DOCUMENT_DUE_DATE"
 msgstr "Date d'échéance :"
 
-#: .\templates\sale_document\sale_templates\sale_document_basic.html:301
-#: .\templates\sale_document\sale_templates\sale_document_elegant.html:243
+#: .\templates\sale_document\sale_templates\sale_document_basic.html:309
+#: .\templates\sale_document\sale_templates\sale_document_elegant.html:256
 msgid "Unit"
 msgstr "Unité"
 
-#: .\templates\sale_document\sale_templates\sale_document_basic.html:333
-#: .\templates\sale_document\sale_templates\sale_document_elegant.html:271
+#: .\templates\sale_document\sale_templates\sale_document_basic.html:341
+#: .\templates\sale_document\sale_templates\sale_document_elegant.html:288
 msgid "SUB-TOTAL_WITHOUT_VAT"
 msgstr "Sous-total HT"
 
-#: .\templates\sale_document\sale_templates\sale_document_basic.html:349
-#: .\templates\sale_document\sale_templates\sale_document_elegant.html:287
+#: .\templates\sale_document\sale_templates\sale_document_basic.html:357
+#: .\templates\sale_document\sale_templates\sale_document_elegant.html:304
 msgid "VAT_OF"
 msgstr "TVA de"
 
