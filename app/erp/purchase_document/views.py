@@ -44,6 +44,7 @@ class BimaErpPurchaseDocumentViewSet(AbstractViewSet):
         'get_history_diff': ['purchase_document.can_view_history'],
         'get_product_history_diff': ['purchase_document.can_view_history'],
         'generate_pdf': ['purchase_document.can_generate_document'],
+        'request_for_quotation': ['purchase_document.can_generate_document'],
 
     }
 

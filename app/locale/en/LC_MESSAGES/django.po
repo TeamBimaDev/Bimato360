@@ -1250,12 +1250,12 @@ msgstr "Number"
 #: .\templates\sale_document\sale_templates\sale_document_basic.html:286
 #: .\templates\sale_document\sale_templates\sale_document_elegant.html:229
 msgid "SALE_DOCUMENT_DATE"
-msgstr "Date"
+msgstr "Date:"
 
 #: .\templates\sale_document\sale_templates\sale_document_basic.html:290
 #: .\templates\sale_document\sale_templates\sale_document_elegant.html:233
 msgid "SALE_DOCUMENT_DUE_DATE"
-msgstr "Due Date"
+msgstr "Due Date:"
 
 #: .\templates\sale_document\sale_templates\sale_document_basic.html:301
 #: .\templates\sale_document\sale_templates\sale_document_elegant.html:243

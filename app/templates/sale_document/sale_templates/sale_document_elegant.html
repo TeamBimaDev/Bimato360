@@ -93,24 +93,30 @@
             flex-direction: column;
             gap: 1rem;
             color: {{ company_data.company.default_color }};
+			widht:100%;
+			
+			
         }
 
         .invoice_type_and_number {
             border-bottom: 2px solid #efefef;
-            font-size: 18px;
+            font-size: 16px;
             font-weight: 600;
             font-style: italic;
             color: {{ company_data.company.default_color }};
-			width:180px;
+            width: 310px;
+			
         }
-		.invoice_date_span_label{
-			width:230px;
-		}
+	
+        .invoice_date_span_label {
+            width: 310px;
+        }
 
         .invoice_date, .invoice_payment_date {
             padding-top: .7rem;
             color: {{ company_data.company.default_color }};
-			width:100%
+            width: 310px;
+			
         }
 
         .products_table {
@@ -175,12 +181,13 @@
         }
 
         .table_totals td {
-            padding-bottom: 0.7rem;
+            padding-bottom: 0.25rem;
+			padding-top: 0.25rem;
             color: {{ company_data.company.default_color }};
         }
 
         .total_bold {
-            font-size: 20px;
+            font-size: 18px;
             font-weight: 800;
             color: {{ company_data.company.default_color }};
         }
@@ -189,6 +196,12 @@
             margin-top: 1rem;
             color: {{ company_data.company.default_color }};
         }
+		
+		.background_color_grey{
+			background-color: #E0E0E0;
+			vertical-align:middle;
+			padding:0 0.5rem
+		}
     </style>
 </head>
 <body class="sale_main_body">
@@ -230,7 +243,7 @@
             <span>{{ current_document.date }}</span>
         </div>
         <div class="invoice_payment_date">
-            <span  class="invoice_date_span_label">{% trans "SALE_DOCUMENT_DUE_DATE" %}</span>
+            <span class="invoice_date_span_label">{% trans "SALE_DOCUMENT_DUE_DATE" %}</span>
             <span>NA/NA/NANA</span>
         </div>
     </div>
@@ -238,11 +251,13 @@
 
 <table class="products_table">
     <tr>
-        <th class="text_left">{% trans "Name / Ref." %}</th>
-        <th>{% trans "Qte." %}</th>
-        <th>{% trans "Unit" %}</th>
-        <th class="text_right">{% trans "U. Price" %}</th>
-        <th class="text_right">{% trans "Total" %}</th>
+        <th class="text_left background_color_grey">&nbsp;&nbsp;{% trans "Name / Ref." %}</th>
+        <th class="background_color_grey">&nbsp;{% trans "Qte." %}</th>
+        <th class="background_color_grey">&nbsp;{% trans "Unit" %}</th>
+        {% if show_price %}
+            <th class="text_right background_color_grey">{% trans "U. Price" %}&nbsp;</th>
+            <th class="text_right background_color_grey">{% trans "Total" %}&nbsp;&nbsp;</th>
+        {% endif %}
     </tr>
 
     {% for product in products %}
@@ -250,53 +265,55 @@
             <td class="product_name">{{ product.name }} / {{ product.reference }}</td>
             <td class="product_quantity text_center">{{ product.quantity }}</td>
             <td class="product_unit text_center">{{ product.unit_of_measure }}</td>
-            <td class="product_prix text_right">{{ product.unit_price }}</td>
-            <td class="product_montant text_right">{{ product.total_price }}</td>
+            {% if show_price %}
+                <td class="product_prix text_right">{{ product.unit_price }}</td>
+                <td class="product_montant text_right">{{ product.total_price }}</td>
+            {% endif %}
         </tr>
     {% endfor %}
 </table>
+{% if show_price %}
+    <table class="table_totals">
+        <tr>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th></th>
+        </tr>
+        <tr>
+            <th></th>
+            <th></th>
+            <th></th>
+            <td class="text_right background_color_grey">{% trans 'SUB-TOTAL_WITHOUT_VAT' %}</td>
+            <td class="text_right background_color_grey">{{ current_document.total_amount_without_vat }}</td>
+        </tr>
 
-<table class="table_totals">
-    <tr>
-        <th></th>
-        <th></th>
-        <th></th>
-        <th></th>
-        <th></th>
-    </tr>
-    <tr>
-        <th></th>
-        <th></th>
-        <th></th>
-        <td class="text_right">{% trans 'SUB-TOTAL_WITHOUT_VAT' %}</td>
-        <td class="text_right">{{ current_document.total_amount_without_vat }}</td>
-    </tr>
+        <tr>
+            <th></th>
+            <th></th>
+            <th></th>
+            <td class="text_right background_color_grey">{% trans 'DISCOUNT' %}</td>
+            <td class="text_right background_color_grey">{{ current_document.total_discount }}</td>
+        </tr>
 
-    <tr>
-        <th></th>
-        <th></th>
-        <th></th>
-        <td class="text_right">{% trans 'DISCOUNT' %}</td>
-        <td class="text_right">{{ current_document.total_discount }}</td>
-    </tr>
+        <tr>
+            <th></th>
+            <th></th>
+            <th></th>
+            <td class="text_right background_color_grey">{% trans 'VAT_OF' %} {{ current_document.total_amount_without_vat }}</td>
+            <td class="text_right background_color_grey">{{ current_document.total_vat }}</td>
+        </tr>
 
-    <tr>
-        <th></th>
-        <th></th>
-        <th></th>
-        <td class="text_right">{% trans 'VAT_OF' %} {{ current_document.total_amount_without_vat }}</td>
-        <td class="text_right">{{ current_document.total_vat }}</td>
-    </tr>
-
-    <tr>
-        <th></th>
-        <th></th>
-        <th></th>
-        <td class="total_bold text_right">{% trans 'TOTAL_PRICE' %} EUR</td>
-        <td class="text_right total_bold">{{ current_document.total_amount }}</td>
-    </tr>
-</table>
-
+        <tr>
+            <th></th>
+            <th></th>
+            <th></th>
+            <td class="total_bold text_right background_color_grey">{% trans 'TOTAL_PRICE' %} EUR</td>
+            <td class="text_right total_bold background_color_grey">{{ current_document.total_amount }}</td>
+        </tr>
+    </table>
+{% endif %}
 
 <div class="note">{{ current_document.note }}</div>
 

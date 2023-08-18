@@ -1245,12 +1245,12 @@ msgstr "Numéro"
 #: .\templates\sale_document\sale_templates\sale_document_basic.html:286
 #: .\templates\sale_document\sale_templates\sale_document_elegant.html:229
 msgid "SALE_DOCUMENT_DATE"
-msgstr "Date"
+msgstr "Date :"
 
 #: .\templates\sale_document\sale_templates\sale_document_basic.html:290
 #: .\templates\sale_document\sale_templates\sale_document_elegant.html:233
 msgid "SALE_DOCUMENT_DUE_DATE"
-msgstr "Date d'échéance"
+msgstr "Date d'échéance :"
 
 #: .\templates\sale_document\sale_templates\sale_document_basic.html:301
 #: .\templates\sale_document\sale_templates\sale_document_elegant.html:243
@@ -1455,15 +1455,15 @@ msgstr ""
 
 #: .\treasury\bank_account\models.py:12
 msgid "RIB"
-msgstr ""
+msgstr "RIB"
 
 #: .\treasury\bank_account\models.py:13
 msgid "IBAN"
-msgstr ""
+msgstr "IBAN"
 
 #: .\treasury\bank_account\models.py:15
 msgid "Currency"
-msgstr ""
+msgstr "Devise"
 
 #: .\treasury\bank_account\models.py:17
 #, fuzzy
@@ -1495,15 +1495,15 @@ msgstr ""
 
 #: .\treasury\payment_term_detail\models.py:17
 msgid "Day of the Month"
-msgstr ""
+msgstr "Jour du mois"
 
 #: .\treasury\payment_term_detail\models.py:20
 msgid "Payment Term Lines"
-msgstr ""
+msgstr "Détails de condition de paiement"
 
 #: .\treasury\transaction\models.py:24
 msgid "Nature"
-msgstr ""
+msgstr "Nature"
 
 #: .\treasury\transaction\models.py:26
 #, fuzzy
@@ -1513,17 +1513,17 @@ msgstr "Description"
 
 #: .\treasury\transaction\models.py:28
 msgid "Transaction Type"
-msgstr ""
+msgstr "Type de transaction"
 
 #: .\treasury\transaction\models.py:31
 #, fuzzy
 #| msgid "Activate Account"
 msgid "Bank Account"
-msgstr "Activer le compte"
+msgstr "Compte bancaire"
 
 #: .\treasury\transaction\models.py:36
 msgid "Expected Date"
-msgstr ""
+msgstr "Date prévu"
 
 #: .\treasury\transaction\models.py:37
 #, fuzzy
@@ -1533,24 +1533,24 @@ msgstr "Montant Total"
 
 #: .\treasury\transaction\models.py:39
 msgid "Transaction Source"
-msgstr ""
+msgstr "Transaction source"
 
 #: .\treasury\transaction\models.py:40
 msgid "Bank account number"
-msgstr ""
+msgstr "N° compte bancaire"
 
 #: .\treasury\transaction\models.py:72
 msgid "You cannot do that. You should make this operation from Bank nature."
-msgstr ""
+msgstr "Il faut faire cette opération depuis une opération bancaire"
 
 #: .\treasury\transaction\models.py:78
 msgid "You cannot do that. You should make this operation from Cash nature."
-msgstr ""
+msgstr "Il faut faire cette opération depuis une opération caisse"
 
 #: .\treasury\transaction_type\models.py:16
 #: .\treasury\transaction_type\models.py:19
 msgid "INCOME_OUTCOME"
-msgstr ""
+msgstr "Entrée / Sortie"
 
 #: .\user\models.py:17
 msgid "User must have an email address."

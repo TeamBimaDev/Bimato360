@@ -124,9 +124,10 @@
         }
 
         .table_invoice_details {
-            width: 100%;
+            width: 350px
             border-top: 2px solid #efefef;
             color: {{ company_data.company.default_color }};
+			
         }
 
         .invoice_type_and_number {
@@ -134,12 +135,18 @@
             font-weight: 600;
             font-style: italic;
             color: {{ company_data.company.default_color }};
+			width:350px;
         }
 
         .invoice_date, .invoice_payment_date {
             padding-top: .7rem;
             color: {{ company_data.company.default_color }};
+			width:350px;
+			
         }
+		.td_date_preve{
+			width:150px;
+		}
 
         .products_table {
             margin-top: 3rem;
@@ -225,7 +232,7 @@
         }
 
         .total_bold {
-            font-size: 20px;
+            font-size: 18px;
             font-weight: 800;
             color: {{ company_data.company.default_color }};
         }
@@ -287,7 +294,7 @@
             <td>{{ current_document.date }}</td>
         </tr>
         <tr class="invoice_payment_date">
-            <td>{% trans "SALE_DOCUMENT_DUE_DATE" %}</td>
+            <td class="td_date_preve">{% trans "SALE_DOCUMENT_DUE_DATE" %}</td>
             <td>NA/NA/NANA</td>
         </tr>
     </table>

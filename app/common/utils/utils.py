@@ -7,12 +7,11 @@ from weasyprint import HTML
 
 def render_to_pdf(template_src, context_dict={}, file_name="document.pdf"):
     template = get_template(template_src)
-    html = template.render(context_dict)
     context_dict["MEDIA_URL"] = settings.MEDIA_URL
     context_dict["request_scheme"] = context_dict["request"].scheme
     context_dict["request_host"] = context_dict["request"].get_host()
     context_dict["show_price"] = context_dict.get("show_price", True)
-
+    html = template.render(context_dict)
     try:
         html_weasy = HTML(string=html)
         pdf = html_weasy.write_pdf()
