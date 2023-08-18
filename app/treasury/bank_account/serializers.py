@@ -41,4 +41,4 @@ class BimaTreasuryBankAccountSerializer(AbstractSerializer):
             'id', 'name', 'account_number', 'iban', 'balance', 'account_holder_name', 'note', 'active',
             'currency', 'currency_public_id', 'bank', 'bank_public_id', 'created', 'updated'
         ]
-        read_only_fields = 'balance'
+        read_only_fields = ('balance',)
