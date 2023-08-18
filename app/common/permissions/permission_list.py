@@ -178,10 +178,15 @@ class PermissionsList:
     TREASURY_PAYMENT_TERM_READ = ('treasury.payment_term.can_read', 'Can read payment term', 'TREASURY_PAYMENT_TERM')
 
     TREASURY_TRANSACTION_TYPE_CREATE = (
-    'treasury.transaction_type.can_create', 'Can create transaction type', 'TREASURY_TRANSACTION_TYPE')
+        'treasury.transaction_type.can_create', 'Can create transaction type', 'TREASURY_TRANSACTION_TYPE')
     TREASURY_TRANSACTION_TYPE_UPDATE = (
-    'treasury.transaction_type.can_update', 'Can update transaction type', 'TREASURY_TRANSACTION_TYPE')
+        'treasury.transaction_type.can_update', 'Can update transaction type', 'TREASURY_TRANSACTION_TYPE')
     TREASURY_TRANSACTION_TYPE_DELETE = (
-    'treasury.transaction_type.can_delete', 'Can delete transaction type', 'TREASURY_TRANSACTION_TYPE')
+        'treasury.transaction_type.can_delete', 'Can delete transaction type', 'TREASURY_TRANSACTION_TYPE')
     TREASURY_TRANSACTION_TYPE_READ = (
-    'treasury.transaction_type.can_read', 'Can read transaction type', 'TREASURY_TRANSACTION_TYPE')
+        'treasury.transaction_type.can_read', 'Can read transaction type', 'TREASURY_TRANSACTION_TYPE')
+
+    TREASURY_TRANSACTION_CREATE = ('treasury.transaction.can_create', 'Can create transaction', 'TREASURY_TRANSACTION')
+    TREASURY_TRANSACTION_UPDATE = ('treasury.transaction.can_update', 'Can update transaction', 'TREASURY_TRANSACTION')
+    TREASURY_TRANSACTION_DELETE = ('treasury.transaction.can_delete', 'Can delete transaction', 'TREASURY_TRANSACTION')
+    TREASURY_TRANSACTION_READ = ('treasury.transaction.can_read', 'Can read transaction', 'TREASURY_TRANSACTION')

@@ -27,10 +27,10 @@ class BimaTreasuryBankAccountService:
             return None
 
     @staticmethod
-    def create_bank_account(bank_account_data, parent):
+    def create_bank_account(parent, bank_account_data):
         try:
-            bank = BimaCoreBank.objects.get_object_by_public_id(bank_account_data.get('bank_public_id'))
-            currency = BimaCoreCurrency.objects.get_object_by_public_id(bank_account_data.get('currency_public_id'))
+            bank = BimaCoreBank.objects.get_object_by_public_id(bank_account_data.pop('bank_public_id'))
+            currency = BimaCoreCurrency.objects.get_object_by_public_id(bank_account_data.pop('currency_public_id'))
             bank_account = BimaTreasuryBankAccount(
                 **bank_account_data,
                 bank=bank,

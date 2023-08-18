@@ -1,54 +1,133 @@
 import logging
+import os
 
+import pandas as pd
+from common.enums.transaction_enum import TransactionDirection
 from common.enums.transaction_enum import TransactionNature
+from django.db import models
+from django.db.models import Sum, Case, When, F
 from treasury.transaction_type.models import BimaTreasuryTransactionType
+
+from app import settings
 
 logger = logging.getLogger(__name__)
 
 
-def create_auto_transaction(transaction):
-    from .models import BimaTreasuryTransaction
+class BimaTreasuryTransactionService:
+    def __init__(self, queryset):
+        self.queryset = queryset
 
-    complementary_transaction_mappings = {
-        ('FROM_CASH_TO_ACCOUNT', 'OUTCOME'): ('FROM_CASH_TO_ACCOUNT', 'INCOME'),
-        ('FROM_ACCOUNT_TO_CASH', 'OUTCOME'): ('FROM_ACCOUNT_TO_CASH', 'INCOME')
-    }
+    def calculate_sums(self):
 
-    key = (transaction.transaction_type.code, transaction.direction)
-    if key not in complementary_transaction_mappings:
-        return  # If not, we don't create any automatic transaction
+        aggregations = self.queryset.aggregate(
+            total_income=Sum(Case(When(direction=TransactionDirection.INCOME.name, then=F('amount')),
+                                  output_field=models.DecimalField())),
+            total_outcome=Sum(Case(When(direction=TransactionDirection.OUTCOME.name, then=F('amount')),
+                                   output_field=models.DecimalField()))
+        )
 
-    complementary_code, complementary_direction = complementary_transaction_mappings[key]
+        total_income = aggregations.get('total_income') or 0
+        total_outcome = aggregations.get('total_outcome') or 0
+        difference = total_income - total_outcome
 
-    complementary_transaction_type = BimaTreasuryTransactionType.objects.get(
-        code=complementary_code,
-        income_outcome=complementary_direction
-    )
-
-    if transaction.nature == TransactionNature.CASH.Name:
-        params = {
-            "nature": 'BANK',
-            "direction": 'INCOME',
-            "transaction_type": complementary_transaction_type,
-            "bank_account": transaction.bank_account,
-            "date": transaction.date,
-            "amount": transaction.amount,
-            "transaction_source": transaction
-        }
-    elif transaction.nature == TransactionNature.BANK.Name:
-        params = {
-            "nature": 'CASH',
-            "direction": 'INCOME',
-            "transaction_type": complementary_transaction_type,
-            "cash": transaction.cash,
-            "date": transaction.date,
-            "amount": transaction.amount,
-            "transaction_source": transaction
+        return {
+            "total_income": total_income,
+            "total_outcome": total_outcome,
+            "difference": difference
         }
 
-    created_transaction = BimaTreasuryTransaction.objects.create(**params)
-    logger.info(f"Auto transaction {created_transaction.pk} created for transaction {transaction.pk}")
-    return created_transaction
+    def format_data_for_export(self):
+        data = []
+        for transaction in self.queryset:
+            try:
+                row = {
+                    'Nature': transaction.nature,
+                    'Direction': transaction.direction,
+                    'Transaction Type': transaction.transaction_type,
+                    'Note': transaction.note,
+                    'Date': transaction.date,
+                    'Expected Date': transaction.expected_date,
+                    'Amount': transaction.amount,
+                    'Transaction Source': transaction.transaction_source,
+                    'Bank Account Number': transaction.partner_bank_account_number,
+                    'Partner': self._get_partner_name(transaction.partner),
+                    'Cash': transaction.cash.cash_name if transaction.cash else '',
+                    'Bank Account': self._get_bank_account_name(transaction.bank_account)
+                }
+                data.append(row)
+            except Exception as e:
+                logger.error(f"Error processing transaction {transaction.public_id}. Error: {e}")
+        return data
+
+    def _get_partner_name(self, partner):
+        if partner.partner_type == 'INDIVIDUAL':
+            return f"{partner.first_name} {partner.last_name}"
+        else:
+            return partner.company_name
+
+    def _get_bank_account_name(self, bank_account):
+        if bank_account:
+            return f"{bank_account.name} ({bank_account.account_number})"
+        return ''
+
+    def export_to_csv(self, file_name):
+        data = self.format_data_for_export()
+        df = pd.DataFrame(data)
+        file_path = os.path.join(settings.MEDIA_ROOT, file_name)
+        df.to_csv(file_path, index=False)
+        return file_path
+
+    def export_to_excel(self, file_name):
+        data = self.format_data_for_export()
+        df = pd.DataFrame(data)
+        file_path = os.path.join(settings.MEDIA_ROOT, file_name)
+        df.to_excel(file_path, index=False, engine='openpyxl')
+        return file_path
+
+    @staticmethod
+    def create_auto_transaction(transaction):
+        from .models import BimaTreasuryTransaction
+
+        complementary_transaction_mappings = {
+            ('FROM_CASH_TO_ACCOUNT', 'OUTCOME'): ('FROM_CASH_TO_ACCOUNT', 'INCOME'),
+            ('FROM_ACCOUNT_TO_CASH', 'OUTCOME'): ('FROM_ACCOUNT_TO_CASH', 'INCOME')
+        }
+
+        key = (transaction.transaction_type.code, transaction.direction)
+        if key not in complementary_transaction_mappings:
+            return  # If not, we don't create any automatic transaction
+
+        complementary_code, complementary_direction = complementary_transaction_mappings[key]
+
+        complementary_transaction_type = BimaTreasuryTransactionType.objects.get(
+            code=complementary_code,
+            income_outcome=complementary_direction
+        )
+
+        if transaction.nature == TransactionNature.CASH.Name:
+            params = {
+                "nature": 'BANK',
+                "direction": 'INCOME',
+                "transaction_type": complementary_transaction_type,
+                "bank_account": transaction.bank_account,
+                "date": transaction.date,
+                "amount": transaction.amount,
+                "transaction_source": transaction
+            }
+        elif transaction.nature == TransactionNature.BANK.Name:
+            params = {
+                "nature": 'CASH',
+                "direction": 'INCOME',
+                "transaction_type": complementary_transaction_type,
+                "cash": transaction.cash,
+                "date": transaction.date,
+                "amount": transaction.amount,
+                "transaction_source": transaction
+            }
+
+        created_transaction = BimaTreasuryTransaction.objects.create(**params)
+        logger.info(f"Auto transaction {created_transaction.pk} created for transaction {transaction.pk}")
+        return created_transaction
 
 
 class TransactionEffectStrategy:

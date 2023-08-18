@@ -193,6 +193,10 @@ def generate_xls_report(data, fields):
                         partner = sale_document.partner
                         value = partner.company_name if partner.partner_type == PartnerType.COMPANY.name else \
                             f"{partner.first_name} {partner.last_name}"
+                    elif field.name in ['recurring_stopped_by', 'recurring_reactivated_by']:
+                        user = getattr(sale_document, field.name)
+                        if user is not None:
+                            value = user.name
                     elif field.choices:
                         value = getattr(sale_document, f"get_{field.name}_display")()
                     else:
@@ -224,7 +228,7 @@ def generate_xls_report(data, fields):
             try:
                 ws.append(r[1].tolist())
             except Exception as e:
-                logger.error(f"Error writing row {r[0]} to Excel file: {e}")
+                logger.error(f"Error writing row {r[1]} to Excel file: {e}")
                 continue
 
         excel_file = BytesIO()

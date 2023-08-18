@@ -15,7 +15,7 @@ from treasury.bank_account.models import BimaTreasuryBankAccount
 from treasury.cash.models import BimaTreasuryCash
 from treasury.transaction_type.models import BimaTreasuryTransactionType
 
-from .service import CashTransactionEffectStrategy, BankTransactionEffectStrategy, create_auto_transaction
+from .service import CashTransactionEffectStrategy, BankTransactionEffectStrategy, BimaTreasuryTransactionService
 
 logger = logging.getLogger(__name__)
 
@@ -109,7 +109,7 @@ class BimaTreasuryTransaction(AbstractModel):
     def handle_auto_transaction(self):
         if self.transaction_type.code in ['FROM_CASH_TO_ACCOUNT',
                                           'FROM_ACCOUNT_TO_CASH'] and self.direction == TransactionNature.OUTCOME.Name:
-            create_auto_transaction(self)
+            BimaTreasuryTransactionService.create_auto_transaction(self)
 
 
 @receiver(post_delete, sender=BimaTreasuryTransaction)

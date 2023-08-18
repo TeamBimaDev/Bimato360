@@ -1,9 +1,9 @@
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db.models.signals import pre_save, pre_delete
 from django.dispatch import receiver
-from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.utils.translation import gettext_lazy as _
 
 from .models import BimaErpSaleDocument
-from django.utils.translation import gettext_lazy as _
 
 
 class InsufficientQuantityError(Exception):
@@ -67,4 +67,4 @@ def pre_save_sale_document(sender, instance, **kwargs):
 @receiver(pre_delete, sender=BimaErpSaleDocument)
 def check_products_before_delete(sender, instance, **kwargs):
     if instance.sale_document_products.count() > 0:
-        raise ValidationError("Cannot delete item because it contains products.")
+        raise ValidationError(_("Cannot delete item because it contains products."))

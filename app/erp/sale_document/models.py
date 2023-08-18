@@ -68,59 +68,77 @@ class BimaErpSaleDocumentProduct(models.Model):
 
 
 class BimaErpSaleDocument(AbstractModel):
-    number = models.CharField(max_length=32, null=False, blank=False, unique=True)
-    date = models.DateField(null=False, blank=False)
-    status = models.CharField(max_length=128, null=False,
-                              blank=False, default="DRAFT",
-                              choices=get_sale_document_status())
-    type = models.CharField(max_length=128, null=False,
-                            blank=False, default="Quote",
-                            choices=get_sale_document_types())
+    number = models.CharField(max_length=32, null=False, blank=False, unique=True, verbose_name=_("Number"))
+    date = models.DateField(null=False, blank=False, verbose_name=_("Date"))
+    status = models.CharField(max_length=128, null=False, blank=False, default="DRAFT",
+                              choices=get_sale_document_status(), verbose_name=_("Status"))
+    type = models.CharField(max_length=128, null=False, blank=False, default="Quote",
+                            choices=get_sale_document_types(), verbose_name=_("Type"))
 
-    partner = models.ForeignKey(BimaErpPartner, on_delete=models.PROTECT)
-    vat_label = models.CharField(max_length=128, blank=True, null=True, default="")
-    vat_amount = models.DecimalField(max_digits=18, decimal_places=3, blank=True, null=True, default=0)
-    note = models.TextField(blank=True, null=True)
-    private_note = models.TextField(blank=True, null=True)
-    validity = models.CharField(blank=True, null=True, choices=get_sale_document_validity())
-    payment_terms = models.CharField(max_length=100, blank=True, null=True)
-    delivery_terms = models.CharField(max_length=100, blank=True, null=True)
-    total_amount_without_vat = models.DecimalField(max_digits=18, decimal_places=3, blank=True, null=True, default=0)
-    total_after_discount = models.DecimalField(max_digits=18, decimal_places=3, blank=True, null=True, default=0)
-    total_vat = models.DecimalField(max_digits=18, decimal_places=3, blank=True, null=True, default=0)
-    total_amount = models.DecimalField(max_digits=18, decimal_places=3, blank=True, null=True, default=0)
-    total_discount = models.DecimalField(max_digits=18, decimal_places=3, blank=True, null=True, default=0)
-    parents = models.ManyToManyField('self', symmetrical=False, blank=True)
-    is_recurring = models.BooleanField(default=False, blank=True, null=True)
-    is_recurring_parent = models.BooleanField(default=False, blank=True, null=True)
-    is_recurring_ended = models.BooleanField(default=False, blank=True, null=True)
-    recurring_initial_parent_id = models.PositiveIntegerField(blank=True, null=True, default=None)
-    recurring_initial_parent_public_id = models.UUIDField(blank=True, null=True, default=None)
+    partner = models.ForeignKey(BimaErpPartner, on_delete=models.PROTECT, verbose_name=_("Partner"))
+    vat_label = models.CharField(max_length=128, blank=True, null=True, default="", verbose_name=_("VAT Label"))
+    vat_amount = models.DecimalField(max_digits=18, decimal_places=3, blank=True, null=True, default=0,
+                                     verbose_name=_("VAT Amount"))
+    note = models.TextField(blank=True, null=True, verbose_name=_("Note"))
+    private_note = models.TextField(blank=True, null=True, verbose_name=_("Private Note"))
+    validity = models.CharField(blank=True, null=True, choices=get_sale_document_validity(), verbose_name=_("Validity"))
+    payment_terms = models.CharField(max_length=100, blank=True, null=True, verbose_name=_("Payment Terms"))
+    delivery_terms = models.CharField(max_length=100, blank=True, null=True, verbose_name=_("Delivery Terms"))
+    total_amount_without_vat = models.DecimalField(max_digits=18, decimal_places=3, blank=True, null=True, default=0,
+                                                   verbose_name=_("Total Amount without VAT"))
+    total_after_discount = models.DecimalField(max_digits=18, decimal_places=3, blank=True, null=True, default=0,
+                                               verbose_name=_("Total After Discount"))
+    total_vat = models.DecimalField(max_digits=18, decimal_places=3, blank=True, null=True, default=0,
+                                    verbose_name=_("Total VAT"))
+    total_amount = models.DecimalField(max_digits=18, decimal_places=3, blank=True, null=True, default=0,
+                                       verbose_name=_("Total Amount"))
+    total_discount = models.DecimalField(max_digits=18, decimal_places=3, blank=True, null=True, default=0,
+                                         verbose_name=_("Total Discount"))
+    parents = models.ManyToManyField('self', symmetrical=False, blank=True, verbose_name=_("Parents"))
+    is_recurring = models.BooleanField(default=False, blank=True, null=True, verbose_name=_("Is Recurring?"))
+    is_recurring_parent = models.BooleanField(default=False, blank=True, null=True,
+                                              verbose_name=_("Is Recurring Parent?"))
+    is_recurring_ended = models.BooleanField(default=False, blank=True, null=True,
+                                             verbose_name=_("Is Recurring Ended?"))
+    recurring_initial_parent_id = models.PositiveIntegerField(blank=True, null=True, default=None,
+                                                              verbose_name=_("Recurring Initial Parent ID"))
+    recurring_initial_parent_public_id = models.UUIDField(blank=True, null=True, default=None,
+                                                          verbose_name=_("Recurring Initial Parent Public ID"))
     recurring_interval = models.CharField(
-        blank=True,
-        null=True,
-        choices=get_sale_document_recurring_interval(),
-        help_text="Interval for recurring sale documents"
+        blank=True, null=True, choices=get_sale_document_recurring_interval(),
+        help_text="Interval for recurring sale documents", verbose_name=_("Recurring Interval")
     )
-    recurring_interval_type_custom_number = models.PositiveIntegerField(blank=True, null=True, default=0)
+    recurring_interval_type_custom_number = models.PositiveIntegerField(blank=True, null=True, default=0,
+                                                                        verbose_name=_(
+                                                                            "Recurring Interval Type Custom Number"))
     recurring_interval_type_custom_unit = models.CharField(blank=True, null=True,
-                                                           choices=get_sale_document_recurring_custom_unit())
-    recurring_cycle = models.CharField(blank=True, null=True, choices=get_sale_document_recurring_cycle())
-    recurring_cycle_number_to_repeat = models.PositiveIntegerField(blank=True, null=True, default=0)
-    recurring_cycle_stop_at = models.DateField(null=True, blank=True)
-    recurring_cycle_stopped_at = models.DateField(null=True, blank=True)
-    recurring_last_generated_day = models.DateField(null=True, blank=True, default=None)
-    recurring_next_generated_day = models.DateField(null=True, blank=True, default=None)
-    recurring_reason_stop = models.TextField(null=True, blank=True, default=None)
+                                                           choices=get_sale_document_recurring_custom_unit(),
+                                                           verbose_name=_("Recurring Interval Type Custom Unit"))
+    recurring_cycle = models.CharField(blank=True, null=True, choices=get_sale_document_recurring_cycle(),
+                                       verbose_name=_("Recurring Cycle"))
+    recurring_cycle_number_to_repeat = models.PositiveIntegerField(blank=True, null=True, default=0,
+                                                                   verbose_name=_("Recurring Cycle Number to Repeat"))
+    recurring_cycle_stop_at = models.DateField(null=True, blank=True, verbose_name=_("Recurring Cycle Stop At"))
+    recurring_cycle_stopped_at = models.DateField(null=True, blank=True, verbose_name=_("Recurring Cycle Stopped At"))
+    recurring_last_generated_day = models.DateField(null=True, blank=True, default=None,
+                                                    verbose_name=_("Recurring Last Generated Day"))
+    recurring_next_generated_day = models.DateField(null=True, blank=True, default=None,
+                                                    verbose_name=_("Recurring Next Generated Day"))
+    recurring_reason_stop = models.TextField(null=True, blank=True, default=None,
+                                             verbose_name=_("Recurring Reason Stop"))
     recurring_stopped_by = models.ForeignKey(get_user_model(), null=True, blank=True, on_delete=models.SET_NULL,
-                                             related_name="stopped_by")
-    recurring_reason_reactivated = models.TextField(null=True, blank=True, default=None)
+                                             related_name="stopped_by", verbose_name=_("Recurring Stopped By"))
+    recurring_reason_reactivated = models.TextField(null=True, blank=True, default=None,
+                                                    verbose_name=_("Recurring Reason Reactivated"))
     recurring_reactivated_by = models.ForeignKey(get_user_model(), null=True, blank=True, on_delete=models.SET_NULL,
-                                                 related_name="reactivated_by")
-    recurring_reactivated_date = models.DateField(null=True, blank=True, default=None)
+                                                 related_name="reactivated_by",
+                                                 verbose_name=_("Recurring Reactivated By"))
+    recurring_reactivated_date = models.DateField(null=True, blank=True, default=None,
+                                                  verbose_name=_("Recurring Reactivated Date"))
 
     history = HistoricalRecords()
-    sale_document_products = models.ManyToManyField(BimaErpProduct, through=BimaErpSaleDocumentProduct)
+    sale_document_products = models.ManyToManyField(BimaErpProduct, through=BimaErpSaleDocumentProduct,
+                                                    verbose_name=_("Sale Document Products"))
 
     class Meta:
         ordering = ['-created']
