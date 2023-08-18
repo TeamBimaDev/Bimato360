@@ -14,7 +14,7 @@ class BimaTreasuryBankAccountService:
         return BimaTreasuryBankAccount.objects.filter(
             parent_type=ContentType.objects.get_for_model(parent),
             parent_id=parent.id
-        ).select_releated('bank', 'currency')
+        )
 
     @staticmethod
     def get_bank_account_by_public_id_and_parent(public_id, parent):

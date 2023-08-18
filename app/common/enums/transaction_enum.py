@@ -44,6 +44,14 @@ class TransactionNature(Enum):
     CASH = _('Cash')
     BANK = _('Bank')
 
+    @classmethod
+    def has_value(cls, value):
+        return any(value == item.value for item in cls)
+
+    @classmethod
+    def get_name(cls, value):
+        return next((item.name for item in cls if item.value == value), None)
+
 
 def get_transaction_nature_cash_or_bank():
     return [(ptd.name, ptd.value) for ptd in TransactionNature]
@@ -52,6 +60,14 @@ def get_transaction_nature_cash_or_bank():
 class TransactionDirection(Enum):
     INCOME = _('Income')
     OUTCOME = _('Outcome')
+
+    @classmethod
+    def has_value(cls, value):
+        return any(value == item.value for item in cls)
+
+    @classmethod
+    def get_name(cls, value):
+        return next((item.name for item in cls if item.value == value), None)
 
 
 def get_transaction_direction_income_or_outcome():
