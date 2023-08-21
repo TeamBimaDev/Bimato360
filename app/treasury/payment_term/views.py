@@ -2,12 +2,10 @@ from common.permissions.action_base_permission import ActionBasedPermission
 from core.abstract.views import AbstractViewSet
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from treasury.payment_term_detail.models import BimaTreasuryPaymentTermDetail
-from treasury.payment_term_detail.serializers import BimaTreasuryPaymentTermDetailSerializer
 
 from .filter import BimaTreasuryPaymentTermFilter
-from .models import BimaTreasuryPaymentTerm
-from .serializers import BimaTreasuryPaymentTermSerializer
+from .models import BimaTreasuryPaymentTerm, BimaTreasuryPaymentTermDetail
+from .serializers import BimaTreasuryPaymentTermSerializer, BimaTreasuryPaymentTermDetailSerializer
 
 
 class BimaTreasuryPaymentTermViewSet(AbstractViewSet):

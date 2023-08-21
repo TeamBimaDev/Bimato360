@@ -72,3 +72,28 @@ class TransactionDirection(Enum):
 
 def get_transaction_direction_income_or_outcome():
     return [(ptd.name, ptd.value) for ptd in TransactionDirection]
+
+
+class PaymentTermType(Enum):
+    IMMEDIATE = _('IMMEDIATE')
+    AFTER_ONE_WEEK = _('AFTER_ONE_WEEK')
+    AFTER_TWO_WEEK = _('AFTER_TWO_WEEK')
+    END_OF_MONTH = _('END_OF_MONTH')
+    NEXT_MONTH = _('END_OF_MONTH')
+    CUSTOM = _('CUSTOM')
+
+
+def get_payment_term_type():
+    return [(ptd.name, ptd.value) for ptd in PaymentTermType]
+
+
+class PaymentTermCustomType(Enum):
+    IMMEDIATE = _('IMMEDIATE')
+    AFTER_ONE_WEEK = _('AFTER_ONE_WEEK')
+    AFTER_TWO_WEEK = _('AFTER_TWO_WEEK')
+    END_OF_MONTH = _('END_OF_MONTH')
+    NEXT_MONTH = _('END_OF_MONTH')
+
+
+def get_payment_term_custom_type():
+    return [(ptd.name, ptd.value) for ptd in PaymentTermCustomType]

@@ -16,7 +16,7 @@ class BimaTreasuryTransactionType(AbstractModel):
                                       verbose_name=_('INCOME_OUTCOME'))
     cash_bank = models.CharField(max_length=32, blank=False, null=False,
                                  choices=get_transaction_type_for_cash_or_bank(),
-                                 verbose_name=_('INCOME_OUTCOME'))
+                                 verbose_name=_('CASH_BANK'))
 
     class Meta:
         ordering = ['name']
