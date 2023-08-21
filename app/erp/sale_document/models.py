@@ -1,10 +1,11 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from common.enums.sale_document_enum import SaleDocumentTypes
 from common.enums.sale_document_enum import get_sale_document_status, \
     get_sale_document_types, get_sale_document_validity, get_sale_document_recurring_interval, \
     get_sale_document_recurring_custom_unit, get_sale_document_recurring_cycle, SaleDocumentRecurringInterval, \
     SaleDocumentRecurringCycle
+from common.enums.transaction_enum import PaymentTermType
 from core.abstract.models import AbstractModel
 from django.contrib.auth import get_user_model
 from django.db import models
@@ -136,6 +137,11 @@ class BimaErpSaleDocument(AbstractModel):
     recurring_reactivated_date = models.DateField(null=True, blank=True, default=None,
                                                   verbose_name=_("Recurring Reactivated Date"))
 
+    next_due_date = models.DateField(null=True, blank=True, verbose_name=_("Next Due Date"))
+    is_payment_late = models.BooleanField(default=False, verbose_name=_("Is Payment Late?"))
+    days_in_late = models.PositiveIntegerField(default=0, verbose_name=_("Days in Late"))
+    last_due_date = models.DateField(null=True, blank=True, verbose_name=_("Last Due Date"))
+
     history = HistoricalRecords()
     sale_document_products = models.ManyToManyField(BimaErpProduct, through=BimaErpSaleDocumentProduct,
                                                     verbose_name=_("Sale Document Products"))
@@ -184,6 +190,40 @@ class BimaErpSaleDocument(AbstractModel):
         if self.recurring_cycle == SaleDocumentRecurringCycle.END_AFTER.name and not \
                 self.recurring_cycle_number_to_repeat:
             raise ValidationError({'Error': _('CHOISIR_RECURRENT_CYCLE_NOMBRE_CYCLE')})
+
+    def calculate_due_date(self, sale_date, payment_term, value):
+        if value == "now":
+            return sale_date
+        elif value == "end of the month":
+            return (sale_date.replace(day=1) + timedelta(days=32)).replace(day=1) - timedelta(days=1)
+        elif value == "next month":
+            return (sale_date.replace(day=1) + timedelta(days=32)).replace(day=1)
+        else:
+            return None
+
+    def get_next_payment_due(self):
+        if self.payment_term.type != PaymentTermType.CUSTOM.name:
+            return self.calculate_due_date(self.date, self.payment_term, self.payment_term.type)
+        else:
+            next_schedule = self.payment_term.schedules.first()
+            return self.calculate_due_date(self.date, self.payment_term, next_schedule.description)
+        self.next_due_date = computed_due_date
+        self.save()
+
+    def update_payment_status(self):
+        today = datetime.date.today()
+        if self.next_due_date and today > self.next_due_date:
+            self.is_payment_late = True
+            delta = today - self.next_due_date
+            self.days_in_late = delta.days
+        else:
+            self.is_payment_late = False
+            self.days_in_late = 0
+        self.save()
+
+    def update_last_due_date(self):
+        self.last_due_date = self.next_due_date
+        self.save()
 
 
 def update_sale_document_totals(sale_document):
