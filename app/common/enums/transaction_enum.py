@@ -73,7 +73,7 @@ class PaymentTermCustomType(Enum):
     AFTER_ONE_WEEK = _('AFTER_ONE_WEEK')
     AFTER_TWO_WEEK = _('AFTER_TWO_WEEK')
     END_OF_MONTH = _('END_OF_MONTH')
-    NEXT_MONTH = _('END_OF_MONTH')
+    NEXT_MONTH = _('NEXT_MONTH')
 
 
 def get_payment_term_custom_type():

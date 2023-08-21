@@ -21,6 +21,11 @@ class BimaTreasuryPaymentTerm(AbstractModel):
                 raise ValidationError('Custom payment terms must have associated schedules.')
         super(BimaTreasuryPaymentTerm, self).save(*args, **kwargs)
 
+    def delete(self, *args, **kwargs):
+        if self.is_system:
+            raise ValidationError(_("Cannot delete system item"))
+        super().delete(*args, **kwargs)
+
     class Meta:
         ordering = ['name']
         permissions = []
