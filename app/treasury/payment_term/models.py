@@ -17,7 +17,7 @@ class BimaTreasuryPaymentTerm(AbstractModel):
 
     def save(self, *args, **kwargs):
         if self.pk:
-            if self.type == self.CUSTOM and not self.payment_term_details.exists():
+            if self.type == PaymentTermType.CUSTOM.name and not self.payment_term_details.exists():
                 raise ValidationError('Custom payment terms must have associated schedules.')
         super(BimaTreasuryPaymentTerm, self).save(*args, **kwargs)
 

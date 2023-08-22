@@ -44,21 +44,21 @@ class BimaTreasuryTransaction(AbstractModel):
     def clean(self):
         if self.amount <= 0:
             logger.warning("Amount should be greater than 0")
-            raise ValidationError('Amount should be greater than 0.')
+            raise ValidationError(_('Amount should be greater than 0.'))
 
         if self.nature == TransactionNature.CASH.Name and not self.cash:
             logger.warning("Cash is required when nature is set to CASH.")
-            raise ValidationError('Cash is required when nature is set to CASH.')
+            raise ValidationError(_('Cash is required when nature is set to CASH.'))
         if self.nature == TransactionNature.BANK.Name and not self.bank_account:
             logger.warning("Bank Account is required when nature is set to BANK.")
-            raise ValidationError('Bank Account is required when nature is set to BANK.')
+            raise ValidationError(_('Bank Account is required when nature is set to BANK.'))
 
         if self.transaction_type.code == 'FROM_ACCOUNT_TO_CASH' and (not self.bank_account or not self.cash):
             logger.warning("Bank Account and Cash are required for FROM_ACCOUNT_TO_CASH transaction.")
-            raise ValidationError('Bank Account and Cash are required for FROM_ACCOUNT_TO_CASH transaction.')
+            raise ValidationError(_('Bank Account and Cash are required for FROM_ACCOUNT_TO_CASH transaction.'))
         elif self.transaction_type.code == 'FROM_CASH_TO_ACCOUNT' and (not self.cash or not self.bank_account):
             logger.warning("Cash and Bank Account are required for FROM_CASH_TO_ACCOUNT transaction.")
-            raise ValidationError('Cash and Bank Account are required for FROM_CASH_TO_ACCOUNT transaction.')
+            raise ValidationError(_('Cash and Bank Account are required for FROM_CASH_TO_ACCOUNT transaction.'))
 
         self.validate_transaction_type_and_nature_combination()
 

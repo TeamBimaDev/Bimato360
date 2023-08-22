@@ -1,4 +1,4 @@
-from common.enums.transaction_enum import PaymentTermCustomType, PaymentTermType
+from common.enums.transaction_enum import PaymentTermType
 from core.abstract.serializers import AbstractSerializer
 from django.db import transaction
 from django.utils.translation import gettext_lazy as _
@@ -31,7 +31,7 @@ class BimaTreasuryPaymentTermDetailSerializer(AbstractSerializer):
 
 
 class BimaTreasuryPaymentTermSerializer(AbstractSerializer):
-    payment_term_details = BimaTreasuryPaymentTermDetailSerializer(many=True, required=False, read_only=True)
+    payment_term_details = BimaTreasuryPaymentTermDetailSerializer(many=True, required=False)
 
     class Meta:
         model = BimaTreasuryPaymentTerm
@@ -43,7 +43,7 @@ class BimaTreasuryPaymentTermSerializer(AbstractSerializer):
 
     def validate_payment_term_details(self, payment_term_details):
         total_percent = sum(
-            line['percentage'] for line in payment_term_details if line['value'] == PaymentTermCustomType.PERCENT.name)
+            line['percentage'] for line in payment_term_details)
         if total_percent != 100:
             raise serializers.ValidationError({"payment_term_details": _("Total percentage must be 100%.")})
         return payment_term_details
@@ -56,17 +56,17 @@ class BimaTreasuryPaymentTermSerializer(AbstractSerializer):
         return data
 
     def create(self, validated_data):
+        payment_term_details = validated_data.pop('payment_term_details', [])
         with transaction.atomic():
             payment_term = BimaTreasuryPaymentTerm.objects.create(**validated_data)
-
             if validated_data.get('type') == PaymentTermType.CUSTOM.name:
-                payment_term_details = validated_data.pop('payment_term_details', [])
                 for line_data in payment_term_details:
                     BimaTreasuryPaymentTermDetail.objects.create(payment_term=payment_term, **line_data)
 
         return payment_term
 
     def update(self, instance, validated_data):
+        payment_term_details = validated_data.pop('payment_term_details', [])
         with transaction.atomic():
             instance.name = validated_data.get('name', instance.name)
             instance.active = validated_data.get('active', instance.active)
@@ -75,7 +75,7 @@ class BimaTreasuryPaymentTermSerializer(AbstractSerializer):
             instance.save()
 
             if validated_data.get('type') == PaymentTermType.CUSTOM.name:
-                payment_term_details = validated_data.pop('payment_term_details', [])
+                instance.payment_term_details.all().delete()
                 for line_data in payment_term_details:
                     BimaTreasuryPaymentTermDetail.objects.update_or_create(payment_term=instance, **line_data)
             else:
