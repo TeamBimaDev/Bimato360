@@ -15,12 +15,6 @@ class BimaTreasuryPaymentTerm(AbstractModel):
     code = models.CharField(max_length=128, unique=True, null=True, blank=True)
     is_system = models.BooleanField(default=False)
 
-    def save(self, *args, **kwargs):
-        if self.pk:
-            if self.type == PaymentTermType.CUSTOM.name and not self.payment_term_details.exists():
-                raise ValidationError('Custom payment terms must have associated schedules.')
-        super(BimaTreasuryPaymentTerm, self).save(*args, **kwargs)
-
     def delete(self, *args, **kwargs):
         if self.is_system:
             raise ValidationError(_("Cannot delete system item"))

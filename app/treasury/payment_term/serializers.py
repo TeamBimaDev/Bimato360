@@ -45,14 +45,14 @@ class BimaTreasuryPaymentTermSerializer(AbstractSerializer):
         depth = 1
         read_only_fields = ('code', 'is_system',)
 
-    def validate_payment_term_details(self, payment_term_details):
+    def payment_term_details_validation(self, payment_term_details):
         total_percent = sum(
             line['percentage'] for line in payment_term_details)
         if total_percent != 100:
             raise serializers.ValidationError({str(_("Payment terms details")): _("Total percentage must be 100%.")})
         return payment_term_details
 
-    def validate_value(self, value):
+    def payment_terms_value_validation(self, value):
         valid_choices = [choice[0] for choice in get_payment_term_custom_type()]
         if value not in valid_choices:
             raise serializers.ValidationError(
@@ -61,13 +61,6 @@ class BimaTreasuryPaymentTermSerializer(AbstractSerializer):
             )
         return value
 
-    def validate(self, data):
-        payment_term_type = data.get('type')
-        if payment_term_type == PaymentTermType.CUSTOM.name:
-            payment_term_details = data.get('payment_term_details', [])
-            self.validate_payment_term_details(payment_term_details)
-        return data
-
     def create(self, validated_data):
         payment_term_details = validated_data.pop('payment_term_details', [])
         with transaction.atomic():
@@ -75,8 +68,9 @@ class BimaTreasuryPaymentTermSerializer(AbstractSerializer):
                 payment_term = BimaTreasuryPaymentTerm.objects.create(**validated_data)
 
                 if validated_data.get('type') == PaymentTermType.CUSTOM.name:
+                    self.payment_term_details_validation(payment_term_details)
                     for line_data in payment_term_details:
-                        self.validate_value(line_data['value'])
+                        self.payment_terms_value_validation(line_data['value'])
                         BimaTreasuryPaymentTermDetail.objects.create(payment_term=payment_term, **line_data)
 
                 return payment_term
@@ -96,9 +90,10 @@ class BimaTreasuryPaymentTermSerializer(AbstractSerializer):
                 instance.save()
 
                 if validated_data.get('type') == PaymentTermType.CUSTOM.name:
+                    self.payment_term_details_validation(payment_term_details)
                     instance.payment_term_details.all().delete()
                     for line_data in payment_term_details:
-                        self.validate_value(line_data['value'])
+                        self.payment_terms_value_validation(line_data['value'])
                         BimaTreasuryPaymentTermDetail.objects.create(payment_term=instance, **line_data)
 
                 else:
