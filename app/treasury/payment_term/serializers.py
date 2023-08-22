@@ -1,10 +1,14 @@
-from common.enums.transaction_enum import PaymentTermType
+import logging
+
+from common.enums.transaction_enum import PaymentTermType, get_payment_term_custom_type
 from core.abstract.serializers import AbstractSerializer
 from django.db import transaction
 from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 
 from .models import BimaTreasuryPaymentTerm, BimaTreasuryPaymentTermDetail
+
+logger = logging.getLogger(__name__)
 
 
 class BimaTreasuryPaymentTermDetailSerializer(AbstractSerializer):
@@ -45,8 +49,17 @@ class BimaTreasuryPaymentTermSerializer(AbstractSerializer):
         total_percent = sum(
             line['percentage'] for line in payment_term_details)
         if total_percent != 100:
-            raise serializers.ValidationError({"payment_term_details": _("Total percentage must be 100%.")})
+            raise serializers.ValidationError({str(_("Payment terms details")): _("Total percentage must be 100%.")})
         return payment_term_details
+
+    def validate_value(self, value):
+        valid_choices = [choice[0] for choice in get_payment_term_custom_type()]
+        if value not in valid_choices:
+            raise serializers.ValidationError(
+                _("Invalid value for payment term detail. value: %(value)") % {
+                    'value': value}
+            )
+        return value
 
     def validate(self, data):
         payment_term_type = data.get('type')
@@ -58,27 +71,41 @@ class BimaTreasuryPaymentTermSerializer(AbstractSerializer):
     def create(self, validated_data):
         payment_term_details = validated_data.pop('payment_term_details', [])
         with transaction.atomic():
-            payment_term = BimaTreasuryPaymentTerm.objects.create(**validated_data)
-            if validated_data.get('type') == PaymentTermType.CUSTOM.name:
-                for line_data in payment_term_details:
-                    BimaTreasuryPaymentTermDetail.objects.create(payment_term=payment_term, **line_data)
+            try:
+                payment_term = BimaTreasuryPaymentTerm.objects.create(**validated_data)
 
-        return payment_term
+                if validated_data.get('type') == PaymentTermType.CUSTOM.name:
+                    for line_data in payment_term_details:
+                        self.validate_value(line_data['value'])
+                        BimaTreasuryPaymentTermDetail.objects.create(payment_term=payment_term, **line_data)
+
+                return payment_term
+
+            except Exception as e:
+                logger.error(f"Error while creating BimaTreasuryPaymentTerm: {e}")
+                raise
 
     def update(self, instance, validated_data):
         payment_term_details = validated_data.pop('payment_term_details', [])
         with transaction.atomic():
-            instance.name = validated_data.get('name', instance.name)
-            instance.active = validated_data.get('active', instance.active)
-            instance.note = validated_data.get('note', instance.note)
-            instance.type = validated_data.get('type', instance.type)
-            instance.save()
+            try:
+                instance.name = validated_data.get('name', instance.name)
+                instance.active = validated_data.get('active', instance.active)
+                instance.note = validated_data.get('note', instance.note)
+                instance.type = validated_data.get('type', instance.type)
+                instance.save()
 
-            if validated_data.get('type') == PaymentTermType.CUSTOM.name:
-                instance.payment_term_details.all().delete()
-                for line_data in payment_term_details:
-                    BimaTreasuryPaymentTermDetail.objects.update_or_create(payment_term=instance, **line_data)
-            else:
-                instance.payment_term_details.all().delete()
+                if validated_data.get('type') == PaymentTermType.CUSTOM.name:
+                    for line_data in payment_term_details:
+                        self.validate_value(line_data['value'])
+                        instance.payment_term_details.all().delete()
+                        BimaTreasuryPaymentTermDetail.objects.create(payment_term=instance, **line_data)
 
-        return instance
+                else:
+                    instance.payment_term_details.all().delete()
+
+                return instance
+
+            except Exception as e:
+                logger.error(f"Error while updating BimaTreasuryPaymentTerm {instance.public_id} : {e}")
+                raise
