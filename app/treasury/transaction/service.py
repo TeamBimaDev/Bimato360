@@ -89,13 +89,13 @@ class BimaTreasuryTransactionService:
         from .models import BimaTreasuryTransaction
 
         complementary_transaction_mappings = {
-            ('FROM_CASH_TO_ACCOUNT', 'OUTCOME'): ('FROM_CASH_TO_ACCOUNT', 'INCOME'),
-            ('FROM_ACCOUNT_TO_CASH', 'OUTCOME'): ('FROM_ACCOUNT_TO_CASH', 'INCOME')
+            ('FROM_CASH_TO_ACCOUNT_OUTCOME', 'OUTCOME'): ('FROM_CASH_TO_ACCOUNT_INCOME', 'INCOME'),
+            ('FROM_ACCOUNT_TO_CASH_OUTCOME', 'OUTCOME'): ('FROM_ACCOUNT_TO_CASH_INCOME', 'INCOME')
         }
 
         key = (transaction.transaction_type.code, transaction.direction)
         if key not in complementary_transaction_mappings:
-            return  # If not, we don't create any automatic transaction
+            return
 
         complementary_code, complementary_direction = complementary_transaction_mappings[key]
 

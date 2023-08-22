@@ -53,25 +53,23 @@ class BimaTreasuryTransaction(AbstractModel):
             logger.warning("Bank Account is required when nature is set to BANK.")
             raise ValidationError(_('Bank Account is required when nature is set to BANK.'))
 
-        if self.transaction_type.code == 'FROM_ACCOUNT_TO_CASH' and (not self.bank_account or not self.cash):
+        if self.transaction_type.code in self.operation_bank_to_cash_or_inverse() and (
+                not self.bank_account or not self.cash):
             logger.warning("Bank Account and Cash are required for FROM_ACCOUNT_TO_CASH transaction.")
             raise ValidationError(_('Bank Account and Cash are required for FROM_ACCOUNT_TO_CASH transaction.'))
-        elif self.transaction_type.code == 'FROM_CASH_TO_ACCOUNT' and (not self.cash or not self.bank_account):
-            logger.warning("Cash and Bank Account are required for FROM_CASH_TO_ACCOUNT transaction.")
-            raise ValidationError(_('Cash and Bank Account are required for FROM_CASH_TO_ACCOUNT transaction.'))
 
         self.validate_transaction_type_and_nature_combination()
 
     def validate_transaction_type_and_nature_combination(self):
         error_message = None
 
-        if (self.transaction_type.code == 'FROM_CASH_TO_ACCOUNT' and
+        if (self.transaction_type.code == 'FROM_CASH_TO_ACCOUNT_INCOME' and
                 self.transaction_type.income_outcome == 'INCOME' and
                 self.direction == 'INCOME' and
                 self.nature == TransactionNature.CASH.Name):
             error_message = _("You cannot do that. You should make this operation from Bank nature.")
 
-        elif (self.transaction_type.code == 'FROM_ACCOUNT_TO_CASH' and
+        elif (self.transaction_type.code == 'FROM_ACCOUNT_TO_CASH_INCOME' and
               self.transaction_type.income_outcome == 'INCOME' and
               self.direction == 'INCOME' and
               self.nature == TransactionNature.BANK.Name):
@@ -107,9 +105,13 @@ class BimaTreasuryTransaction(AbstractModel):
         strategy.apply(self)
 
     def handle_auto_transaction(self):
-        if self.transaction_type.code in ['FROM_CASH_TO_ACCOUNT',
-                                          'FROM_ACCOUNT_TO_CASH'] and self.direction == TransactionNature.OUTCOME.Name:
+        if self.transaction_type.code in ['FROM_CASH_TO_ACCOUNT_OUTCOME',
+                                          'FROM_ACCOUNT_TO_CASH_OUTCOME'] and self.direction == TransactionNature.OUTCOME.Name:
             BimaTreasuryTransactionService.create_auto_transaction(self)
+
+    def operation_bank_to_cash_or_inverse(self):
+        return ['FROM_CASH_TO_ACCOUNT_OUTCOME', 'FROM_ACCOUNT_TO_CASH_OUTCOME', 'FROM_CASH_TO_ACCOUNT_INCOME',
+                'FROM_ACCOUNT_TO_CASH_INCOME']
 
 
 @receiver(post_delete, sender=BimaTreasuryTransaction)

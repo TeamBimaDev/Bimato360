@@ -96,9 +96,9 @@ class BimaTreasuryPaymentTermSerializer(AbstractSerializer):
                 instance.save()
 
                 if validated_data.get('type') == PaymentTermType.CUSTOM.name:
+                    instance.payment_term_details.all().delete()
                     for line_data in payment_term_details:
                         self.validate_value(line_data['value'])
-                        instance.payment_term_details.all().delete()
                         BimaTreasuryPaymentTermDetail.objects.create(payment_term=instance, **line_data)
 
                 else:
