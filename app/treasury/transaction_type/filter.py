@@ -13,7 +13,7 @@ class BimaTreasuryTransactionTypeFilter(django_filters.FilterSet):
 
     class Meta:
         model = BimaTreasuryTransactionType
-        fields = ['active', 'search']
+        fields = ['active', 'search', 'income_outcome', 'cash_bank']
 
     def filter_search(self, queryset, name, value):
         return queryset.filter(

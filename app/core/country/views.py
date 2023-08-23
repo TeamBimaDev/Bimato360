@@ -1,32 +1,28 @@
-from django.http import HttpResponse
-from pandas import read_csv
-from rest_framework import status
-from rest_framework.decorators import action
-from rest_framework.response import Response
-from core.abstract.views import AbstractViewSet
-from core.country.serializers import BimaCoreCountrySerializer
-from core.state.serializers import BimaCoreStateSerializer
-from reportlab.lib.pagesizes import letter
+import csv
 
+import requests
 from common.helpers.GeneratePdf import GeneratePdf
 from common.helpers.NumberedCanvas import NumberedCanvas
 from common.helpers.PdfTable import PdfTable
-from django.db import transaction
-from .models import BimaCoreCountry
-import csv
-import requests
-
-from django.utils.translation import gettext_lazy as _
-
-from core.state.models import BimaCoreState
-
-from core.currency.models import BimaCoreCurrency
-
 from common.permissions.action_base_permission import ActionBasedPermission
-
 from common.service.file_service import check_csv_file
+from core.abstract.views import AbstractViewSet
+from core.country.serializers import BimaCoreCountrySerializer
+from core.currency.models import BimaCoreCurrency
+from core.state.models import BimaCoreState
+from core.state.serializers import BimaCoreStateSerializer
+from django.db import transaction
+from django.http import HttpResponse
+from django.utils.translation import gettext_lazy as _
+from pandas import read_csv
+from reportlab.lib.pagesizes import letter
+from rest_framework import status
+from rest_framework.decorators import action
+from rest_framework.response import Response
 
+from .models import BimaCoreCountry
 from .service import import_data_from_csv_file, export_to_csv, generate_xls_file
+from ..abstract.base_filter import BaseFilter
 
 
 class BimaCoreCountryViewSet(AbstractViewSet):
@@ -190,13 +186,13 @@ class BimaCoreCountryViewSet(AbstractViewSet):
 
     @action(detail=False, methods=['GET'], url_path='export_csv')
     def export_csv(self, request):
-        data_to_export = BimaCoreCountry.objects.all()
+        data_to_export = BaseFilter(request.GET, queryset=BimaCoreCountry.objects.all()).qs
         model_fields = BimaCoreCountry._meta
         return export_to_csv(data_to_export, model_fields)
 
     @action(detail=False, methods=['GET'], url_path='export_xls')
     def export_xls(self, request):
-        data_to_export = BimaCoreCountry.objects.all()
+        data_to_export = BaseFilter(request.GET, queryset=BimaCoreCountry.objects.all()).qs
         return generate_xls_file(data_to_export)
 
 

@@ -2,6 +2,7 @@ from core.abstract.serializers import AbstractSerializer
 from erp.partner.models import BimaErpPartner
 from rest_framework import serializers
 from simple_history.models import HistoricalRecords
+from treasury.transaction_type.models import BimaTreasuryTransactionType
 
 from .models import BimaTreasuryTransaction
 
@@ -16,17 +17,33 @@ class BimaTreasuryTransactionSerializer(AbstractSerializer):
         required=False
     )
 
+    transaction_type = serializers.SerializerMethodField(read_only=True)
+    transaction_type_public_id = serializers.SlugRelatedField(
+        queryset=BimaTreasuryTransactionType.objects.all(),
+        slug_field='public_id',
+        source='transaction_type',
+        write_only=True,
+        required=True
+    )
+
     def get_partner(self, obj):
         return {
             'id': obj.partner.public_id.hex,
             'name': obj.partner.name,
         }
 
+    def get_transaction_type(self, obj):
+        return {
+            'id': obj.transaction_type.public_id.hex,
+            'name': obj.transaction_type.name,
+        }
+
     class Meta:
         model = BimaTreasuryTransaction
         fields = [
             'id', 'name', 'transaction_payment_method', 'amount', 'date', 'due_date', 'note', 'partner',
-            'partner_bank_account_number', 'partner_public_id', 'created', 'updated'
+            'partner_bank_account_number', 'partner_public_id', 'transaction_type', 'transaction_type_public_id',
+            'created', 'updated'
         ]
 
 

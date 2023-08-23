@@ -1,6 +1,7 @@
 from collections import defaultdict
 from itertools import groupby
 
+from common.enums.sale_document_enum import get_sale_document_status, get_sale_document_types
 from common.permissions.action_base_permission import ActionBasedPermission
 from common.utils.utils import render_to_pdf
 from company.models import BimaCompany
@@ -262,6 +263,8 @@ class BimaErpPurchaseDocumentViewSet(AbstractViewSet):
         pdf_filename = "document.pdf"
         context = self._get_context(pk)
         context['document_title'] = context['current_document'].display_type
+        context['translated_status'] = dict(get_sale_document_status()).get(context['current_document'].status)
+        context['translated_type'] = dict(get_sale_document_types()).get(context['current_document'].type)
         context['request'] = request
         company_data = context.get('company_data', None)
         default_sale_document_pdf_format = company_data.get('default_sale_document_pdf_format')
@@ -273,6 +276,8 @@ class BimaErpPurchaseDocumentViewSet(AbstractViewSet):
         pdf_filename = "document.pdf"
         context = self._get_context(pk)
         context['document_title'] = str(_('Request for Quotation'))
+        context['translated_status'] = dict(get_sale_document_status()).get(context['current_document'].status)
+        context['translated_type'] = str(_('Request for Quotation'))
         context['request'] = request
         context['show_price'] = False
         company_data = context.get('company_data', None)

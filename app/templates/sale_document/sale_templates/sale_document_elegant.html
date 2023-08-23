@@ -26,6 +26,8 @@
         }
 
         #footer-left {
+			position: absolute;
+            bottom: 0;
             position: running(footer-left);
             font-size: 13px;
             border-top: 2px solid #efefef;
@@ -35,9 +37,12 @@
         }
 
         .sale_main_body {
-            margin-inline: 5rem;
+			margin-left:1rem;
+			margin-right:1rem;
+			margin-bottom:1rem;
             font-family: {{ company_data.company.default_font_family }};
             color: {{ company_data.company.default_color }};
+			position: relative;
         }
 
         .div_header {
@@ -211,7 +216,7 @@
     </div>
     {% if company_data.company.show_template_logo %}
         <div class="company_logo" id="header-right">
-            <img src="{{ request.scheme }}://{{ request.get_host }}{{ MEDIA_URL }}{{ company_data.favorite_logo.file_path }}"
+            <img src="{{ request.scheme }}://{{ request.get_host }}{{ MEDIA_URL }}{{ company_data.favorite_logo.file_path }}" 
                  alt="{% trans "Company Logo" %}" class="logo"/>
         </div>
     {% endif %}
@@ -236,7 +241,11 @@
     </div>
     <div class="div_invoice_details">
         <div class="invoice_type_and_number">
-            {{ document_title|upper }} {{ current_document.number }}
+            {{ translated_type|upper }}
+        {% if current_document.status != 'CONFIRMED' %}
+			{{ translated_status|upper }}
+		{% endif %}
+		{{ current_document.number }}
         </div>
         <div class="invoice_date">
             <span class="invoice_date_span_label">{% trans "SALE_DOCUMENT_DATE" %}</span>

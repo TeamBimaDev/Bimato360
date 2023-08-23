@@ -1,16 +1,16 @@
 import django_filters
+from common.permissions.action_base_permission import ActionBasedPermission
+from common.service.file_service import check_csv_file
+from core.abstract.views import AbstractViewSet
+from core.currency.models import BimaCoreCurrency
+from core.currency.serializers import BimaCoreCurrencySerializer
 from django.db.models import Q
+from django.utils.translation import gettext_lazy as _
 from pandas import read_csv
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from django.utils.translation import gettext_lazy as _
 
-from core.abstract.views import AbstractViewSet
-from core.currency.models import BimaCoreCurrency
-from core.currency.serializers import BimaCoreCurrencySerializer
-from common.service.file_service import check_csv_file
-from common.permissions.action_base_permission import ActionBasedPermission
 from .service import import_data_from_csv_file, export_to_csv, generate_xls_file
 
 
@@ -88,11 +88,11 @@ class BimaCoreCurrencyViewSet(AbstractViewSet):
 
     @action(detail=False, methods=['GET'], url_path='export_csv')
     def export_csv(self, request):
-        data_to_export = BimaCoreCurrency.objects.all()
+        data_to_export = CurrencyFilter(request.GET, queryset=BimaCoreCurrency.objects.all()).qs
         model_fields = BimaCoreCurrency._meta
         return export_to_csv(data_to_export, model_fields)
 
     @action(detail=False, methods=['GET'], url_path='export_xls')
     def export_xls(self, request):
-        data_to_export = BimaCoreCurrency.objects.all()
+        data_to_export = CurrencyFilter(request.GET, queryset=BimaCoreCurrency.objects.all()).qs
         return generate_xls_file(data_to_export)

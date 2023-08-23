@@ -2,7 +2,8 @@ from collections import defaultdict
 from datetime import datetime
 from itertools import groupby
 
-from common.enums.sale_document_enum import SaleDocumentTypes, SaleDocumentStatus
+from common.enums.sale_document_enum import SaleDocumentTypes, SaleDocumentStatus, get_sale_document_status, \
+    get_sale_document_types
 from common.permissions.action_base_permission import ActionBasedPermission
 from common.utils.utils import render_to_pdf
 from company.models import BimaCompany
@@ -285,6 +286,8 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
         pdf_filename = "document.pdf"
         context = self._get_context(pk)
         context['document_title'] = str(_('Delivery Note'))
+        context['translated_status'] = dict(get_sale_document_status()).get(context['current_document'].status)
+        context['translated_type'] = str(_('Delivery Note'))
         context['request'] = request
         company_data = context.get('company_data', None)
         default_sale_document_pdf_format = company_data.get('default_sale_document_pdf_format')
@@ -295,7 +298,8 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
     def generate_pdf(self, request, pk=None):
         pdf_filename = "document.pdf"
         context = self._get_context(pk)
-        context['document_title'] = context['current_document'].type
+        context['translated_status'] = dict(get_sale_document_status()).get(context['current_document'].status)
+        context['translated_type'] = dict(get_sale_document_types()).get(context['current_document'].type)
         context['request'] = request
         company_data = context.get('company_data', None)
         default_sale_document_pdf_format = company_data.get('default_sale_document_pdf_format')
