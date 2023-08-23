@@ -106,7 +106,8 @@ class BimaTreasuryTransaction(AbstractModel):
 
     def handle_auto_transaction(self):
         if self.transaction_type.code in ['FROM_CASH_TO_ACCOUNT_OUTCOME',
-                                          'FROM_ACCOUNT_TO_CASH_OUTCOME'] and self.direction == TransactionNature.OUTCOME.Name:
+                                          'FROM_ACCOUNT_TO_CASH_OUTCOME'] \
+                and self.direction == TransactionNature.OUTCOME.Name:
             BimaTreasuryTransactionService.create_auto_transaction(self)
 
     def operation_bank_to_cash_or_inverse(self):

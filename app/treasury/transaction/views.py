@@ -1,3 +1,4 @@
+from common.permissions.action_base_permission import ActionBasedPermission
 from core.abstract.views import AbstractViewSet
 from rest_framework import status
 from rest_framework.decorators import action
@@ -7,7 +8,6 @@ from .filter import BimaTreasuryTransactionFilter
 from .models import BimaTreasuryTransaction
 from .serializers import BimaTreasuryTransactionSerializer, TransactionHistorySerializer
 from .service import BimaTreasuryTransactionService
-from ...common.permissions.action_base_permission import ActionBasedPermission
 
 
 class BimaTreasuryTransactionViewSet(AbstractViewSet):

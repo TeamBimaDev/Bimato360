@@ -1,6 +1,7 @@
 import csv
 import logging
 from datetime import datetime
+from decimal import Decimal
 from io import BytesIO
 from uuid import UUID
 
@@ -9,14 +10,18 @@ from common.enums.partner_type import PartnerType
 from common.enums.sale_document_enum import SaleDocumentRecurringCycle
 from common.enums.sale_document_enum import SaleDocumentRecurringIntervalCustomUnit
 from common.enums.sale_document_enum import SaleDocumentStatus
+from common.enums.sale_document_enum import SaleDocumentTypes
 from common.enums.sale_document_enum import time_interval_based_on_recurring_interval, SaleDocumentRecurringInterval
 from common.service.purchase_sale_service import SalePurchaseService
 from dateutil.relativedelta import relativedelta
 from django.db import transaction
 from django.db.models import Sum
 from django.http import HttpResponse
+from django.utils.translation import gettext_lazy as _
+from erp.product.models import BimaErpProduct
 from erp.sale_document.models import BimaErpSaleDocument
 from pandas import DataFrame
+from rest_framework.exceptions import ValidationError
 
 from .models import BimaErpSaleDocument, BimaErpSaleDocumentProduct, update_sale_document_totals
 
@@ -371,3 +376,26 @@ def reactivate_recurring_sale_document(sale_document, reactivation_date, reason=
     except Exception as ex:
         logger.error(f"Unable to reactivate sale_document {sale_document.public_id} for reason {ex.args}")
         return False
+
+
+class CreditNoteValidator:
+
+    @staticmethod
+    def validate_product_addition_or_update(sale_document, product_public_id, quantity):
+        """
+        Validates adding or updating a product in a credit note.
+        """
+        if sale_document.type != SaleDocumentTypes.CREDIT_NOTE.name:
+            return
+
+        parent_document = sale_document.parents.first()
+        if not parent_document:
+            raise ValidationError(_('This document does not have a parent'))
+
+        product = BimaErpProduct.objects.get_object_by_public_id(product_public_id)
+        parent_product = parent_document.bimaerpsaledocumentproduct_set.filter(product__id=product.id).first()
+        if not parent_product:
+            raise ValidationError(_('This product does not exist in the parent document'))
+
+        if parent_product.quantity < Decimal(quantity):
+            raise ValidationError(_('Exceeding quantity from the parent document'))

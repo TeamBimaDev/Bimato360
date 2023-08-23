@@ -35,5 +35,5 @@ class BimaTreasuryPaymentTermDetail(models.Model):
 
     def save(self, *args, **kwargs):
         if self.payment_term.type != PaymentTermType.CUSTOM.name:
-            raise ValidationError('Only custom payment terms can have schedules.')
+            raise ValidationError(_('Only custom payment terms can have details.'))
         super(BimaTreasuryPaymentTermDetail, self).save(*args, **kwargs)

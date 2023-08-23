@@ -15,6 +15,7 @@ from django.db import transaction
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, get_list_or_404
 from django.utils.translation import gettext_lazy as _
+from erp.product.models import BimaErpProduct
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -25,8 +26,7 @@ from .serializers import BimaErpSaleDocumentSerializer, BimaErpSaleDocumentProdu
     BimaErpSaleDocumentHistorySerializer, BimaErpSaleDocumentProductHistorySerializer
 from .service import SaleDocumentService, generate_recurring_sale_documents, create_products_from_parents, \
     create_new_document, calculate_totals_for_selected_items, generate_xls_report, generate_csv_report, \
-    stop_recurring_sale_document, reactivate_recurring_sale_document
-from ..product.models import BimaErpProduct
+    stop_recurring_sale_document, reactivate_recurring_sale_document, CreditNoteValidator
 
 
 class BimaErpSaleDocumentViewSet(AbstractViewSet):
@@ -97,11 +97,19 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
     @action(detail=True, methods=['post'])
     def add_product(self, request, pk=None):
         sale_document = self.get_object()
-        serializer = BimaErpSaleDocumentProductSerializer(data=request.data, context={'sale_document': sale_document})
+        try:
+            CreditNoteValidator.validate_product_addition_or_update(
+                sale_document, request.data.get('product_public_id'), request.data.get('quantity')
+            )
+        except ValidationError as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
+        serializer = BimaErpSaleDocumentProductSerializer(data=request.data,
+                                                          context={'sale_document': sale_document})
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
+
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=True, methods=['put'])
@@ -119,6 +127,13 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
                                                 sale_document__public_id=sale_document_public_id, product=product)[0]
         if sale_document_product is None:
             return Response({'error': _('Cannot find the item to edit')}, status=status.HTTP_404_NOT_FOUND)
+
+        try:
+            CreditNoteValidator.validate_product_addition_or_update(
+                sale_document_product.sale_document, product_public_id, request.data.get('quantity')
+            )
+        except ValidationError as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
         serializer = BimaErpSaleDocumentProductSerializer(sale_document_product, data=request.data, partial=True)
 
