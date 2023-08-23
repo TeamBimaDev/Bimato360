@@ -2,6 +2,8 @@ from core.abstract.serializers import AbstractSerializer
 from erp.partner.models import BimaErpPartner
 from rest_framework import serializers
 from simple_history.models import HistoricalRecords
+from treasury.bank_account.models import BimaTreasuryBankAccount
+from treasury.cash.models import BimaTreasuryCash
 from treasury.transaction_type.models import BimaTreasuryTransactionType
 
 from .models import BimaTreasuryTransaction
@@ -26,6 +28,24 @@ class BimaTreasuryTransactionSerializer(AbstractSerializer):
         required=True
     )
 
+    cash = serializers.SerializerMethodField(read_only=True)
+    cash_public_id = serializers.SlugRelatedField(
+        queryset=BimaTreasuryCash.objects.all(),
+        slug_field='public_id',
+        source='cash',
+        write_only=True,
+        required=False
+    )
+
+    bank_account = serializers.SerializerMethodField(read_only=True)
+    bank_account_public_id = serializers.SlugRelatedField(
+        queryset=BimaTreasuryBankAccount.objects.all(),
+        slug_field='public_id',
+        source='bank_account',
+        write_only=True,
+        required=False
+    )
+
     def get_partner(self, obj):
         return {
             'id': obj.partner.public_id.hex,
@@ -38,12 +58,24 @@ class BimaTreasuryTransactionSerializer(AbstractSerializer):
             'name': obj.transaction_type.name,
         }
 
+    def get_cash(self, obj):
+        return {
+            'id': obj.cash.public_id.hex,
+            'name': obj.cash.name,
+        }
+
+    def get_bank_account(self, obj):
+        return {
+            'id': obj.bank_account.public_id.hex,
+            'name': obj.bank_account.name,
+        }
+
     class Meta:
         model = BimaTreasuryTransaction
         fields = [
             'id', 'name', 'transaction_payment_method', 'amount', 'date', 'due_date', 'note', 'partner',
             'partner_bank_account_number', 'partner_public_id', 'transaction_type', 'transaction_type_public_id',
-            'created', 'updated'
+            'cash', 'cash_public_id', 'bank_account', 'bank_account_id', 'created', 'updated'
         ]
 
 
