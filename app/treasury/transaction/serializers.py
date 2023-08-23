@@ -73,7 +73,7 @@ class BimaTreasuryTransactionSerializer(AbstractSerializer):
     class Meta:
         model = BimaTreasuryTransaction
         fields = [
-            'id', 'name', 'transaction_payment_method', 'amount', 'date', 'due_date', 'note', 'partner',
+            'id', 'name', 'transaction_payment_method', 'amount', 'date', 'due_date', 'note', 'reference', 'partner',
             'partner_bank_account_number', 'partner_public_id', 'transaction_type', 'transaction_type_public_id',
             'cash', 'cash_public_id', 'bank_account', 'bank_account_id', 'created', 'updated'
         ]

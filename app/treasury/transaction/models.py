@@ -35,6 +35,7 @@ class BimaTreasuryTransaction(AbstractModel):
     date = models.DateField(verbose_name=_("Date"))
     expected_date = models.DateField(null=True, blank=True, verbose_name=_("Expected Date"))
     amount = models.DecimalField(max_digits=14, decimal_places=3, verbose_name=_("Amount"))
+    reference = models.CharField(max_length=64, null=True, blank=True, verbose_name=_("Reference"))
     transaction_source = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True,
                                            verbose_name=_("Transaction Source"))
     partner_bank_account_number = models.CharField(max_length=32, verbose_name=_("Bank account number"), null=True,
