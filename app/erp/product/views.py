@@ -1,28 +1,27 @@
+import logging
+
 import django_filters
-from django.db import models
-from django.utils.translation import gettext_lazy as _
+from common.permissions.action_base_permission import ActionBasedPermission
+from common.service.file_service import check_csv_file
+from common.utils.utils import render_to_pdf
 from core.abstract.views import AbstractViewSet
+from core.entity_tag.models import get_entity_tags_for_parent_entity, create_single_entity_tag, BimaCoreEntityTag
+from core.entity_tag.serializers import BimaCoreEntityTagSerializer
+from django.db import models
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
+from django.utils.translation import gettext_lazy as _
+from erp.sale_document.models import BimaErpSaleDocumentProduct
 from pandas import read_csv
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
+
 from .models import BimaErpProduct
 from .serializers import BimaErpProductSerializer
 from .utils import generate_xls_file, export_to_csv, verify_file_exist_for_ean13, generate_ean13_from_image, \
     import_product_data_from_csv_file
-from common.utils.utils import render_to_pdf
-from erp.sale_document.models import BimaErpSaleDocumentProduct
-from core.entity_tag.models import get_entity_tags_for_parent_entity, create_single_entity_tag, BimaCoreEntityTag
-from core.entity_tag.serializers import BimaCoreEntityTagSerializer
-from common.permissions.action_base_permission import ActionBasedPermission
-
-from django.http import JsonResponse
-
-import logging
-
-from common.service.file_service import check_csv_file
 
 logger = logging.getLogger(__name__)
 
@@ -146,17 +145,19 @@ class BimaErpProductViewSet(AbstractViewSet):
     @action(detail=False, methods=['GET'], url_path='export_csv')
     def export_csv(self, request):
         data_to_export = self.get_queryset()
+        filtered_data = ProductFilter(request.GET, queryset=data_to_export)
         model_fields = BimaErpProduct._meta
-        return export_to_csv(data_to_export, model_fields)
+        return export_to_csv(filtered_data.qs, model_fields)
 
     @action(detail=False, methods=['GET'], url_path='export_pdf')
     def export_pdf(self, request):
         template_name = "product/pdf.html"
         data_to_export = self.get_queryset()
+        filtered_data = ProductFilter(request.GET, queryset=data_to_export)
         return render_to_pdf(
             template_name,
             {
-                "products": data_to_export,
+                "products": filtered_data.qs,
                 "request": request,
             },
             "product.pdf"
@@ -166,7 +167,8 @@ class BimaErpProductViewSet(AbstractViewSet):
     def export_xls(self, request):
         model_fields = BimaErpProduct._meta
         data_to_export = self.get_queryset()
-        return generate_xls_file(data_to_export, model_fields)
+        filtered_data = ProductFilter(request.GET, queryset=data_to_export)
+        return generate_xls_file(filtered_data.qs, model_fields)
 
     @action(detail=True, methods=['GET'], url_path='export_csv')
     def detail_export_csv(self, request, pk=None):

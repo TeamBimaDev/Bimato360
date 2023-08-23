@@ -233,8 +233,9 @@ class BimaErpPartnerViewSet(AbstractViewSet):
     @action(detail=False, methods=['GET'], url_path='export_csv')
     def export_csv(self, request):
         data_to_export = self.get_queryset()
+        filtered_data = PartnerFilter(request.GET, queryset=data_to_export)
         model_fields = BimaErpPartner._meta
-        return export_to_csv(data_to_export, model_fields)
+        return export_to_csv(filtered_data.qs, model_fields)
 
     @action(detail=True, methods=['GET'], url_path='export_csv')
     def detail_export_csv(self, request, pk=None):
@@ -246,10 +247,11 @@ class BimaErpPartnerViewSet(AbstractViewSet):
     def export_pdf(self, request):
         template_name = "partner/pdf.html"
         data_to_export = self.get_queryset()
+        filtered_data = PartnerFilter(request.GET, queryset=data_to_export)
         return render_to_pdf(
             template_name,
             {
-                "partners": data_to_export,
+                "partners": filtered_data.qs,
                 "request": request,
             },
             "partner.pdf"
@@ -271,7 +273,8 @@ class BimaErpPartnerViewSet(AbstractViewSet):
     @action(detail=False, methods=['GET'], url_path='export_xls')
     def export_xls(self, request):
         data_to_export = self.get_queryset()
-        return generate_xls_file(data_to_export)
+        filtered_data = PartnerFilter(request.GET, queryset=data_to_export)
+        return generate_xls_file(filtered_data.qs)
 
     @action(detail=True, methods=['GET'], url_path='export_xls')
     def detail_export_xls(self, request, pk=None):

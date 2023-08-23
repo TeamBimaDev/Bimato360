@@ -2,6 +2,7 @@ from collections import defaultdict
 from datetime import datetime
 from itertools import groupby
 
+from common.enums.sale_document_enum import SaleDocumentTypes, SaleDocumentStatus
 from common.permissions.action_base_permission import ActionBasedPermission
 from common.utils.utils import render_to_pdf
 from company.models import BimaCompany
@@ -164,6 +165,12 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
     def create_new_document_from_parent(self, request, *args, **kwargs):
         document_type, parent_public_ids = self.get_request_data(request)
         parents = self.get_parents(parent_public_ids)
+
+        if document_type == SaleDocumentTypes.CREDIT_NOTE.name:
+            confirmed_parent = parents.filter(status=SaleDocumentStatus.CONFIRMED.name).first()
+            if not confirmed_parent:
+                return Response({'error': _('No confirmed parent document found')}, status=status.HTTP_400_BAD_REQUEST)
+            parents = BimaErpSaleDocument.objects.filter(id=confirmed_parent.id)
 
         self.validate_parents(parents)
         self.validate_document_type(document_type)

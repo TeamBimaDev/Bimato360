@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-08-22 11:42+0100\n"
+"POT-Creation-Date: 2023-08-23 10:22+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -579,17 +579,17 @@ msgid "Integrity error occurred"
 msgstr "Données dupliqués, merci de vérifier"
 
 #: .\core\country\views.py:179 .\core\currency\views.py:77
-#: .\erp\partner\views.py:295 .\erp\product\views.py:134
+#: .\erp\partner\views.py:298 .\erp\product\views.py:133
 msgid "Some rows could not be processed"
 msgstr "Impossible de traiter tout les données"
 
 #: .\core\country\views.py:184 .\core\currency\views.py:82
-#: .\erp\partner\views.py:300 .\erp\product\views.py:139
+#: .\erp\partner\views.py:303 .\erp\product\views.py:138
 msgid "All rows processed successfully"
 msgstr "Tous les données sont traité"
 
 #: .\core\country\views.py:188 .\core\currency\views.py:86
-#: .\erp\partner\views.py:304 .\erp\product\views.py:143
+#: .\erp\partner\views.py:307 .\erp\product\views.py:142
 msgid "an error occurred while treating the file"
 msgstr "Une erreur est survenu lors la traitement du fichier"
 
@@ -865,7 +865,7 @@ msgstr "La ressource n'existe pas"
 msgid "Category, VAT or Unit of Measure does not exist"
 msgstr "Merci de vérifier les données"
 
-#: .\erp\product\views.py:85
+#: .\erp\product\views.py:84
 msgid "Item exists in a sale document"
 msgstr "L'article existe dans un document de vente"
 
@@ -883,15 +883,15 @@ msgstr "Aucun produit avec cet identifiant n'existe."
 msgid "Confirmed Item must contain at least one Product."
 msgstr "L'élément confirmé doit contenir au moins un produit."
 
-#: .\erp\purchase_document\views.py:61 .\erp\sale_document\views.py:63
+#: .\erp\purchase_document\views.py:61 .\erp\sale_document\views.py:64
 msgid "You do not have permission to change the status"
 msgstr "Vous n'avez pas l'autorisation de modifier le statut"
 
-#: .\erp\purchase_document\views.py:65 .\erp\sale_document\views.py:67
+#: .\erp\purchase_document\views.py:65 .\erp\sale_document\views.py:68
 msgid "You do not have permission to rollback the status"
 msgstr "Vous n'avez pas l'autorisation de revenir en arrière sur le statut"
 
-#: .\erp\purchase_document\views.py:75 .\erp\sale_document\views.py:77
+#: .\erp\purchase_document\views.py:75 .\erp\sale_document\views.py:78
 msgid "You do not have permission to set the status"
 msgstr "Vous n'avez pas l'autorisation de définir le statut"
 
@@ -899,27 +899,27 @@ msgstr "Vous n'avez pas l'autorisation de définir le statut"
 msgid "Mismatched purchase_document_id"
 msgstr "Identifiant du document d'achat incorrect"
 
-#: .\erp\purchase_document\views.py:120 .\erp\sale_document\views.py:121
+#: .\erp\purchase_document\views.py:120 .\erp\sale_document\views.py:130
 msgid "Cannot find the item to edit"
 msgstr "Impossible de trouver l'élément à modifier"
 
-#: .\erp\purchase_document\views.py:159 .\erp\sale_document\views.py:160
+#: .\erp\purchase_document\views.py:159 .\erp\sale_document\views.py:182
 msgid "Item created"
 msgstr "Élément créé"
 
-#: .\erp\purchase_document\views.py:288 .\erp\sale_document\views.py:288
+#: .\erp\purchase_document\views.py:288 .\erp\sale_document\views.py:310
 msgid "Rapport"
 msgstr "Rapport"
 
-#: .\erp\purchase_document\views.py:330 .\erp\sale_document\views.py:364
+#: .\erp\purchase_document\views.py:330 .\erp\sale_document\views.py:386
 msgid "No valid parent documents found"
 msgstr "Aucun document parent valide trouvé"
 
-#: .\erp\purchase_document\views.py:334 .\erp\sale_document\views.py:368
+#: .\erp\purchase_document\views.py:334 .\erp\sale_document\views.py:390
 msgid "All documents should belong to the same partner"
 msgstr "Tous les documents doivent appartenir au même partenaire"
 
-#: .\erp\purchase_document\views.py:338 .\erp\sale_document\views.py:372
+#: .\erp\purchase_document\views.py:338 .\erp\sale_document\views.py:394
 msgid "Please give the type of the document"
 msgstr "Veuillez indiquer le type de document"
 
@@ -1122,40 +1122,60 @@ msgstr "Nombre de cycle"
 msgid "Not enough stock available for this product."
 msgstr "Stock insuffisant disponible pour ce produit."
 
+#: .\erp\sale_document\service.py:393
+msgid "This document does not have a parent"
+msgstr "Impossible de trouver la facture source"
+
+#: .\erp\sale_document\service.py:398
+#, fuzzy
+#| msgid "Item exists in a sale document"
+msgid "This product does not exist in the parent document"
+msgstr "Ce produit n'existe pas dans la facture source"
+
+#: .\erp\sale_document\service.py:401
+msgid "Exceeding quantity from the parent document"
+msgstr "Vous avez dépasser la quantité disponible dans la facture source"
+
 #: .\erp\sale_document\signals.py:70
 msgid "Cannot delete item because it contains products."
 msgstr "Impossible de supprimer l'élément car il contient des produits."
 
-#: .\erp\sale_document\views.py:113 .\erp\sale_document\views.py:136
+#: .\erp\sale_document\views.py:122 .\erp\sale_document\views.py:152
 msgid "Mismatched sale_document_id"
 msgstr "Identifiant du document de vente incorrect"
 
-#: .\erp\sale_document\views.py:265
+#: .\erp\sale_document\views.py:172
+#, fuzzy
+#| msgid "No valid parent documents found"
+msgid "No confirmed parent document found"
+msgstr "Aucun document parent valide trouvé"
+
+#: .\erp\sale_document\views.py:287
 msgid "Delivery Note"
 msgstr "Bon de livraison"
 
-#: .\erp\sale_document\views.py:315
+#: .\erp\sale_document\views.py:337
 msgid "Recurring sale documents generation process has started."
 msgstr ""
 "Le processus de génération de documents de vente récurrents a commencé."
 
-#: .\erp\sale_document\views.py:338
+#: .\erp\sale_document\views.py:360
 #, fuzzy
 #| msgid "Impossible de générer le code à barre"
 msgid "Impossible de stopper la facture récurrente"
 msgstr "Impossible de générer le code à barre"
 
-#: .\erp\sale_document\views.py:341
+#: .\erp\sale_document\views.py:363
 msgid "Facture récurrente arrêter"
 msgstr "Facture récurrente arrêter"
 
-#: .\erp\sale_document\views.py:349
+#: .\erp\sale_document\views.py:371
 #, fuzzy
 #| msgid "Impossible de générer le code à barre"
 msgid "Impossible de reactiver la facture récurrente"
 msgstr "Impossible de générer le code à barre"
 
-#: .\erp\sale_document\views.py:352
+#: .\erp\sale_document\views.py:374
 msgid "Facture récurrente reactiver"
 msgstr "Facture récurrente reactiver"
 
@@ -1517,12 +1537,18 @@ msgstr "Note"
 msgid "Description/Note"
 msgstr "Description"
 
-#: .\treasury\payment_term\models.py:26
+#: .\treasury\payment_term\models.py:20
 #: .\treasury\transaction_type\models.py:29
 #, fuzzy
 #| msgid "Cannot find the item to edit"
 msgid "Cannot delete system item"
 msgstr "Impossible de trouver l'élément à modifier"
+
+#: .\treasury\payment_term\models.py:38
+#, fuzzy
+#| msgid "Payment Term Lines"
+msgid "Only custom payment terms can have details."
+msgstr "Détails de condition de paiement"
 
 #: .\treasury\payment_term\serializers.py:52
 #, fuzzy
@@ -1591,21 +1617,16 @@ msgstr "Champ ciasse obligatoire"
 msgid "Bank Account is required when nature is set to BANK."
 msgstr "Champ compte obligatoire"
 
-#: .\treasury\transaction\models.py:58
+#: .\treasury\transaction\models.py:59
 msgid ""
 "Bank Account and Cash are required for FROM_ACCOUNT_TO_CASH transaction."
 msgstr "champs compte et caisse sont obligatoires"
 
-#: .\treasury\transaction\models.py:61
-msgid ""
-"Cash and Bank Account are required for FROM_CASH_TO_ACCOUNT transaction."
-msgstr "champs compte et caisse sont obligatoires"
-
-#: .\treasury\transaction\models.py:72
+#: .\treasury\transaction\models.py:70
 msgid "You cannot do that. You should make this operation from Bank nature."
 msgstr "Il faut faire cette opération depuis une opération bancaire"
 
-#: .\treasury\transaction\models.py:78
+#: .\treasury\transaction\models.py:76
 msgid "You cannot do that. You should make this operation from Cash nature."
 msgstr "Il faut faire cette opération depuis une opération caisse"
 
@@ -1673,6 +1694,10 @@ msgstr "Le mot de passe a été réinitialisé."
 #: .\user\views.py:369
 msgid "Creation of the new password succeed."
 msgstr "La création du nouveau mot de passe a réussi."
+
+#~ msgid ""
+#~ "Cash and Bank Account are required for FROM_CASH_TO_ACCOUNT transaction."
+#~ msgstr "champs compte et caisse sont obligatoires"
 
 #~ msgid "Expense"
 #~ msgstr "Dépense"
