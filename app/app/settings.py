@@ -191,6 +191,10 @@ LOGGING = {
             'format': "%(asctime)s \033[1m%(name)s\033[0m [%(levelname)s] %(message)s",
             'datefmt': "%Y-%m-%d %H:%M:%S"
         },
+        'json': {
+            '()': 'pythonjsonlogger.jsonlogger.JsonFormatter',
+            'format': '%(asctime)s %(levelname)s %(name)s %(message)s'
+        }
     },
     'handlers': {
         'console': {
@@ -201,50 +205,60 @@ LOGGING = {
         'file': {
             'level': 'DEBUG',
             'class': 'logging.FileHandler',
+            'filename': os.path.join(BASE_DIR, 'logs', 'django.log'),
+            'formatter': 'verbose',
+            'encoding': 'utf-8',
+        },
+        'error_file': {
+            'level': 'ERROR',
+            'class': 'logging.FileHandler',
             'filename': os.path.join(BASE_DIR, 'logs', 'django_errors.log'),
             'formatter': 'verbose',
+            'encoding': 'utf-8',
         },
-        'user_activity': {
+        'file_json': {
             'level': 'DEBUG',
             'class': 'logging.FileHandler',
-            'filename': os.path.join(BASE_DIR, 'logs', 'user_activity.log'),
-            'formatter': 'verbose',
-        },
+            'filename': os.path.join(BASE_DIR, 'logs', 'django_json.log'),
+            'formatter': 'json',
+            'encoding': 'utf-8',
+        }
     },
     'loggers': {
         'django': {
-            'handlers': ['console', 'file'],
+            'handlers': ['console', 'file', 'error_file'],
             'level': 'INFO',
             'propagate': True,
         },
         'core': {
-            'handlers': ['console', 'file'],
+            'handlers': ['console', 'file', 'error_file'],
             'level': 'DEBUG',
-            'propagate': False,
+            'propagate': True,
         },
         'user': {
-            'handlers': ['console', 'file'],
+            'handlers': ['console', 'file', 'error_file'],
             'level': 'DEBUG',
-            'propagate': False,
+            'propagate': True,
         },
         'company': {
-            'handlers': ['console', 'file'],
+            'handlers': ['console', 'file', 'error_file'],
             'level': 'DEBUG',
-            'propagate': False,
+            'propagate': True,
         },
         'erp': {
-            'handlers': ['console', 'file'],
+            'handlers': ['console', 'file', 'error_file'],
             'level': 'DEBUG',
-            'propagate': False,
+            'propagate': True,
         },
         'treasury': {
-            'handlers': ['console', 'file'],
+            'handlers': ['console', 'file', 'error_file'],
             'level': 'DEBUG',
-            'propagate': False,
+            'propagate': True,
         },
         'celery': {
             'handlers': ['file'],
             'level': 'DEBUG',
+            'propagate': True,
         },
     },
 }
