@@ -1,0 +1,26 @@
+INSERT INTO public.treasury_bimatreasurytransactiontype (id, public_id, created, updated, name, active, code, is_system,
+                                                         income_outcome, cash_bank)
+VALUES (1, 'b76eab54-8a85-40fc-971b-9c09756837bb', '2023-08-22 13:10:43.065253+01', '2023-08-22 13:10:43.065253+01',
+        'Caisse Vers Compte', true, 'FROM_CASH_TO_ACCOUNT_INCOME', true, 'INCOME', 'BANK'),
+       (2, '4c6fe1a0-d4fc-4c02-ab30-70b53bc18758', '2023-08-22 13:10:58.365633+01', '2023-08-22 13:10:58.365633+01',
+        'Compte Vers Caisse', true, 'FROM_ACCOUNT_TO_CASH_INCOME', true, 'INCOME', 'CASH'),
+       (3, 'e4c288a2-8cf7-45e8-9f60-0caa5855f490', '2023-08-22 13:11:11.919061+01', '2023-08-22 13:11:11.919061+01',
+        'Caisse Vers Compte', true, 'FROM_CASH_TO_ACCOUNT_OUTCOME', true, 'OUTCOME', 'CASH'),
+       (4, '94f63440-bfb6-484c-8146-4dabad3f4554', '2023-08-22 13:11:27.372995+01', '2023-08-22 13:11:27.372995+01',
+        'Compte Vers Caisse', true, 'FROM_ACCOUNT_TO_CASH_OUTCOME', true, 'OUTCOME', 'BANK'),
+       (5, '44c60e44-2dd3-4ab9-a0c8-73df19373805', '2023-08-22 13:11:40.38992+01', '2023-08-22 13:11:40.38992+01',
+        'Solde Initial', true, 'INITIAL_BALANCE_ACCOUNT', true, 'INCOME', 'BANK'),
+       (6, '9bcfab43-7c4c-4226-96e9-19920d4e4644', '2023-08-22 13:11:48.773962+01', '2023-08-22 13:11:48.773962+01',
+        'Sold Initial', true, 'INITIAL_BALANCE_CASH', true, 'INCOME', 'CASH'),
+       (7, '4842a12d-4031-4e73-8027-9215ff3f85ac', '2023-08-22 13:12:01.510077+01', '2023-08-22 13:12:01.510077+01',
+        'Versement', true, 'TRANSFER_INCOME', true, 'INCOME', 'BANK'),
+       (8, 'b2842222-9773-4bce-b8a3-9cc7d94eafad', '2023-08-22 13:12:08.014837+01', '2023-08-22 13:12:08.014837+01',
+        'Versement', true, 'TRANSFER_OUTCOME', true, 'OUTCOME', 'BANK'),
+       (9, '57289fb5-fa33-4857-9585-9f0047d0b064', '2023-08-22 13:12:16.422225+01', '2023-08-22 13:12:16.422225+01',
+        'Chèque', true, 'CHECK_INCOME', true, 'INCOME', 'BANK'),
+       (10, '8b3eb265-c2b6-4c76-90bc-296b10913dad', '2023-08-22 13:12:24.213963+01', '2023-08-22 13:12:24.213963+01',
+        'Chèque', true, 'CHECK_OUTCOME', true, 'OUTCOME', 'BANK'),
+       (11, '52664e8b-8d9c-49e6-b527-a66365a93463', '2023-08-22 13:12:33.010475+01', '2023-08-22 13:12:33.010475+01',
+        'Salaire', true, 'SALARY_OUTCOME', true, 'OUTCOME', 'BANK');
+ALTER SEQUENCE public.treasury_bimatreasurytransactiontype_id_seq RESTART WITH 11;
+SELECT pg_catalog.setval('public.treasury_bimatreasurytransactiontype_id_seq', 11, true);
