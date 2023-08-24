@@ -1,57 +1,60 @@
-from django.contrib.contenttypes.models import ContentType
-from django.shortcuts import get_object_or_404
-from django.utils import timezone
+from app.settings import config
+from common.permissions.app_permission import (
+    IsAdminAndCanActivateAccount,
+    IsSelfUserOrUserCanUpdate,
+    UserCanCreateOtherUser,
+)
+from common.permissions.app_permission import (
+    IsAdminUser,
+    CanEditOtherPassword,
+    UserHasAddPermission,
+)
+from core.abstract.pagination import DefaultPagination
+from core.document.models import get_documents_for_parent_entity, BimaCoreDocument
+from core.document.serializers import BimaCoreDocumentSerializer
+from core.models import GlobalPermission
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
 from django.contrib.auth.tokens import default_token_generator
+from django.contrib.contenttypes.models import ContentType
 from django.db import transaction
-from django.utils.http import urlsafe_base64_encode
+from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from django.utils.encoding import force_bytes
+from django.utils.http import urlsafe_base64_encode
+from django.utils.translation import gettext_lazy as _
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import permissions, viewsets, status, generics
 from rest_framework.decorators import action
 from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from rest_framework.views import APIView
-from django.utils.translation import gettext_lazy as _
-
-from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.settings import api_settings
+from rest_framework.views import APIView
+from rest_framework_simplejwt.views import TokenObtainPairView
 
 from .filters import UserFilter
+from .models import User
 from .serializers import (
     UserSerializer,
     AuthTokenSerializer,
     ChangePasswordSerializer,
-    ResetPasswordEmailRequestSerializer, SetNewPasswordSerializer, AdminCreateUserSerializer
+    ResetPasswordEmailRequestSerializer,
+    SetNewPasswordSerializer,
+    AdminCreateUserSerializer,
 )
-
-from .models import User
-from .service import get_favorite_user_profile_image, verify_user_credential_when_change_password
-
+from .service import (
+    get_favorite_user_profile_image,
+    verify_user_credential_when_change_password,
+)
 from .signals import reset_password_signal, user_activated_signal, user_declined_signal
-from common.permissions.app_permission import IsAdminOrSelfUser, IsAdminUser, CanEditOtherPassword, UserHasAddPermission
-
-from common.permissions.app_permission import IsAdminAndCanActivateAccount, IsSelfUserOrUserCanUpdate, \
-    UserCanCreateOtherUser
-
-from core.abstract.pagination import DefaultPagination
-
-from core.models import GlobalPermission
-
-from core.document.models import get_documents_for_parent_entity, BimaCoreDocument
-
-from core.document.serializers import BimaCoreDocumentSerializer
-
-from app.settings import config
 
 
 class CreateTokenView(TokenObtainPairView):
     permission_classes = (permissions.AllowAny,)
     serializer_class = AuthTokenSerializer
     renderer_classes = api_settings.DEFAULT_RENDERER_CLASSES
-    ordering = ['-name']
+    ordering = ["-name"]
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -65,179 +68,215 @@ class UserViewSet(viewsets.ModelViewSet):
         """
         Instantiates and returns the list of permissions that this view requires.
         """
-        if self.action == 'create':
+        if self.action == "create":
             permission_classes = [permissions.AllowAny]
-        elif self.action in ['update', 'partial_update']:
-            permission_classes = [permissions.IsAuthenticated & IsSelfUserOrUserCanUpdate]
-        elif self.action == 'destroy':
+        elif self.action in ["update", "partial_update"]:
+            permission_classes = [
+                permissions.IsAuthenticated & IsSelfUserOrUserCanUpdate
+            ]
+        elif self.action == "destroy":
             permission_classes = [IsAdminUser]
-        elif self.action in ['manage_permissions']:
+        elif self.action in ["manage_permissions"]:
             permission_classes = [permissions.IsAuthenticated & UserHasAddPermission]
-        elif self.action in ['list_permissions', 'list_user_permissions']:
+        elif self.action in ["list_permissions", "list_user_permissions"]:
             permission_classes = [permissions.IsAuthenticated]
-        elif self.action in ['create_by_admin']:
+        elif self.action in ["create_by_admin"]:
             permission_classes = [permissions.IsAuthenticated & UserCanCreateOtherUser]
-        elif self.action in ['manage_user_activation']:
+        elif self.action in ["manage_user_activation"]:
             permission_classes = [IsAdminAndCanActivateAccount]
         else:
             permission_classes = [permissions.IsAuthenticated]
 
         return [permission() for permission in permission_classes]
 
-    @action(detail=False, methods=['get'], url_path='me')
+    @action(detail=False, methods=["get"], url_path="me")
     def me(self, request):
         serializer = self.get_serializer(request.user)
         return Response(serializer.data)
 
-    @action(detail=False, methods=['get'], url_path='list-permissions')
+    @action(detail=False, methods=["get"], url_path="list-permissions")
     def list_permissions(self, request):
         content_type = ContentType.objects.get_for_model(GlobalPermission)
         permissions = Permission.objects.filter(content_type=content_type)
-        permissions_list = [{'id': perm.id, 'name': perm.name, 'codename': perm.codename} for perm in permissions]
+        permissions_list = [
+            {"id": perm.id, "name": perm.name, "codename": perm.codename}
+            for perm in permissions
+        ]
         return Response(permissions_list)
 
-    @action(detail=True, methods=['post'], url_path='manage-permissions')
+    @action(detail=True, methods=["post"], url_path="manage-permissions")
     def manage_permissions(self, request, pk=None):
-
         user_to_update = self.get_object()
 
-        if not request.user.has_perm('user.user.can_add_permission'):
-            return Response({'error': 'You do not have permission to manage permissions'},
-                            status=status.HTTP_403_FORBIDDEN)
+        if not request.user.has_perm("user.user.can_add_permission"):
+            return Response(
+                {"error": "You do not have permission to manage permissions"},
+                status=status.HTTP_403_FORBIDDEN,
+            )
 
-        new_permission_ids = set(request.data.get('permissions', []))
-        current_permission_ids = set(user_to_update.user_permissions.values_list('id', flat=True))
+        new_permission_ids = set(request.data.get("permissions", []))
+        current_permission_ids = set(
+            user_to_update.user_permissions.values_list("id", flat=True)
+        )
 
         permissions_to_add = new_permission_ids - current_permission_ids
         permissions_to_remove = current_permission_ids - new_permission_ids
 
         with transaction.atomic():
             try:
-                permissions_to_add = Permission.objects.filter(id__in=permissions_to_add)
+                permissions_to_add = Permission.objects.filter(
+                    id__in=permissions_to_add
+                )
                 user_to_update.user_permissions.add(*permissions_to_add)
 
-                permissions_to_remove = Permission.objects.filter(id__in=permissions_to_remove)
+                permissions_to_remove = Permission.objects.filter(
+                    id__in=permissions_to_remove
+                )
                 user_to_update.user_permissions.remove(*permissions_to_remove)
             except Exception as e:
-                return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-        return Response({'status': 'Permissions updated successfully'})
+        return Response({"status": "Permissions updated successfully"})
 
-    @action(detail=True, methods=['get'], url_path='list_user_permissions')
+    @action(detail=True, methods=["get"], url_path="list_user_permissions")
     def list_user_permissions(self, request, pk=None):
         user = get_object_or_404(User, public_id=pk)
         user_permissions = user.user_permissions.all()
 
         permissions_list = [
             {
-                'permission_id': perm.id,
-                'permission_name': perm.name,
-                'permission_codename': perm.codename
+                "permission_id": perm.id,
+                "permission_name": perm.name,
+                "permission_codename": perm.codename,
             }
             for perm in user_permissions
         ]
 
         response_data = {
-            'user_public_id': user.public_id,
-            'user_name': user.name,
-            'permissions': permissions_list
+            "user_public_id": user.public_id,
+            "user_name": user.name,
+            "permissions": permissions_list,
         }
 
         return Response(response_data, status=status.HTTP_200_OK)
 
     def get_object(self):
-        obj = User.objects. \
-            get_object_by_public_id(self.kwargs['pk'])
+        obj = User.objects.get_object_by_public_id(self.kwargs["pk"])
         return obj
 
-    @action(detail=False, methods=['post'], url_path='create_by_admin')
+    @action(detail=False, methods=["post"], url_path="create_by_admin")
     def create_by_admin(self, request):
         serializer = AdminCreateUserSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        user = serializer.save()
+        serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    @action(detail=False, methods=['post'], url_path='manage_user_activation')
+    @action(detail=False, methods=["post"], url_path="manage_user_activation")
     def manage_user_activation(self, request):
-        public_ids = request.data.get('user_public_ids', [])
-        action = request.data.get('action', None)
+        public_ids = request.data.get("user_public_ids", [])
+        action = request.data.get("action", None)
 
-        if action not in ['approve', 'decline']:
-            return Response({"error": "Invalid action"}, status=status.HTTP_400_BAD_REQUEST)
+        if action not in ["approve", "decline"]:
+            return Response(
+                {"error": "Invalid action"}, status=status.HTTP_400_BAD_REQUEST
+            )
 
         users = User.objects.filter(public_id__in=public_ids)
 
         for user in users:
-            if action == 'approve':
+            if action == "approve":
                 user.is_approved = True
                 user.approved_by = request.user
                 user.approved_at = timezone.now()
                 user.is_active = True
                 user.save()
-                user_activated_signal.send(sender=self.__class__, user=user, admin=request.user)
-            elif action == 'decline':
+                user_activated_signal.send(
+                    sender=self.__class__, user=user, admin=request.user
+                )
+            elif action == "decline":
                 user.is_approved = False
                 user.is_active = False
-                user.reason_declined = request.data.get('reason_declined', None)
+                user.reason_declined = request.data.get("reason_declined", None)
                 user.save()
-                user_declined_signal.send(sender=self.__class__, user=user, admin=request.user)
+                user_declined_signal.send(
+                    sender=self.__class__, user=user, admin=request.user
+                )
 
-        return Response({"status": f"Users have been {action}d successfully"}, status=status.HTTP_200_OK)
+        return Response(
+            {"status": f"Users have been {action}d successfully"},
+            status=status.HTTP_200_OK,
+        )
 
-    @action(detail=True, methods=['get'], url_path='documents')
+    @action(detail=True, methods=["get"], url_path="documents")
     def list_documents(self, request, *args, **kwargs):
         user = self.get_object()
         documents = get_documents_for_parent_entity(user)
         serialized_documents = BimaCoreDocumentSerializer(documents, many=True)
         return Response(serialized_documents.data)
 
-    @action(detail=True, methods=['post'], url_path='add_document')
+    @action(detail=True, methods=["post"], url_path="add_document")
     def create_document(self, request, *args, **kwargs):
         user = self.get_object()
         document_data = request.data
-        document_data['file_path'] = request.FILES['file_path']
-        document_data['is_favorite'] = request.data.get('is_favorite', False)
+        document_data["file_path"] = request.FILES["file_path"]
+        document_data["is_favorite"] = request.data.get("is_favorite", False)
         result = BimaCoreDocument.create_document_for_parent(user, document_data)
         if isinstance(result, BimaCoreDocument):
-            return Response({
-                "id": result.public_id,
-                "document_name": result.document_name,
-                "description": result.description,
-                "date_file": result.date_file,
-                "file_type": result.file_type,
-                "is_favorite": result.is_favorite
-
-            }, status=status.HTTP_201_CREATED)
+            return Response(
+                {
+                    "id": result.public_id,
+                    "document_name": result.document_name,
+                    "description": result.description,
+                    "date_file": result.date_file,
+                    "file_type": result.file_type,
+                    "is_favorite": result.is_favorite,
+                },
+                status=status.HTTP_201_CREATED,
+            )
         else:
-            return Response(result, status=result.get("status", status.HTTP_500_INTERNAL_SERVER_ERROR))
+            return Response(
+                result,
+                status=result.get("status", status.HTTP_500_INTERNAL_SERVER_ERROR),
+            )
 
-    @action(detail=True, methods=['get'], url_path='get_favorite_user_profile_image')
+    @action(detail=True, methods=["get"], url_path="get_favorite_user_profile_image")
     def get_favorite_user_profile_image(self, request, *args, **kwargs):
         user = self.get_object()
         favorite_image = get_favorite_user_profile_image(user)
         serialized_image = BimaCoreDocumentSerializer(favorite_image)
         return Response(serialized_image.data, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=['post'],
-            url_path='(?P<pk>[^/.]+)/make_favorite_image/(?P<document_public_id>[^/.]+)')
+    @action(
+        detail=False,
+        methods=["post"],
+        url_path="(?P<pk>[^/.]+)/make_favorite_image/(?P<document_public_id>[^/.]+)",
+    )
     def make_favorite_image(self, request, pk=None, document_public_id=None):
         user = self.get_object()
-        document_to_favorite = get_object_or_404(BimaCoreDocument, public_id=document_public_id)
+        document_to_favorite = get_object_or_404(
+            BimaCoreDocument, public_id=document_public_id
+        )
 
-        if document_to_favorite.parent_id == user.id and \
-                document_to_favorite.parent_type == ContentType.objects.get_for_model(
-            user):
-
-            BimaCoreDocument.objects.filter(parent_id=user.id,
-                                            parent_type=ContentType.objects.get_for_model(user)).update(
-                is_favorite=False)
+        if (
+            document_to_favorite.parent_id == user.id
+            and document_to_favorite.parent_type
+            == ContentType.objects.get_for_model(user)
+        ):
+            BimaCoreDocument.objects.filter(
+                parent_id=user.id, parent_type=ContentType.objects.get_for_model(user)
+            ).update(is_favorite=False)
 
             document_to_favorite.is_favorite = True
             document_to_favorite.save()
 
-            return Response({"message": "Image has been set as favorite"}, status=status.HTTP_200_OK)
+            return Response(
+                {"message": "Image has been set as favorite"}, status=status.HTTP_200_OK
+            )
         else:
-            return Response({"error": "The image does not belong to the user"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": "The image does not belong to the user"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
 
 class UserActivationView(APIView):
@@ -245,24 +284,32 @@ class UserActivationView(APIView):
 
     def post(self, request, user_id):
         user = get_user_model().objects.get(public_id=user_id)
-        inform_user = request.data.get('inform_user', True)
+        inform_user = request.data.get("inform_user", True)
 
-        if 'is_approved' in request.data and request.data['is_approved'] and request.data['is_approved'] == "True":
+        if (
+            "is_approved" in request.data
+            and request.data["is_approved"]
+            and request.data["is_approved"] == "True"
+        ):
             user.is_approved = True
             user.is_approved_by = request.user
             user.approved_at = timezone.now()
             user.is_active = True
             user.save()
-            user_activated_signal.send(sender=self.__class__, user=user, admin=request.user)
-            response = {'status': 'User activated'}
+            user_activated_signal.send(
+                sender=self.__class__, user=user, admin=request.user
+            )
+            response = {"status": "User activated"}
         else:
             user.is_approved = False
             user.is_active = False
-            user.reason_declined = request.data.get('reason_declined', None)
+            user.reason_declined = request.data.get("reason_declined", None)
             user.save()
             if inform_user:
-                user_declined_signal.send(sender=self.__class__, user=user, admin=request.user)
-            response = {'status': 'User not activated'}
+                user_declined_signal.send(
+                    sender=self.__class__, user=user, admin=request.user
+                )
+            response = {"status": "User not activated"}
 
         user.save()
         return Response(response, status=status.HTTP_200_OK)
@@ -282,8 +329,7 @@ class ChangePasswordView(GenericAPIView):
         return [CanEditOtherPassword()]
 
     def get_object(self):
-        obj = User.objects. \
-            get_object_by_public_id(self.kwargs['public_id'])
+        obj = User.objects.get_object_by_public_id(self.kwargs["public_id"])
         return obj
 
     def patch(self, request, *args, **kwargs):
@@ -307,13 +353,21 @@ class PasswordResetView(generics.GenericAPIView):
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
-            user = get_user_model().objects.get(email=serializer.data.get('email'))
+            user = get_user_model().objects.get(email=serializer.data.get("email"))
             if user is not None:
                 token = default_token_generator.make_token(user)
                 uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
 
-                reset_password_link = config('SITE_URL') + '/auth/reset-password/' + str(user.public_id) + "/" + str(
-                    uidb64) + "/" + str(token) + "/"
+                reset_password_link = (
+                    config("SITE_URL")
+                    + "/auth/reset-password/"
+                    + str(user.public_id)
+                    + "/"
+                    + str(uidb64)
+                    + "/"
+                    + str(token)
+                    + "/"
+                )
 
                 user.reset_password_token = token
                 user.reset_password_uid = uidb64
@@ -326,7 +380,10 @@ class PasswordResetView(generics.GenericAPIView):
                     reset_password_link=reset_password_link,
                 )
 
-            return Response({'success': _("We have sent you a link to reset your password")}, status=200)
+            return Response(
+                {"success": _("We have sent you a link to reset your password")},
+                status=200,
+            )
         else:
             return Response(serializer.errors, status=400)
 
@@ -336,11 +393,13 @@ class PasswordResetConfirmView(GenericAPIView):
     permission_classes = [AllowAny]
 
     def get(self, request, *args, **kwargs):
-        uidb64 = kwargs.get('uidb64')
-        token = kwargs.get('token')
-        public_id = kwargs.get('public_id')
+        uidb64 = kwargs.get("uidb64")
+        token = kwargs.get("token")
+        public_id = kwargs.get("public_id")
 
-        response, status_code = verify_user_credential_when_change_password(uidb64, token, public_id)
+        response, status_code = verify_user_credential_when_change_password(
+            uidb64, token, public_id
+        )
         return Response(response, status=status_code)
 
     def post(self, request, *args, **kwargs):
@@ -356,11 +415,13 @@ class CreateUserPasswordForFirstTime(APIView):
     permission_classes = (permissions.AllowAny,)
 
     def get(self, request, *args, **kwargs):
-        uidb64 = kwargs.get('uidb64')
-        token = kwargs.get('token')
-        public_id = kwargs.get('public_id')
+        uidb64 = kwargs.get("uidb64")
+        token = kwargs.get("token")
+        public_id = kwargs.get("public_id")
 
-        response, status_code = verify_user_credential_when_change_password(uidb64, token, public_id)
+        response, status_code = verify_user_credential_when_change_password(
+            uidb64, token, public_id
+        )
         return Response(response, status=status_code)
 
     def post(self, request, *args, **kwargs):

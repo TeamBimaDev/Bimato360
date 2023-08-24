@@ -1,8 +1,10 @@
 import factory
 from factory.django import DjangoModelFactory
-from user.models import User
 from faker import Faker
+from user.models import User
+
 faker = Faker()
+
 
 class UserFactory(DjangoModelFactory):
     class Meta:
@@ -10,6 +12,7 @@ class UserFactory(DjangoModelFactory):
 
     name = factory.Faker("name")
     email = factory.Faker("email")
+
     @factory.post_generation
     def password(self, create, extracted, **kwargs):
         if not create:
