@@ -17,6 +17,8 @@ class BimaTreasuryTransactionSerializer(AbstractSerializer):
         source="partner",
         write_only=True,
         required=False,
+        allow_null=True,
+        allow_empty=True,
     )
 
     transaction_type = serializers.SerializerMethodField(read_only=True)
@@ -35,6 +37,8 @@ class BimaTreasuryTransactionSerializer(AbstractSerializer):
         source="cash",
         write_only=True,
         required=False,
+        allow_null=True,
+        allow_empty=True,
     )
 
     bank_account = serializers.SerializerMethodField(read_only=True)
@@ -44,6 +48,8 @@ class BimaTreasuryTransactionSerializer(AbstractSerializer):
         source="bank_account",
         write_only=True,
         required=False,
+        allow_null=True,
+        allow_empty=True,
     )
 
     def get_partner(self, obj):
