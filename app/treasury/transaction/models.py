@@ -92,10 +92,10 @@ class BimaTreasuryTransaction(AbstractModel):
             logger.warning("Amount should be greater than 0")
             raise ValidationError(_("Amount should be greater than 0."))
 
-        if self.nature == TransactionNature.CASH.Name and not self.cash:
+        if self.nature == TransactionNature.CASH.name and not self.cash:
             logger.warning("Cash is required when nature is set to CASH.")
             raise ValidationError(_("Cash is required when nature is set to CASH."))
-        if self.nature == TransactionNature.BANK.Name and not self.bank_account:
+        if self.nature == TransactionNature.BANK.name and not self.bank_account:
             logger.warning("Bank Account is required when nature is set to BANK.")
             raise ValidationError(
                 _("Bank Account is required when nature is set to BANK.")
@@ -133,7 +133,7 @@ class BimaTreasuryTransaction(AbstractModel):
                 self.transaction_type.code == "FROM_CASH_TO_ACCOUNT_INCOME"
                 and self.transaction_type.income_outcome == "INCOME"
                 and self.direction == "INCOME"
-                and self.nature == TransactionNature.CASH.Name
+                and self.nature == TransactionNature.CASH.name
         ):
             error_message = _(
                 "You cannot do that. You should make this operation from Bank nature."
@@ -143,7 +143,7 @@ class BimaTreasuryTransaction(AbstractModel):
                 self.transaction_type.code == "FROM_ACCOUNT_TO_CASH_INCOME"
                 and self.transaction_type.income_outcome == "INCOME"
                 and self.direction == "INCOME"
-                and self.nature == TransactionNature.BANK.Name
+                and self.nature == TransactionNature.BANK.name
         ):
             error_message = _(
                 "You cannot do that. You should make this operation from Cash nature."
@@ -167,8 +167,8 @@ class BimaTreasuryTransaction(AbstractModel):
 
     def get_effect_strategy(self):
         strategies = {
-            TransactionNature.CASH.Name: CashTransactionEffectStrategy(),
-            TransactionNature.BANK.Name: BankTransactionEffectStrategy(),
+            TransactionNature.CASH.name: CashTransactionEffectStrategy(),
+            TransactionNature.BANK.name: BankTransactionEffectStrategy(),
         }
         return strategies.get(self.nature)
 
@@ -184,7 +184,7 @@ class BimaTreasuryTransaction(AbstractModel):
         if (
                 self.transaction_type.code
                 in ["FROM_CASH_TO_ACCOUNT_OUTCOME", "FROM_ACCOUNT_TO_CASH_OUTCOME"]
-                and self.direction == TransactionNature.OUTCOME.Name
+                and self.direction == TransactionNature.OUTCOME.name
         ):
             BimaTreasuryTransactionService.create_auto_transaction(self)
 
