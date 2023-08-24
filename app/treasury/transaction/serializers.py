@@ -74,7 +74,6 @@ class BimaTreasuryTransactionSerializer(AbstractSerializer):
         model = BimaTreasuryTransaction
         fields = [
             "id",
-            "transaction_payment_method",
             "amount",
             "date",
             "due_date",
@@ -88,7 +87,7 @@ class BimaTreasuryTransactionSerializer(AbstractSerializer):
             "cash",
             "cash_public_id",
             "bank_account",
-            "bank_account_id",
+            "bank_account_public_id",
             "created",
             "updated",
         ]
