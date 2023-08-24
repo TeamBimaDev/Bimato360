@@ -76,7 +76,7 @@ class BimaTreasuryTransactionSerializer(AbstractSerializer):
             "id",
             "amount",
             "date",
-            "due_date",
+            "expected_date",
             "note",
             "reference",
             "partner",
