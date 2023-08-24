@@ -4,8 +4,8 @@ from django.utils.translation import gettext_lazy as _
 
 
 class TransactionTypeIncomeOutcome(Enum):
-    INCOME = _('INCOME')
-    OUTCOME = _('OUTCOME')
+    INCOME = _("INCOME")
+    OUTCOME = _("OUTCOME")
 
 
 def get_transaction_type_income_outcome():
@@ -13,8 +13,8 @@ def get_transaction_type_income_outcome():
 
 
 class TransactionTypeForCashOrBank(Enum):
-    CASH = _('Cash')
-    BANK = _('Bank')
+    CASH = _("Cash")
+    BANK = _("Bank")
 
 
 def get_transaction_type_for_cash_or_bank():
@@ -22,16 +22,16 @@ def get_transaction_type_for_cash_or_bank():
 
 
 class TransactionNature(Enum):
-    CASH = _('Cash')
-    BANK = _('Bank')
+    CASH = _("Cash")
+    BANK = _("Bank")
 
     @classmethod
     def has_value(cls, value):
-        return any(value == item.value for item in cls)
+        return any(value == item.name for item in cls)
 
     @classmethod
     def get_name(cls, value):
-        return next((item.name for item in cls if item.value == value), None)
+        return next((item.name for item in cls if item.name == value), None)
 
 
 def get_transaction_nature_cash_or_bank():
@@ -39,8 +39,8 @@ def get_transaction_nature_cash_or_bank():
 
 
 class TransactionDirection(Enum):
-    INCOME = _('Income')
-    OUTCOME = _('Outcome')
+    INCOME = _("Income")
+    OUTCOME = _("Outcome")
 
     @classmethod
     def has_value(cls, value):
@@ -56,12 +56,12 @@ def get_transaction_direction_income_or_outcome():
 
 
 class PaymentTermType(Enum):
-    IMMEDIATE = _('IMMEDIATE')
-    AFTER_ONE_WEEK = _('AFTER_ONE_WEEK')
-    AFTER_TWO_WEEK = _('AFTER_TWO_WEEK')
-    END_OF_MONTH = _('END_OF_MONTH')
-    NEXT_MONTH = _('NEXT_MONTH')
-    CUSTOM = _('CUSTOM')
+    IMMEDIATE = _("IMMEDIATE")
+    AFTER_ONE_WEEK = _("AFTER_ONE_WEEK")
+    AFTER_TWO_WEEK = _("AFTER_TWO_WEEK")
+    END_OF_MONTH = _("END_OF_MONTH")
+    NEXT_MONTH = _("NEXT_MONTH")
+    CUSTOM = _("CUSTOM")
 
 
 def get_payment_term_type():
@@ -69,11 +69,11 @@ def get_payment_term_type():
 
 
 class PaymentTermCustomType(Enum):
-    IMMEDIATE = _('IMMEDIATE')
-    AFTER_ONE_WEEK = _('AFTER_ONE_WEEK')
-    AFTER_TWO_WEEK = _('AFTER_TWO_WEEK')
-    END_OF_MONTH = _('END_OF_MONTH')
-    NEXT_MONTH = _('NEXT_MONTH')
+    IMMEDIATE = _("IMMEDIATE")
+    AFTER_ONE_WEEK = _("AFTER_ONE_WEEK")
+    AFTER_TWO_WEEK = _("AFTER_TWO_WEEK")
+    END_OF_MONTH = _("END_OF_MONTH")
+    NEXT_MONTH = _("NEXT_MONTH")
 
 
 def get_payment_term_custom_type():
