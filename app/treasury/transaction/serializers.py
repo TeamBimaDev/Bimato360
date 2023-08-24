@@ -81,6 +81,7 @@ class BimaTreasuryTransactionSerializer(AbstractSerializer):
                 "name": obj.bank_account.name,
                 "bank": obj.bank_account.bank.name,
                 "currency": obj.bank_account.currency.name,
+                "symbol": obj.bank_account.currency.symbol,
             }
         return None
 
