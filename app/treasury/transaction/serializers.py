@@ -53,10 +53,12 @@ class BimaTreasuryTransactionSerializer(AbstractSerializer):
     )
 
     def get_partner(self, obj):
-        return {
-            "id": obj.partner.public_id.hex,
-            "name": obj.partner.name,
-        }
+        if obj.partner:
+            return {
+                "id": obj.partner.public_id.hex,
+                "name": obj.partner.name,
+            }
+        return None  # or return {} if you want an empty dictionary instead
 
     def get_transaction_type(self, obj):
         return {
@@ -65,35 +67,43 @@ class BimaTreasuryTransactionSerializer(AbstractSerializer):
         }
 
     def get_cash(self, obj):
-        return {
-            "id": obj.cash.public_id.hex,
-            "name": obj.cash.name,
-        }
+        if obj.cash:
+            return {
+                "id": obj.cash.public_id.hex,
+                "name": obj.cash.name,
+            }
+        return None
 
     def get_bank_account(self, obj):
-        return {
-            "id": obj.bank_account.public_id.hex,
-            "name": obj.bank_account.name,
-        }
+        if obj.bank_account:
+            return {
+                "id": obj.bank_account.public_id.hex,
+                "name": obj.bank_account.name,
+                "bank": obj.bank_account.bank.name,
+                "currency": obj.bank_account.currency.name,
+            }
+        return None
 
     class Meta:
         model = BimaTreasuryTransaction
         fields = [
             "id",
-            "amount",
-            "date",
-            "expected_date",
-            "note",
-            "reference",
-            "partner",
-            "partner_bank_account_number",
-            "partner_public_id",
+            "nature",
+            "direction",
             "transaction_type",
             "transaction_type_public_id",
             "cash",
             "cash_public_id",
             "bank_account",
             "bank_account_public_id",
+            "partner",
+            "partner_public_id",
+            "partner_bank_account_number",
+            "amount",
+            "date",
+            "expected_date",
+            "note",
+            "reference",
             "created",
             "updated",
         ]

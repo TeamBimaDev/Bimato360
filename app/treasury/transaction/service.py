@@ -2,8 +2,7 @@ import logging
 import os
 
 import pandas as pd
-from common.enums.transaction_enum import TransactionDirection
-from common.enums.transaction_enum import TransactionNature
+from common.enums.transaction_enum import TransactionDirection, TransactionNature
 from django.db import models
 from django.db.models import Sum, Case, When, F
 from treasury.transaction_type.models import BimaTreasuryTransactionType
@@ -163,7 +162,7 @@ class CashTransactionEffectStrategy(TransactionEffectStrategy):
     def apply(self, transaction):
         transaction.cash.balance += (
             transaction.amount
-            if transaction.direction == TransactionNature.INCOME.name
+            if transaction.direction == TransactionDirection.INCOME.name
             else -transaction.amount
         )
         transaction.cash.save()
@@ -171,7 +170,7 @@ class CashTransactionEffectStrategy(TransactionEffectStrategy):
     def revert(self, transaction):
         transaction.cash.balance -= (
             transaction.amount
-            if transaction.direction == TransactionNature.INCOME.name
+            if transaction.direction == TransactionDirection.INCOME.name
             else +transaction.amount
         )
         transaction.cash.save()
@@ -181,7 +180,7 @@ class BankTransactionEffectStrategy(TransactionEffectStrategy):
     def apply(self, transaction):
         transaction.bank_account.balance += (
             transaction.amount
-            if transaction.direction == TransactionNature.INCOME.name
+            if transaction.direction == TransactionDirection.INCOME.name
             else -transaction.amount
         )
         transaction.bank_account.save()
@@ -189,7 +188,7 @@ class BankTransactionEffectStrategy(TransactionEffectStrategy):
     def revert(self, transaction):
         transaction.bank_account.balance -= (
             transaction.amount
-            if transaction.direction == TransactionNature.INCOME.name
+            if transaction.direction == TransactionDirection.INCOME.name
             else +transaction.amount
         )
         transaction.bank_account.save()

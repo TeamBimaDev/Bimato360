@@ -1,7 +1,7 @@
 import logging
 from datetime import datetime
 
-from common.enums.transaction_enum import TransactionNature
+from common.enums.transaction_enum import TransactionNature, TransactionDirection
 from common.enums.transaction_enum import (
     get_transaction_nature_cash_or_bank,
     get_transaction_direction_income_or_outcome,
@@ -184,7 +184,7 @@ class BimaTreasuryTransaction(AbstractModel):
         if (
                 self.transaction_type.code
                 in ["FROM_CASH_TO_ACCOUNT_OUTCOME", "FROM_ACCOUNT_TO_CASH_OUTCOME"]
-                and self.direction == TransactionNature.OUTCOME.name
+                and self.direction == TransactionDirection.OUTCOME.name
         ):
             BimaTreasuryTransactionService.create_auto_transaction(self)
 
