@@ -125,10 +125,32 @@ class TransactionHistorySerializer(serializers.ModelSerializer):
         if instance.prev_record:
             diffs = instance.diff_against(instance.prev_record)
             for change in diffs.changes:
+                old_value = self.get_readable_value(change.field, change.old)
+                new_value = self.get_readable_value(change.field, change.new)
                 changes.append(
-                    {"field": change.field, "old": change.old, "new": change.new}
+                    {"field": change.field, "old": old_value, "new": new_value}
                 )
         return changes
+
+    def get_readable_value(self, field, value):
+        if field == "bank_account":
+            obj = BimaTreasuryBankAccount.objects.filter(id=value).first()
+            return obj.name if obj else None
+        elif field == "cash":
+            obj = BimaTreasuryCash.objects.filter(id=value).first()
+            return obj.name if obj else None
+        elif field == "transaction_type":
+            obj = BimaTreasuryTransactionType.objects.filter(id=value).first()
+            return obj.name if obj else None
+        elif field == "partner":
+            obj = BimaErpPartner.objects.filter(id=value).first()
+            if obj:
+                if obj.partner_type == "INDIVIDUAL":
+                    return f"{obj.first_name} {obj.last_name}"
+                else:
+                    return obj.company_name
+            return None
+        return value
 
     def get_changed_by(self, instance):
         return instance.history_user.name if instance.history_user else None
