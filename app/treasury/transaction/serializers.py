@@ -6,6 +6,7 @@ from treasury.cash.models import BimaTreasuryCash
 from treasury.transaction_type.models import BimaTreasuryTransactionType
 
 from .models import BimaTreasuryTransaction
+from .service import BimaTreasuryTransactionService
 
 
 class BimaTreasuryTransactionSerializer(AbstractSerializer):
@@ -133,23 +134,11 @@ class TransactionHistorySerializer(serializers.ModelSerializer):
         return changes
 
     def get_readable_value(self, field, value):
-        if field == "bank_account":
-            obj = BimaTreasuryBankAccount.objects.filter(id=value).first()
-            return obj.name if obj else None
-        elif field == "cash":
-            obj = BimaTreasuryCash.objects.filter(id=value).first()
-            return obj.name if obj else None
-        elif field == "transaction_type":
-            obj = BimaTreasuryTransactionType.objects.filter(id=value).first()
-            return obj.name if obj else None
-        elif field == "partner":
-            obj = BimaErpPartner.objects.filter(id=value).first()
-            if obj:
-                if obj.partner_type == "INDIVIDUAL":
-                    return f"{obj.first_name} {obj.last_name}"
-                else:
-                    return obj.company_name
-            return None
+        transaction_service = BimaTreasuryTransactionService(None)
+        retrieve_method = transaction_service.FIELD_TO_METHOD_MAP.get(field)
+        if retrieve_method:
+            return retrieve_method(transaction_service, value)
+
         return value
 
     def get_changed_by(self, instance):

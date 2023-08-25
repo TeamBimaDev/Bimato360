@@ -7,6 +7,9 @@ import pandas as pd
 from common.enums.transaction_enum import TransactionDirection, TransactionNature
 from django.db import models
 from django.db.models import Sum, Case, When, F
+from erp.partner.models import BimaErpPartner
+from treasury.bank_account.models import BimaTreasuryBankAccount
+from treasury.cash.models import BimaTreasuryCash
 from treasury.transaction_type.models import BimaTreasuryTransactionType
 
 from app import settings
@@ -160,6 +163,34 @@ class BimaTreasuryTransactionService:
             grouped[date_without_time].append(record)
 
         return grouped
+
+    def get_bank_account_name(self, value):
+        obj = BimaTreasuryBankAccount.objects.filter(id=value).first()
+        return obj.name if obj else None
+
+    def get_cash_name(self, value):
+        obj = BimaTreasuryCash.objects.filter(id=value).first()
+        return obj.name if obj else None
+
+    def get_transaction_type_name(self, value):
+        obj = BimaTreasuryTransactionType.objects.filter(id=value).first()
+        return obj.name if obj else None
+
+    def get_partner_name(self, value):
+        obj = BimaErpPartner.objects.filter(id=value).first()
+        if obj:
+            if obj.partner_type == "INDIVIDUAL":
+                return f"{obj.first_name} {obj.last_name}"
+            else:
+                return obj.company_name
+        return None
+
+    FIELD_TO_METHOD_MAP = {
+        "bank_account": get_bank_account_name,
+        "cash": get_cash_name,
+        "transaction_type": get_transaction_type_name,
+        "partner": get_partner_name,
+    }
 
 
 class TransactionEffectStrategy:
