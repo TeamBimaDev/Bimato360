@@ -61,7 +61,7 @@ class BimaTreasuryTransactionService:
                     "Transaction Source": transaction.transaction_source,
                     "Bank Account Number": transaction.partner_bank_account_number,
                     "Partner": self._get_partner_name(transaction.partner),
-                    "Cash": transaction.cash.cash_name if transaction.cash else "",
+                    "Cash": transaction.cash.name if transaction.cash else "",
                     "Bank Account": self._get_bank_account_name(
                         transaction.bank_account
                     ),
