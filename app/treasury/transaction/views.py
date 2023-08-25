@@ -34,12 +34,14 @@ class BimaTreasuryTransactionViewSet(AbstractViewSet):
     filterset_class = BimaTreasuryTransactionFilter
     action_permissions = {
         "list": ["transaction.can_read"],
+        "export_csv": ["transaction.can_read"],
+        "export_excel": ["transaction.can_read"],
         "create": ["transaction.can_create"],
         "retrieve": ["transaction.can_read"],
         "update": ["transaction.can_update"],
         "partial_update": ["transaction.can_update"],
         "destroy": ["transaction.can_delete"],
-        "get_history_diff": ["transaction.can_view_history"],
+        "get_transaction_history": ["transaction.can_view_history"],
     }
 
     def get_object(self):
