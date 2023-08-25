@@ -95,8 +95,8 @@ class BimaTreasuryTransactionViewSet(AbstractViewSet):
 
         return response
 
-    @action(detail=False, methods=["GET"], url_path="export_excel")
-    def export_excel(self, request):
+    @action(detail=False, methods=["GET"], url_path="export_xls")
+    def export_xls(self, request):
         filtered_qs = BimaTreasuryTransactionFilter(
             request.GET, queryset=BimaTreasuryTransaction.objects.all()
         ).qs
