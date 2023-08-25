@@ -1,5 +1,4 @@
 import logging
-import os
 from collections import defaultdict
 from datetime import datetime
 
@@ -8,11 +7,11 @@ from common.enums.transaction_enum import TransactionDirection, TransactionNatur
 from django.db import models
 from django.db.models import Sum, Case, When, F
 from erp.partner.models import BimaErpPartner
+from openpyxl.styles import Border, Side, Font
+from openpyxl.utils import get_column_letter
 from treasury.bank_account.models import BimaTreasuryBankAccount
 from treasury.cash.models import BimaTreasuryCash
 from treasury.transaction_type.models import BimaTreasuryTransactionType
-
-from app import settings
 
 logger = logging.getLogger(__name__)
 
@@ -54,7 +53,7 @@ class BimaTreasuryTransactionService:
                 row = {
                     "Nature": transaction.nature,
                     "Direction": transaction.direction,
-                    "Transaction Type": transaction.transaction_type,
+                    "Transaction Type": transaction.transaction_type.name,
                     "Note": transaction.note,
                     "Date": transaction.date,
                     "Expected Date": transaction.expected_date,
@@ -75,29 +74,25 @@ class BimaTreasuryTransactionService:
         return data
 
     def _get_partner_name(self, partner):
-        if partner.partner_type == "INDIVIDUAL":
-            return f"{partner.first_name} {partner.last_name}"
-        else:
-            return partner.company_name
+        if partner:
+            if partner.partner_type == "INDIVIDUAL":
+                return f"{partner.first_name} {partner.last_name}"
+            else:
+                return partner.company_name
+        return ""
 
     def _get_bank_account_name(self, bank_account):
         if bank_account:
             return f"{bank_account.name} ({bank_account.account_number})"
         return ""
 
-    def export_to_csv(self, file_name):
+    def export_to_csv(self):
         data = self.format_data_for_export()
-        df = pd.DataFrame(data)
-        file_path = os.path.join(settings.MEDIA_ROOT, file_name)
-        df.to_csv(file_path, index=False)
-        return file_path
+        return pd.DataFrame(data)
 
-    def export_to_excel(self, file_name):
+    def export_to_excel(self):
         data = self.format_data_for_export()
-        df = pd.DataFrame(data)
-        file_path = os.path.join(settings.MEDIA_ROOT, file_name)
-        df.to_excel(file_path, index=False, engine="openpyxl")
-        return file_path
+        return pd.DataFrame(data)
 
     @staticmethod
     def create_auto_transaction(transaction):
@@ -191,6 +186,50 @@ class BimaTreasuryTransactionService:
         "transaction_type": get_transaction_type_name,
         "partner": get_partner_name,
     }
+
+    def style_worksheet(self, ws):
+        thin_border = Border(
+            left=Side(style="thin"),
+            right=Side(style="thin"),
+            top=Side(style="thin"),
+            bottom=Side(style="thin"),
+        )
+
+        for row in ws.iter_rows():
+            for cell in row:
+                cell.border = thin_border
+
+        for row in ws.iter_rows():
+            for cell in row:
+                if cell.column_letter == "B":
+                    if cell.value == "INCOME":
+                        amount_cell = ws[f"G{cell.row}"]
+                        amount_cell.font = Font(color="00FF00")
+                    elif cell.value == "OUTCOME":
+                        amount_cell = ws[f"G{cell.row}"]
+                        amount_cell.font = Font(color="FF0000")
+
+        for column in ws.columns:
+            max_length = 0
+            column = [cell for cell in column]
+            for cell in column:
+                try:
+                    if len(str(cell.value)) > max_length:
+                        max_length = len(cell.value)
+                except:
+                    pass
+            adjusted_width = max_length + 2
+            ws.column_dimensions[
+                get_column_letter(column[0].column)
+            ].width = adjusted_width
+
+    def append_totals(self, ws):
+        sums = self.calculate_sums()
+        ws.append([])
+        ws.append(["Totals"])
+        ws.append(["Total Income", sums["total_income"]])
+        ws.append(["Total Outcome", sums["total_outcome"]])
+        ws.append(["Difference", sums["difference"]])
 
 
 class TransactionEffectStrategy:

@@ -1,3 +1,5 @@
+from io import BytesIO
+
 from common.permissions.action_base_permission import ActionBasedPermission
 from core.abstract.views import AbstractViewSet
 from core.entity_tag.models import (
@@ -6,7 +8,9 @@ from core.entity_tag.models import (
     BimaCoreEntityTag,
 )
 from core.entity_tag.serializers import BimaCoreEntityTagSerializer
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
+from openpyxl.reader.excel import load_workbook
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -79,8 +83,17 @@ class BimaTreasuryTransactionViewSet(AbstractViewSet):
             request.GET, queryset=BimaTreasuryTransaction.objects.all()
         ).qs
         service = BimaTreasuryTransactionService(filtered_qs)
-        file_path = service.export_to_csv("transactions_export.csv")
-        return Response({"file_path": file_path})
+        df = service.export_to_csv()
+
+        # Now generate the CSV in memory and serve it
+        buffer = BytesIO()
+        df.to_csv(buffer, index=False)
+
+        # Generate the response with the appropriate headers
+        response = HttpResponse(buffer.getvalue(), content_type="text/csv")
+        response["Content-Disposition"] = "attachment; filename=transactions_export.csv"
+
+        return response
 
     @action(detail=False, methods=["GET"], url_path="export_excel")
     def export_excel(self, request):
@@ -88,8 +101,33 @@ class BimaTreasuryTransactionViewSet(AbstractViewSet):
             request.GET, queryset=BimaTreasuryTransaction.objects.all()
         ).qs
         service = BimaTreasuryTransactionService(filtered_qs)
-        file_path = service.export_to_excel("transactions_export.xlsx")
-        return Response({"file_path": file_path})
+        df = service.export_to_excel()
+
+        # Convert dataframe to workbook
+        buffer = BytesIO()
+        df.to_excel(buffer, index=False, engine="openpyxl")
+        buffer.seek(0)
+
+        # Load the workbook, apply styling, and append totals
+        wb = load_workbook(buffer)
+        ws = wb.active
+        service.style_worksheet(ws)
+        service.append_totals(ws)
+
+        # Save workbook back to buffer
+        buffer.seek(0)
+        wb.save(buffer)
+
+        # Serve the Excel file with the appropriate headers
+        response = HttpResponse(
+            buffer.getvalue(),
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
+        response[
+            "Content-Disposition"
+        ] = "attachment; filename=transactions_export.xlsx"
+
+        return response
 
     def list_tags(self, request, *args, **kwargs):
         transaction = BimaTreasuryTransaction.objects.get_object_by_public_id(
