@@ -103,22 +103,18 @@ class BimaTreasuryTransactionViewSet(AbstractViewSet):
         service = BimaTreasuryTransactionService(filtered_qs)
         df = service.export_to_excel()
 
-        # Convert dataframe to workbook
         buffer = BytesIO()
         df.to_excel(buffer, index=False, engine="openpyxl")
         buffer.seek(0)
 
-        # Load the workbook, apply styling, and append totals
         wb = load_workbook(buffer)
         ws = wb.active
         service.style_worksheet(ws)
         service.append_totals(ws)
 
-        # Save workbook back to buffer
         buffer.seek(0)
         wb.save(buffer)
 
-        # Serve the Excel file with the appropriate headers
         response = HttpResponse(
             buffer.getvalue(),
             content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
