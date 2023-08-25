@@ -65,8 +65,8 @@ class BimaTreasuryTransactionViewSet(AbstractViewSet):
         result = service.calculate_sums()
         return Response(result)
 
-    @action(detail=False, methods=["GET"], url_path="export_to_csv")
-    def export_to_csv(self, request):
+    @action(detail=False, methods=["GET"], url_path="export_csv")
+    def export_csv(self, request):
         filtered_qs = BimaTreasuryTransactionFilter(
             request.GET, queryset=BimaTreasuryTransaction.objects.all()
         ).qs
@@ -74,8 +74,8 @@ class BimaTreasuryTransactionViewSet(AbstractViewSet):
         file_path = service.export_to_csv("transactions_export.csv")
         return Response({"file_path": file_path})
 
-    @action(detail=False, methods=["GET"], url_path="export_to_excel")
-    def export_to_excel(self, request):
+    @action(detail=False, methods=["GET"], url_path="export_excel")
+    def export_excel(self, request):
         filtered_qs = BimaTreasuryTransactionFilter(
             request.GET, queryset=BimaTreasuryTransaction.objects.all()
         ).qs
