@@ -1,5 +1,7 @@
 import logging
 import os
+from collections import defaultdict
+from datetime import datetime
 
 import pandas as pd
 from common.enums.transaction_enum import TransactionDirection, TransactionNature
@@ -148,6 +150,16 @@ class BimaTreasuryTransactionService:
             f"Auto transaction {created_transaction.pk} created for transaction {transaction.pk}"
         )
         return created_transaction
+
+    @staticmethod
+    def group_by_date(history_data):
+        grouped = defaultdict(list)
+
+        for record in history_data:
+            date_without_time = datetime.fromisoformat(record["history_date"]).date()
+            grouped[date_without_time].append(record)
+
+        return grouped
 
 
 class TransactionEffectStrategy:

@@ -55,8 +55,14 @@ class BimaTreasuryTransactionViewSet(AbstractViewSet):
         if not history.exists():
             return Response([], status=status.HTTP_200_OK)
 
-        serialized_history = TransactionHistorySerializer(history, many=True)
-        return Response(serialized_history.data)
+        serialized_history = TransactionHistorySerializer(history, many=True).data
+        grouped_history = BimaTreasuryTransactionService.group_by_date(
+            serialized_history
+        )
+        response_data = [
+            {"date": key, "changes": value} for key, value in grouped_history.items()
+        ]
+        return Response(response_data)
 
     @action(detail=False, methods=["GET"], url_path="transaction_sums")
     def transaction_sums(self, request):

@@ -1,7 +1,6 @@
 from core.abstract.serializers import AbstractSerializer
 from erp.partner.models import BimaErpPartner
 from rest_framework import serializers
-from simple_history.models import HistoricalRecords
 from treasury.bank_account.models import BimaTreasuryBankAccount
 from treasury.cash.models import BimaTreasuryCash
 from treasury.transaction_type.models import BimaTreasuryTransactionType
@@ -56,7 +55,10 @@ class BimaTreasuryTransactionSerializer(AbstractSerializer):
         if obj.partner:
             return {
                 "id": obj.partner.public_id.hex,
-                "name": obj.partner.name,
+                "partner_type": obj.partner.partner_type,
+                "first_name": obj.partner.first_name,
+                "last_name": obj.partner.last_name,
+                "company_name": obj.partner.company_name,
             }
         return None  # or return {} if you want an empty dictionary instead
 
@@ -115,7 +117,7 @@ class TransactionHistorySerializer(serializers.ModelSerializer):
     changed_by = serializers.SerializerMethodField()
 
     class Meta:
-        model = HistoricalRecords
+        model = BimaTreasuryTransaction.history.model
         fields = ("id", "changes", "changed_by", "history_date")
 
     def get_changes(self, instance):
