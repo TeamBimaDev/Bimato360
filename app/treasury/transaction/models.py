@@ -8,7 +8,7 @@ from common.enums.transaction_enum import (
 )
 from core.abstract.models import AbstractModel
 from django.core.exceptions import ValidationError
-from django.db import models
+from django.db import models, transaction
 from django.db.models.signals import post_delete
 from django.dispatch import receiver
 from django.utils.translation import gettext_lazy as _
@@ -156,14 +156,24 @@ class BimaTreasuryTransaction(AbstractModel):
             raise ValidationError(error_message)
 
     def save(self, *args, **kwargs):
-        if self.pk:
-            old_transaction = BimaTreasuryTransaction.objects.get(pk=self.pk)
-            self.revert_effect(old_transaction)
+        with transaction.atomic():
+            if self.pk:
+                old_transaction = BimaTreasuryTransaction.objects.get(pk=self.pk)
+                self.check_if_transaction_child_and_prevent_modification(
+                    old_transaction
+                )
 
-        self.apply_effect()
+                self.revert_effect(old_transaction)
 
-        super(BimaTreasuryTransaction, self).save(*args, **kwargs)
-        self.handle_auto_transaction()
+                super(BimaTreasuryTransaction, self).save(*args, **kwargs)
+
+                self.apply_effect()
+
+                self.handle_auto_transaction(old_transaction)
+            else:
+                super(BimaTreasuryTransaction, self).save(*args, **kwargs)
+                self.apply_effect()
+                self.handle_auto_transaction()
 
     def get_effect_strategy(self):
         strategies = {
@@ -180,13 +190,22 @@ class BimaTreasuryTransaction(AbstractModel):
         strategy = self.get_effect_strategy()
         strategy.apply(self)
 
-    def handle_auto_transaction(self):
+    def handle_auto_transaction(self, old_transaction=None):
         if (
                 self.transaction_type.code
                 in ["FROM_CASH_TO_ACCOUNT_OUTCOME", "FROM_ACCOUNT_TO_CASH_OUTCOME"]
                 and self.direction == TransactionDirection.OUTCOME.name
         ):
-            BimaTreasuryTransactionService.create_auto_transaction(self)
+            child_transaction = BimaTreasuryTransaction.objects.filter(
+                transaction_source=self
+            ).first()
+
+            if child_transaction:
+                self.apply_change_on_transaction_child(
+                    old_transaction, child_transaction
+                )
+            else:
+                BimaTreasuryTransactionService.create_auto_transaction(self)
 
     def operation_bank_to_cash_or_inverse(self):
         return [
@@ -196,7 +215,32 @@ class BimaTreasuryTransaction(AbstractModel):
             "FROM_ACCOUNT_TO_CASH_INCOME",
         ]
 
+    def check_if_transaction_child_and_prevent_modification(self, old_transaction):
+        if self.transaction_source:
+            changed_fields = [
+                f.name
+                for f in self._meta.fields
+                if getattr(self, f.name) != getattr(old_transaction, f.name)
+            ]
+            if set(changed_fields) - {"note"}:
+                raise ValidationError(_("Cannot update a child transaction."))
+
+    def apply_change_on_transaction_child(self, old_transaction, child_transaction):
+        if old_transaction.amount != self.amount:
+            child_transaction.revert_effect()
+
+            child_transaction.amount = self.amount
+            child_transaction.date = self.date
+            child_transaction.save()
+
+            child_transaction.apply_effect()
+
 
 @receiver(post_delete, sender=BimaTreasuryTransaction)
 def update_balance_on_delete(sender, instance, **kwargs):
+    if not instance.transaction_source:
+        child_transaction = BimaTreasuryTransaction.objects.get(
+            transaction_source=instance
+        )
+        child_transaction.delete()
     instance.revert_effect(instance)

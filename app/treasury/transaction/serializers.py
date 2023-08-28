@@ -52,6 +52,17 @@ class BimaTreasuryTransactionSerializer(AbstractSerializer):
         allow_empty=True,
     )
 
+    transaction_source = serializers.SerializerMethodField(read_only=True)
+    transaction_source_public_id = serializers.SlugRelatedField(
+        queryset=BimaTreasuryTransaction.objects.all(),
+        slug_field="public_id",
+        source="transaction_source",
+        write_only=True,
+        required=False,
+        allow_null=True,
+        allow_empty=True,
+    )
+
     def get_partner(self, obj):
         if obj.partner:
             return {
@@ -88,6 +99,16 @@ class BimaTreasuryTransactionSerializer(AbstractSerializer):
             }
         return None
 
+    def get_transaction_source(self, obj):
+        if obj.transaction_source:
+            return {
+                "id": obj.transaction_source.public_id.hex,
+                "direction": obj.transaction_source.direction,
+                "transaction_type": obj.transaction_source.transaction_type.name,
+                "amount": obj.transaction_source.amount,
+            }
+        return None
+
     class Meta:
         model = BimaTreasuryTransaction
         fields = [
@@ -108,6 +129,8 @@ class BimaTreasuryTransactionSerializer(AbstractSerializer):
             "expected_date",
             "note",
             "reference",
+            "transaction_source",
+            "transaction_source_public_id",
             "created",
             "updated",
         ]

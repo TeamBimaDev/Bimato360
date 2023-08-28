@@ -25,12 +25,12 @@ class SaleDocumentValidity(Enum):
 
 
 class SaleDocumentRecurringInterval(Enum):
-    DAILY = _('QUOTIDIEN')
-    WEEKLY = _('HEBDOMADAIRE')
-    MONTHLY = _('MENSUEL')
-    QUARTERLY = _('TRIMESTRIEL')
-    YEARLY = _('ANNUEL')
-    CUSTOM = _('PERSONNALISE')
+    DAILY = _("QUOTIDIEN")
+    WEEKLY = _("HEBDOMADAIRE")
+    MONTHLY = _("MENSUEL")
+    QUARTERLY = _("TRIMESTRIEL")
+    YEARLY = _("ANNUEL")
+    CUSTOM = _("PERSONNALISE")
 
 
 time_interval_based_on_recurring_interval = {
@@ -38,21 +38,27 @@ time_interval_based_on_recurring_interval = {
     SaleDocumentRecurringInterval.WEEKLY.name: relativedelta(weeks=1),
     SaleDocumentRecurringInterval.MONTHLY.name: relativedelta(months=1),
     SaleDocumentRecurringInterval.QUARTERLY.name: relativedelta(months=3),
-    SaleDocumentRecurringInterval.YEARLY.name: relativedelta(years=1)
+    SaleDocumentRecurringInterval.YEARLY.name: relativedelta(years=1),
 }
 
 
 class SaleDocumentRecurringIntervalCustomUnit(Enum):
-    DAY = _('JOUR')
-    WEEK = _('SEMAINE')
+    DAY = _("JOUR")
+    WEEK = _("SEMAINE")
     MONTH = _("MOIS")
     YEAR = _("ANNEE")
 
 
 class SaleDocumentRecurringCycle(Enum):
-    UNDEFINED = _('INDEFINIE')
-    END_AT = _('TERMINE LE')
+    UNDEFINED = _("INDEFINIE")
+    END_AT = _("TERMINE LE")
     END_AFTER = _("TERMINE APRES")
+
+
+class SaleDocumentPaymentStatus(Enum):
+    NOT_PAID = _("NOT_PAD")
+    PARTIAL_PAID = _("PARTIAL_PAID")
+    PAID = _("PAID")
 
 
 def get_sale_document_recurring_cycle():
@@ -77,3 +83,7 @@ def get_sale_document_status():
 
 def get_sale_document_validity():
     return [(vd.name, vd.value) for vd in SaleDocumentValidity]
+
+
+def get_payment_status():
+    return [(ps.name, ps.value) for ps in SaleDocumentPaymentStatus]
