@@ -54,12 +54,12 @@ class BimaTreasuryTransactionViewSet(AbstractViewSet):
         return obj
 
     def perform_create(self, serializer):
-        sale_document_public_ids = self.request.data.pop('sale_document')
+        sale_document_public_ids = self.request.data.pop('sale_documents_id')
         instance = serializer.save()
         instance.handle_invoice_payment(sale_document_public_ids)
 
     def perform_update(self, serializer):
-        sale_document_public_ids = self.request.data.pop('sale_document')
+        sale_document_public_ids = self.request.data.pop('sale_documents_id')
         instance = serializer.save()
         instance.handle_invoice_payment(sale_document_public_ids)
 
