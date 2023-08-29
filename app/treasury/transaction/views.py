@@ -85,11 +85,9 @@ class BimaTreasuryTransactionViewSet(AbstractViewSet):
         service = BimaTreasuryTransactionService(filtered_qs)
         df = service.export_to_csv()
 
-        # Now generate the CSV in memory and serve it
         buffer = BytesIO()
         df.to_csv(buffer, index=False)
 
-        # Generate the response with the appropriate headers
         response = HttpResponse(buffer.getvalue(), content_type="text/csv")
         response["Content-Disposition"] = "attachment; filename=transactions_export.csv"
 

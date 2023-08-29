@@ -33,6 +33,7 @@ from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext_lazy as _
+from erp.sale_document.serializers import BimaErpSaleDocumentUnpaidSerializer
 from pandas import read_csv
 from rest_framework import status
 from rest_framework.decorators import action
@@ -45,7 +46,6 @@ from .models import BimaErpPartner
 from .serializers import BimaErpPartnerSerializer
 from .signals import post_create_partner
 from .utils import generate_xls_file, import_partner_data_from_csv_file, export_to_csv
-from ..sale_document.serializers import BimaErpSaleDocumentSerializer
 
 
 class PartnerFilter(django_filters.FilterSet):
@@ -411,5 +411,5 @@ class BimaErpPartnerViewSet(AbstractViewSet):
             type=SaleDocumentTypes.INVOICE.name,
         )
 
-        serialized_data = BimaErpSaleDocumentSerializer(unpaid_invoice, many=True)
+        serialized_data = BimaErpSaleDocumentUnpaidSerializer(unpaid_invoice, many=True)
         return Response(serialized_data.data)

@@ -128,9 +128,11 @@ class BimaTreasuryTransactionService:
                 "direction": "INCOME",
                 "transaction_type": complementary_transaction_type,
                 "bank_account": transaction.bank_account,
+                "cash": transaction.cash,
                 "date": transaction.date,
                 "amount": transaction.amount,
                 "transaction_source": transaction,
+                "reference": transaction.reference,
             }
         elif transaction.nature == TransactionNature.BANK.name:
             params = {
@@ -138,9 +140,11 @@ class BimaTreasuryTransactionService:
                 "direction": "INCOME",
                 "transaction_type": complementary_transaction_type,
                 "cash": transaction.cash,
+                "bank_account": transaction.bank_account,
                 "date": transaction.date,
                 "amount": transaction.amount,
                 "transaction_source": transaction,
+                "reference": transaction.reference,
             }
 
         created_transaction = BimaTreasuryTransaction.objects.create(**params)

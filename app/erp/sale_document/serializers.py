@@ -32,6 +32,17 @@ class BimaErpSaleDocumentSerializer(AbstractSerializer):
         write_only=True
     )
 
+    payment_term = serializers.SerializerMethodField(read_only=True)
+    payment_term_public_id = serializers.SlugRelatedField(
+        queryset=BimaErpPartner.objects.all(),
+        slug_field='public_id',
+        source='payment_term',
+        write_only=True,
+        required=False,
+        allow_null=True,
+        allow_empty=True
+    )
+
     def get_partner(self, obj):
         return {
             'id': obj.partner.public_id.hex,
@@ -83,12 +94,20 @@ class BimaErpSaleDocumentSerializer(AbstractSerializer):
             }
         return None
 
+    def get_payment_terms(self, obj):
+        if obj.payment_term:
+            return {
+                'id': obj.payment_term.public_id.hex,
+                'name': obj.payment_term.name,
+            }
+        return None
+
     class Meta:
         model = BimaErpSaleDocument
 
         fields = [
             'id', 'number', 'date', 'status', 'type', 'partner', 'partner_public_id', 'note',
-            'private_note', 'validity', 'payment_terms', 'delivery_terms', 'total_vat',
+            'private_note', 'validity', 'payment_terms', 'payment_terms_public_id', 'delivery_terms', 'total_vat',
             'total_discount', 'parents', 'parent_public_ids', 'history', 'vat_label', 'vat_amount', 'created',
             'updated', 'total_vat', 'total_amount', 'total_discount', 'children', 'is_recurring', 'is_recurring_parent',
             'recurring_initial_parent_id', 'recurring_initial_parent_public_id', 'recurring_interval',
@@ -96,7 +115,55 @@ class BimaErpSaleDocumentSerializer(AbstractSerializer):
             'recurring_cycle_number_to_repeat', 'recurring_cycle_stop_at', 'recurring_cycle_stopped_at',
             'recurring_last_generated_day', 'recurring_reason_stop', 'recurring_reason_reactivated',
             'recurring_reactivated_date', 'recurring_stopped_by_display', 'recurring_reactivated_by_display',
-            'is_recurring_ended'
+            'is_recurring_ended', 'payment_status'
+        ]
+        read_only_fields = ('total_vat', 'total_amount', 'total_discount',)
+
+
+class BimaErpSaleDocumentUnpaidSerializer(AbstractSerializer):
+    partner = serializers.SerializerMethodField(read_only=True)
+    partner_public_id = serializers.SlugRelatedField(
+        queryset=BimaErpPartner.objects.all(),
+        slug_field='public_id',
+        source='partner',
+        write_only=True
+    )
+
+    payment_term = serializers.SerializerMethodField(read_only=True)
+    payment_term_public_id = serializers.SlugRelatedField(
+        queryset=BimaErpPartner.objects.all(),
+        slug_field='public_id',
+        source='payment_term',
+        write_only=True,
+        required=False,
+        allow_null=True,
+        allow_empty=True
+    )
+
+    def get_partner(self, obj):
+        return {
+            'id': obj.partner.public_id.hex,
+            'partner_type': obj.partner.partner_type,
+            'first_name': obj.partner.first_name,
+            'last_name': obj.partner.last_name,
+            'company_name': obj.partner.company_name,
+        }
+
+    def get_payment_terms(self, obj):
+        if obj.payment_term:
+            return {
+                'id': obj.payment_term.public_id.hex,
+                'name': obj.payment_term.name,
+            }
+        return None
+
+    class Meta:
+        model = BimaErpSaleDocument
+
+        fields = [
+            'id', 'number', 'date', 'status', 'type', 'partner', 'partner_public_id', 'note',
+            'private_note', 'validity', 'payment_terms', 'payment_terms_public_id', 'total_vat',
+            'total_discount', 'vat_amount', 'total_vat', 'total_amount', 'total_discount', 'payment_status'
         ]
         read_only_fields = ('total_vat', 'total_amount', 'total_discount',)
 

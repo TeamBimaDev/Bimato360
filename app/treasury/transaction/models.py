@@ -9,7 +9,7 @@ from common.enums.transaction_enum import (
 from core.abstract.models import AbstractModel
 from django.core.exceptions import ValidationError
 from django.db import models, transaction
-from django.db.models.signals import post_delete
+from django.db.models.signals import pre_delete
 from django.dispatch import receiver
 from django.utils.translation import gettext_lazy as _
 from erp.partner.models import BimaErpPartner
@@ -28,6 +28,7 @@ logger = logging.getLogger(__name__)
 
 
 class BimaTreasuryTransaction(AbstractModel):
+    skip_child_validation = False
     nature = models.CharField(
         max_length=5,
         choices=get_transaction_nature_cash_or_bank(),
@@ -163,32 +164,22 @@ class BimaTreasuryTransaction(AbstractModel):
                     old_transaction
                 )
 
-                self.revert_effect(old_transaction)
+                revert_effect(old_transaction)
 
                 super(BimaTreasuryTransaction, self).save(*args, **kwargs)
 
-                self.apply_effect()
+                apply_effect(self)
 
                 self.handle_auto_transaction(old_transaction)
             else:
                 super(BimaTreasuryTransaction, self).save(*args, **kwargs)
-                self.apply_effect()
+                apply_effect(self)
                 self.handle_auto_transaction()
 
-    def get_effect_strategy(self):
-        strategies = {
-            TransactionNature.CASH.name: CashTransactionEffectStrategy(),
-            TransactionNature.BANK.name: BankTransactionEffectStrategy(),
-        }
-        return strategies.get(self.nature)
-
-    def revert_effect(self, transaction):
-        strategy = self.get_effect_strategy()
-        strategy.revert(transaction)
-
-    def apply_effect(self):
-        strategy = self.get_effect_strategy()
-        strategy.apply(self)
+    def delete(self, *args, **kwargs):
+        system_delete = kwargs.pop("system_delete", False)
+        self.check_if_transaction_child_and_prevent_deletion(system_delete)
+        super(BimaTreasuryTransaction, self).delete(*args, **kwargs)
 
     def handle_auto_transaction(self, old_transaction=None):
         if (
@@ -215,32 +206,68 @@ class BimaTreasuryTransaction(AbstractModel):
             "FROM_ACCOUNT_TO_CASH_INCOME",
         ]
 
+    def check_if_transaction_child_and_prevent_deletion(self, system_delete=False):
+        if self.transaction_source and not system_delete:
+            raise ValidationError(
+                _(
+                    "This transaction is created automatically from another one, it's not possible to delete it"
+                )
+            )
+
     def check_if_transaction_child_and_prevent_modification(self, old_transaction):
-        if self.transaction_source:
+        if self.transaction_source and not self.__class__.skip_child_validation:
             changed_fields = [
                 f.name
                 for f in self._meta.fields
                 if getattr(self, f.name) != getattr(old_transaction, f.name)
             ]
             if set(changed_fields) - {"note"}:
-                raise ValidationError(_("Cannot update a child transaction."))
+                raise ValidationError(
+                    _(
+                        "This transaction is created automatically form another one, it's not possible to edit it"
+                    )
+                )
 
     def apply_change_on_transaction_child(self, old_transaction, child_transaction):
-        if old_transaction.amount != self.amount:
-            child_transaction.revert_effect()
+        revert_effect(child_transaction)
 
-            child_transaction.amount = self.amount
-            child_transaction.date = self.date
-            child_transaction.save()
+        child_transaction.amount = self.amount
+        child_transaction.date = self.date
+        child_transaction.reference = self.reference
+        child_transaction.cash = self.cash
+        child_transaction.bank_account = self.bank_account
 
-            child_transaction.apply_effect()
+        self.__class__.skip_child_validation = True
+        child_transaction.save()
+        self.__class__.skip_child_validation = False
+
+        apply_effect(child_transaction)
 
 
-@receiver(post_delete, sender=BimaTreasuryTransaction)
-def update_balance_on_delete(sender, instance, **kwargs):
-    if not instance.transaction_source:
-        child_transaction = BimaTreasuryTransaction.objects.get(
-            transaction_source=instance
-        )
-        child_transaction.delete()
-    instance.revert_effect(instance)
+def get_effect_strategy(transaction):
+    strategies = {
+        TransactionNature.CASH.name: CashTransactionEffectStrategy(),
+        TransactionNature.BANK.name: BankTransactionEffectStrategy(),
+    }
+    return strategies.get(transaction.nature)
+
+
+def revert_effect(transaction):
+    strategy = get_effect_strategy(transaction)
+    strategy.revert(transaction)
+
+
+def apply_effect(transaction):
+    strategy = get_effect_strategy(transaction)
+    strategy.apply(transaction)
+
+
+@receiver(pre_delete, sender=BimaTreasuryTransaction)
+def update_balance_on_pre_delete(sender, instance, **kwargs):
+    child_transaction = BimaTreasuryTransaction.objects.filter(
+        transaction_source=instance
+    ).first()
+    if child_transaction:
+        child_transaction.delete(system_delete=True)
+
+    revert_effect(instance)
