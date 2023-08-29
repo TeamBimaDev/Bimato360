@@ -21,6 +21,11 @@ VALUES (1, 'b76eab54-8a85-40fc-971b-9c09756837bb', '2023-08-22 13:10:43.065253+0
        (10, '8b3eb265-c2b6-4c76-90bc-296b10913dad', '2023-08-22 13:12:24.213963+01', '2023-08-22 13:12:24.213963+01',
         'Chèque', true, 'CHECK_OUTCOME', true, 'OUTCOME', 'BANK'),
        (11, '52664e8b-8d9c-49e6-b527-a66365a93463', '2023-08-22 13:12:33.010475+01', '2023-08-22 13:12:33.010475+01',
-        'Salaire', true, 'SALARY_OUTCOME', true, 'OUTCOME', 'BANK');
-ALTER SEQUENCE public.treasury_bimatreasurytransactiontype_id_seq RESTART WITH 11;
-SELECT pg_catalog.setval('public.treasury_bimatreasurytransactiontype_id_seq', 11, true);
+        'Salaire', true, 'SALARY_OUTCOME', true, 'OUTCOME', 'BANK'),
+       (12, '52664e8b-8d9c-49e6-b527-a66365a93556', '2023-08-22 13:10:43.065253+01', '2023-08-22 13:10:43.065253+01',
+        'Ivoince Payement', true, '', 'INVOICE_PAYMENT_BANK', true, 'INCOME', 'BANK'),
+       (13, '325cb624-1f1e-42a5-8945-b7b287548b1d', '2023-08-22 13:10:43.065253+01', '2023-08-22 13:10:43.065253+01',
+        'Ivoince Payement', true, '', 'INVOICE_PAYMENT_CASH', true, 'INCOME', 'CASH');
+
+ALTER SEQUENCE public.treasury_bimatreasurytransactiontype_id_seq RESTART WITH 14;
+SELECT pg_catalog.setval('public.treasury_bimatreasurytransactiontype_id_seq', 14, true);

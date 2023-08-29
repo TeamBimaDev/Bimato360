@@ -8,7 +8,7 @@ from common.enums.transaction_enum import (
     get_transaction_direction_income_or_outcome,
 )
 from core.abstract.models import AbstractModel
-from django import apps
+from django.apps import apps
 from django.core.exceptions import ValidationError
 from django.db import models, transaction
 from django.db.models.signals import pre_delete
