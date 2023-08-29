@@ -53,6 +53,16 @@ class BimaTreasuryTransactionViewSet(AbstractViewSet):
         obj = BimaTreasuryTransaction.objects.get_object_by_public_id(self.kwargs["pk"])
         return obj
 
+    def perform_create(self, serializer):
+        sale_document_public_ids = self.request.data.pop('sale_document')
+        instance = serializer.save()
+        instance.handle_invoice_payment(sale_document_public_ids)
+
+    def perform_update(self, serializer):
+        sale_document_public_ids = self.request.data.pop('sale_document')
+        instance = serializer.save()
+        instance.handle_invoice_payment(sale_document_public_ids)
+
     @action(detail=True, methods=["GET"], url_path="get_transaction_history")
     def get_transaction_history(self, request, pk=None):
         transaction = self.get_object()

@@ -178,9 +178,6 @@ class BimaTreasuryTransaction(AbstractModel):
                 apply_effect(self)
                 self.handle_auto_transaction()
 
-            if self.transaction_type.code == "INVOICE_PAYMENT":
-                self.handle_invoice_payment()
-
     def delete(self, *args, **kwargs):
         system_delete = kwargs.pop("system_delete", False)
         self.check_if_transaction_child_and_prevent_deletion(system_delete)
@@ -250,32 +247,33 @@ class BimaTreasuryTransaction(AbstractModel):
 
         apply_effect(child_transaction)
 
-    def handle_invoice_payment(self):
-        TransactionSaleDocumentPayment.objects.filter(transaction=self).delete()
-        BimaErpSaleDocument = apps.get_model('erp', 'BimaErpSaleDocument')
-        remaining_amount = self.amount
-        sale_documents = BimaErpSaleDocument.objects.filter(
-            public_id__in=self.sale_document_public_ids
-        ).order_by('date')
+    def handle_invoice_payment(self, sale_document_public_ids):
+        if self.transaction_type.code in ["INVOICE_PAYMENT_CASH", "INVOICE_PAYMENT_BANK"]:
+            TransactionSaleDocumentPayment.objects.filter(transaction=self).delete()
+            BimaErpSaleDocument = apps.get_model('erp', 'BimaErpSaleDocument')
+            remaining_amount = self.amount
+            sale_documents = BimaErpSaleDocument.objects.filter(
+                public_id__in=sale_document_public_ids
+            ).order_by('date')
 
-        for doc in sale_documents:
-            if remaining_amount <= 0:
-                break
+            for doc in sale_documents:
+                if remaining_amount <= 0:
+                    break
 
-            if doc.total_amount <= remaining_amount:
-                doc.payment_status = SaleDocumentPaymentStatus.PAID.name
-                remaining_amount -= doc.total_amount
-                TransactionSaleDocumentPayment.objects.create(
-                    transaction=self, sale_document=doc, amount_paid=doc.total_amount
-                )
-            else:
-                doc.payment_status = SaleDocumentPaymentStatus.PARTIAL_PAID.name
-                TransactionSaleDocumentPayment.objects.create(
-                    transaction=self, sale_document=doc, amount_paid=remaining_amount
-                )
-                remaining_amount = 0
+                if doc.total_amount <= remaining_amount:
+                    doc.payment_status = SaleDocumentPaymentStatus.PAID.name
+                    remaining_amount -= doc.total_amount
+                    TransactionSaleDocumentPayment.objects.create(
+                        transaction=self, sale_document=doc, amount_paid=doc.total_amount
+                    )
+                else:
+                    doc.payment_status = SaleDocumentPaymentStatus.PARTIAL_PAID.name
+                    TransactionSaleDocumentPayment.objects.create(
+                        transaction=self, sale_document=doc, amount_paid=remaining_amount
+                    )
+                    remaining_amount = 0
 
-            doc.save()
+                doc.save()
 
     def handle_invoice_payment_deletion(self):
         with transaction.atomic():
