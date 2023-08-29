@@ -23,6 +23,8 @@ from erp.product.models import BimaErpProduct
 from rest_framework.exceptions import ValidationError
 from simple_history.models import HistoricalRecords
 from treasury.payment_term.models import BimaTreasuryPaymentTerm
+from treasury.transaction.models import BimaTreasuryTransaction
+from treasury.transaction.models import TransactionSaleDocumentPayment
 
 
 class BimaErpSaleDocumentProduct(models.Model):
@@ -321,6 +323,11 @@ class BimaErpSaleDocument(AbstractModel):
         BimaErpProduct,
         through=BimaErpSaleDocumentProduct,
         verbose_name=_("Sale Document Products"),
+    )
+    transactions = models.ManyToManyField(
+        BimaTreasuryTransaction,
+        through=TransactionSaleDocumentPayment,
+        related_name='sale_documents',
     )
 
     class Meta:

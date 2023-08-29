@@ -16,8 +16,9 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from .filter import BimaTreasuryTransactionFilter
-from .models import BimaTreasuryTransaction
-from .serializers import BimaTreasuryTransactionSerializer, TransactionHistorySerializer
+from .models import BimaTreasuryTransaction, TransactionSaleDocumentPayment
+from .serializers import BimaTreasuryTransactionSerializer, TransactionHistorySerializer, \
+    TransactionSaleDocumentPaymentSerializer
 from .service import BimaTreasuryTransactionService
 
 
@@ -166,3 +167,10 @@ class BimaTreasuryTransactionViewSet(AbstractViewSet):
             "date__year", flat=True
         )
         return Response(years)
+
+    @action(detail=True, methods=['GET'], url_path='transaction_sale_document_payments')
+    def transaction_sale_document_payments(self, request, pk=None):
+        transaction = self.get_object()
+        sale_document_payments = TransactionSaleDocumentPayment.objects.filter(transaction=transaction)
+        serializer = TransactionSaleDocumentPaymentSerializer(sale_document_payments, many=True)
+        return Response(serializer.data)

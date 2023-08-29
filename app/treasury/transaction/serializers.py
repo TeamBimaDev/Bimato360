@@ -1,11 +1,12 @@
 from core.abstract.serializers import AbstractSerializer
 from erp.partner.models import BimaErpPartner
+from erp.sale_document.serializers import BimaErpSaleDocumentUnpaidSerializer
 from rest_framework import serializers
 from treasury.bank_account.models import BimaTreasuryBankAccount
 from treasury.cash.models import BimaTreasuryCash
 from treasury.transaction_type.models import BimaTreasuryTransactionType
 
-from .models import BimaTreasuryTransaction
+from .models import BimaTreasuryTransaction, TransactionSaleDocumentPayment
 from .service import BimaTreasuryTransactionService
 
 
@@ -166,3 +167,11 @@ class TransactionHistorySerializer(serializers.ModelSerializer):
 
     def get_changed_by(self, instance):
         return instance.history_user.name if instance.history_user else None
+
+
+class TransactionSaleDocumentPaymentSerializer(serializers.ModelSerializer):
+    sale_document = BimaErpSaleDocumentUnpaidSerializer()
+
+    class Meta:
+        model = TransactionSaleDocumentPayment
+        fields = ['transaction', 'sale_document', 'amount_paid']

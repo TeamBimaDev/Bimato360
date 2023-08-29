@@ -32,11 +32,11 @@ class BimaErpSaleDocumentSerializer(AbstractSerializer):
         write_only=True
     )
 
-    payment_term = serializers.SerializerMethodField(read_only=True)
-    payment_term_public_id = serializers.SlugRelatedField(
+    payment_terms = serializers.SerializerMethodField(read_only=True)
+    payment_terms_public_id = serializers.SlugRelatedField(
         queryset=BimaErpPartner.objects.all(),
         slug_field='public_id',
-        source='payment_term',
+        source='payment_terms',
         write_only=True,
         required=False,
         allow_null=True,
@@ -95,10 +95,10 @@ class BimaErpSaleDocumentSerializer(AbstractSerializer):
         return None
 
     def get_payment_terms(self, obj):
-        if obj.payment_term:
+        if obj.payment_terms:
             return {
-                'id': obj.payment_term.public_id.hex,
-                'name': obj.payment_term.name,
+                'id': obj.payment_terms.public_id.hex,
+                'name': obj.payment_terms.name,
             }
         return None
 
@@ -129,11 +129,11 @@ class BimaErpSaleDocumentUnpaidSerializer(AbstractSerializer):
         write_only=True
     )
 
-    payment_term = serializers.SerializerMethodField(read_only=True)
-    payment_term_public_id = serializers.SlugRelatedField(
+    payment_terms = serializers.SerializerMethodField(read_only=True)
+    payment_terms_public_id = serializers.SlugRelatedField(
         queryset=BimaErpPartner.objects.all(),
         slug_field='public_id',
-        source='payment_term',
+        source='payment_terms',
         write_only=True,
         required=False,
         allow_null=True,
@@ -150,10 +150,10 @@ class BimaErpSaleDocumentUnpaidSerializer(AbstractSerializer):
         }
 
     def get_payment_terms(self, obj):
-        if obj.payment_term:
+        if obj.payment_terms:
             return {
-                'id': obj.payment_term.public_id.hex,
-                'name': obj.payment_term.name,
+                'id': obj.payment_terms.public_id.hex,
+                'name': obj.payment_terms.name,
             }
         return None
 

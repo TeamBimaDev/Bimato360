@@ -1,12 +1,14 @@
 import logging
 from datetime import datetime
 
+from common.enums.sale_document_enum import SaleDocumentPaymentStatus
 from common.enums.transaction_enum import TransactionNature, TransactionDirection
 from common.enums.transaction_enum import (
     get_transaction_nature_cash_or_bank,
     get_transaction_direction_income_or_outcome,
 )
 from core.abstract.models import AbstractModel
+from django import apps
 from django.core.exceptions import ValidationError
 from django.db import models, transaction
 from django.db.models.signals import pre_delete
@@ -176,9 +178,14 @@ class BimaTreasuryTransaction(AbstractModel):
                 apply_effect(self)
                 self.handle_auto_transaction()
 
+            if self.transaction_type.code == "INVOICE_PAYMENT":
+                self.handle_invoice_payment()
+
     def delete(self, *args, **kwargs):
         system_delete = kwargs.pop("system_delete", False)
         self.check_if_transaction_child_and_prevent_deletion(system_delete)
+        if self.transaction_type.code == "INVOICE_PAYMENT":
+            self.handle_invoice_payment_deletion()
         super(BimaTreasuryTransaction, self).delete(*args, **kwargs)
 
     def handle_auto_transaction(self, old_transaction=None):
@@ -242,6 +249,54 @@ class BimaTreasuryTransaction(AbstractModel):
         self.__class__.skip_child_validation = False
 
         apply_effect(child_transaction)
+
+    def handle_invoice_payment(self):
+        TransactionSaleDocumentPayment.objects.filter(transaction=self).delete()
+        BimaErpSaleDocument = apps.get_model('erp', 'BimaErpSaleDocument')
+        remaining_amount = self.amount
+        sale_documents = BimaErpSaleDocument.objects.filter(
+            public_id__in=self.sale_document_public_ids
+        ).order_by('date')
+
+        for doc in sale_documents:
+            if remaining_amount <= 0:
+                break
+
+            if doc.total_amount <= remaining_amount:
+                doc.payment_status = SaleDocumentPaymentStatus.PAID.name
+                remaining_amount -= doc.total_amount
+                TransactionSaleDocumentPayment.objects.create(
+                    transaction=self, sale_document=doc, amount_paid=doc.total_amount
+                )
+            else:
+                doc.payment_status = SaleDocumentPaymentStatus.PARTIAL_PAID.name
+                TransactionSaleDocumentPayment.objects.create(
+                    transaction=self, sale_document=doc, amount_paid=remaining_amount
+                )
+                remaining_amount = 0
+
+            doc.save()
+
+    def handle_invoice_payment_deletion(self):
+        with transaction.atomic():
+            BimaErpSaleDocument = apps.get_model('erp', 'BimaErpSaleDocument')
+            sale_document_payments = TransactionSaleDocumentPayment.objects.filter(transaction=self)
+
+            sale_document_ids = sale_document_payments.values_list('sale_document', flat=True)
+
+            BimaErpSaleDocument.objects.filter(id__in=sale_document_ids).update(
+                payment_status=SaleDocumentPaymentStatus.NOT_PAID.name)
+
+            sale_document_payments.delete()
+
+
+class TransactionSaleDocumentPayment(models.Model):
+    transaction = models.ForeignKey(BimaTreasuryTransaction, on_delete=models.CASCADE)
+    sale_document = models.ForeignKey('erp.BimaErpSaleDocument', on_delete=models.CASCADE)
+    amount_paid = models.DecimalField(max_digits=14, decimal_places=3)
+
+    class Meta:
+        unique_together = ('transaction', 'sale_document')
 
 
 def get_effect_strategy(transaction):
