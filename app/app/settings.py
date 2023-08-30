@@ -60,7 +60,7 @@ MIDDLEWARE = [
     "django.middleware.locale.LocaleMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
-    "common.middlewares.error_handling_middleware.ErrorHandlingMiddleware",
+    # "common.middlewares.error_handling_middleware.ErrorHandlingMiddleware",
     # 'debug_toolbar.middleware.DebugToolbarMiddleware',
     "django.middleware.common.CommonMiddleware",
     "simple_history.middleware.HistoryRequestMiddleware",

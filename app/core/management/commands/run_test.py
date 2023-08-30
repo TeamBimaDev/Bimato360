@@ -1,13 +1,15 @@
-import subprocess
-from django.core.management.base import BaseCommand
-from django.apps import apps
 import os
+import subprocess
+
+from django.apps import apps
+from django.core.management.base import BaseCommand
+
+
 class Command(BaseCommand):
     help = 'Run all tests in all sub-apps of all apps.'
 
     def handle(self, *args, **options):
         app_configs = apps.get_app_configs()
-
         for app_config in app_configs:
             app_name = app_config.name
             if app_name == 'simple_history':
@@ -27,4 +29,5 @@ class Command(BaseCommand):
                     command = f"python manage.py test {app_and_sub_app}"
                     subprocess.call(command, shell=True)
                 else:
-                    self.stdout.write(self.style.WARNING(f"No tests.py file found for app: {app_name}.{sub_app}. Skipping..."))
+                    self.stdout.write(
+                        self.style.WARNING(f"No tests.py file found for app: {app_name}.{sub_app}. Skipping..."))

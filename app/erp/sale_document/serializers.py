@@ -115,9 +115,9 @@ class BimaErpSaleDocumentSerializer(AbstractSerializer):
             'recurring_cycle_number_to_repeat', 'recurring_cycle_stop_at', 'recurring_cycle_stopped_at',
             'recurring_last_generated_day', 'recurring_reason_stop', 'recurring_reason_reactivated',
             'recurring_reactivated_date', 'recurring_stopped_by_display', 'recurring_reactivated_by_display',
-            'is_recurring_ended', 'payment_status'
+            'is_recurring_ended', 'payment_status', 'amount_paid'
         ]
-        read_only_fields = ('total_vat', 'total_amount', 'total_discount',)
+        read_only_fields = ('total_vat', 'total_amount', 'total_discount', 'amount_paid',)
 
 
 class BimaErpSaleDocumentUnpaidSerializer(AbstractSerializer):
@@ -163,9 +163,10 @@ class BimaErpSaleDocumentUnpaidSerializer(AbstractSerializer):
         fields = [
             'id', 'number', 'date', 'status', 'type', 'partner', 'partner_public_id', 'note',
             'private_note', 'validity', 'payment_terms', 'payment_terms_public_id', 'total_vat',
-            'total_discount', 'vat_amount', 'total_vat', 'total_amount', 'total_discount', 'payment_status'
+            'total_discount', 'vat_amount', 'total_vat', 'total_amount', 'total_discount', 'payment_status',
+            'amount_paid'
         ]
-        read_only_fields = ('total_vat', 'total_amount', 'total_discount',)
+        read_only_fields = ('total_vat', 'total_amount', 'total_discount', 'amount_paid',)
 
 
 class BimaErpSaleDocumentHistorySerializer(serializers.ModelSerializer):

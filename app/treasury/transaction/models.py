@@ -75,6 +75,14 @@ class BimaTreasuryTransaction(AbstractModel):
     amount = models.DecimalField(
         max_digits=14, decimal_places=3, verbose_name=_("Amount")
     )
+    remaining_amount = models.DecimalField(
+        max_digits=18,
+        decimal_places=3,
+        blank=True,
+        null=True,
+        default=0,
+        verbose_name=_("Amount Paid"),
+    )
     reference = models.CharField(
         max_length=64, null=True, blank=True, verbose_name=_("Reference")
     )
@@ -257,23 +265,31 @@ class BimaTreasuryTransaction(AbstractModel):
             ).order_by('date')
 
             for doc in sale_documents:
+                update_amount_paid(doc)
                 if remaining_amount <= 0:
                     break
 
-                if doc.total_amount <= remaining_amount:
+                unpaid_amount = doc.total_amount - doc.amount_paid
+
+                if unpaid_amount <= remaining_amount:
                     doc.payment_status = SaleDocumentPaymentStatus.PAID.name
-                    remaining_amount -= doc.total_amount
+                    doc.amount_paid += unpaid_amount
                     TransactionSaleDocumentPayment.objects.create(
-                        transaction=self, sale_document=doc, amount_paid=doc.total_amount
+                        transaction=self, sale_document=doc, amount_paid=unpaid_amount
                     )
+                    remaining_amount -= unpaid_amount
                 else:
                     doc.payment_status = SaleDocumentPaymentStatus.PARTIAL_PAID.name
+                    doc.amount_paid += remaining_amount
                     TransactionSaleDocumentPayment.objects.create(
                         transaction=self, sale_document=doc, amount_paid=remaining_amount
                     )
                     remaining_amount = 0
 
                 doc.save()
+
+            self.remaining_amount = remaining_amount
+            self.save()
 
     def handle_invoice_payment_deletion(self):
         with transaction.atomic():
@@ -286,6 +302,18 @@ class BimaTreasuryTransaction(AbstractModel):
                 payment_status=SaleDocumentPaymentStatus.NOT_PAID.name)
 
             sale_document_payments.delete()
+
+
+def update_amount_paid(sale_document):
+    BimaErpSaleDocument = apps.get_model('erp', 'BimaErpSaleDocument')
+    with transaction.atomic():
+        sale_document = BimaErpSaleDocument.objects.select_for_update().get(pk=sale_document.pk)
+
+        transactions = sale_document.transactions.all()
+        amount_paid = sum(tr.amount for tr in transactions)
+
+        sale_document.amount_paid = amount_paid
+        sale_document.save()
 
 
 class TransactionSaleDocumentPayment(models.Model):

@@ -304,6 +304,14 @@ class BimaErpSaleDocument(AbstractModel):
     payment_status = models.CharField(
         default="NOT_PAID", blank=True, null=True, choices=get_payment_status()
     )
+    amount_paid = models.DecimalField(
+        max_digits=18,
+        decimal_places=3,
+        blank=True,
+        null=True,
+        default=0,
+        verbose_name=_("Amount Paid"),
+    )
 
     next_due_date = models.DateField(
         null=True, blank=True, verbose_name=_("Next Due Date")
@@ -427,6 +435,16 @@ class BimaErpSaleDocument(AbstractModel):
 
     def update_last_due_date(self):
         self.last_due_date = self.next_due_date
+        self.save()
+
+    def update_payment_status(self):
+        if self.amount_paid == self.total_amount:
+            self.payment_status = "PAID"
+        elif self.amount_paid > 0:
+            self.payment_status = "PARTIAL_PAID"
+        else:
+            self.payment_status = "NOT_PAID"
+
         self.save()
 
 
