@@ -11,7 +11,7 @@ class SimpleTransactionSaleDocumentPaymentSerializer(serializers.ModelSerializer
     )
     transaction_number = serializers.SlugRelatedField(
         source='transaction',
-        slug_field='amount',
+        slug_field='number',
         read_only=True
     )
 

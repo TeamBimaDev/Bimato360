@@ -13,6 +13,7 @@ from django.shortcuts import get_object_or_404
 from openpyxl.reader.excel import load_workbook
 from rest_framework import status
 from rest_framework.decorators import action
+from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 
 from .filter import BimaTreasuryTransactionFilter
@@ -62,6 +63,14 @@ class BimaTreasuryTransactionViewSet(AbstractViewSet):
         sale_document_public_ids = self.request.data.pop('sale_documents_ids')
         instance = serializer.save()
         instance.handle_invoice_payment(sale_document_public_ids)
+
+    @action(detail=False, methods=['get'])
+    def get_unique_number(self, request, **kwargs):
+        try:
+            unique_number = BimaTreasuryTransactionService.generate_unique_number()
+            return Response({"unique_number": unique_number})
+        except ValidationError as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=True, methods=["GET"], url_path="get_transaction_history")
     def get_transaction_history(self, request, pk=None):

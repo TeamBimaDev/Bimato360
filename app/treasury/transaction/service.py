@@ -6,6 +6,7 @@ import pandas as pd
 from common.enums.transaction_enum import TransactionDirection, TransactionNature
 from django.db import models
 from django.db.models import Sum, Case, When, F
+from django.utils.crypto import get_random_string
 from erp.partner.models import BimaErpPartner
 from openpyxl.styles import Border, Side, Font
 from openpyxl.utils import get_column_letter
@@ -121,9 +122,10 @@ class BimaTreasuryTransactionService:
         complementary_transaction_type = BimaTreasuryTransactionType.objects.get(
             code=complementary_code, income_outcome=complementary_direction
         )
-
+        number = BimaTreasuryTransactionService.generate_unique_number(),
         if transaction.nature == TransactionNature.CASH.name:
             params = {
+                "number": number,
                 "nature": "BANK",
                 "direction": "INCOME",
                 "transaction_type": complementary_transaction_type,
@@ -136,6 +138,7 @@ class BimaTreasuryTransactionService:
             }
         elif transaction.nature == TransactionNature.BANK.name:
             params = {
+                "number": number,
                 "nature": "CASH",
                 "direction": "INCOME",
                 "transaction_type": complementary_transaction_type,
@@ -234,6 +237,15 @@ class BimaTreasuryTransactionService:
         ws.append(["Total Income", sums["total_income"]])
         ws.append(["Total Outcome", sums["total_outcome"]])
         ws.append(["Difference", sums["difference"]])
+
+    @staticmethod
+    def generate_unique_number():
+        first_char = "B"
+        second_char = "T"
+        year = datetime.now().year
+        random_string = get_random_string(length=12, allowed_chars='ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789')
+        unique_number = f"{first_char}{second_char}_{year}_{random_string}"
+        return unique_number
 
 
 class TransactionEffectStrategy:

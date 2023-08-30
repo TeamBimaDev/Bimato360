@@ -114,6 +114,7 @@ class BimaTreasuryTransactionSerializer(AbstractSerializer):
         model = BimaTreasuryTransaction
         fields = [
             "id",
+            "number"
             "nature",
             "direction",
             "transaction_type",
