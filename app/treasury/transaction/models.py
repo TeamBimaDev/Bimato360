@@ -259,11 +259,10 @@ class BimaTreasuryTransaction(AbstractModel):
         if self.transaction_type.code in ["INVOICE_PAYMENT_CASH", "INVOICE_PAYMENT_BANK"]:
             BimaErpSaleDocument = apps.get_model('erp', 'BimaErpSaleDocument')
             old_sale_document_payments = TransactionSaleDocumentPayment.objects.filter(transaction=self)
-            old_sale_document_ids = list(old_sale_document_payments.values_list('sale_document_id', flat=True))
+            old_sale_documents = [payment.sale_document for payment in old_sale_document_payments]
             old_sale_document_payments.delete()
-            for sd_id in old_sale_document_ids:
-                sd_to_update = BimaErpSaleDocument.objects.get(pk=sd_id)
-                update_amount_paid(sd_to_update)
+            for sd_deleted in old_sale_documents:
+                update_amount_paid(sd_deleted)
 
             remaining_amount = self.amount
             sale_documents = BimaErpSaleDocument.objects.filter(
@@ -294,7 +293,6 @@ class BimaTreasuryTransaction(AbstractModel):
                     remaining_amount = 0
 
                 doc.save()
-                doc.refresh_from_db()
 
             self.remaining_amount = remaining_amount
             self.save()
@@ -313,8 +311,8 @@ class BimaTreasuryTransaction(AbstractModel):
 
 
 def update_amount_paid(sale_document):
-    transactions = sale_document.transactions.all()
-    amount_paid = sum(tr.amount for tr in transactions)
+    transactions = sale_document.transactionsaledocumentpayment_set.all()
+    amount_paid = sum(tr.amount_paid for tr in transactions)
 
     sale_document.amount_paid = amount_paid
 
