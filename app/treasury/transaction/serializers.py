@@ -126,7 +126,7 @@ class BimaTreasuryTransactionSerializer(AbstractSerializer):
             "partner_public_id",
             "partner_bank_account_number",
             "amount",
-            "remaining_amount ",
+            "remaining_amount",
             "date",
             "expected_date",
             "note",
@@ -136,7 +136,7 @@ class BimaTreasuryTransactionSerializer(AbstractSerializer):
             "created",
             "updated",
         ]
-        read_only_fields = ('remaining_amount ',)
+        read_only_fields = ('remaining_amount',)
 
 
 class TransactionHistorySerializer(serializers.ModelSerializer):

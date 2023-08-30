@@ -384,6 +384,7 @@ class BimaErpSaleDocument(AbstractModel):
             raise ValidationError({"Error": _("CHOISIR_RECURRENT_CYCLE_DATE_FIN")})
         if (
                 self.recurring_cycle_stop_at
+                and not self.is_recurring_ended
                 and self.recurring_cycle_stop_at < datetime.now().date()
         ):
             raise ValidationError(
