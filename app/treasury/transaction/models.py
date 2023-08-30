@@ -257,8 +257,15 @@ class BimaTreasuryTransaction(AbstractModel):
 
     def handle_invoice_payment(self, sale_document_public_ids):
         if self.transaction_type.code in ["INVOICE_PAYMENT_CASH", "INVOICE_PAYMENT_BANK"]:
-            TransactionSaleDocumentPayment.objects.filter(transaction=self).delete()
             BimaErpSaleDocument = apps.get_model('erp', 'BimaErpSaleDocument')
+
+            old_sale_document_payments = TransactionSaleDocumentPayment.objects.filter(transaction=self)
+            old_sale_documents = BimaErpSaleDocument.objects.filter(
+                transactionsaledocumentpayment__in=old_sale_document_payments)
+            old_sale_document_payments.delete()
+            for payment_doc in old_sale_documents:
+                update_amount_paid(payment_doc)
+
             remaining_amount = self.amount
             sale_documents = BimaErpSaleDocument.objects.filter(
                 public_id__in=sale_document_public_ids
@@ -266,8 +273,9 @@ class BimaTreasuryTransaction(AbstractModel):
 
             for doc in sale_documents:
                 update_amount_paid(doc)
+                doc.refresh_from_db()
                 if remaining_amount <= 0:
-                    break
+                    continue
 
                 unpaid_amount = doc.total_amount - doc.amount_paid
 
@@ -305,15 +313,17 @@ class BimaTreasuryTransaction(AbstractModel):
 
 
 def update_amount_paid(sale_document):
-    BimaErpSaleDocument = apps.get_model('erp', 'BimaErpSaleDocument')
-    with transaction.atomic():
-        sale_document = BimaErpSaleDocument.objects.select_for_update().get(pk=sale_document.pk)
+    transactions = sale_document.transactions.all()
+    amount_paid = sum(tr.amount for tr in transactions)
 
-        transactions = sale_document.transactions.all()
-        amount_paid = sum(tr.amount for tr in transactions)
-
-        sale_document.amount_paid = amount_paid
-        sale_document.save()
+    sale_document.amount_paid = amount_paid
+    if sale_document.amount_paid == sale_document.total_amount:
+        sale_document.payment_status = SaleDocumentPaymentStatus.PAID.name
+    elif sale_document.amount_paid > 0:
+        sale_document.payment_status = SaleDocumentPaymentStatus.PARTIAL_PAID.name
+    else:
+        sale_document.payment_status = SaleDocumentPaymentStatus.NOT_PAID.name
+    sale_document.save()
 
 
 class TransactionSaleDocumentPayment(models.Model):
