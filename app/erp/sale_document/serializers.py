@@ -1,11 +1,13 @@
 from core.abstract.serializers import AbstractSerializer
+from django.apps import apps
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils.translation import gettext_lazy as _
+from erp.partner.models import BimaErpPartner
 from erp.product.models import BimaErpProduct
 from rest_framework import serializers
+from treasury.transaction.serializers_helper import SimpleTransactionSaleDocumentPaymentSerializer
 
 from .models import BimaErpSaleDocument, BimaErpSaleDocumentProduct
-from ..partner.models import BimaErpPartner
 
 
 class BimaErpSaleDocumentSerializer(AbstractSerializer):
@@ -139,6 +141,12 @@ class BimaErpSaleDocumentUnpaidSerializer(AbstractSerializer):
         allow_null=True,
         allow_empty=True
     )
+    transactions = serializers.SerializerMethodField()
+
+    def get_transactions(self, obj):
+        TransactionSaleDocumentPayment = apps.get_model('treasury', 'TransactionSaleDocumentPayment')
+        transactions = TransactionSaleDocumentPayment.objects.filter(sale_document=obj)
+        return SimpleTransactionSaleDocumentPaymentSerializer(transactions, many=True).data
 
     def get_partner(self, obj):
         return {
@@ -164,9 +172,9 @@ class BimaErpSaleDocumentUnpaidSerializer(AbstractSerializer):
             'id', 'number', 'date', 'status', 'type', 'partner', 'partner_public_id', 'note',
             'private_note', 'validity', 'payment_terms', 'payment_terms_public_id', 'total_vat',
             'total_discount', 'vat_amount', 'total_vat', 'total_amount', 'total_discount', 'payment_status',
-            'amount_paid'
+            'amount_paid', 'transactions'
         ]
-        read_only_fields = ('total_vat', 'total_amount', 'total_discount', 'amount_paid',)
+        read_only_fields = ('total_vat', 'total_amount', 'total_discount', 'amount_paid', 'transactions')
 
 
 class BimaErpSaleDocumentHistorySerializer(serializers.ModelSerializer):
