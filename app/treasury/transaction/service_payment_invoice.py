@@ -1,6 +1,7 @@
 from common.enums.purchase_document_enum import PurchaseDocumentPaymentStatus
 from common.enums.sale_document_enum import SaleDocumentPaymentStatus
 from django.apps import apps
+from django.db import transaction
 
 
 def get_invoice_payment_codes():
@@ -18,30 +19,11 @@ def get_invoice_payment_supplier_codes():
 
 def handle_invoice_payment(transaction, document_public_ids):
     if transaction.transaction_type.code in get_invoice_payment_customer_codes():
-        transaction.handle_invoice_payment_customer_invoice(transaction, document_public_ids)
+        handle_invoice_payment_customer_invoice(transaction, document_public_ids)
     elif transaction.transaction_type.code in get_invoice_payment_supplier_codes():
-        transaction.handle_invoice_payment_supplier_invoice(transaction, document_public_ids)
+        handle_invoice_payment_supplier_invoice(transaction, document_public_ids)
     else:
         return
-
-
-def handle_invoice_payment_deletion(transaction):
-    if transaction.transaction_type.code in get_invoice_payment_customer_codes():
-        with transaction.atomic():
-            TransactionSaleDocumentPayment = apps.get_model('treasury', 'TransactionSaleDocumentPayment')
-            old_sale_document_payments = TransactionSaleDocumentPayment.objects.filter(transaction=transaction)
-            old_sale_documents = [payment.sale_document for payment in old_sale_document_payments]
-            old_sale_document_payments.delete()
-            for sale_doc in old_sale_documents:
-                update_amount_paid_sale_document(sale_doc)
-    elif transaction.transaction_type.code in get_invoice_payment_supplier_codes():
-        with transaction.atomic():
-            TransactionPurchaseDocumentPayment = apps.get_model('treasury', 'TransactionPurchaseDocumentPayment')
-            old_purchase_document_payments = TransactionPurchaseDocumentPayment.objects.filter(transaction=transaction)
-            old_purchase_documents = [payment.sale_document for payment in old_purchase_document_payments]
-            old_purchase_document_payments.delete()
-            for purchase_doc in old_purchase_documents:
-                update_amount_paid_purchase_document(purchase_doc)
 
 
 def update_amount_paid_sale_document(sale_document):
@@ -72,11 +54,7 @@ def update_amount_paid_document(document, transactions, payment_status):
 def handle_invoice_payment_customer_invoice(transaction, document_public_ids):
     BimaErpSaleDocument = apps.get_model('erp', 'BimaErpSaleDocument')
     TransactionSaleDocumentPayment = apps.get_model('treasury', 'TransactionSaleDocumentPayment')
-    old_sale_document_payments = TransactionSaleDocumentPayment.objects.filter(transaction=transaction)
-    old_sale_documents = [payment.sale_document for payment in old_sale_document_payments]
-    old_sale_document_payments.delete()
-    for sd_deleted in old_sale_documents:
-        update_amount_paid_sale_document(sd_deleted)
+    delete_old_paid_transaction_sale_document(transaction)
 
     remaining_amount = transaction.amount
     sale_documents = BimaErpSaleDocument.objects.filter(
@@ -115,11 +93,7 @@ def handle_invoice_payment_customer_invoice(transaction, document_public_ids):
 def handle_invoice_payment_supplier_invoice(transaction, document_public_ids):
     BimaErpPurchaseDocument = apps.get_model('erp', 'BimaErpPurchaseDocument')
     TransactionPurchaseDocumentPayment = apps.get_model('treasury', 'TransactionPurchaseDocumentPayment')
-    old_purchase_document_payments = TransactionPurchaseDocumentPayment.objects.filter(transaction=transaction)
-    old_purchase_documents = [payment.purchase_document for payment in old_purchase_document_payments]
-    old_purchase_document_payments.delete()
-    for purchase_doc in old_purchase_documents:
-        update_amount_paid_purchase_document(purchase_doc)
+    delete_old_paid_transaction_purchase_document(transaction)
 
     remaining_amount = transaction.amount
     purchase_documents = BimaErpPurchaseDocument.objects.filter(
@@ -153,3 +127,31 @@ def handle_invoice_payment_supplier_invoice(transaction, document_public_ids):
 
     transaction.remaining_amount = remaining_amount
     transaction.save()
+
+
+def handle_invoice_payment_deletion(transaction_paid):
+    if transaction_paid.transaction_type.code in get_invoice_payment_customer_codes():
+        delete_old_paid_transaction_sale_document(transaction_paid)
+    elif transaction_paid.transaction_type.code in get_invoice_payment_supplier_codes():
+        delete_old_paid_transaction_purchase_document(transaction_paid)
+
+
+def delete_old_paid_transaction_sale_document(transaction_paid):
+    with transaction.atomic():
+        TransactionSaleDocumentPayment = apps.get_model('treasury', 'TransactionSaleDocumentPayment')
+        old_sale_document_payments = TransactionSaleDocumentPayment.objects.filter(transaction=transaction_paid)
+        old_sale_documents = [payment.sale_document for payment in old_sale_document_payments]
+        old_sale_document_payments.delete()
+        for sale_doc in old_sale_documents:
+            update_amount_paid_sale_document(sale_doc)
+
+
+def delete_old_paid_transaction_purchase_document(transaction_paid):
+    with transaction.atomic():
+        TransactionPurchaseDocumentPayment = apps.get_model('treasury', 'TransactionPurchaseDocumentPayment')
+        old_purchase_document_payments = TransactionPurchaseDocumentPayment.objects.filter(
+            transaction=transaction_paid)
+        old_purchase_documents = [payment.sale_document for payment in old_purchase_document_payments]
+        old_purchase_document_payments.delete()
+        for purchase_doc in old_purchase_documents:
+            update_amount_paid_purchase_document(purchase_doc)
