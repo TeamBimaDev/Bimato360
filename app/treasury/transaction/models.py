@@ -29,6 +29,11 @@ from .service import (
 logger = logging.getLogger(__name__)
 
 
+def get_invoice_payment_codes():
+    return ["INVOICE_PAYMENT_CASH", "INVOICE_PAYMENT_BANK", "INVOICE_PAYMENT_OUTCOME_BANK",
+            "INVOICE_PAYMENT_OUTCOME_CASH"]
+
+
 class BimaTreasuryTransaction(AbstractModel):
     skip_child_validation = False
     # number = models.CharField(
@@ -195,7 +200,7 @@ class BimaTreasuryTransaction(AbstractModel):
     def delete(self, *args, **kwargs):
         system_delete = kwargs.pop("system_delete", False)
         self.check_if_transaction_child_and_prevent_deletion(system_delete)
-        if self.transaction_type.code == "INVOICE_PAYMENT":
+        if self.transaction_type.code in get_invoice_payment_codes():
             self.handle_invoice_payment_deletion()
         super(BimaTreasuryTransaction, self).delete(*args, **kwargs)
 
@@ -262,7 +267,7 @@ class BimaTreasuryTransaction(AbstractModel):
         apply_effect(child_transaction)
 
     def handle_invoice_payment(self, sale_document_public_ids):
-        if self.transaction_type.code in ["INVOICE_PAYMENT_CASH", "INVOICE_PAYMENT_BANK"]:
+        if self.transaction_type.code in get_invoice_payment_codes():
             BimaErpSaleDocument = apps.get_model('erp', 'BimaErpSaleDocument')
             old_sale_document_payments = TransactionSaleDocumentPayment.objects.filter(transaction=self)
             old_sale_documents = [payment.sale_document for payment in old_sale_document_payments]
@@ -305,15 +310,11 @@ class BimaTreasuryTransaction(AbstractModel):
 
     def handle_invoice_payment_deletion(self):
         with transaction.atomic():
-            BimaErpSaleDocument = apps.get_model('erp', 'BimaErpSaleDocument')
-            sale_document_payments = TransactionSaleDocumentPayment.objects.filter(transaction=self)
-
-            sale_document_ids = sale_document_payments.values_list('sale_document', flat=True)
-
-            BimaErpSaleDocument.objects.filter(id__in=sale_document_ids).update(
-                payment_status=SaleDocumentPaymentStatus.NOT_PAID.name)
-
-            sale_document_payments.delete()
+            old_sale_document_payments = TransactionSaleDocumentPayment.objects.filter(transaction=self)
+            old_sale_documents = [payment.sale_document for payment in old_sale_document_payments]
+            old_sale_document_payments.delete()
+            for sale_doc in old_sale_documents:
+                update_amount_paid(sale_doc)
 
 
 def update_amount_paid(sale_document):
