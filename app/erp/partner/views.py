@@ -35,6 +35,7 @@ from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext_lazy as _
+from erp.purchase_document.serializers import BimaErpPurchaseDocumentUnpaidSerializer
 from erp.sale_document.serializers import BimaErpSaleDocumentUnpaidSerializer
 from pandas import read_csv
 from rest_framework import status
@@ -426,5 +427,5 @@ class BimaErpPartnerViewSet(AbstractViewSet):
             type=PurchaseDocumentTypes.INVOICE.name,
         )
 
-        serialized_data = BimaErpSaleDocumentUnpaidSerializer(unpaid_invoice, many=True)
+        serialized_data = BimaErpPurchaseDocumentUnpaidSerializer(unpaid_invoice, many=True)
         return Response(serialized_data.data)
