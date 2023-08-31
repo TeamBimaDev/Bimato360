@@ -151,7 +151,7 @@ def delete_old_paid_transaction_purchase_document(transaction_paid):
         TransactionPurchaseDocumentPayment = apps.get_model('treasury', 'TransactionPurchaseDocumentPayment')
         old_purchase_document_payments = TransactionPurchaseDocumentPayment.objects.filter(
             transaction=transaction_paid)
-        old_purchase_documents = [payment.sale_document for payment in old_purchase_document_payments]
+        old_purchase_documents = [payment.purchase_document for payment in old_purchase_document_payments]
         old_purchase_document_payments.delete()
         for purchase_doc in old_purchase_documents:
             update_amount_paid_purchase_document(purchase_doc)

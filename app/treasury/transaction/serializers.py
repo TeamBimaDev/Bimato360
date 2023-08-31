@@ -7,7 +7,7 @@ from treasury.bank_account.models import BimaTreasuryBankAccount
 from treasury.cash.models import BimaTreasuryCash
 from treasury.transaction_type.models import BimaTreasuryTransactionType
 
-from .models import BimaTreasuryTransaction, TransactionSaleDocumentPayment
+from .models import BimaTreasuryTransaction, TransactionSaleDocumentPayment, TransactionPurchaseDocumentPayment
 from .service import BimaTreasuryTransactionService
 
 
@@ -185,5 +185,5 @@ class TransactionPurchaseDocumentPaymentSerializer(serializers.ModelSerializer):
     purchase_document = BimaErpPurchaseDocumentUnpaidSerializer()
 
     class Meta:
-        model = TransactionSaleDocumentPayment
+        model = TransactionPurchaseDocumentPayment
         fields = ['transaction', 'purchase_document', 'amount_paid']
