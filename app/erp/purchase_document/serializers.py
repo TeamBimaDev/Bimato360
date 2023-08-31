@@ -1,10 +1,12 @@
 from core.abstract.serializers import AbstractSerializer
+from django.apps import apps
 from django.utils.translation import gettext_lazy as _
+from erp.partner.models import BimaErpPartner
 from erp.product.models import BimaErpProduct
 from rest_framework import serializers
+from treasury.transaction.serializers_helper import SimpleTransactionPurchaseDocumentPaymentSerializer
 
 from .models import BimaErpPurchaseDocument, BimaErpPurchaseDocumentProduct
-from ..partner.models import BimaErpPartner
 
 
 class BimaErpPurchaseDocumentSerializer(AbstractSerializer):
@@ -27,6 +29,17 @@ class BimaErpPurchaseDocumentSerializer(AbstractSerializer):
         slug_field='public_id',
         source='partner',
         write_only=True
+    )
+
+    payment_terms = serializers.SerializerMethodField(read_only=True)
+    payment_terms_public_id = serializers.SlugRelatedField(
+        queryset=BimaErpPartner.objects.all(),
+        slug_field='public_id',
+        source='payment_terms',
+        write_only=True,
+        required=False,
+        allow_null=True,
+        allow_empty=True
     )
 
     def get_partner(self, obj):
@@ -61,15 +74,23 @@ class BimaErpPurchaseDocumentSerializer(AbstractSerializer):
             for child in obj.bimaerppurchasedocument_set.all()
         ] if obj.bimaerppurchasedocument_set else []
 
+    def get_payment_terms(self, obj):
+        if obj.payment_terms:
+            return {
+                'id': obj.payment_terms.public_id.hex,
+                'name': obj.payment_terms.name,
+            }
+        return None
+
     class Meta:
         model = BimaErpPurchaseDocument
         fields = [
             'id', 'number', 'number_at_partner', 'date', 'status', 'type', 'partner', 'partner_public_id', 'vat_label',
-            'vat_amount', 'note', 'private_note', 'validity', 'payment_terms', 'delivery_terms',
-            'total_amount_without_vat', 'total_after_discount', 'total_vat', 'total_amount', 'total_discount',
-            'parents', 'parent_public_ids', 'history', 'created', 'updated', 'children'
+            'vat_amount', 'note', 'private_note', 'validity', 'payment_terms', 'payment_terms_public_id',
+            'delivery_terms', 'total_amount_without_vat', 'total_after_discount', 'total_vat', 'total_amount',
+            'total_discount', 'parents', 'parent_public_ids', 'history', 'created', 'updated', 'children'
         ]
-        read_only_fields = ('total_vat', 'total_amount', 'total_discount',)
+        read_only_fields = ('total_vat', 'total_amount', 'total_discount', 'amount_paid',)
 
 
 class BimaErpPurchaseDocumentHistorySerializer(serializers.ModelSerializer):
@@ -163,3 +184,59 @@ class BimaErpPurchaseDocumentProductHistorySerializer(serializers.ModelSerialize
             'description', 'discount', 'discount_amount', 'total_without_vat',
             'total_after_discount', 'total_price', 'history_type', 'history_date'
         ]
+
+
+class BimaErpPurchaseDocumentUnpaidSerializer(AbstractSerializer):
+    partner = serializers.SerializerMethodField(read_only=True)
+    partner_public_id = serializers.SlugRelatedField(
+        queryset=BimaErpPartner.objects.all(),
+        slug_field='public_id',
+        source='partner',
+        write_only=True
+    )
+
+    payment_terms = serializers.SerializerMethodField(read_only=True)
+    payment_terms_public_id = serializers.SlugRelatedField(
+        queryset=BimaErpPartner.objects.all(),
+        slug_field='public_id',
+        source='payment_terms',
+        write_only=True,
+        required=False,
+        allow_null=True,
+        allow_empty=True
+    )
+
+    transactions = serializers.SerializerMethodField()
+
+    def get_transactions(self, obj):
+        TransactionPurchaseDocumentPayment = apps.get_model('treasury', 'TransactionPurchaseDocumentPayment')
+        transactions = TransactionPurchaseDocumentPayment.objects.filter(purchase_document=obj)
+        return SimpleTransactionPurchaseDocumentPaymentSerializer(transactions, many=True).data
+
+    def get_partner(self, obj):
+        return {
+            'id': obj.partner.public_id.hex,
+            'partner_type': obj.partner.partner_type,
+            'first_name': obj.partner.first_name,
+            'last_name': obj.partner.last_name,
+            'company_name': obj.partner.company_name,
+        }
+
+    def get_payment_terms(self, obj):
+        if obj.payment_terms:
+            return {
+                'id': obj.payment_terms.public_id.hex,
+                'name': obj.payment_terms.name,
+            }
+        return None
+
+    class Meta:
+        model = BimaErpPurchaseDocument
+
+        fields = [
+            'id', 'number', 'date', 'status', 'type', 'partner', 'partner_public_id', 'note',
+            'private_note', 'validity', 'total_vat', 'total_discount', 'vat_amount', 'total_vat', 'total_amount',
+            'total_discount', 'payment_status', 'amount_paid', 'transactions', 'payment_terms',
+            'payment_terms_public_id',
+        ]
+        read_only_fields = ('total_vat', 'total_amount', 'total_discount', 'amount_paid', 'transactions')

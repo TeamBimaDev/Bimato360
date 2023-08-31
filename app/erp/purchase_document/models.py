@@ -1,4 +1,5 @@
 from common.enums.purchase_document_enum import PurchaseDocumentTypes
+from common.enums.purchase_document_enum import get_payment_status
 from common.enums.purchase_document_enum import get_purchase_document_status, \
     get_purchase_document_types, get_purchase_document_validity
 from core.abstract.models import AbstractModel
@@ -9,6 +10,8 @@ from erp.partner.models import BimaErpPartner
 from erp.product.models import BimaErpProduct
 from rest_framework.exceptions import ValidationError
 from simple_history.models import HistoricalRecords
+from treasury.payment_term.models import BimaTreasuryPaymentTerm
+from treasury.transaction.models import BimaTreasuryTransaction, TransactionPurchaseDocumentPayment
 
 
 class BimaErpPurchaseDocumentProduct(models.Model):
@@ -73,7 +76,14 @@ class BimaErpPurchaseDocument(AbstractModel):
     note = models.TextField(blank=True, null=True)
     private_note = models.TextField(blank=True, null=True)
     validity = models.CharField(blank=True, null=True, choices=get_purchase_document_validity())
-    payment_terms = models.CharField(max_length=100, blank=True, null=True)
+    payment_terms = models.ForeignKey(
+        BimaTreasuryPaymentTerm,
+        blank=True,
+        null=True,
+        verbose_name=_("Payment Terms"),
+        on_delete=models.PROTECT,
+        default=None,
+    )
     delivery_terms = models.CharField(max_length=100, blank=True, null=True)
     total_amount_without_vat = models.DecimalField(max_digits=18, decimal_places=3, blank=True, null=True, default=0)
     total_after_discount = models.DecimalField(max_digits=18, decimal_places=3, blank=True, null=True, default=0)
@@ -83,6 +93,22 @@ class BimaErpPurchaseDocument(AbstractModel):
     parents = models.ManyToManyField('self', symmetrical=False, blank=True)
     history = HistoricalRecords()
     purchase_document_products = models.ManyToManyField(BimaErpProduct, through=BimaErpPurchaseDocumentProduct)
+    payment_status = models.CharField(
+        default="NOT_PAID", blank=True, null=True, choices=get_payment_status()
+    )
+    amount_paid = models.DecimalField(
+        max_digits=18,
+        decimal_places=3,
+        blank=True,
+        null=True,
+        default=0,
+        verbose_name=_("Amount Paid"),
+    )
+    transactions = models.ManyToManyField(
+        BimaTreasuryTransaction,
+        through=TransactionPurchaseDocumentPayment,
+        related_name='purchase_documents',
+    )
 
     class Meta:
         ordering = ['-created']

@@ -15,7 +15,7 @@ VALUES (1, 'b76eab54-8a85-40fc-971b-9c09756837bb', '2023-08-22 13:10:43.065253+0
        (7, '4842a12d-4031-4e73-8027-9215ff3f85ac', '2023-08-22 13:12:01.510077+01', '2023-08-22 13:12:01.510077+01',
         'Versement Entrée', true, 'TRANSFER_INCOME', true, 'INCOME', 'BANK'),
        (8, 'b2842222-9773-4bce-b8a3-9cc7d94eafad', '2023-08-22 13:12:08.014837+01', '2023-08-22 13:12:08.014837+01',
-        'Versement Sorite', true, 'TRANSFER_OUTCOME', true, 'OUTCOME', 'BANK'),
+        'Versement Sortie', true, 'TRANSFER_OUTCOME', true, 'OUTCOME', 'BANK'),
        (9, '57289fb5-fa33-4857-9585-9f0047d0b064', '2023-08-22 13:12:16.422225+01', '2023-08-22 13:12:16.422225+01',
         'Chèque Entrée', true, 'CHECK_INCOME', true, 'INCOME', 'BANK'),
        (10, '8b3eb265-c2b6-4c76-90bc-296b10913dad', '2023-08-22 13:12:24.213963+01', '2023-08-22 13:12:24.213963+01',
@@ -23,12 +23,12 @@ VALUES (1, 'b76eab54-8a85-40fc-971b-9c09756837bb', '2023-08-22 13:10:43.065253+0
        (11, '52664e8b-8d9c-49e6-b527-a66365a93463', '2023-08-22 13:12:33.010475+01', '2023-08-22 13:12:33.010475+01',
         'Salaire', true, 'SALARY_OUTCOME', true, 'OUTCOME', 'BANK'),
        (12, '52664e8b-8d9c-49e6-b527-a66365a93556', '2023-08-22 13:10:43.065253+01', '2023-08-22 13:10:43.065253+01',
-        'Payment Facture', true, 'INVOICE_PAYMENT_BANK', true, 'INCOME', 'BANK'),
+        'Payment Facture Client', true, 'INVOICE_PAYMENT_BANK', true, 'INCOME', 'BANK'),
        (13, '325cb624-1f1e-42a5-8945-b7b287548b1d', '2023-08-22 13:10:43.065253+01', '2023-08-22 13:10:43.065253+01',
-        'Payment Facture', true, 'INVOICE_PAYMENT_CASH', true, 'INCOME', 'CASH'),
-       (14, '52664e8b-8d9c-49e6-b527-a66365a93556', '2023-08-22 13:10:43.065253+01', '2023-08-22 13:10:43.065253+01',
+        'Payment Facture Client', true, 'INVOICE_PAYMENT_CASH', true, 'INCOME', 'CASH'),
+       (14, '125d3e0e-1674-479d-8b17-b4a364e73a03', '2023-08-22 13:10:43.065253+01', '2023-08-22 13:10:43.065253+01',
         'Règelemnt Facture Fournisseur', true, 'INVOICE_PAYMENT_OUTCOME_BANK', true, 'OUTCOME', 'BANK'),
-       (15, '325cb624-1f1e-42a5-8945-b7b287548b1d', '2023-08-22 13:10:43.065253+01', '2023-08-22 13:10:43.065253+01',
+       (15, 'f2af0cde-bd8e-4fbc-820f-b6582735e050', '2023-08-22 13:10:43.065253+01', '2023-08-22 13:10:43.065253+01',
         'Règelemnt Facture Fournisseur', true, 'INVOICE_PAYMENT_OUTCOME_CASH', true, 'OUTCOME', 'CASH');
 
 ALTER SEQUENCE public.treasury_bimatreasurytransactiontype_id_seq RESTART WITH 16;

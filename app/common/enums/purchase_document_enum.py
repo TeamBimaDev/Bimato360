@@ -31,6 +31,12 @@ class PurchaseDocumentRecurringInterval(Enum):
     YEARLY = 365
 
 
+class PurchaseDocumentPaymentStatus(Enum):
+    NOT_PAID = _("NOT_PAD")
+    PARTIAL_PAID = _("PARTIAL_PAID")
+    PAID = _("PAID")
+
+
 def get_purchase_document_recurring_interval():
     return [(member.value, member.name.lower().replace('_', ' ')) for member in PurchaseDocumentRecurringInterval]
 
@@ -45,3 +51,7 @@ def get_purchase_document_status():
 
 def get_purchase_document_validity():
     return [(vd.name, vd.value) for vd in PurchaseDocumentValidity]
+
+
+def get_payment_status():
+    return [(ps.name, ps.value) for ps in PurchaseDocumentPaymentStatus]

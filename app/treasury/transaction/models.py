@@ -1,6 +1,7 @@
 import logging
 from datetime import datetime
 
+from common.enums.purchase_document_enum import PurchaseDocumentPaymentStatus
 from common.enums.sale_document_enum import SaleDocumentPaymentStatus
 from common.enums.transaction_enum import TransactionNature, TransactionDirection
 from common.enums.transaction_enum import (
@@ -32,6 +33,14 @@ logger = logging.getLogger(__name__)
 def get_invoice_payment_codes():
     return ["INVOICE_PAYMENT_CASH", "INVOICE_PAYMENT_BANK", "INVOICE_PAYMENT_OUTCOME_BANK",
             "INVOICE_PAYMENT_OUTCOME_CASH"]
+
+
+def get_invoice_payment_customer_codes():
+    return ["INVOICE_PAYMENT_CASH", "INVOICE_PAYMENT_BANK"]
+
+
+def get_invoice_payment_supplier_codes():
+    return ["INVOICE_PAYMENT_OUTCOME_BANK", "INVOICE_PAYMENT_OUTCOME_CASH"]
 
 
 class BimaTreasuryTransaction(AbstractModel):
@@ -200,8 +209,7 @@ class BimaTreasuryTransaction(AbstractModel):
     def delete(self, *args, **kwargs):
         system_delete = kwargs.pop("system_delete", False)
         self.check_if_transaction_child_and_prevent_deletion(system_delete)
-        if self.transaction_type.code in get_invoice_payment_codes():
-            self.handle_invoice_payment_deletion()
+        self.handle_invoice_payment_deletion()
         super(BimaTreasuryTransaction, self).delete(*args, **kwargs)
 
     def handle_auto_transaction(self, old_transaction=None):
@@ -266,71 +274,136 @@ class BimaTreasuryTransaction(AbstractModel):
 
         apply_effect(child_transaction)
 
-    def handle_invoice_payment(self, sale_document_public_ids):
-        if self.transaction_type.code in get_invoice_payment_codes():
-            BimaErpSaleDocument = apps.get_model('erp', 'BimaErpSaleDocument')
-            old_sale_document_payments = TransactionSaleDocumentPayment.objects.filter(transaction=self)
-            old_sale_documents = [payment.sale_document for payment in old_sale_document_payments]
-            old_sale_document_payments.delete()
-            for sd_deleted in old_sale_documents:
-                update_amount_paid(sd_deleted)
+    def handle_invoice_payment_customer_invoice(self, document_public_ids):
+        BimaErpSaleDocument = apps.get_model('erp', 'BimaErpSaleDocument')
+        old_sale_document_payments = TransactionSaleDocumentPayment.objects.filter(transaction=self)
+        old_sale_documents = [payment.sale_document for payment in old_sale_document_payments]
+        old_sale_document_payments.delete()
+        for sd_deleted in old_sale_documents:
+            update_amount_paid_sale_document(sd_deleted)
 
-            remaining_amount = self.amount
-            sale_documents = BimaErpSaleDocument.objects.filter(
-                public_id__in=sale_document_public_ids
-            ).order_by('date')
+        remaining_amount = self.amount
+        sale_documents = BimaErpSaleDocument.objects.filter(
+            public_id__in=document_public_ids
+        ).order_by('date')
 
-            for doc in sale_documents:
-                update_amount_paid(doc)
-                doc.refresh_from_db()
-                if remaining_amount <= 0:
-                    continue
+        for doc in sale_documents:
+            update_amount_paid_sale_document(doc)
+            doc.refresh_from_db()
+            if remaining_amount <= 0:
+                continue
 
-                unpaid_amount = doc.total_amount - doc.amount_paid
+            unpaid_amount = doc.total_amount - doc.amount_paid
 
-                if unpaid_amount <= remaining_amount:
-                    doc.payment_status = SaleDocumentPaymentStatus.PAID.name
-                    doc.amount_paid += unpaid_amount
-                    TransactionSaleDocumentPayment.objects.create(
-                        transaction=self, sale_document=doc, amount_paid=unpaid_amount
-                    )
-                    remaining_amount -= unpaid_amount
-                else:
-                    doc.payment_status = SaleDocumentPaymentStatus.PARTIAL_PAID.name
-                    doc.amount_paid += remaining_amount
-                    TransactionSaleDocumentPayment.objects.create(
-                        transaction=self, sale_document=doc, amount_paid=remaining_amount
-                    )
-                    remaining_amount = 0
+            if unpaid_amount <= remaining_amount:
+                doc.payment_status = SaleDocumentPaymentStatus.PAID.name
+                doc.amount_paid += unpaid_amount
+                TransactionSaleDocumentPayment.objects.create(
+                    transaction=self, sale_document=doc, amount_paid=unpaid_amount
+                )
+                remaining_amount -= unpaid_amount
+            else:
+                doc.payment_status = SaleDocumentPaymentStatus.PARTIAL_PAID.name
+                doc.amount_paid += remaining_amount
+                TransactionSaleDocumentPayment.objects.create(
+                    transaction=self, sale_document=doc, amount_paid=remaining_amount
+                )
+                remaining_amount = 0
 
-                doc.save()
+            doc.save()
 
-            self.remaining_amount = remaining_amount
-            self.save()
+        self.remaining_amount = remaining_amount
+        self.save()
+
+    def handle_invoice_payment_supplier_invoice(self, document_public_ids):
+        BimaErpPurchaseDocument = apps.get_model('erp', 'BimaErpPurchaseDocument')
+        old_purchase_document_payments = TransactionPurchaseDocumentPayment.objects.filter(transaction=self)
+        old_purchase_documents = [payment.purchase_document for payment in old_purchase_document_payments]
+        old_purchase_document_payments.delete()
+        for purchase_doc in old_purchase_documents:
+            update_amount_paid_purchase_document(purchase_doc)
+
+        remaining_amount = self.amount
+        purchase_documents = BimaErpPurchaseDocument.objects.filter(
+            public_id__in=document_public_ids
+        ).order_by('date')
+
+        for doc in purchase_documents:
+            update_amount_paid_purchase_document(doc)
+            doc.refresh_from_db()
+            if remaining_amount <= 0:
+                continue
+
+            unpaid_amount = doc.total_amount - doc.amount_paid
+
+            if unpaid_amount <= remaining_amount:
+                doc.payment_status = PurchaseDocumentPaymentStatus.PAID.name
+                doc.amount_paid += unpaid_amount
+                TransactionPurchaseDocumentPayment.objects.create(
+                    transaction=self, purchase_document=doc, amount_paid=unpaid_amount
+                )
+                remaining_amount -= unpaid_amount
+            else:
+                doc.payment_status = PurchaseDocumentPaymentStatus.PARTIAL_PAID.name
+                doc.amount_paid += remaining_amount
+                TransactionPurchaseDocumentPayment.objects.create(
+                    transaction=self, purchase_document=doc, amount_paid=remaining_amount
+                )
+                remaining_amount = 0
+
+            doc.save()
+
+        self.remaining_amount = remaining_amount
+        self.save()
+
+    def handle_invoice_payment(self, document_public_ids):
+        if self.transaction_type.code in get_invoice_payment_customer_codes():
+            self.handle_invoice_payment_customer_invoice(document_public_ids)
+        elif self.transaction_type.code in get_invoice_payment_supplier_codes():
+            self.handle_invoice_payment_supplier_invoice(document_public_ids)
+        else:
+            return
 
     def handle_invoice_payment_deletion(self):
-        with transaction.atomic():
-            old_sale_document_payments = TransactionSaleDocumentPayment.objects.filter(transaction=self)
-            old_sale_documents = [payment.sale_document for payment in old_sale_document_payments]
-            old_sale_document_payments.delete()
-            for sale_doc in old_sale_documents:
-                update_amount_paid(sale_doc)
+        if self.transaction_type.code in get_invoice_payment_customer_codes():
+            with transaction.atomic():
+                old_sale_document_payments = TransactionSaleDocumentPayment.objects.filter(transaction=self)
+                old_sale_documents = [payment.sale_document for payment in old_sale_document_payments]
+                old_sale_document_payments.delete()
+                for sale_doc in old_sale_documents:
+                    update_amount_paid_sale_document(sale_doc)
+        elif self.transaction_type.code in get_invoice_payment_supplier_codes():
+            with transaction.atomic():
+                old_purchase_document_payments = TransactionPurchaseDocumentPayment.objects.filter(transaction=self)
+                old_purchase_documents = [payment.sale_document for payment in old_purchase_document_payments]
+                old_purchase_document_payments.delete()
+                for purchase_doc in old_purchase_documents:
+                    update_amount_paid_purchase_document(purchase_doc)
 
 
-def update_amount_paid(sale_document):
+def update_amount_paid_sale_document(sale_document):
     transactions = sale_document.transactionsaledocumentpayment_set.all()
+    update_amount_paid_document(sale_document, transactions, SaleDocumentPaymentStatus)
+
+
+def update_amount_paid_purchase_document(purchase_document):
+    transactions = purchase_document.transactionpurchasedocumentpayment_set.all()
+    update_amount_paid_document(purchase_document, transactions, PurchaseDocumentPaymentStatus)
+
+
+def update_amount_paid_document(document, transactions, payment_status):
     amount_paid = sum(tr.amount_paid for tr in transactions)
 
-    sale_document.amount_paid = amount_paid
+    document.amount_paid = amount_paid
 
-    if sale_document.amount_paid == sale_document.total_amount:
-        sale_document.payment_status = SaleDocumentPaymentStatus.PAID.name
-    elif sale_document.amount_paid > 0:
-        sale_document.payment_status = SaleDocumentPaymentStatus.PARTIAL_PAID.name
+    if document.amount_paid == document.total_amount:
+        document.payment_status = payment_status.PAID.name
+    elif document.amount_paid > 0:
+        document.payment_status = payment_status.PARTIAL_PAID.name
     else:
-        sale_document.payment_status = SaleDocumentPaymentStatus.NOT_PAID.name
+        document.payment_status = payment_status.NOT_PAID.name
 
-    sale_document.save()
+    document.save()
 
 
 class TransactionSaleDocumentPayment(models.Model):
@@ -340,6 +413,15 @@ class TransactionSaleDocumentPayment(models.Model):
 
     class Meta:
         unique_together = ('transaction', 'sale_document')
+
+
+class TransactionPurchaseDocumentPayment(models.Model):
+    transaction = models.ForeignKey(BimaTreasuryTransaction, on_delete=models.CASCADE)
+    purchase_document = models.ForeignKey('erp.BimaErpPurchaseDocument', on_delete=models.CASCADE)
+    amount_paid = models.DecimalField(max_digits=14, decimal_places=3)
+
+    class Meta:
+        unique_together = ('transaction', 'purchase_document')
 
 
 def get_effect_strategy(transaction):

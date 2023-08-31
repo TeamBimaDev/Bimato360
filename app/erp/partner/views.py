@@ -1,5 +1,7 @@
 import django_filters
 from common.converters.default_converters import str_to_bool
+from common.enums.purchase_document_enum import PurchaseDocumentPaymentStatus, PurchaseDocumentStatus, \
+    PurchaseDocumentTypes
 from common.enums.sale_document_enum import (
     SaleDocumentPaymentStatus,
     SaleDocumentStatus,
@@ -409,6 +411,19 @@ class BimaErpPartnerViewSet(AbstractViewSet):
         ).filter(
             status=SaleDocumentStatus.CONFIRMED.name,
             type=SaleDocumentTypes.INVOICE.name,
+        )
+
+        serialized_data = BimaErpSaleDocumentUnpaidSerializer(unpaid_invoice, many=True)
+        return Response(serialized_data.data)
+
+    @action(detail=True, methods=["GET"], url_path="get_unpaid_invoice")
+    def get_unpaid_invoice_supplier(self, request, pk=None):
+        partner = self.get_object()
+        unpaid_invoice = partner.bimaerppurchasedocument_set.exclude(
+            payment_status=PurchaseDocumentPaymentStatus.PAID.name
+        ).filter(
+            status=PurchaseDocumentStatus.CONFIRMED.name,
+            type=PurchaseDocumentTypes.INVOICE.name,
         )
 
         serialized_data = BimaErpSaleDocumentUnpaidSerializer(unpaid_invoice, many=True)
