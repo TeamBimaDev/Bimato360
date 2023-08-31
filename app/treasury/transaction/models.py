@@ -30,11 +30,8 @@ logger = logging.getLogger(__name__)
 
 class BimaTreasuryTransaction(AbstractModel):
     skip_child_validation = False
-    # number = models.CharField(
-    #     max_length=32, null=False, blank=False, unique=True, verbose_name=_("Number")
-    # )
     number = models.CharField(
-        max_length=32, null=True, blank=True, verbose_name=_("Number")
+        max_length=32, null=False, blank=False, unique=True, verbose_name=_("Number")
     )
     nature = models.CharField(
         max_length=5,
