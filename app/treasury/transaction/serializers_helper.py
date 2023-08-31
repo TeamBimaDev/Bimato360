@@ -1,3 +1,4 @@
+from django.utils.encoding import force_str
 from rest_framework import serializers
 
 from .models import TransactionSaleDocumentPayment
@@ -14,6 +15,12 @@ class SimpleTransactionSaleDocumentPaymentSerializer(serializers.ModelSerializer
         slug_field='number',
         read_only=True
     )
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        transaction = instance.transaction
+        representation['transaction_public_id'] = force_str(transaction.public_id.hex)
+        return representation
 
     class Meta:
         model = TransactionSaleDocumentPayment
