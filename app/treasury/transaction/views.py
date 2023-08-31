@@ -17,10 +17,11 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 
 from .filter import BimaTreasuryTransactionFilter
-from .models import BimaTreasuryTransaction, TransactionSaleDocumentPayment
+from .models import BimaTreasuryTransaction, TransactionSaleDocumentPayment, TransactionPurchaseDocumentPayment
 from .serializers import BimaTreasuryTransactionSerializer, TransactionHistorySerializer, \
-    TransactionSaleDocumentPaymentSerializer
+    TransactionSaleDocumentPaymentSerializer, TransactionPurchaseDocumentPaymentSerializer
 from .service import BimaTreasuryTransactionService
+from .service_payment_invoice import handle_invoice_payment
 
 
 class BimaTreasuryTransactionViewSet(AbstractViewSet):
@@ -57,12 +58,12 @@ class BimaTreasuryTransactionViewSet(AbstractViewSet):
     def perform_create(self, serializer):
         sale_document_public_ids = self.request.data.pop('sale_documents_ids')
         instance = serializer.save()
-        instance.handle_invoice_payment(sale_document_public_ids)
-   
+        handle_invoice_payment(instance, sale_document_public_ids)
+
     def perform_update(self, serializer):
         sale_document_public_ids = self.request.data.pop('sale_documents_ids')
         instance = serializer.save()
-        instance.handle_invoice_payment(sale_document_public_ids)
+        handle_invoice_payment(instance, sale_document_public_ids)
 
     @action(detail=False, methods=['get'])
     def get_unique_number(self, request, **kwargs):
@@ -192,4 +193,11 @@ class BimaTreasuryTransactionViewSet(AbstractViewSet):
         transaction = self.get_object()
         sale_document_payments = TransactionSaleDocumentPayment.objects.filter(transaction=transaction)
         serializer = TransactionSaleDocumentPaymentSerializer(sale_document_payments, many=True)
+        return Response(serializer.data)
+
+    @action(detail=True, methods=['GET'], url_path='transaction_purchase_document_payments')
+    def transaction_purchase_document_payments(self, request, pk=None):
+        transaction = self.get_object()
+        purchase_document_payments = TransactionPurchaseDocumentPayment.objects.filter(transaction=transaction)
+        serializer = TransactionPurchaseDocumentPaymentSerializer(purchase_document_payments, many=True)
         return Response(serializer.data)

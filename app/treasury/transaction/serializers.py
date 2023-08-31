@@ -1,5 +1,6 @@
 from core.abstract.serializers import AbstractSerializer
 from erp.partner.models import BimaErpPartner
+from erp.purchase_document.serializers import BimaErpPurchaseDocumentUnpaidSerializer
 from erp.sale_document.serializers import BimaErpSaleDocumentUnpaidSerializer
 from rest_framework import serializers
 from treasury.bank_account.models import BimaTreasuryBankAccount
@@ -178,3 +179,11 @@ class TransactionSaleDocumentPaymentSerializer(serializers.ModelSerializer):
     class Meta:
         model = TransactionSaleDocumentPayment
         fields = ['transaction', 'sale_document', 'amount_paid']
+
+
+class TransactionPurchaseDocumentPaymentSerializer(serializers.ModelSerializer):
+    purchase_document = BimaErpPurchaseDocumentUnpaidSerializer()
+
+    class Meta:
+        model = TransactionSaleDocumentPayment
+        fields = ['transaction', 'purchase_document', 'amount_paid']

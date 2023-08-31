@@ -416,7 +416,7 @@ class BimaErpPartnerViewSet(AbstractViewSet):
         serialized_data = BimaErpSaleDocumentUnpaidSerializer(unpaid_invoice, many=True)
         return Response(serialized_data.data)
 
-    @action(detail=True, methods=["GET"], url_path="get_unpaid_invoice")
+    @action(detail=True, methods=["GET"], url_path="get_unpaid_invoice_supplier")
     def get_unpaid_invoice_supplier(self, request, pk=None):
         partner = self.get_object()
         unpaid_invoice = partner.bimaerppurchasedocument_set.exclude(
