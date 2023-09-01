@@ -25,6 +25,7 @@ router.register("", UserViewSet)
 urlpatterns = [
     path("token/", views.CreateTokenView.as_view(), name="token_obtain_pair"),
     path("token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
+    path('role/', include('user.role.urls')),
     path(
         "<str:public_id>/change-password/",
         ChangePasswordView.as_view(),
@@ -47,5 +48,5 @@ urlpatterns = [
         name="user_activate_and_change_password",
     ),
     path("", include(router.urls)),
-    path('role/', include('user.role.urls')),
+
 ]
