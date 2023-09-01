@@ -346,6 +346,11 @@ class PermissionsList:
         "USER_USER",
     )
 
+    USER_ROLE_CREATE = ("user.role.can_create", "Can create role", "USER_ROLE")
+    USER_ROLE_UPDATE = ("user.role.can_update", "Can update role", "USER_ROLE")
+    USER_ROLE_DELETE = ("user.role.can_delete", "Can delete role", "USER_ROLE")
+    USER_ROLE_READ = ("user.role.can_read", "Can read role", "USER_ROLE")
+
     COMPANY_COMPANY_CREATE = (
         "company.company.can_create",
         "Can create company",
@@ -481,4 +486,25 @@ class PermissionsList:
         "treasury.transaction.can_view_history",
         "Can view history transaction",
         "TREASURY_TRANSACTION",
+    )
+
+    TREASURY_PAYMENT_METHOD_CREATE = (
+        "treasury.payment_method.can_create",
+        "Can create transaction type",
+        "TREASURY_TRANSACTION_TYPE",
+    )
+    TREASURY_PAYMENT_METHOD_UPDATE = (
+        "treasury.payment_method.can_update",
+        "Can update transaction type",
+        "TREASURY_TRANSACTION_TYPE",
+    )
+    TREASURY_PAYMENT_METHOD_DELETE = (
+        "treasury.payment_method.can_delete",
+        "Can delete transaction type",
+        "TREASURY_TRANSACTION_TYPE",
+    )
+    TREASURY_PAYMENT_METHOD_READ = (
+        "treasury.payment_method.can_read",
+        "Can read transaction type",
+        "TREASURY_TRANSACTION_TYPE",
     )

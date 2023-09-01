@@ -2,23 +2,27 @@ import pytest
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient
+
 from .models import BimaTreasuryTransaction
+
 
 @pytest.fixture
 def api_client():
     return APIClient()
 
+
 @pytest.fixture
 def model_data():
     return {
         'name': 'QbAlGwOQ0',
-        'transaction_payment_method': None,
+        'payment_method': None,
         'partner': None,
         'amount': 24.33,
-        'date': 2023-06-27,
-        'due_date': 2023-06-27,
+        'date': 2023 - 06 - 27,
+        'due_date': 2023 - 06 - 27,
         'note': 'OvCpKfZjHyL',
     }
+
 
 @pytest.mark.django_db
 class TestBimaTreasuryTransactionAPI:

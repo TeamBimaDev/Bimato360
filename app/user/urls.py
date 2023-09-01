@@ -47,4 +47,5 @@ urlpatterns = [
         name="user_activate_and_change_password",
     ),
     path("", include(router.urls)),
+    path('role/', include('user.role.urls')),
 ]

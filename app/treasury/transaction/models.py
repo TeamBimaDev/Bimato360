@@ -48,6 +48,13 @@ class BimaTreasuryTransaction(AbstractModel):
         on_delete=models.PROTECT,
         verbose_name=_("Transaction Type"),
     )
+    # payment_method = models.ForeignKey(
+    #     BimaTreasuryPaymentMethod,
+    #     on_delete=models.PROTECT,
+    #     verbose_name=_("Transaction Type"),
+    #     null=True,
+    #     blank=True
+    # )
     cash = models.ForeignKey(
         BimaTreasuryCash,
         on_delete=models.PROTECT,
@@ -144,8 +151,8 @@ class BimaTreasuryTransaction(AbstractModel):
 
         if (
                 self.transaction_type.code == "FROM_CASH_TO_ACCOUNT_INCOME"
-                and self.transaction_type.income_outcome == "INCOME"
-                and self.direction == "INCOME"
+                and self.transaction_type.income_outcome == TransactionDirection.INCOME.name
+                and self.direction == TransactionDirection.INCOME.name
                 and self.nature == TransactionNature.CASH.name
         ):
             error_message = _(
@@ -154,8 +161,8 @@ class BimaTreasuryTransaction(AbstractModel):
 
         elif (
                 self.transaction_type.code == "FROM_ACCOUNT_TO_CASH_INCOME"
-                and self.transaction_type.income_outcome == "INCOME"
-                and self.direction == "INCOME"
+                and self.transaction_type.income_outcome == TransactionDirection.INCOME.name
+                and self.direction == TransactionDirection.INCOME.name
                 and self.nature == TransactionNature.BANK.name
         ):
             error_message = _(
