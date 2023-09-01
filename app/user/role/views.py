@@ -1,6 +1,5 @@
 from common.permissions.action_base_permission import ActionBasedPermission
 from core.abstract.views import AbstractViewSet
-from core.currency.models import BimaCoreCurrency
 from django_filters import rest_framework as django_filters
 from rest_framework import filters
 
@@ -27,7 +26,7 @@ class BimaUserRoleViewSet(AbstractViewSet):
     }
 
     def get_object(self):
-        obj = BimaCoreCurrency.objects.get_object_by_public_id(self.kwargs['pk'])
+        obj = BimaUserRoleSerializer.objects.get_object_by_public_id(self.kwargs['pk'])
         return obj
 
     def perform_create(self, serializer):
