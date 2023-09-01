@@ -16,6 +16,7 @@ from erp.partner.models import BimaErpPartner
 from simple_history.models import HistoricalRecords
 from treasury.bank_account.models import BimaTreasuryBankAccount
 from treasury.cash.models import BimaTreasuryCash
+from treasury.payment_method.models import BimaTreasuryPaymentMethod
 from treasury.transaction_type.models import BimaTreasuryTransactionType
 
 from .service import (
@@ -48,13 +49,13 @@ class BimaTreasuryTransaction(AbstractModel):
         on_delete=models.PROTECT,
         verbose_name=_("Transaction Type"),
     )
-    # payment_method = models.ForeignKey(
-    #     BimaTreasuryPaymentMethod,
-    #     on_delete=models.PROTECT,
-    #     verbose_name=_("Transaction Type"),
-    #     null=True,
-    #     blank=True
-    # )
+    payment_method = models.ForeignKey(
+        BimaTreasuryPaymentMethod,
+        on_delete=models.PROTECT,
+        verbose_name=_("Transaction Type"),
+        null=True,
+        blank=True
+    )
     cash = models.ForeignKey(
         BimaTreasuryCash,
         on_delete=models.PROTECT,

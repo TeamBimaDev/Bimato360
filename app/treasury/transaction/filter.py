@@ -11,6 +11,9 @@ class BimaTreasuryTransactionFilter(django_filters.FilterSet):
     transaction_type = django_filters.UUIDFilter(
         field_name="transaction_type__public_id"
     )
+    payment_method = django_filters.UUIDFilter(
+        field_name="payment_method__public_id"
+    )
     cash = django_filters.UUIDFilter(field_name="cash__public_id")
     bank_account = django_filters.UUIDFilter(field_name="bank_account__public_id")
     partner = django_filters.UUIDFilter(field_name="partner__public_id")

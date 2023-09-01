@@ -36,4 +36,5 @@ class BimaUserRoleViewSet(AbstractViewSet):
 
     def perform_update(self, serializer):
         permissions = self.request.data.get('permissions')
-        serializer.save(permissions=permissions)
+        role = serializer.save()
+        role.permissions.set(permissions)
