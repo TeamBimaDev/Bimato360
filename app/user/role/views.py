@@ -5,6 +5,7 @@ from rest_framework import filters
 
 from .models import BimaUserRole
 from .serializers import BimaUserRoleSerializer
+from .service import filter_passed_permission_return_only_available
 
 
 class BimaUserRoleViewSet(AbstractViewSet):
@@ -26,14 +27,16 @@ class BimaUserRoleViewSet(AbstractViewSet):
     }
 
     def get_object(self):
-        obj = BimaUserRoleSerializer.objects.get_object_by_public_id(self.kwargs['pk'])
+        obj = BimaUserRole.objects.get_object_by_public_id(self.kwargs['pk'])
         return obj
 
     def perform_create(self, serializer):
         permissions = self.request.data.get('permissions')
-        serializer.save(permissions=permissions)
+        existing_permissions = filter_passed_permission_return_only_available(permissions)
+        serializer.save(permissions=existing_permissions)
 
     def perform_update(self, serializer):
         permissions = self.request.data.get('permissions')
+        existing_permissions = filter_passed_permission_return_only_available(permissions)
         role = serializer.save()
-        role.permissions.set(permissions)
+        role.permissions.set(existing_permissions)
