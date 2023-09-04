@@ -2,6 +2,7 @@ import uuid
 from io import BytesIO
 
 from common.enums.transaction_enum import TransactionDirection
+from common.enums.transaction_enum import TransactionTypeIncomeOutcome
 from common.permissions.action_base_permission import ActionBasedPermission
 from core.abstract.views import AbstractViewSet
 from core.entity_tag.models import (
@@ -10,6 +11,7 @@ from core.entity_tag.models import (
     BimaCoreEntityTag,
 )
 from core.entity_tag.serializers import BimaCoreEntityTagSerializer
+from django.db.models import Q
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext_lazy as _
@@ -237,4 +239,25 @@ class BimaTreasuryTransactionViewSet(AbstractViewSet):
         purchase_document_payments = TransactionPurchaseDocumentPayment.objects.filter(
             purchase_document__public_id=purchase_document_public_id)
         serializer = TransactionPurchaseDocumentPaymentSerializer(purchase_document_payments, many=True)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=['GET'], url_path='get_transactions_available_for_sale_document')
+    def get_transactions_available_for_sale_document(self, request, pk=None):
+        transactions = BimaTreasuryTransaction.objects.filter(
+            Q(transaction_type__code="INVOICE_PAYMENT_BANK") | Q(transaction_type__code="INVOICE_PAYMENT_CASH"),
+            remaining_amount__gt=0,
+            direction=TransactionTypeIncomeOutcome.INCOME.name,
+        )
+        serializer = BimaTreasuryTransactionSerializer(transactions, many=True)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=['GET'], url_path='get_transactions_available_for_purchase_document')
+    def get_transactions_available_for_purchase_document(self, request, pk=None):
+        transactions = BimaTreasuryTransaction.objects.filter(
+            Q(transaction_type__code="INVOICE_PAYMENT_OUTCOME_BANK") | Q(
+                transaction_type__code="INVOICE_PAYMENT_OUTCOME_CASH"),
+            remaining_amount__gt=0,
+            direction=TransactionTypeIncomeOutcome.OUTCOME.name,
+        )
+        serializer = BimaTreasuryTransactionSerializer(transactions, many=True)
         return Response(serializer.data)

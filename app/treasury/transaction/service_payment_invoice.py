@@ -1,5 +1,6 @@
 from common.enums.purchase_document_enum import PurchaseDocumentPaymentStatus
 from common.enums.sale_document_enum import SaleDocumentPaymentStatus
+from common.enums.transaction_enum import TransactionTypeIncomeOutcome
 from django.apps import apps
 from django.db import transaction
 
@@ -49,6 +50,17 @@ def update_amount_paid_document(document, transactions, payment_status):
         document.payment_status = payment_status.NOT_PAID.name
 
     document.save()
+
+
+def get_total_amount_used_for_transaction(transaction):
+    if transaction.direction == TransactionTypeIncomeOutcome.INCOME.name:
+        transactions = transaction.transactionsaledocumentpayment_set.all()
+    else:
+        transactions = transaction.transactionpurchasedocumentpayment_set.all()
+
+    amount_paid = sum(tr.amount_paid for tr in transactions)
+
+    return transaction.amount - amount_paid
 
 
 def handle_invoice_payment_customer_invoice(transaction, document_public_ids):
