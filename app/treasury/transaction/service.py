@@ -132,7 +132,6 @@ class BimaTreasuryTransactionService:
         number = BimaTreasuryTransactionService.generate_unique_number(),
         if transaction.nature == TransactionNature.CASH.name:
             params = {
-                "number": number,
                 "nature": "BANK",
                 "direction": "INCOME",
                 "transaction_type": complementary_transaction_type,
@@ -146,7 +145,6 @@ class BimaTreasuryTransactionService:
             }
         elif transaction.nature == TransactionNature.BANK.name:
             params = {
-                "number": number,
                 "nature": "CASH",
                 "direction": "INCOME",
                 "transaction_type": complementary_transaction_type,
@@ -159,7 +157,7 @@ class BimaTreasuryTransactionService:
                 "reference": transaction.reference,
             }
 
-        created_transaction = BimaTreasuryTransaction.objects.create(**params)
+        created_transaction = BimaTreasuryTransaction.objects.create(number=number, **params)
         logger.info(
             f"Auto transaction {created_transaction.pk} created for transaction {transaction.pk}"
         )
