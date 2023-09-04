@@ -244,9 +244,9 @@ class BimaTreasuryTransactionViewSet(AbstractViewSet):
     @action(detail=False, methods=['GET'], url_path='get_transactions_available_for_sale_document')
     def get_transactions_available_for_sale_document(self, request, pk=None):
         transactions = BimaTreasuryTransaction.objects.filter(
-            Q(transaction_type__code="INVOICE_PAYMENT_BANK") | Q(transaction_type__code="INVOICE_PAYMENT_CASH"),
-            remaining_amount__gt=0,
-            direction=TransactionTypeIncomeOutcome.INCOME.name,
+            Q(remaining_amount__gt=0) & Q(direction=TransactionTypeIncomeOutcome.INCOME.name)
+            & (Q(transaction_type__code="INVOICE_PAYMENT_BANK") |
+               Q(transaction_type__code="INVOICE_PAYMENT_CASH"))
         )
         serializer = BimaTreasuryTransactionSerializer(transactions, many=True)
         return Response(serializer.data)
@@ -254,10 +254,9 @@ class BimaTreasuryTransactionViewSet(AbstractViewSet):
     @action(detail=False, methods=['GET'], url_path='get_transactions_available_for_purchase_document')
     def get_transactions_available_for_purchase_document(self, request, pk=None):
         transactions = BimaTreasuryTransaction.objects.filter(
-            Q(transaction_type__code="INVOICE_PAYMENT_OUTCOME_BANK") | Q(
-                transaction_type__code="INVOICE_PAYMENT_OUTCOME_CASH"),
-            remaining_amount__gt=0,
-            direction=TransactionTypeIncomeOutcome.OUTCOME.name,
+            Q(remaining_amount__gt=0) & Q(direction=TransactionTypeIncomeOutcome.OUTCOME.name)
+            & (Q(transaction_type__code="INVOICE_PAYMENT_OUTCOME_BANK") |
+               Q(transaction_type__code="INVOICE_PAYMENT_OUTCOME_CASH"))
         )
         serializer = BimaTreasuryTransactionSerializer(transactions, many=True)
         return Response(serializer.data)
