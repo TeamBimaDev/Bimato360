@@ -5,6 +5,7 @@ from erp.sale_document.serializers import BimaErpSaleDocumentUnpaidSerializer
 from rest_framework import serializers
 from treasury.bank_account.models import BimaTreasuryBankAccount
 from treasury.cash.models import BimaTreasuryCash
+from treasury.payment_method.models import BimaTreasuryPaymentMethod
 from treasury.transaction_type.models import BimaTreasuryTransactionType
 
 from .models import BimaTreasuryTransaction, TransactionSaleDocumentPayment, TransactionPurchaseDocumentPayment
@@ -28,6 +29,15 @@ class BimaTreasuryTransactionSerializer(AbstractSerializer):
         queryset=BimaTreasuryTransactionType.objects.all(),
         slug_field="public_id",
         source="transaction_type",
+        write_only=True,
+        required=True,
+    )
+
+    payment_method = serializers.SerializerMethodField(read_only=True)
+    payment_method_public_id = serializers.SlugRelatedField(
+        queryset=BimaTreasuryPaymentMethod.objects.all(),
+        slug_field="public_id",
+        source="payment_method",
         write_only=True,
         required=True,
     )
@@ -74,13 +84,21 @@ class BimaTreasuryTransactionSerializer(AbstractSerializer):
                 "last_name": obj.partner.last_name,
                 "company_name": obj.partner.company_name,
             }
-        return None  # or return {} if you want an empty dictionary instead
+        return None
 
     def get_transaction_type(self, obj):
         return {
             "id": obj.transaction_type.public_id.hex,
             "name": obj.transaction_type.name,
         }
+
+    def get_payment_method(self, obj):
+        if obj.partner:
+            return {
+                "id": obj.payment_method.public_id.hex,
+                "name": obj.payment_method.name,
+            }
+        return None
 
     def get_cash(self, obj):
         if obj.cash:
@@ -120,6 +138,8 @@ class BimaTreasuryTransactionSerializer(AbstractSerializer):
             "direction",
             "transaction_type",
             "transaction_type_public_id",
+            "payment_method",
+            "payment_method_public_id",
             "cash",
             "cash_public_id",
             "bank_account",
