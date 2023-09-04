@@ -1,3 +1,4 @@
+import uuid
 from io import BytesIO
 
 from common.enums.transaction_enum import TransactionDirection
@@ -11,6 +12,7 @@ from core.entity_tag.models import (
 from core.entity_tag.serializers import BimaCoreEntityTagSerializer
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
+from django.utils.translation import gettext_lazy as _
 from openpyxl.reader.excel import load_workbook
 from rest_framework import status
 from rest_framework.decorators import action
@@ -217,7 +219,22 @@ class BimaTreasuryTransactionViewSet(AbstractViewSet):
 
     @action(detail=False, methods=['GET'], url_path='transaction_by_sale_document')
     def transaction_by_sale_document(self, request, pk=None):
-        transaction = self.get_object()
-        purchase_document_payments = TransactionPurchaseDocumentPayment.objects.filter(transaction=transaction)
+        sale_document_public_id = request.query_params.get('sale_document_public_id')
+        if not sale_document_public_id or not uuid.UUID(sale_document_public_id, version=4):
+            return Response({"Error": _("Please provide a valid UUID")}, status=status.HTTP_400_BAD_REQUEST)
+
+        sale_document_payments = TransactionSaleDocumentPayment.objects.filter(
+            sale_document__public_id=sale_document_public_id)
+        serializer = TransactionSaleDocumentPaymentSerializer(sale_document_payments, many=True)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=['GET'], url_path='transaction_by_purchase_document')
+    def transaction_by_purchase_document(self, request, pk=None):
+        purchase_document_public_id = request.query_params.get('purchase_document_public_id')
+        if not purchase_document_public_id or not uuid.UUID(purchase_document_public_id, version=4):
+            return Response({"Error": _("Please provide a valid UUID")}, status=status.HTTP_400_BAD_REQUEST)
+
+        purchase_document_payments = TransactionPurchaseDocumentPayment.objects.filter(
+            purchase_document__public_id=purchase_document_public_id)
         serializer = TransactionPurchaseDocumentPaymentSerializer(purchase_document_payments, many=True)
         return Response(serializer.data)
