@@ -33,3 +33,21 @@ VALUES (1, 'b76eab54-8a85-40fc-971b-9c09756837bb', '2023-08-22 13:10:43.065253+0
 
 ALTER SEQUENCE public.treasury_bimatreasurytransactiontype_id_seq RESTART WITH 16;
 SELECT pg_catalog.setval('public.treasury_bimatreasurytransactiontype_id_seq', 16, true);
+
+delete from public.treasury_bimatreasurytransaction where transaction_type_id in  in (5, 6, 7, 8, 9, 10, 11);
+
+delete from public.treasury_bimatreasurytransactiontype where id in (5, 6, 7, 8, 9, 10, 11);
+
+INSERT INTO public.treasury_bimatreasurytransactiontype (id, public_id, created, updated, name, active, code, is_system,
+                                                         income_outcome, cash_bank)
+VALUES (16, '7e418c5e-d33e-4fd1-8012-9b110f95c416', '2023-08-22 13:10:43.065253+01', '2023-08-22 13:10:43.065253+01',
+        'Depôt de fond', true, 'DEPOT_FOND_INCOME_BANK', true, 'INCOME', 'BANK'),
+       (17, 'a2a9ef26-e60b-4517-aaea-28e12d8bd68e', '2023-08-22 13:10:43.065253+01', '2023-08-22 13:10:43.065253+01',
+        'Depôt de fond', true, 'DEPOT_FOND_INCOME_CASH', true, 'INCOME', 'CASH'),
+       (18, '57335998-d669-4f55-9418-f634986b8947', '2023-08-22 13:10:43.065253+01', '2023-08-22 13:10:43.065253+01',
+        'Charge Entreprise', true, 'CHARGE_ENTREPRISE_OUTCOME_BANK', true, 'OUTCOME', 'BANK'),
+       (19, '10203f49-d7c9-4ba0-8b58-bb1924ed4929', '2023-08-22 13:10:43.065253+01', '2023-08-22 13:10:43.065253+01',
+        'Charge Entreprise', true, 'CHARGE_ENTREPRISE_OUTCOME_CASH', true, 'OUTCOME', 'CASH');
+
+ALTER SEQUENCE public.treasury_bimatreasurytransactiontype_id_seq RESTART WITH 20;
+SELECT pg_catalog.setval('public.treasury_bimatreasurytransactiontype_id_seq', 20, true);

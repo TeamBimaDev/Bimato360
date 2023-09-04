@@ -22,5 +22,5 @@ VALUES (1, 'd467db1b-b845-428f-aace-6ffaab90412f', '2023-08-22 13:10:43.065253+0
         'Virement Sortie', true, 'VIRMENT_OUTCOME', true, 'OUTCOME', 'BANK');
 
 
-ALTER SEQUENCE public.treasury_bimatreasurypaymentmethod_id_seq RESTART WITH 16;
-SELECT pg_catalog.setval('public.treasury_bimatreasurypaymentmethod_id_seq', 16, true);
+ALTER SEQUENCE public.treasury_bimatreasurypaymentmethod_id_seq RESTART WITH 11;
+SELECT pg_catalog.setval('public.treasury_bimatreasurypaymentmethod_id_seq', 11, true);
