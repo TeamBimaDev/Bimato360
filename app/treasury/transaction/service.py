@@ -12,6 +12,7 @@ from openpyxl.styles import Border, Side, Font
 from openpyxl.utils import get_column_letter
 from treasury.bank_account.models import BimaTreasuryBankAccount
 from treasury.cash.models import BimaTreasuryCash
+from treasury.payment_method.models import BimaTreasuryPaymentMethod
 from treasury.transaction_type.models import BimaTreasuryTransactionType
 
 logger = logging.getLogger(__name__)
@@ -122,6 +123,12 @@ class BimaTreasuryTransactionService:
         complementary_transaction_type = BimaTreasuryTransactionType.objects.get(
             code=complementary_code, income_outcome=complementary_direction
         )
+        payment_method_for_cash = BimaTreasuryPaymentMethod.objects.get(
+            code="CASH_PAYMENT_INCOME", income_outcome="INCOME"
+        )
+        payment_method_for_bank = BimaTreasuryPaymentMethod.objects.get(
+            code="TRANSFER_INCOME", income_outcome="INCOME"
+        )
         number = BimaTreasuryTransactionService.generate_unique_number(),
         if transaction.nature == TransactionNature.CASH.name:
             params = {
@@ -129,6 +136,7 @@ class BimaTreasuryTransactionService:
                 "nature": "BANK",
                 "direction": "INCOME",
                 "transaction_type": complementary_transaction_type,
+                "payment_method": payment_method_for_bank,
                 "bank_account": transaction.bank_account,
                 "cash": transaction.cash,
                 "date": transaction.date,
@@ -142,6 +150,7 @@ class BimaTreasuryTransactionService:
                 "nature": "CASH",
                 "direction": "INCOME",
                 "transaction_type": complementary_transaction_type,
+                "payment_method": payment_method_for_cash,
                 "cash": transaction.cash,
                 "bank_account": transaction.bank_account,
                 "date": transaction.date,
