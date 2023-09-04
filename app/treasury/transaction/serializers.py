@@ -93,7 +93,7 @@ class BimaTreasuryTransactionSerializer(AbstractSerializer):
         }
 
     def get_payment_method(self, obj):
-        if obj.partner:
+        if obj.payment_method:
             return {
                 "id": obj.payment_method.public_id.hex,
                 "name": obj.payment_method.name,
