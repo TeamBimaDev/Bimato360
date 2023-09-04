@@ -1,6 +1,7 @@
 from common.permissions.action_base_permission import ActionBasedPermission
 from core.abstract.views import AbstractViewSet
 
+from .filter import BimaTreasuryPaymentMethodFilter
 from .models import BimaTreasuryPaymentMethod
 from .serializers import BimaTreasuryPaymentMethodSerializer
 
@@ -9,7 +10,7 @@ class BimaTreasuryPaymentMethodViewSet(AbstractViewSet):
     queryset = BimaTreasuryPaymentMethod.objects.all()
     serializer_class = BimaTreasuryPaymentMethodSerializer
     permission_classes = (ActionBasedPermission,)
-    filterset_class = BimaTreasuryPaymentMethod
+    filterset_class = BimaTreasuryPaymentMethodFilter
 
     action_permissions = {
         'list': ['payment_method.can_read'],
