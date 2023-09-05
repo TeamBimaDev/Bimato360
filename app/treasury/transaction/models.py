@@ -203,7 +203,7 @@ class BimaTreasuryTransaction(AbstractModel):
         self.check_if_transaction_child_and_prevent_deletion(system_delete)
         handle_invoice_payment_deletion(self)
         if self.has_payment():
-            ValidationError(_("You cannot delete this transaction, you need to unlink invoice payment first"))
+            raise ValidationError(_("You cannot delete this transaction, you need to unlink invoice payment first"))
         super(BimaTreasuryTransaction, self).delete(*args, **kwargs)
 
     def has_payment(self):
