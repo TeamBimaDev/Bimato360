@@ -204,6 +204,7 @@ class TransactionSaleDocumentPaymentSerializer(serializers.ModelSerializer):
 
 class TransactionPurchaseDocumentPaymentSerializer(serializers.ModelSerializer):
     purchase_document = BimaErpPurchaseDocumentUnpaidSerializer()
+    transaction = BimaTreasuryTransactionSerializer()
 
     class Meta:
         model = TransactionPurchaseDocumentPayment
