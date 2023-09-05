@@ -23,5 +23,6 @@ class BimaTreasuryCashSerializer(AbstractSerializer):
     class Meta:
         model = BimaTreasuryCash
         fields = [
-            'id', 'name', 'active', 'note', 'company', 'company_public_id', 'created', 'updated'
+            'id', 'name', 'active', 'note', 'company', 'company_public_id', 'created', 'updated', 'balance'
         ]
+        read_only_fields = ('balance',)
