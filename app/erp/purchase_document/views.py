@@ -25,6 +25,7 @@ from .serializers import BimaErpPurchaseDocumentSerializer, BimaErpPurchaseDocum
     BimaErpPurchaseDocumentHistorySerializer, BimaErpPurchaseDocumentProductHistorySerializer
 from .service import PurchaseDocumentService, create_products_from_parents, generate_xls_report, generate_csv_report, \
     calculate_totals_for_selected_items, create_new_document
+from .service_payment_invoice import handle_invoice_payment
 
 
 class BimaErpPurchaseDocumentViewSet(AbstractViewSet):
@@ -321,6 +322,13 @@ class BimaErpPurchaseDocumentViewSet(AbstractViewSet):
 
         serializer = self.get_serializer(child, many=True)
         return paginator.get_paginated_response(serializer.data)
+
+    @action(detail=True, methods=['POST'], url_path="save_payment_with_transaction_credits")
+    def save_payment_with_transaction_credits(self, request, pk=None):
+        purchase_document = self.get_object()
+        transaction_public_ids = self.request.data.pop('transaction_public_ids')
+        handle_invoice_payment(purchase_document, transaction_public_ids)
+        return Response({"Payment": _("Payement effectué avec succes")})
 
     def get_request_data(self, request):
         document_type = request.data.get('document_type', '')

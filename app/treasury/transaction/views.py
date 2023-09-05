@@ -1,7 +1,6 @@
 import uuid
 from io import BytesIO
 
-from common.enums.transaction_enum import TransactionDirection
 from common.enums.transaction_enum import TransactionTypeIncomeOutcome
 from common.permissions.action_base_permission import ActionBasedPermission
 from core.abstract.views import AbstractViewSet
@@ -27,7 +26,7 @@ from .models import BimaTreasuryTransaction, TransactionSaleDocumentPayment, Tra
 from .serializers import BimaTreasuryTransactionSerializer, TransactionHistorySerializer, \
     TransactionSaleDocumentPaymentSerializer, TransactionPurchaseDocumentPaymentSerializer
 from .service import BimaTreasuryTransactionService
-from .service_payment_invoice import handle_invoice_payment, get_invoice_payment_customer_codes
+from .service_payment_invoice import handle_invoice_payment
 
 
 class BimaTreasuryTransactionViewSet(AbstractViewSet):
@@ -206,18 +205,6 @@ class BimaTreasuryTransactionViewSet(AbstractViewSet):
         transaction = self.get_object()
         purchase_document_payments = TransactionPurchaseDocumentPayment.objects.filter(transaction=transaction)
         serializer = TransactionPurchaseDocumentPaymentSerializer(purchase_document_payments, many=True)
-        return Response(serializer.data)
-
-    @action(detail=False, methods=['GET'], url_path='get_transactions_with_remaining_amount')
-    def transaction_purchase_document_payments(self, request):
-        partner_public_id = request.query_params.get('partner_public_id')
-        transactions = BimaTreasuryTransaction.objects.filter(
-            remaining_amount__gt=0,
-            direction=TransactionDirection.INCOME.name,
-            transaction_type__code__in=get_invoice_payment_customer_codes(),
-            partner__public_id=partner_public_id
-        )
-        serializer = BimaTreasuryTransactionSerializer(transactions, many=True)
         return Response(serializer.data)
 
     @action(detail=False, methods=['GET'], url_path='transaction_by_sale_document')
