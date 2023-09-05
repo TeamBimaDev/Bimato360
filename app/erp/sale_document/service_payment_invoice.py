@@ -4,6 +4,8 @@ import uuid
 from common.enums.sale_document_enum import SaleDocumentPaymentStatus
 from django.apps import apps
 from django.db import transaction
+from django.http import Http404
+from django.utils.translation import gettext_lazy as _
 
 logger = logging.getLogger(__name__)
 
@@ -24,6 +26,7 @@ def handle_invoice_payment(sale_document, transaction_public_ids):
         except Exception as ex:
             logger.error(f"An error occurred while saving payment invoice: {ex}", exc_info=True,
                          extra={'object_id': object.id})
+            raise Http404({"error": _("Erreur lors l'enregistrement du paiement")})
 
 
 def delete_old_paid_transaction_sale_document(sale_document):
@@ -53,13 +56,13 @@ def handle_invoice_payment_customer_invoice(sale_document, transaction_public_id
         if unpaid_amount <= remaining_amount:
             trans.remaining_amount = remaining_amount - unpaid_amount
             TransactionSaleDocumentPayment.objects.create(
-                transaction=transaction, sale_document=sale_document, amount_paid=remaining_amount - unpaid_amount
+                transaction=trans, sale_document=sale_document, amount_paid=remaining_amount - unpaid_amount
             )
             unpaid_amount = 0
             trans.save()
         else:
             TransactionSaleDocumentPayment.objects.create(
-                transaction=transaction, sale_document=sale_document, amount_paid=remaining_amount
+                transaction=trans, sale_document=sale_document, amount_paid=remaining_amount
             )
             trans.remaining_amount = 0
             trans.save()

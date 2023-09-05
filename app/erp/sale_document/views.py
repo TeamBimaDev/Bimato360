@@ -379,10 +379,11 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
         return Response({"Succes": _("Facture récurrente reactiver")})
 
     @action(detail=True, methods=['POST'], url_path="save_payment_with_transaction_credits")
-    def save_payment_with_transaction_credits(self):
+    def save_payment_with_transaction_credits(self, request, pk=None):
         sale_document = self.get_object()
         transaction_public_ids = self.request.data.pop('transaction_public_ids')
         handle_invoice_payment(sale_document, transaction_public_ids)
+        return Response({"Payment": _("Payement effectué avec succes")})
 
     def get_request_data(self, request):
         document_type = request.data.get('document_type', '')
