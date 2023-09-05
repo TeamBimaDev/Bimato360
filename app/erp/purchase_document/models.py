@@ -60,6 +60,7 @@ class BimaErpPurchaseDocumentProduct(models.Model):
 
 
 class BimaErpPurchaseDocument(AbstractModel):
+    skip_child_validation_form_transaction = False
     number = models.CharField(max_length=32, null=False, blank=False, unique=True)
     number_at_partner = models.CharField(max_length=32, null=True, blank=True, unique=False)
     date = models.DateField(null=False, blank=False)
@@ -116,7 +117,7 @@ class BimaErpPurchaseDocument(AbstractModel):
         default_permissions = ()
 
     def save(self, *args, **kwargs):
-        if self.pk is not None:  # only do this for existing instances, not when creating new ones
+        if self.pk is not None and not self.skip_child_validation_form_transaction:
             if self.bimaerppurchasedocument_set.exists():
                 raise ValidationError("Cannot modify a PurchaseDocument that has children.")
         super().save(*args, **kwargs)

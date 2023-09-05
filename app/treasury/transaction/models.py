@@ -193,7 +193,7 @@ class BimaTreasuryTransaction(AbstractModel):
 
                 self.handle_auto_transaction(old_transaction)
             else:
-                self.remaining_amount = get_total_amount_used_for_transaction(self)
+                self.remaining_amount = self.amount
                 super(BimaTreasuryTransaction, self).save(*args, **kwargs)
                 apply_effect(self)
                 self.handle_auto_transaction()

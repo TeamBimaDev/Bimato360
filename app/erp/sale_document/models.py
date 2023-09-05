@@ -100,6 +100,7 @@ class BimaErpSaleDocumentProduct(models.Model):
 
 
 class BimaErpSaleDocument(AbstractModel):
+    skip_child_validation_form_transaction = False
     number = models.CharField(
         max_length=32, null=False, blank=False, unique=True, verbose_name=_("Number")
     )
@@ -344,8 +345,8 @@ class BimaErpSaleDocument(AbstractModel):
         default_permissions = ()
 
     def save(self, *args, **kwargs):
-        skip_child_validation_form_transaction = kwargs.get("skip_child_validation_form_transaction", False)
-        if self.pk is not None and not skip_child_validation_form_transaction:
+
+        if self.pk is not None and not self.skip_child_validation_form_transaction:
             if self.bimaerpsaledocument_set.exists() and not self.is_recurring:
                 raise ValidationError("Cannot modify a SaleDocument that has children.")
         self.validate_all_required_field_for_recurring()

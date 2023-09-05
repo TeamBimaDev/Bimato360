@@ -69,7 +69,9 @@ def handle_invoice_payment_customer_invoice(sale_document, transaction_public_id
 def update_amount_paid_document(document, amount_paid, payment_status):
     document.amount_paid = amount_paid
     document.payment_status = payment_status
-    document.save(skip_child_validation_form_transaction=True)
+    document.skip_child_validation_form_transaction = True
+    document.save()
+    document.skip_child_validation_form_transaction = False
 
 
 def update_remaining_amount_in_transaction(transaction):
@@ -92,4 +94,6 @@ def handle_amount_paid_and_status_paid_sale_document(sale_document):
     else:
         sale_document.payment_status = SaleDocumentPaymentStatus.NOT_PAID.name
 
-    sale_document.save(skip_child_validation_form_transaction=True)
+    sale_document.skip_child_validation_form_transaction = True
+    sale_document.save()
+    sale_document.skip_child_validation_form_transaction = False
