@@ -195,6 +195,7 @@ class TransactionHistorySerializer(serializers.ModelSerializer):
 
 class TransactionSaleDocumentPaymentSerializer(serializers.ModelSerializer):
     sale_document = BimaErpSaleDocumentUnpaidSerializer()
+    transaction = BimaTreasuryTransactionSerializer()
 
     class Meta:
         model = TransactionSaleDocumentPayment
