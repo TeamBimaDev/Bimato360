@@ -29,6 +29,7 @@ from .serializers import BimaErpSaleDocumentSerializer, BimaErpSaleDocumentProdu
 from .service import SaleDocumentService, generate_recurring_sale_documents, create_products_from_parents, \
     create_new_document, calculate_totals_for_selected_items, generate_xls_report, generate_csv_report, \
     stop_recurring_sale_document, reactivate_recurring_sale_document, CreditNoteValidator
+from .service_payment_invoice import handle_invoice_payment
 
 
 class BimaErpSaleDocumentViewSet(AbstractViewSet):
@@ -57,6 +58,7 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
         return obj
 
     def update(self, request, *args, **kwargs):
+        transaction_public_ids = self.request.data.pop('transaction_public_ids')
         instance = self.get_object()
         new_status = request.data.get('status')
 
@@ -68,17 +70,18 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
             if not request.user.has_perm('erp.sale_document.can_rollback_status'):
                 return Response({'error': _('You do not have permission to rollback the status')},
                                 status=status.HTTP_403_FORBIDDEN)
-
+        handle_invoice_payment(transaction_public_ids)
         return super().update(request, *args, **kwargs)
 
     def create(self, request, *args, **kwargs):
+        transaction_public_ids = self.request.data.pop('transaction_public_ids')
         new_status = request.data.get('status')
 
         if new_status in ['CONFIRMED', 'CANCELED']:
             if not request.user.has_perm('erp.sale_document.can_change_status'):
                 return Response({'error': _('You do not have permission to set the status')},
                                 status=status.HTTP_403_FORBIDDEN)
-
+        handle_invoice_payment(transaction_public_ids)
         return super().create(request, *args, **kwargs)
 
     @action(detail=False, methods=['get'])

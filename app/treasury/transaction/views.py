@@ -11,6 +11,7 @@ from core.entity_tag.models import (
     BimaCoreEntityTag,
 )
 from core.entity_tag.serializers import BimaCoreEntityTagSerializer
+from django.apps import apps
 from django.db.models import Q
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
@@ -243,8 +244,17 @@ class BimaTreasuryTransactionViewSet(AbstractViewSet):
 
     @action(detail=False, methods=['GET'], url_path='get_transactions_available_for_sale_document')
     def get_transactions_available_for_sale_document(self, request, pk=None):
+        sale_document_public_id = request.query_params.get("sale_document_public_id")
+        if not sale_document_public_id or not uuid.UUID(sale_document_public_id, version=4):
+            return Response({"Error": _("Please provide a valid UUID")}, status=status.HTTP_400_BAD_REQUEST)
+        BimaErpSaleDocument = apps.get_model('erp', 'BimaErpSaleDocument')
+        sale_document = BimaErpSaleDocument.objects.get_object_by_public_id(sale_document_public_id)
+        if not sale_document:
+            return Response([])
+
         transactions = BimaTreasuryTransaction.objects.filter(
             Q(remaining_amount__gt=0) & Q(direction=TransactionTypeIncomeOutcome.INCOME.name)
+            & Q(partner=sale_document.partner)
             & (Q(transaction_type__code="INVOICE_PAYMENT_BANK") |
                Q(transaction_type__code="INVOICE_PAYMENT_CASH"))
         )
@@ -253,8 +263,17 @@ class BimaTreasuryTransactionViewSet(AbstractViewSet):
 
     @action(detail=False, methods=['GET'], url_path='get_transactions_available_for_purchase_document')
     def get_transactions_available_for_purchase_document(self, request, pk=None):
+        purchase_document_public_id = request.query_params.get("sale_document_public_id")
+        if not purchase_document_public_id or not uuid.UUID(purchase_document_public_id, version=4):
+            return Response({"Error": _("Please provide a valid UUID")}, status=status.HTTP_400_BAD_REQUEST)
+        BimaErpPurchaseDocument = apps.get_model('erp', 'BimaErpPurchaseDocument')
+        purchase_document = BimaErpPurchaseDocument.objects.get_object_by_public_id(purchase_document_public_id)
+        if not purchase_document:
+            return Response([])
+
         transactions = BimaTreasuryTransaction.objects.filter(
             Q(remaining_amount__gt=0) & Q(direction=TransactionTypeIncomeOutcome.OUTCOME.name)
+            & Q(partner=purchase_document.partner)
             & (Q(transaction_type__code="INVOICE_PAYMENT_OUTCOME_BANK") |
                Q(transaction_type__code="INVOICE_PAYMENT_OUTCOME_CASH"))
         )

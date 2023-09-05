@@ -49,7 +49,7 @@ def update_amount_paid_document(document, transactions, payment_status):
     else:
         document.payment_status = payment_status.NOT_PAID.name
 
-    document.save()
+    document.save(skip_child_validation_form_transaction=True)
 
 
 def get_total_amount_used_for_transaction(transaction):
@@ -96,7 +96,7 @@ def handle_invoice_payment_customer_invoice(transaction, document_public_ids):
             )
             remaining_amount = 0
 
-        doc.save()
+        doc.save(skip_child_validation_form_transaction=True)
 
     transaction.remaining_amount = remaining_amount
     transaction.save()
@@ -135,7 +135,7 @@ def handle_invoice_payment_supplier_invoice(transaction, document_public_ids):
             )
             remaining_amount = 0
 
-        doc.save()
+        doc.save(skip_child_validation_form_transaction=True)
 
     transaction.remaining_amount = remaining_amount
     transaction.save()
