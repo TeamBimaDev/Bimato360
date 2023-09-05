@@ -34,9 +34,13 @@ VALUES (1, 'b76eab54-8a85-40fc-971b-9c09756837bb', '2023-08-22 13:10:43.065253+0
 ALTER SEQUENCE public.treasury_bimatreasurytransactiontype_id_seq RESTART WITH 16;
 SELECT pg_catalog.setval('public.treasury_bimatreasurytransactiontype_id_seq', 16, true);
 
-delete from public.treasury_bimatreasurytransaction where transaction_type_id in  in (5, 6, 7, 8, 9, 10, 11);
+delete
+from public.treasury_bimatreasurytransaction
+where transaction_type_id in (5, 6, 7, 8, 9, 10, 11);
 
-delete from public.treasury_bimatreasurytransactiontype where id in (5, 6, 7, 8, 9, 10, 11);
+delete
+from public.treasury_bimatreasurytransactiontype
+where id in (5, 6, 7, 8, 9, 10, 11);
 
 INSERT INTO public.treasury_bimatreasurytransactiontype (id, public_id, created, updated, name, active, code, is_system,
                                                          income_outcome, cash_bank)

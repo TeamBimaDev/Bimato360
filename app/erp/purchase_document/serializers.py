@@ -4,6 +4,7 @@ from django.utils.translation import gettext_lazy as _
 from erp.partner.models import BimaErpPartner
 from erp.product.models import BimaErpProduct
 from rest_framework import serializers
+from treasury.payment_term.models import BimaTreasuryPaymentTerm
 from treasury.transaction.serializers_helper import SimpleTransactionPurchaseDocumentPaymentSerializer
 
 from .models import BimaErpPurchaseDocument, BimaErpPurchaseDocumentProduct
@@ -33,7 +34,7 @@ class BimaErpPurchaseDocumentSerializer(AbstractSerializer):
 
     payment_terms = serializers.SerializerMethodField(read_only=True)
     payment_terms_public_id = serializers.SlugRelatedField(
-        queryset=BimaErpPartner.objects.all(),
+        queryset=BimaTreasuryPaymentTerm.objects.all(),
         slug_field='public_id',
         source='payment_terms',
         write_only=True,
@@ -198,7 +199,7 @@ class BimaErpPurchaseDocumentUnpaidSerializer(AbstractSerializer):
 
     payment_terms = serializers.SerializerMethodField(read_only=True)
     payment_terms_public_id = serializers.SlugRelatedField(
-        queryset=BimaErpPartner.objects.all(),
+        queryset=BimaTreasuryPaymentTerm.objects.all(),
         slug_field='public_id',
         source='payment_terms',
         write_only=True,
