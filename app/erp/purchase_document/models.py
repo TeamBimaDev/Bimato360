@@ -140,7 +140,7 @@ class BimaErpPurchaseDocument(AbstractModel):
         return self.TYPE_DISPLAY_MAPPING.get(self.type, self.type)
 
     def has_payment(self):
-        return self.transactionpurchasedocumentpayment_set.exists()
+        return self.transactionpurchasedocumentpayment_set.exists() or self.transactionsaledocumentpayment_set.exists()
 
 
 def update_purchase_document_totals(purchase_document):
