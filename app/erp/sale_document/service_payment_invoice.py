@@ -56,7 +56,7 @@ def handle_invoice_payment_customer_invoice(sale_document, transaction_public_id
         if unpaid_amount <= remaining_amount:
             trans.remaining_amount = remaining_amount - unpaid_amount
             TransactionSaleDocumentPayment.objects.create(
-                transaction=trans, sale_document=sale_document, amount_paid=remaining_amount - unpaid_amount
+                transaction=trans, sale_document=sale_document, amount_paid=unpaid_amount
             )
             unpaid_amount = 0
             trans.save()
