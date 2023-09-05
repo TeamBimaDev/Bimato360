@@ -122,6 +122,11 @@ class BimaErpPurchaseDocument(AbstractModel):
                 raise ValidationError("Cannot modify a PurchaseDocument that has children.")
         super().save(*args, **kwargs)
 
+    def delete(self, *args, **kwargs):
+        if self.has_payment():
+            raise ValidationError(_("Cannot delete this invoice, you need to unpaid it first!"))
+        super(BimaErpPurchaseDocument, self).delete(*args, **kwargs)
+
     TYPE_DISPLAY_MAPPING = {
         PurchaseDocumentTypes.QUOTE.name: _("Quote"),
         PurchaseDocumentTypes.ORDER.name: _("Order"),
@@ -133,6 +138,9 @@ class BimaErpPurchaseDocument(AbstractModel):
     @property
     def display_type(self):
         return self.TYPE_DISPLAY_MAPPING.get(self.type, self.type)
+
+    def has_payment(self):
+        return self.transactionpurchasedocumentpayment_set.exists()
 
 
 def update_purchase_document_totals(purchase_document):

@@ -1,7 +1,7 @@
 import logging
 import uuid
 
-from common.enums.sale_document_enum import SaleDocumentPaymentStatus
+from common.enums.purchase_document_enum import PurchaseDocumentPaymentStatus, PurchaseDocumentStatus
 from django.apps import apps
 from django.db import transaction
 from django.http import Http404
@@ -16,8 +16,12 @@ def verify_transaction_public_ids(public_id):
     return False
 
 
+def verify_status_is_confirmed(purchase_document):
+    return purchase_document.status == PurchaseDocumentStatus.CONFIRMED.name
+
+
 def handle_invoice_payment(purchase_document, transaction_public_ids):
-    if verify_transaction_public_ids(transaction_public_ids):
+    if verify_transaction_public_ids(transaction_public_ids) and verify_status_is_confirmed(purchase_document):
         try:
             delete_old_paid_transaction_purchase_document(purchase_document)
             update_amount_paid_document(purchase_document, 0, PurchaseDocumentPaymentStatus.NOT_PAID.name)
@@ -27,6 +31,8 @@ def handle_invoice_payment(purchase_document, transaction_public_ids):
             logger.error(f"An error occurred while saving payment invoice: {ex}", exc_info=True,
                          extra={'object_id': object.id})
             raise Http404({"error": _("Erreur lors l'enregistrement du paiement")})
+    if not verify_status_is_confirmed(purchase_document):
+        delete_old_paid_transaction_purchase_document(purchase_document)
 
 
 def delete_old_paid_transaction_purchase_document(purchase_document):
@@ -92,11 +98,11 @@ def handle_amount_paid_and_status_paid_purchase_document(purchase_document):
     purchase_document.amount_paid = amount_paid
 
     if purchase_document.amount_paid == purchase_document.total_amount:
-        purchase_document.payment_status = SaleDocumentPaymentStatus.PAID.name
+        purchase_document.payment_status = PurchaseDocumentPaymentStatus.PAID.name
     elif purchase_document.amount_paid > 0:
-        purchase_document.payment_status = SaleDocumentPaymentStatus.PARTIAL_PAID.name
+        purchase_document.payment_status = PurchaseDocumentPaymentStatus.PARTIAL_PAID.name
     else:
-        purchase_document.payment_status = SaleDocumentPaymentStatus.NOT_PAID.name
+        purchase_document.payment_status = PurchaseDocumentPaymentStatus.NOT_PAID.name
 
     purchase_document.skip_child_validation_form_transaction = True
     purchase_document.save()

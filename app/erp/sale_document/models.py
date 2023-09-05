@@ -352,6 +352,11 @@ class BimaErpSaleDocument(AbstractModel):
         self.validate_all_required_field_for_recurring()
         super().save(*args, **kwargs)
 
+    def delete(self, *args, **kwargs):
+        if self.has_payment():
+            raise ValidationError(_("Cannot delete this invoice, you need to unpaid it first!"))
+        super(BimaErpSaleDocument, self).delete(*args, **kwargs)
+
     TYPE_DISPLAY_MAPPING = {
         SaleDocumentTypes.QUOTE.name: _("Quote"),
         SaleDocumentTypes.ORDER.name: _("Order"),
@@ -450,6 +455,9 @@ class BimaErpSaleDocument(AbstractModel):
             self.payment_status = "NOT_PAID"
 
         self.save()
+
+    def has_payment(self):
+        return self.transactionsaledocumentpayment_set.exists()
 
 
 def update_sale_document_totals(sale_document):

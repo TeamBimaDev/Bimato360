@@ -1,5 +1,5 @@
-from common.enums.purchase_document_enum import PurchaseDocumentPaymentStatus
-from common.enums.sale_document_enum import SaleDocumentPaymentStatus
+from common.enums.purchase_document_enum import PurchaseDocumentPaymentStatus, PurchaseDocumentStatus
+from common.enums.sale_document_enum import SaleDocumentPaymentStatus, SaleDocumentStatus
 from common.enums.transaction_enum import TransactionTypeIncomeOutcome
 from django.apps import apps
 from django.db import transaction
@@ -75,6 +75,9 @@ def handle_invoice_payment_customer_invoice(transaction, document_public_ids):
     ).order_by('date')
 
     for doc in sale_documents:
+        if not doc.status == SaleDocumentStatus.CONFIRMED.name:
+            continue
+
         update_amount_paid_sale_document(doc)
         doc.refresh_from_db()
         if remaining_amount <= 0:
@@ -116,6 +119,8 @@ def handle_invoice_payment_supplier_invoice(transaction, document_public_ids):
     ).order_by('date')
 
     for doc in purchase_documents:
+        if not doc.status == PurchaseDocumentStatus.CONFIRMED.name:
+            continue
         update_amount_paid_purchase_document(doc)
         doc.refresh_from_db()
         if remaining_amount <= 0:
