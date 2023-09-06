@@ -26,7 +26,7 @@ from .models import BimaTreasuryTransaction, TransactionSaleDocumentPayment, Tra
 from .serializers import BimaTreasuryTransactionSerializer, TransactionHistorySerializer, \
     TransactionSaleDocumentPaymentSerializer, TransactionPurchaseDocumentPaymentSerializer
 from .service import BimaTreasuryTransactionService
-from .service_payment_invoice import handle_invoice_payment
+from .service_payment_invoice import handle_invoice_payment, handle_credit_note_payment
 
 
 class BimaTreasuryTransactionViewSet(AbstractViewSet):
@@ -64,11 +64,13 @@ class BimaTreasuryTransactionViewSet(AbstractViewSet):
         sale_document_public_ids = self.request.data.pop('sale_documents_ids')
         instance = serializer.save()
         handle_invoice_payment(instance, sale_document_public_ids)
+        handle_credit_note_payment(instance, sale_document_public_ids)
 
     def perform_update(self, serializer):
         sale_document_public_ids = self.request.data.pop('sale_documents_ids')
         instance = serializer.save()
         handle_invoice_payment(instance, sale_document_public_ids)
+        handle_credit_note_payment(instance, sale_document_public_ids)
 
     @action(detail=False, methods=['get'])
     def get_unique_number(self, request, **kwargs):

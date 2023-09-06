@@ -55,3 +55,14 @@ VALUES (16, '7e418c5e-d33e-4fd1-8012-9b110f95c416', '2023-08-22 13:10:43.065253+
 
 ALTER SEQUENCE public.treasury_bimatreasurytransactiontype_id_seq RESTART WITH 20;
 SELECT pg_catalog.setval('public.treasury_bimatreasurytransactiontype_id_seq', 20, true);
+
+INSERT INTO public.treasury_bimatreasurytransactiontype (id, public_id, created, updated, name, active, code, is_system,
+                                                         income_outcome, cash_bank)
+VALUES (20, 'bbadb609-1b1f-4ae7-8275-5b73d6c7f87b', '2023-08-22 13:10:43.065253+01', '2023-08-22 13:10:43.065253+01',
+        'Décaissement facture avoir', true, 'CREDIT_NOTE_OUTCOME_BANK', true, 'OUTCOME', 'BANK'),
+       (21, 'd0664baa-fd44-4c43-a1eb-d756d170b3c0', '2023-08-22 13:10:43.065253+01', '2023-08-22 13:10:43.065253+01',
+        'Décaissement facture avoir', true, 'CREDIT_NOTE_OUTCOME_CASH', true, 'OUTCOME', 'CASH');
+
+
+ALTER SEQUENCE public.treasury_bimatreasurytransactiontype_id_seq RESTART WITH 22;
+SELECT pg_catalog.setval('public.treasury_bimatreasurytransactiontype_id_seq', 22, true);

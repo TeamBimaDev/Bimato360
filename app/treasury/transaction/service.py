@@ -133,8 +133,8 @@ class BimaTreasuryTransactionService:
         if transaction.nature == TransactionNature.CASH.name:
             params = {
                 "number": number,
-                "nature": "BANK",
-                "direction": "INCOME",
+                "nature": TransactionNature.BANK.name,
+                "direction": TransactionDirection.INCOME.name,
                 "transaction_type": complementary_transaction_type,
                 "payment_method": payment_method_for_bank,
                 "bank_account": transaction.bank_account,
@@ -147,8 +147,8 @@ class BimaTreasuryTransactionService:
         elif transaction.nature == TransactionNature.BANK.name:
             params = {
                 "number": number,
-                "nature": "CASH",
-                "direction": "INCOME",
+                "nature": TransactionNature.CASH.name,
+                "direction": TransactionDirection.INCOME.name,
                 "transaction_type": complementary_transaction_type,
                 "payment_method": payment_method_for_cash,
                 "cash": transaction.cash,
