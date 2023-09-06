@@ -233,7 +233,8 @@
     </div>
     {% if company_data.company.show_template_logo %}
         <div class="company_logo" id="header-right">
-            <img src="{{ request.scheme }}://{{ request.get_host }}{{ MEDIA_URL }}{{ company_data.favorite_logo.file_path }}"
+            <img src="{{ request.scheme }}://
+                    {{ request.get_host }}{{ MEDIA_URL }}{{ company_data.favorite_logo.file_path }}"
                  alt="{% trans "Company Logo" %}" class="logo"/>
         </div>
     {% endif %}
@@ -344,14 +345,14 @@
 {% if current_document.status == 'CONFIRMED' and current_document.type == 'INVOICE' %}
     <div class="payment_details">
         <span class="payment_status_span_label">{% trans 'PAYMENT_STATUS' %} :</span>
-        <span class="payment_status_span_value">{{ current_document.payment_status }} :</span>
+        <span class="payment_status_span_value">{{ current_document.translated_payment_status }}</span>
         {% if current_document.amount_paid != current_document.total_amount %}
             <br/>
             <span class="payment_status_span_label">{% trans 'PAYMENT_AMOUNT_PAID' %} :</span>
-            <span class="payment_status_span_value payment_status_paid_value">{{ current_document.amount_paid }} :</span>
+            <span class="payment_status_span_value payment_status_paid_value">{{ current_document.amount_paid }}</span>
             <br/>
             <span class="payment_status_span_label">{% trans 'PAYMENT_AMOUNT_REMAIN' %} :</span>
-            <span class="payment_status_span_value payment_status_remain_value">{{ current_document.remain_amount }} :</span>
+            <span class="payment_status_span_value payment_status_remain_value">{{ current_document.remain_amount }}</span>
 
         {% endif %}
     </div>

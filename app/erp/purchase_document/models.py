@@ -139,6 +139,14 @@ class BimaErpPurchaseDocument(AbstractModel):
     def display_type(self):
         return self.TYPE_DISPLAY_MAPPING.get(self.type, self.type)
 
+    @property
+    def remain_amount(self):
+        return self.total_amount - self.amount_paid
+
+    @property
+    def translated_payment_status(self):
+        return str(_(self.payment_status))
+
     def has_payment(self):
         return self.transactionpurchasedocumentpayment_set.exists()
 

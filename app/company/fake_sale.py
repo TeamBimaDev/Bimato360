@@ -5,8 +5,8 @@ from common.enums.company_type import get_company_type_choices
 from common.enums.entity_status import get_entity_status_choices
 from common.enums.gender import get_gender_choices
 from common.enums.partner_type import get_partner_type_choices
-from common.enums.sale_document_enum import get_sale_document_status, get_sale_document_types, \
-    get_sale_document_validity, get_sale_document_recurring_interval
+from common.enums.sale_document_enum import get_payment_status
+from common.enums.sale_document_enum import get_sale_document_validity, get_sale_document_recurring_interval
 from core.address.models import BimaCoreAddress
 from core.country.models import BimaCoreCountry
 from core.state.models import BimaCoreState
@@ -19,27 +19,39 @@ fake = faker.Faker()
 
 
 def fake_bima_erp_sale_document(partner):
+    payment_status = random.choice([x[0] for x in get_payment_status()])
+    total_amount = 4500
+
+    if payment_status == 'NOT_PAID':
+        amount_paid = 0
+    elif payment_status == 'PARTIAL_PAID':
+        amount_paid = fake.random_int(min=1, max=(total_amount - 1))
+    else:
+        amount_paid = total_amount
+
     sale_document = BimaErpSaleDocument(
         id=fake.random_int(min=1, max=10),
         number=fake.random_number(digits=6, fix_len=True),
         date=fake.date_this_year(),
-        status=random.choice([x[0] for x in get_sale_document_status()]),
-        type=random.choice([x[0] for x in get_sale_document_types()]),
+        status='CONFIRMED',
+        type='INVOICE',
         partner=partner,
         vat_label="Euro",
         vat_amount=fake.random_int(min=1, max=40),
         note=fake.text(),
         private_note=fake.text(),
         validity=random.choice([x[0] for x in get_sale_document_validity()]),
-        payment_terms=fake.text(),
         delivery_terms=fake.text(),
         total_amount_without_vat=fake.random_int(min=1, max=10),
         total_after_discount=fake.random_int(min=1, max=20),
         total_vat=fake.random_int(min=1, max=30),
-        total_amount=fake.random_int(min=1, max=40),
+        total_amount=total_amount,
         total_discount=fake.random_int(min=1, max=50),
         is_recurring=fake.boolean(),
         recurring_interval=random.choice([x[0] for x in get_sale_document_recurring_interval()]),
+        payment_status=payment_status,
+        amount_paid=amount_paid
+
     )
     return sale_document
 

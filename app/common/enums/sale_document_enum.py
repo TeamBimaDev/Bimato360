@@ -56,9 +56,15 @@ class SaleDocumentRecurringCycle(Enum):
 
 
 class SaleDocumentPaymentStatus(Enum):
-    NOT_PAID = _("NOT_PAD")
+    NOT_PAID = _("NOT_PAID")
     PARTIAL_PAID = _("PARTIAL_PAID")
     PAID = _("PAID")
+
+    @classmethod
+    def get_value_by_name(cls, name):
+        return next(
+            (item.value for item in cls if item.name.lower() == name.lower()), None
+        )
 
 
 def get_sale_document_recurring_cycle():

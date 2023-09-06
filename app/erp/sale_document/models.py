@@ -11,6 +11,7 @@ from common.enums.sale_document_enum import (
     SaleDocumentRecurringInterval,
     SaleDocumentRecurringCycle,
     get_payment_status,
+    SaleDocumentPaymentStatus
 )
 from common.enums.transaction_enum import PaymentTermType
 from core.abstract.models import AbstractModel
@@ -372,6 +373,10 @@ class BimaErpSaleDocument(AbstractModel):
     @property
     def remain_amount(self):
         return self.total_amount - self.amount_paid
+
+    @property
+    def translated_payment_status(self):
+        return str(SaleDocumentPaymentStatus.get_value_by_name(self.payment_status))
 
     def validate_all_required_field_for_recurring(self):
         if self.is_recurring:

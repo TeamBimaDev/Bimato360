@@ -32,7 +32,7 @@ class PurchaseDocumentRecurringInterval(Enum):
 
 
 class PurchaseDocumentPaymentStatus(Enum):
-    NOT_PAID = _("NOT_PAD")
+    NOT_PAID = _("NOT_PAID")
     PARTIAL_PAID = _("PARTIAL_PAID")
     PAID = _("PAID")
 
