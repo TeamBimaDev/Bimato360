@@ -129,9 +129,10 @@ class BimaTreasuryTransactionService:
         payment_method_for_bank = BimaTreasuryPaymentMethod.objects.get(
             code="TRANSFER_INCOME", income_outcome="INCOME"
         )
-        number = BimaTreasuryTransactionService.generate_unique_number(),
+        number = BimaTreasuryTransactionService.generate_unique_number()
         if transaction.nature == TransactionNature.CASH.name:
             params = {
+                "number": number,
                 "nature": "BANK",
                 "direction": "INCOME",
                 "transaction_type": complementary_transaction_type,
@@ -145,6 +146,7 @@ class BimaTreasuryTransactionService:
             }
         elif transaction.nature == TransactionNature.BANK.name:
             params = {
+                "number": number,
                 "nature": "CASH",
                 "direction": "INCOME",
                 "transaction_type": complementary_transaction_type,
@@ -157,7 +159,7 @@ class BimaTreasuryTransactionService:
                 "reference": transaction.reference,
             }
 
-        created_transaction = BimaTreasuryTransaction.objects.create(number=number, **params)
+        created_transaction = BimaTreasuryTransaction.objects.create(**params)
         logger.info(
             f"Auto transaction {created_transaction.pk} created for transaction {transaction.pk}"
         )
@@ -265,35 +267,34 @@ class TransactionEffectStrategy:
 
 class CashTransactionEffectStrategy(TransactionEffectStrategy):
     def apply(self, transaction):
-        transaction.cash.balance += (
-            transaction.amount
-            if transaction.direction == TransactionDirection.INCOME.name
-            else -transaction.amount
-        )
+        if transaction.direction == TransactionDirection.INCOME.name:
+            transaction.cash.balance += transaction.amount
+        else:
+            transaction.cash.balance -= transaction.amount
+
         transaction.cash.save()
 
     def revert(self, transaction):
-        transaction.cash.balance -= (
-            transaction.amount
-            if transaction.direction == TransactionDirection.INCOME.name
-            else +transaction.amount
-        )
+        if transaction.direction == TransactionDirection.INCOME.name:
+            transaction.cash.balance -= transaction.amount
+        else:
+            transaction.cash.balance += transaction.amount
         transaction.cash.save()
 
 
 class BankTransactionEffectStrategy(TransactionEffectStrategy):
     def apply(self, transaction):
-        transaction.bank_account.balance += (
-            transaction.amount
-            if transaction.direction == TransactionDirection.INCOME.name
-            else -transaction.amount
-        )
+        if transaction.direction == TransactionDirection.INCOME.name:
+            transaction.bank_account.balance += transaction.amount
+        else:
+            transaction.bank_account.balance -= transaction.amount
+
         transaction.bank_account.save()
 
     def revert(self, transaction):
-        transaction.bank_account.balance -= (
-            transaction.amount
-            if transaction.direction == TransactionDirection.INCOME.name
-            else +transaction.amount
-        )
+        if transaction.direction == TransactionDirection.INCOME.name:
+            transaction.bank_account.balance -= transaction.amount
+        else:
+            transaction.bank_account.balance += transaction.amount
+
         transaction.bank_account.save()

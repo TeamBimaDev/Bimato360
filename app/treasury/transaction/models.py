@@ -31,6 +31,7 @@ logger = logging.getLogger(__name__)
 
 class BimaTreasuryTransaction(AbstractModel):
     skip_child_validation = False
+    skip_revert_apply_effect_validation = False
     number = models.CharField(
         max_length=32, null=False, blank=False, unique=True, verbose_name=_("Number")
     )
@@ -183,19 +184,23 @@ class BimaTreasuryTransaction(AbstractModel):
                 self.check_if_transaction_child_and_prevent_modification(
                     old_transaction
                 )
-
-                revert_effect(old_transaction)
+                if not self.__class__.skip_revert_apply_effect_validation:
+                    revert_effect(old_transaction)
                 self.remaining_amount = get_total_amount_used_for_transaction(self)
 
                 super(BimaTreasuryTransaction, self).save(*args, **kwargs)
 
-                apply_effect(self)
+                if not self.__class__.skip_revert_apply_effect_validation:
+                    self.refresh_from_db()
+                    apply_effect(self)
 
                 self.handle_auto_transaction(old_transaction)
             else:
                 self.remaining_amount = self.amount
                 super(BimaTreasuryTransaction, self).save(*args, **kwargs)
-                apply_effect(self)
+                if not self.__class__.skip_revert_apply_effect_validation:
+                    self.refresh_from_db()
+                    apply_effect(self)
                 self.handle_auto_transaction()
 
     def delete(self, *args, **kwargs):
@@ -258,15 +263,18 @@ class BimaTreasuryTransaction(AbstractModel):
 
     def apply_change_on_transaction_child(self, old_transaction, child_transaction):
         revert_effect(child_transaction)
-
+        child_transaction.refresh_from_db()
+        self.refresh_from_db()
         child_transaction.amount = self.amount
         child_transaction.date = self.date
         child_transaction.reference = self.reference
         child_transaction.cash = self.cash
         child_transaction.bank_account = self.bank_account
 
+        self.__class__.skip_revert_apply_effect_validation = True
         self.__class__.skip_child_validation = True
         child_transaction.save()
+        self.__class__.skip_revert_apply_effect_validation = False
         self.__class__.skip_child_validation = False
 
         apply_effect(child_transaction)

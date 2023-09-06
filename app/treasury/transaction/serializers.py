@@ -105,6 +105,7 @@ class BimaTreasuryTransactionSerializer(AbstractSerializer):
             return {
                 "id": obj.cash.public_id.hex,
                 "name": obj.cash.name,
+                "balance": obj.cash.balance,
             }
         return None
 
@@ -113,6 +114,7 @@ class BimaTreasuryTransactionSerializer(AbstractSerializer):
             return {
                 "id": obj.bank_account.public_id.hex,
                 "name": obj.bank_account.name,
+                "balance": obj.bank_account.balance,
                 "bank": obj.bank_account.bank.name,
                 "currency": obj.bank_account.currency.name,
                 "symbol": obj.bank_account.currency.symbol,
