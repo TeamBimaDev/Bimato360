@@ -4,7 +4,7 @@ from uuid import UUID
 
 import django_filters
 from common.converters.default_converters import str_to_bool
-from common.enums.sale_document_enum import SaleDocumentValidity
+from common.enums.sale_document_enum import SaleDocumentValidity, SaleDocumentPaymentStatus
 from django.db.models import Q
 from django.utils import timezone
 
@@ -26,11 +26,12 @@ class SaleDocumentFilter(django_filters.FilterSet):
     product = django_filters.CharFilter(method='filter_product_hex')
     is_recurring = django_filters.CharFilter(method='filter_by_recurring')
     is_recurring_parent = django_filters.CharFilter(method='filter_by_recurring_parent')
+    payment_status = django_filters.CharFilter(method='filter_by_payment_status')
 
     class Meta:
         model = BimaErpSaleDocument
         fields = ['number', 'status', 'type', 'partner', 'date_gte', 'date_lte', 'total_amount_gte', 'total_amount_lte',
-                  'validity_expired']
+                  'validity_expired', 'payment_status']
 
     def filter_validity_expired(self, queryset, name, value):
         current_date = timezone.now().date()
@@ -75,3 +76,7 @@ class SaleDocumentFilter(django_filters.FilterSet):
         except Exception as ex:
             logger.error(f"Unable to log by filter recurring {ex}")
             return queryset
+
+    def filter_by_payment_status(self, queryset, name, value):
+        if value.lower() in [sdp.name for sdp in SaleDocumentPaymentStatus]:
+            return queryset.filter(payment_status=value.upper())

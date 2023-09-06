@@ -1,11 +1,10 @@
+from datetime import timedelta
 from uuid import UUID
 
 import django_filters
-from django.utils import timezone
-from datetime import timedelta
-
+from common.enums.purchase_document_enum import PurchaseDocumentValidity, PurchaseDocumentPaymentStatus
 from django.db.models import Q
-from common.enums.purchase_document_enum import PurchaseDocumentValidity
+from django.utils import timezone
 
 from .models import BimaErpPurchaseDocument
 
@@ -21,6 +20,7 @@ class PurchaseDocumentFilter(django_filters.FilterSet):
     total_amount_lte = django_filters.NumberFilter(field_name='total_amount', lookup_expr='lte')
     validity_expired = django_filters.CharFilter(method='filter_validity_expired')
     product = django_filters.CharFilter(method='filter_product_hex')
+    payment_status = django_filters.CharFilter(method='filter_by_payment_status')
 
     class Meta:
         model = BimaErpPurchaseDocument
@@ -56,3 +56,7 @@ class PurchaseDocumentFilter(django_filters.FilterSet):
             return queryset.filter(bimaerppurchasedocumentproduct__product__public_id=product_public_id)
         except ValueError:
             return queryset
+
+    def filter_by_payment_status(self, queryset, name, value):
+        if value.lower() in [sdp.name for sdp in PurchaseDocumentPaymentStatus]:
+            return queryset.filter(payment_status=value.upper())
