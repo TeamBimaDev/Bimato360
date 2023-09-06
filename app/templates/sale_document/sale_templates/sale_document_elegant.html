@@ -26,7 +26,7 @@
         }
 
         #footer-left {
-			position: absolute;
+            position: absolute;
             bottom: 0;
             position: running(footer-left);
             font-size: 13px;
@@ -37,12 +37,12 @@
         }
 
         .sale_main_body {
-			margin-left:1rem;
-			margin-right:1rem;
-			margin-bottom:1rem;
+            margin-left: 1rem;
+            margin-right: 1rem;
+            margin-bottom: 1rem;
             font-family: {{ company_data.company.default_font_family }};
             color: {{ company_data.company.default_color }};
-			position: relative;
+            position: relative;
         }
 
         .div_header {
@@ -98,9 +98,9 @@
             flex-direction: column;
             gap: 1rem;
             color: {{ company_data.company.default_color }};
-			widht:100%;
-			
-			
+            widht: 100%;
+
+
         }
 
         .invoice_type_and_number {
@@ -110,9 +110,9 @@
             font-style: italic;
             color: {{ company_data.company.default_color }};
             width: 310px;
-			
+
         }
-	
+
         .invoice_date_span_label {
             width: 310px;
         }
@@ -121,7 +121,7 @@
             padding-top: .7rem;
             color: {{ company_data.company.default_color }};
             width: 310px;
-			
+
         }
 
         .products_table {
@@ -187,7 +187,7 @@
 
         .table_totals td {
             padding-bottom: 0.25rem;
-			padding-top: 0.25rem;
+            padding-top: 0.25rem;
             color: {{ company_data.company.default_color }};
         }
 
@@ -201,12 +201,29 @@
             margin-top: 1rem;
             color: {{ company_data.company.default_color }};
         }
-		
-		.background_color_grey{
-			background-color: #E0E0E0;
-			vertical-align:middle;
-			padding:0 0.5rem
-		}
+
+        .background_color_grey {
+            background-color: #E0E0E0;
+            vertical-align: middle;
+            padding: 0 0.5rem
+        }
+
+        .payment_details {
+            border: 1px solid{{ company_data.company.default_color }};
+            padding: 10px;
+            margin-top: 1rem;
+        }
+
+        .payment_status_span_label {
+            width: 100px;
+            font-weight: bold;
+            color: {{ company_data.company.default_color }};
+        }
+
+        .payment_status_span_value {
+            font-style: italic;
+            color: {{ company_data.company.default_color }};
+        }
     </style>
 </head>
 <body class="sale_main_body">
@@ -216,7 +233,7 @@
     </div>
     {% if company_data.company.show_template_logo %}
         <div class="company_logo" id="header-right">
-            <img src="{{ request.scheme }}://{{ request.get_host }}{{ MEDIA_URL }}{{ company_data.favorite_logo.file_path }}" 
+            <img src="{{ request.scheme }}://{{ request.get_host }}{{ MEDIA_URL }}{{ company_data.favorite_logo.file_path }}"
                  alt="{% trans "Company Logo" %}" class="logo"/>
         </div>
     {% endif %}
@@ -242,10 +259,10 @@
     <div class="div_invoice_details">
         <div class="invoice_type_and_number">
             {{ translated_type|upper }}
-        {% if current_document.status != 'CONFIRMED' %}
-			{{ translated_status|upper }}
-		{% endif %}
-		{{ current_document.number }}
+            {% if current_document.status != 'CONFIRMED' %}
+                {{ translated_status|upper }}
+            {% endif %}
+            {{ current_document.number }}
         </div>
         <div class="invoice_date">
             <span class="invoice_date_span_label">{% trans "SALE_DOCUMENT_DATE" %}</span>
@@ -322,6 +339,22 @@
             <td class="text_right total_bold background_color_grey">{{ current_document.total_amount }}</td>
         </tr>
     </table>
+{% endif %}
+
+{% if current_document.status == 'CONFIRMED' and current_document.type == 'INVOICE' %}
+    <div class="payment_details">
+        <span class="payment_status_span_label">{% trans 'PAYMENT_STATUS' %} :</span>
+        <span class="payment_status_span_value">{{ current_document.payment_status }} :</span>
+        {% if current_document.amount_paid != current_document.total_amount %}
+            <br/>
+            <span class="payment_status_span_label">{% trans 'PAYMENT_AMOUNT_PAID' %} :</span>
+            <span class="payment_status_span_value payment_status_paid_value">{{ current_document.amount_paid }} :</span>
+            <br/>
+            <span class="payment_status_span_label">{% trans 'PAYMENT_AMOUNT_REMAIN' %} :</span>
+            <span class="payment_status_span_value payment_status_remain_value">{{ current_document.remain_amount }} :</span>
+
+        {% endif %}
+    </div>
 {% endif %}
 
 <div class="note">{{ current_document.note }}</div>

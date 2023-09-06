@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-09-05 15:10+0100\n"
+"POT-Creation-Date: 2023-09-06 14:50+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -176,7 +176,7 @@ msgstr "Non disponible à la vente"
 
 #: .\common\enums\purchase_document_enum.py:7
 #: .\common\enums\sale_document_enum.py:8 .\erp\purchase_document\models.py:131
-#: .\erp\sale_document\models.py:361
+#: .\erp\sale_document\models.py:362
 msgid "Quote"
 msgstr "Devis"
 
@@ -187,12 +187,12 @@ msgstr "COMMANDE"
 
 #: .\common\enums\purchase_document_enum.py:9
 #: .\common\enums\sale_document_enum.py:10
-#: .\erp\purchase_document\models.py:133 .\erp\sale_document\models.py:363
+#: .\erp\purchase_document\models.py:133 .\erp\sale_document\models.py:364
 msgid "Invoice"
 msgstr "Facture"
 
 #: .\common\enums\purchase_document_enum.py:10
-#: .\common\enums\sale_document_enum.py:11 .\erp\sale_document\models.py:364
+#: .\common\enums\sale_document_enum.py:11 .\erp\sale_document\models.py:365
 msgid "Credit note"
 msgstr "Avoir"
 
@@ -315,7 +315,7 @@ msgid "OUTCOME"
 msgstr "Sortie"
 
 #: .\common\enums\transaction_enum.py:16 .\common\enums\transaction_enum.py:25
-#: .\treasury\transaction\models.py:64
+#: .\treasury\transaction\models.py:65
 msgid "Cash"
 msgstr "Caisse"
 
@@ -728,11 +728,11 @@ msgid "VAT ID Number"
 msgstr "N° TVA"
 
 #: .\erp\partner\models.py:72 .\erp\product\models.py:35
-#: .\erp\sale_document\models.py:114
+#: .\erp\sale_document\models.py:115
 msgid "Status"
 msgstr "Statut"
 
-#: .\erp\partner\models.py:74 .\erp\sale_document\models.py:139
+#: .\erp\partner\models.py:74 .\erp\sale_document\models.py:140
 msgid "Note"
 msgstr "Note"
 
@@ -782,7 +782,7 @@ msgstr "Merci de vérifier le type de partenaire ou celui de la sociéte"
 msgid "Name"
 msgstr "Nom"
 
-#: .\erp\product\models.py:17 .\treasury\transaction\models.py:97
+#: .\erp\product\models.py:17 .\treasury\transaction\models.py:98
 msgid "Reference"
 msgstr "Référence"
 
@@ -794,7 +794,7 @@ msgstr "Description"
 msgid "EAN13"
 msgstr "EAN13"
 
-#: .\erp\product\models.py:21 .\erp\sale_document\models.py:122
+#: .\erp\product\models.py:21 .\erp\sale_document\models.py:123
 #: .\templates\partner\pdf.html:35 .\templates\product\pdf.html:39
 msgid "Type"
 msgstr "Type"
@@ -885,26 +885,28 @@ msgstr "Merci de vérifier les données"
 msgid "Item exists in a sale document"
 msgstr "L'article existe dans un document de vente"
 
-#: .\erp\purchase_document\models.py:84 .\erp\sale_document\models.py:153
+#: .\erp\purchase_document\models.py:84 .\erp\sale_document\models.py:154
 msgid "Payment Terms"
 msgstr "Condition de paiement"
 
-#: .\erp\purchase_document\models.py:106 .\erp\sale_document\models.py:314
-#: .\treasury\transaction\models.py:94
+#: .\erp\purchase_document\models.py:106 .\erp\sale_document\models.py:315
+#: .\treasury\transaction\models.py:95
 #, fuzzy
 #| msgid "Total Amount"
 msgid "Amount Paid"
 msgstr "Montant Total"
 
-#: .\erp\purchase_document\models.py:127 .\erp\sale_document\models.py:357
+#: .\erp\purchase_document\models.py:127 .\erp\sale_document\models.py:358
 msgid "Cannot delete this invoice, you need to unpaid it first!"
-msgstr "Impossible de supprimer cette facture, vous devez d'abord la marquer comme impayée !"
+msgstr ""
+"Impossible de supprimer cette facture, vous devez d'abord la marquer comme "
+"impayée !"
 
-#: .\erp\purchase_document\models.py:132 .\erp\sale_document\models.py:362
+#: .\erp\purchase_document\models.py:132 .\erp\sale_document\models.py:363
 msgid "Order"
 msgstr "Bon de commande"
 
-#: .\erp\purchase_document\serializers.py:155
+#: .\erp\purchase_document\serializers.py:156
 #: .\erp\sale_document\serializers.py:265
 #: .\erp\sale_document\serializers.py:274
 msgid "No product with this id exists."
@@ -963,194 +965,194 @@ msgstr "Tous les documents doivent appartenir au même partenaire"
 msgid "Please give the type of the document"
 msgstr "Veuillez indiquer le type de document"
 
-#: .\erp\sale_document\models.py:105 .\treasury\transaction\models.py:35
+#: .\erp\sale_document\models.py:106 .\treasury\transaction\models.py:36
 #, fuzzy
 #| msgid "Serial Number"
 msgid "Number"
 msgstr "Numéro de série"
 
-#: .\erp\sale_document\models.py:107 .\treasury\transaction\models.py:81
+#: .\erp\sale_document\models.py:108 .\treasury\transaction\models.py:82
 msgid "Date"
 msgstr "Date"
 
-#: .\erp\sale_document\models.py:126 .\treasury\transaction\models.py:78
+#: .\erp\sale_document\models.py:127 .\treasury\transaction\models.py:79
 #, fuzzy
 #| msgid "Partner Type"
 msgid "Partner"
 msgstr "Type de partenaire"
 
-#: .\erp\sale_document\models.py:129
+#: .\erp\sale_document\models.py:130
 msgid "VAT Label"
 msgstr "Libelle T.V.A"
 
-#: .\erp\sale_document\models.py:137
+#: .\erp\sale_document\models.py:138
 #, fuzzy
 #| msgid "Total Amount"
 msgid "VAT Amount"
 msgstr "Montant Total"
 
-#: .\erp\sale_document\models.py:141
+#: .\erp\sale_document\models.py:142
 msgid "Private Note"
 msgstr "Note privée"
 
-#: .\erp\sale_document\models.py:147
+#: .\erp\sale_document\models.py:148
 msgid "Validity"
 msgstr "Validité"
 
-#: .\erp\sale_document\models.py:158
+#: .\erp\sale_document\models.py:159
 msgid "Delivery Terms"
 msgstr "Condition de livraison"
 
-#: .\erp\sale_document\models.py:166
+#: .\erp\sale_document\models.py:167
 #, fuzzy
 #| msgid "Total Without VAT"
 msgid "Total Amount without VAT"
 msgstr "Total HT"
 
-#: .\erp\sale_document\models.py:174
+#: .\erp\sale_document\models.py:175
 #, fuzzy
 #| msgid "Total Discount"
 msgid "Total After Discount"
 msgstr "Total Remise"
 
-#: .\erp\sale_document\models.py:182
+#: .\erp\sale_document\models.py:183
 #: .\templates\sale_document\delivery_note.html:245
 msgid "Total VAT"
 msgstr "Total TVA"
 
-#: .\erp\sale_document\models.py:190
+#: .\erp\sale_document\models.py:191
 #: .\templates\sale_document\delivery_note.html:249
 msgid "Total Amount"
 msgstr "Montant Total"
 
-#: .\erp\sale_document\models.py:198
+#: .\erp\sale_document\models.py:199
 #: .\templates\sale_document\delivery_note.html:240
 msgid "Total Discount"
 msgstr "Total Remise"
 
-#: .\erp\sale_document\models.py:201
+#: .\erp\sale_document\models.py:202
 msgid "Parents"
 msgstr "Parent"
 
-#: .\erp\sale_document\models.py:204
+#: .\erp\sale_document\models.py:205
 msgid "Is Recurring?"
 msgstr "Est reccurent?"
 
-#: .\erp\sale_document\models.py:207
+#: .\erp\sale_document\models.py:208
 msgid "Is Recurring Parent?"
 msgstr "Est recurrent parent?"
 
-#: .\erp\sale_document\models.py:210
+#: .\erp\sale_document\models.py:211
 msgid "Is Recurring Ended?"
 msgstr "Recurrent terminé?"
 
-#: .\erp\sale_document\models.py:216
+#: .\erp\sale_document\models.py:217
 msgid "Recurring Initial Parent ID"
 msgstr "Recurrnet parent initial"
 
-#: .\erp\sale_document\models.py:222
+#: .\erp\sale_document\models.py:223
 msgid "Recurring Initial Parent Public ID"
 msgstr "Recurrent parent intial ID"
 
-#: .\erp\sale_document\models.py:229
+#: .\erp\sale_document\models.py:230
 msgid "Recurring Interval"
 msgstr "Interval de recurrence"
 
-#: .\erp\sale_document\models.py:235
+#: .\erp\sale_document\models.py:236
 msgid "Recurring Interval Type Custom Number"
 msgstr "Numéro personnalisé de type d'intervalle récurrent"
 
-#: .\erp\sale_document\models.py:241
+#: .\erp\sale_document\models.py:242
 msgid "Recurring Interval Type Custom Unit"
 msgstr "Interval personnaliser"
 
-#: .\erp\sale_document\models.py:247
+#: .\erp\sale_document\models.py:248
 msgid "Recurring Cycle"
 msgstr "Cycle de récurrence"
 
-#: .\erp\sale_document\models.py:253
+#: .\erp\sale_document\models.py:254
 msgid "Recurring Cycle Number to Repeat"
 msgstr "Nombre de cycle récurrent à répéter"
 
-#: .\erp\sale_document\models.py:256
+#: .\erp\sale_document\models.py:257
 msgid "Recurring Cycle Stop At"
 msgstr "Arrêt du cycle récurrent à"
 
-#: .\erp\sale_document\models.py:259
+#: .\erp\sale_document\models.py:260
 msgid "Recurring Cycle Stopped At"
 msgstr "Cycle récurrent arrêté le"
 
-#: .\erp\sale_document\models.py:265
+#: .\erp\sale_document\models.py:266
 msgid "Recurring Last Generated Day"
 msgstr "Récurrent dernier jour généré"
 
-#: .\erp\sale_document\models.py:271
+#: .\erp\sale_document\models.py:272
 msgid "Recurring Next Generated Day"
 msgstr "Jour généré suivant récurrent"
 
-#: .\erp\sale_document\models.py:274
+#: .\erp\sale_document\models.py:275
 msgid "Recurring Reason Stop"
 msgstr "Raison récurrente Arrêt"
 
-#: .\erp\sale_document\models.py:282
+#: .\erp\sale_document\models.py:283
 msgid "Recurring Stopped By"
 msgstr "Récurrent arrêté par"
 
-#: .\erp\sale_document\models.py:288
+#: .\erp\sale_document\models.py:289
 #, fuzzy
 #| msgid "User has been activated"
 msgid "Recurring Reason Reactivated"
 msgstr "Raison récurrente réactivée"
 
-#: .\erp\sale_document\models.py:296
+#: .\erp\sale_document\models.py:297
 msgid "Recurring Reactivated By"
 msgstr "Récurrent Réactivé Par"
 
-#: .\erp\sale_document\models.py:302
+#: .\erp\sale_document\models.py:303
 msgid "Recurring Reactivated Date"
 msgstr "Date de réactivation récurrente"
 
-#: .\erp\sale_document\models.py:318
+#: .\erp\sale_document\models.py:319
 #, fuzzy
 #| msgid "Expected Date"
 msgid "Next Due Date"
 msgstr "Date prévu"
 
-#: .\erp\sale_document\models.py:321
+#: .\erp\sale_document\models.py:322
 #, fuzzy
 #| msgid "Payment Terms"
 msgid "Is Payment Late?"
 msgstr "Condition de paiement"
 
-#: .\erp\sale_document\models.py:324
+#: .\erp\sale_document\models.py:325
 msgid "Days in Late"
 msgstr "Jours en retard"
 
-#: .\erp\sale_document\models.py:327
+#: .\erp\sale_document\models.py:328
 #, fuzzy
 #| msgid "Name"
 msgid "Last Due Date"
 msgstr "Dernière date d'échéance"
 
-#: .\erp\sale_document\models.py:334
+#: .\erp\sale_document\models.py:335
 #, fuzzy
 #| msgid "Service Products"
 msgid "Sale Document Products"
 msgstr "Produits"
 
-#: .\erp\sale_document\models.py:383
+#: .\erp\sale_document\models.py:388
 msgid "CHOISIR_RECURRENT_CUSTOM_TYPE_UNIT_OR_NUMBER"
 msgstr "Choisir une unité"
 
-#: .\erp\sale_document\models.py:391
+#: .\erp\sale_document\models.py:396
 msgid "CHOISIR_RECURRENT_CYCLE_DATE_FIN"
 msgstr "Date fin"
 
-#: .\erp\sale_document\models.py:399
+#: .\erp\sale_document\models.py:404
 msgid "CHOISIR_RECURRENT_CYCLE_DATE_FIN_FUTURE"
 msgstr "Date fin future"
 
-#: .\erp\sale_document\models.py:407
+#: .\erp\sale_document\models.py:412
 msgid "CHOISIR_RECURRENT_CYCLE_NOMBRE_CYCLE"
 msgstr "Nombre de cycle"
 
@@ -1241,26 +1243,26 @@ msgstr "EAN 13"
 
 #: .\templates\sale_document\delivery_note.html:168
 #: .\templates\sale_document\sale_document_resume.html:117
-#: .\templates\sale_document\sale_templates\sale_document_basic.html:259
-#: .\templates\sale_document\sale_templates\sale_document_elegant.html:220
+#: .\templates\sale_document\sale_templates\sale_document_basic.html:276
+#: .\templates\sale_document\sale_templates\sale_document_elegant.html:237
 msgid "Company Logo"
 msgstr "Logo de l'entreprise"
 
 #: .\templates\sale_document\delivery_note.html:214
-#: .\templates\sale_document\sale_templates\sale_document_basic.html:318
-#: .\templates\sale_document\sale_templates\sale_document_elegant.html:263
+#: .\templates\sale_document\sale_templates\sale_document_basic.html:335
+#: .\templates\sale_document\sale_templates\sale_document_elegant.html:280
 msgid "Name / Ref."
 msgstr "Nom / Réf."
 
 #: .\templates\sale_document\delivery_note.html:215
-#: .\templates\sale_document\sale_templates\sale_document_basic.html:319
-#: .\templates\sale_document\sale_templates\sale_document_elegant.html:264
+#: .\templates\sale_document\sale_templates\sale_document_basic.html:336
+#: .\templates\sale_document\sale_templates\sale_document_elegant.html:281
 msgid "Qte."
 msgstr "Qté."
 
 #: .\templates\sale_document\delivery_note.html:216
-#: .\templates\sale_document\sale_templates\sale_document_basic.html:322
-#: .\templates\sale_document\sale_templates\sale_document_elegant.html:267
+#: .\templates\sale_document\sale_templates\sale_document_basic.html:339
+#: .\templates\sale_document\sale_templates\sale_document_elegant.html:284
 msgid "U. Price"
 msgstr "Prix Uni."
 
@@ -1269,8 +1271,8 @@ msgid "Disc."
 msgstr "Rem."
 
 #: .\templates\sale_document\delivery_note.html:219
-#: .\templates\sale_document\sale_templates\sale_document_basic.html:323
-#: .\templates\sale_document\sale_templates\sale_document_elegant.html:268
+#: .\templates\sale_document\sale_templates\sale_document_basic.html:340
+#: .\templates\sale_document\sale_templates\sale_document_elegant.html:285
 msgid "Total"
 msgstr "Total"
 
@@ -1309,15 +1311,15 @@ msgstr "Total HT"
 
 #: .\templates\sale_document\sale_document_resume.html:128
 #: .\templates\sale_document\sale_document_resume.html:164
-#: .\templates\sale_document\sale_templates\sale_document_basic.html:360
-#: .\templates\sale_document\sale_templates\sale_document_elegant.html:305
+#: .\templates\sale_document\sale_templates\sale_document_basic.html:377
+#: .\templates\sale_document\sale_templates\sale_document_elegant.html:322
 msgid "DISCOUNT"
 msgstr "Remise"
 
 #: .\templates\sale_document\sale_document_resume.html:129
 #: .\templates\sale_document\sale_document_resume.html:180
-#: .\templates\sale_document\sale_templates\sale_document_basic.html:376
-#: .\templates\sale_document\sale_templates\sale_document_elegant.html:321
+#: .\templates\sale_document\sale_templates\sale_document_basic.html:393
+#: .\templates\sale_document\sale_templates\sale_document_elegant.html:338
 msgid "TOTAL_PRICE"
 msgstr "Total"
 
@@ -1327,34 +1329,49 @@ msgstr "Total"
 msgid "SUB_TOTAL_WITHOUT_VAT"
 msgstr "Sous-total HT"
 
-#: .\templates\sale_document\sale_templates\sale_document_basic.html:301
+#: .\templates\sale_document\sale_templates\sale_document_basic.html:318
 msgid "SALE_DOCUMENT_NUMBER"
 msgstr "Numéro"
 
-#: .\templates\sale_document\sale_templates\sale_document_basic.html:305
-#: .\templates\sale_document\sale_templates\sale_document_elegant.html:251
+#: .\templates\sale_document\sale_templates\sale_document_basic.html:322
+#: .\templates\sale_document\sale_templates\sale_document_elegant.html:268
 msgid "SALE_DOCUMENT_DATE"
 msgstr "Date :"
 
-#: .\templates\sale_document\sale_templates\sale_document_basic.html:309
-#: .\templates\sale_document\sale_templates\sale_document_elegant.html:255
+#: .\templates\sale_document\sale_templates\sale_document_basic.html:326
+#: .\templates\sale_document\sale_templates\sale_document_elegant.html:272
 msgid "SALE_DOCUMENT_DUE_DATE"
 msgstr "Date d'échéance :"
 
-#: .\templates\sale_document\sale_templates\sale_document_basic.html:320
-#: .\templates\sale_document\sale_templates\sale_document_elegant.html:265
+#: .\templates\sale_document\sale_templates\sale_document_basic.html:337
+#: .\templates\sale_document\sale_templates\sale_document_elegant.html:282
 msgid "Unit"
 msgstr "Unité"
 
-#: .\templates\sale_document\sale_templates\sale_document_basic.html:352
-#: .\templates\sale_document\sale_templates\sale_document_elegant.html:297
+#: .\templates\sale_document\sale_templates\sale_document_basic.html:369
+#: .\templates\sale_document\sale_templates\sale_document_elegant.html:314
 msgid "SUB-TOTAL_WITHOUT_VAT"
 msgstr "Sous-total HT"
 
-#: .\templates\sale_document\sale_templates\sale_document_basic.html:368
-#: .\templates\sale_document\sale_templates\sale_document_elegant.html:313
+#: .\templates\sale_document\sale_templates\sale_document_basic.html:385
+#: .\templates\sale_document\sale_templates\sale_document_elegant.html:330
 msgid "VAT_OF"
 msgstr "TVA de"
+
+#: .\templates\sale_document\sale_templates\sale_document_basic.html:401
+#: .\templates\sale_document\sale_templates\sale_document_elegant.html:346
+msgid "PAYMENT_STATUS"
+msgstr "Status de paiment"
+
+#: .\templates\sale_document\sale_templates\sale_document_basic.html:405
+#: .\templates\sale_document\sale_templates\sale_document_elegant.html:350
+msgid "PAYMENT_AMOUNT_PAID"
+msgstr "Montant payée"
+
+#: .\templates\sale_document\sale_templates\sale_document_basic.html:408
+#: .\templates\sale_document\sale_templates\sale_document_elegant.html:353
+msgid "PAYMENT_AMOUNT_REMAIN"
+msgstr "Montant restant"
 
 #: .\templates\user\activation_confirmation_email.html:5
 msgid "Account Created,"
@@ -1560,7 +1577,7 @@ msgstr "Devise"
 msgid "Account Holder Name"
 msgstr "Compte créé"
 
-#: .\treasury\bank_account\models.py:20 .\treasury\transaction\models.py:80
+#: .\treasury\bank_account\models.py:20 .\treasury\transaction\models.py:81
 #, fuzzy
 #| msgid "Note"
 msgid "Notes"
@@ -1613,75 +1630,77 @@ msgid "Invalid value for payment term detail. value: %(value)"
 msgstr ""
 "La somme des valeurs des détails des conditions de paiement doit être de 100."
 
-#: .\treasury\transaction\models.py:40
+#: .\treasury\transaction\models.py:41
 msgid "Nature"
 msgstr "Nature"
 
-#: .\treasury\transaction\models.py:45
+#: .\treasury\transaction\models.py:46
 #, fuzzy
 #| msgid "Description"
 msgid "Direction"
 msgstr "Description"
 
-#: .\treasury\transaction\models.py:50 .\treasury\transaction\models.py:55
+#: .\treasury\transaction\models.py:51 .\treasury\transaction\models.py:56
 msgid "Transaction Type"
 msgstr "Type de transaction"
 
-#: .\treasury\transaction\models.py:71
+#: .\treasury\transaction\models.py:72
 #, fuzzy
 #| msgid "Activate Account"
 msgid "Bank Account"
 msgstr "Compte bancaire"
 
-#: .\treasury\transaction\models.py:83
+#: .\treasury\transaction\models.py:84
 msgid "Expected Date"
 msgstr "Date prévu"
 
-#: .\treasury\transaction\models.py:86
+#: .\treasury\transaction\models.py:87
 #, fuzzy
 #| msgid "Total Amount"
 msgid "Amount"
 msgstr "Montant Total"
 
-#: .\treasury\transaction\models.py:104
+#: .\treasury\transaction\models.py:105
 msgid "Transaction Source"
 msgstr "Transaction source"
 
-#: .\treasury\transaction\models.py:107
+#: .\treasury\transaction\models.py:108
 msgid "Bank account number"
 msgstr "N° compte bancaire"
 
-#: .\treasury\transaction\models.py:114
+#: .\treasury\transaction\models.py:115
 msgid "Amount should be greater than 0."
 msgstr "Montant doit etre superieur a 0"
 
-#: .\treasury\transaction\models.py:118
+#: .\treasury\transaction\models.py:119
 msgid "Cash is required when nature is set to CASH."
 msgstr "Champ ciasse obligatoire"
 
-#: .\treasury\transaction\models.py:122
+#: .\treasury\transaction\models.py:123
 msgid "Bank Account is required when nature is set to BANK."
 msgstr "Champ compte obligatoire"
 
-#: .\treasury\transaction\models.py:133
+#: .\treasury\transaction\models.py:134
 msgid ""
 "Bank Account and Cash are required for FROM_ACCOUNT_TO_CASH transaction."
 msgstr "champs compte et caisse sont obligatoires"
 
-#: .\treasury\transaction\models.py:160
+#: .\treasury\transaction\models.py:161
 msgid "You cannot do that. You should make this operation from Bank nature."
 msgstr "Il faut faire cette opération depuis une opération bancaire"
 
-#: .\treasury\transaction\models.py:170
+#: .\treasury\transaction\models.py:171
 msgid "You cannot do that. You should make this operation from Cash nature."
 msgstr "Il faut faire cette opération depuis une opération caisse"
 
-#: .\treasury\transaction\models.py:205
+#: .\treasury\transaction\models.py:210
 msgid ""
 "You cannot delete this transaction, you need to unlink invoice payment first"
-msgstr "Vous ne pouvez pas supprimer cette transaction, vous devez d'abord la dissocier du paiement de la facture."
+msgstr ""
+"Vous ne pouvez pas supprimer cette transaction, vous devez d'abord la "
+"dissocier du paiement de la facture."
 
-#: .\treasury\transaction\models.py:241
+#: .\treasury\transaction\models.py:246
 msgid ""
 "This transaction is created automatically from another one, it's not "
 "possible to delete it"
@@ -1689,14 +1708,16 @@ msgstr ""
 "This transaction is created automatically from another one, it's not "
 "possible to delete it"
 
-#: .\treasury\transaction\models.py:255
+#: .\treasury\transaction\models.py:260
 msgid ""
 "This transaction is created automatically form another one, it's not "
 "possible to edit it"
-msgstr "This transaction is created automatically from another one, it's not possible to edit it."
+msgstr ""
+"This transaction is created automatically from another one, it's not "
+"possible to edit it."
 
-#: .\treasury\transaction\views.py:214 .\treasury\transaction\views.py:225
-#: .\treasury\transaction\views.py:236 .\treasury\transaction\views.py:255
+#: .\treasury\transaction\views.py:216 .\treasury\transaction\views.py:227
+#: .\treasury\transaction\views.py:238 .\treasury\transaction\views.py:257
 #, fuzzy
 #| msgid "Please provide all needed data"
 msgid "Please provide a valid UUID"

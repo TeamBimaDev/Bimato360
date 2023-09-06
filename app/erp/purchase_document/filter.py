@@ -1,3 +1,4 @@
+import logging
 from datetime import timedelta
 from uuid import UUID
 
@@ -7,6 +8,8 @@ from django.db.models import Q
 from django.utils import timezone
 
 from .models import BimaErpPurchaseDocument
+
+logger = logging.getLogger(__name__)
 
 
 class PurchaseDocumentFilter(django_filters.FilterSet):
@@ -58,5 +61,9 @@ class PurchaseDocumentFilter(django_filters.FilterSet):
             return queryset
 
     def filter_by_payment_status(self, queryset, name, value):
-        if value.lower() in [sdp.name for sdp in PurchaseDocumentPaymentStatus]:
-            return queryset.filter(payment_status=value.upper())
+        try:
+            if value.upper() in [sdp.name for sdp in PurchaseDocumentPaymentStatus]:
+                return queryset.filter(payment_status=value.upper())
+        except Exception as ex:
+            logger.error(f"unable to filter by payment status{ex}")
+            return queryset

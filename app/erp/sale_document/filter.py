@@ -78,5 +78,9 @@ class SaleDocumentFilter(django_filters.FilterSet):
             return queryset
 
     def filter_by_payment_status(self, queryset, name, value):
-        if value.lower() in [sdp.name for sdp in SaleDocumentPaymentStatus]:
-            return queryset.filter(payment_status=value.upper())
+        try:
+            if value.upper() in [sdp.name for sdp in SaleDocumentPaymentStatus]:
+                return queryset.filter(payment_status=value.upper())
+        except Exception as ex:
+            logger.error(f"unable to filter by payment status{ex}")
+            return queryset
