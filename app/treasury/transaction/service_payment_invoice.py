@@ -4,6 +4,8 @@ from common.enums.sale_document_enum import SaleDocumentPaymentStatus, SaleDocum
 from common.enums.transaction_enum import TransactionTypeIncomeOutcome
 from django.apps import apps
 from django.db import transaction as db_transaction
+from django.utils.translation import gettext_lazy as _
+from rest_framework.exceptions import ValidationError
 
 
 def handle_invoice_payment(transaction, document_public_ids):
@@ -42,7 +44,11 @@ def handle_credit_note_payment_invoice(transaction, document_public_ids):
     sale_documents = BimaErpSaleDocument.objects.filter(
         public_id__in=document_public_ids
     ).order_by('date')
+    if sale_documents.count() > 1:
+        raise ValidationError({"Error": _("Only One Credit not is allowed!")})
 
+    if sale_documents[0].total_amount != transaction.amount:
+        raise ValidationError({"Error": _("Amount of the transaction should be equal to the amount of credit note!")})
     for doc in sale_documents:
         if not doc.status == SaleDocumentStatus.CONFIRMED.name and not doc.status == SaleDocumentTypes.CREDIT_NOTE.name:
             continue
