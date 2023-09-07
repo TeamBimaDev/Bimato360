@@ -44,10 +44,9 @@ def handle_credit_note_payment_invoice(transaction, document_public_ids):
     sale_documents = BimaErpSaleDocument.objects.filter(
         public_id__in=document_public_ids
     ).order_by('date')
-    if sale_documents.count() > 1:
-        raise ValidationError({"Error": _("Only One Credit not is allowed!")})
 
-    if sale_documents[0].total_amount != transaction.amount:
+    sum_sale_document_amount = _get_sum_sale_document_amount(sale_documents)
+    if sum_sale_document_amount != transaction.amount:
         raise ValidationError({"Error": _("Amount of the transaction should be equal to the amount of credit note!")})
     for doc in sale_documents:
         if not doc.status == SaleDocumentStatus.CONFIRMED.name and not doc.status == SaleDocumentTypes.CREDIT_NOTE.name:
@@ -222,6 +221,10 @@ def _update_amount_paid_document(document, transactions, payment_status):
     document.skip_child_validation_form_transaction = True
     document.save()
     document.skip_child_validation_form_transaction = False
+
+
+def _get_sum_sale_document_amount(sale_documents):
+    return sum(sd.total_amount for sd in sale_documents)
 
 
 def _get_invoice_payment_codes():

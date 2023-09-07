@@ -72,7 +72,7 @@ def _calculate_payment_late_type_custom(sale_document):
 
         if due_date:
             now = timezone.now().date()
-            if now <= due_date:
+            if now > due_date:
                 amount_paid = _calculate_sum_amount_paid(sale_document)
                 percentage_to_pay_decimal = Decimal(str(percentage_to_pay))
                 if amount_paid is None or amount_paid == 0 or amount_paid < (
