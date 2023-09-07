@@ -412,7 +412,7 @@ class BimaErpPartnerViewSet(AbstractViewSet):
         ).filter(
             status=SaleDocumentStatus.CONFIRMED.name,
             type=SaleDocumentTypes.INVOICE.name,
-        )
+        ).order_by("date", "id")
 
         serialized_data = BimaErpSaleDocumentUnpaidSerializer(unpaid_invoice, many=True)
         return Response(serialized_data.data)
@@ -425,7 +425,7 @@ class BimaErpPartnerViewSet(AbstractViewSet):
         ).filter(
             status=SaleDocumentStatus.CONFIRMED.name,
             type=SaleDocumentTypes.CREDIT_NOTE.name,
-        )
+        ).order_by("date", "id")
 
         serialized_data = BimaErpSaleDocumentUnpaidSerializer(unpaid_invoice, many=True)
         return Response(serialized_data.data)
@@ -438,7 +438,7 @@ class BimaErpPartnerViewSet(AbstractViewSet):
         ).filter(
             status=PurchaseDocumentStatus.CONFIRMED.name,
             type=PurchaseDocumentTypes.INVOICE.name,
-        )
+        ).order_by("date", "id")
 
         serialized_data = BimaErpPurchaseDocumentUnpaidSerializer(unpaid_invoice, many=True)
         return Response(serialized_data.data)

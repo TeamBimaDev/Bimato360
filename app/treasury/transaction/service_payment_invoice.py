@@ -38,16 +38,18 @@ def get_total_amount_used_for_transaction(transaction):
 def handle_credit_note_payment_invoice(transaction, document_public_ids):
     BimaErpSaleDocument = apps.get_model('erp', 'BimaErpSaleDocument')
     TransactionSaleDocumentPayment = apps.get_model('treasury', 'TransactionSaleDocumentPayment')
-    _delete_old_paid_transaction_sale_document(transaction)
-
-    remaining_amount = transaction.amount
     sale_documents = BimaErpSaleDocument.objects.filter(
         public_id__in=document_public_ids
-    ).order_by('date')
+    ).order_by('date', 'id')
 
     sum_sale_document_amount = _get_sum_sale_document_amount(sale_documents)
     if sum_sale_document_amount != transaction.amount:
         raise ValidationError({"Error": _("Amount of the transaction should be equal to the amount of credit note!")})
+
+    _delete_old_paid_transaction_sale_document(transaction)
+
+    remaining_amount = transaction.amount
+
     for doc in sale_documents:
         if not doc.status == SaleDocumentStatus.CONFIRMED.name and not doc.status == SaleDocumentTypes.CREDIT_NOTE.name:
             continue
@@ -90,7 +92,7 @@ def handle_invoice_payment_customer_invoice(transaction, document_public_ids):
     remaining_amount = transaction.amount
     sale_documents = BimaErpSaleDocument.objects.filter(
         public_id__in=document_public_ids
-    ).order_by('date')
+    ).order_by('date', 'id')
 
     for doc in sale_documents:
         if not doc.status == SaleDocumentStatus.CONFIRMED.name and not doc.type == SaleDocumentTypes.INVOICE.name:
@@ -134,7 +136,7 @@ def handle_invoice_payment_supplier_invoice(transaction, document_public_ids):
     remaining_amount = transaction.amount
     purchase_documents = BimaErpPurchaseDocument.objects.filter(
         public_id__in=document_public_ids
-    ).order_by('date')
+    ).order_by('date', 'id')
 
     for doc in purchase_documents:
         if not doc.status == PurchaseDocumentStatus.CONFIRMED.name and not doc.type == PurchaseDocumentTypes.INVOICE.name:

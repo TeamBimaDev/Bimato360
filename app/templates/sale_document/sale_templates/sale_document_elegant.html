@@ -233,7 +233,8 @@
     </div>
     {% if company_data.company.show_template_logo %}
         <div class="company_logo" id="header-right">
-            <img src="{{ request.scheme }}://{{ request.get_host }}{{ MEDIA_URL }}{{ company_data.favorite_logo.file_path }}"
+            <img src="{{ request.scheme }}://
+                    {{ request.get_host }}{{ MEDIA_URL }}{{ company_data.favorite_logo.file_path }}"
                  alt="{% trans "Company Logo" %}" class="logo"/>
         </div>
     {% endif %}
@@ -341,7 +342,7 @@
     </table>
 {% endif %}
 
-{% if current_document.status == 'CONFIRMED' and current_document.type == 'INVOICE' %}
+{% if current_document.status == 'CONFIRMED' and (current_document.type == 'INVOICE' or current_document.type == 'CREDIT_NOTE') %}
     <div class="payment_details">
         <span class="payment_status_span_label">{% trans 'PAYMENT_STATUS' %} :</span>
         <span class="payment_status_span_value">{{ current_document.translated_payment_status }}</span>
