@@ -14,5 +14,10 @@ app.conf.beat_schedule = {
         'schedule': crontab(hour='11', minute='00'),
         'args': ('celer_beat_security_key_to_access_to_tasks',)
     },
+    'verify_sale_document_payment_status_task': {
+        'task': 'erp.tasks.verify_sale_document_payment_status_task',
+        'schedule': crontab(hour='08', minute='00'),
+        'args': ('celer_beat_security_key_to_access_to_payment_status_tasks',)
+    },
 
 }

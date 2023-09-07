@@ -30,6 +30,7 @@ from .service import SaleDocumentService, generate_recurring_sale_documents, cre
     create_new_document, calculate_totals_for_selected_items, generate_xls_report, generate_csv_report, \
     stop_recurring_sale_document, reactivate_recurring_sale_document, CreditNoteValidator
 from .service_payment_invoice import handle_invoice_payment
+from .service_payment_notification import verify_sale_document_payment_status
 
 
 class BimaErpSaleDocumentViewSet(AbstractViewSet):
@@ -384,6 +385,11 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
         transaction_public_ids = self.request.data.pop('transaction_public_ids')
         handle_invoice_payment(sale_document, transaction_public_ids)
         return Response({"Payment": _("Payement effectué avec succes")})
+
+    @action(detail=False, methods=['GET'], url_path='verify_payment_status_sale_document')
+    def verify_payment_status_sale_document(self, request, pk=None):
+        return_data = verify_sale_document_payment_status()
+        return Response(return_data)
 
     def get_request_data(self, request):
         document_type = request.data.get('document_type', '')

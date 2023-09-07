@@ -155,20 +155,20 @@ class BimaTreasuryTransaction(AbstractModel):
                 self.transaction_type.code == "FROM_CASH_TO_ACCOUNT_INCOME"
                 and self.transaction_type.income_outcome == TransactionDirection.INCOME.name
                 and self.direction == TransactionDirection.INCOME.name
-                and self.nature == TransactionNature.CASH.name
+                and self.nature == TransactionNature.BANK.name
         ):
             error_message = _(
-                "You cannot do that. You should make this operation from Bank nature."
+                "You cannot do that. You should make this operation from Cash."
             )
 
         elif (
                 self.transaction_type.code == "FROM_ACCOUNT_TO_CASH_INCOME"
                 and self.transaction_type.income_outcome == TransactionDirection.INCOME.name
                 and self.direction == TransactionDirection.INCOME.name
-                and self.nature == TransactionNature.BANK.name
+                and self.nature == TransactionNature.CASH.name
         ):
             error_message = _(
-                "You cannot do that. You should make this operation from Cash nature."
+                "You cannot do that. You should make this operation from Bank."
             )
 
         if error_message:
@@ -178,6 +178,7 @@ class BimaTreasuryTransaction(AbstractModel):
             raise ValidationError(error_message)
 
     def save(self, *args, **kwargs):
+        self.clean()
         with transaction.atomic():
             if self.pk:
                 old_transaction = BimaTreasuryTransaction.objects.get(pk=self.pk)

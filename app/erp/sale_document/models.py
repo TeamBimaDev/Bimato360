@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 
 from common.enums.sale_document_enum import SaleDocumentTypes
 from common.enums.sale_document_enum import (
@@ -13,12 +13,10 @@ from common.enums.sale_document_enum import (
     get_payment_status,
     SaleDocumentPaymentStatus
 )
-from common.enums.transaction_enum import PaymentTermType
 from core.abstract.models import AbstractModel
 from django.contrib.auth import get_user_model
 from django.db import models
 from django.db.models import DecimalField, Sum
-from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from erp.partner.models import BimaErpPartner
 from erp.product.models import BimaErpProduct
@@ -415,56 +413,6 @@ class BimaErpSaleDocument(AbstractModel):
                 and not self.recurring_cycle_number_to_repeat
         ):
             raise ValidationError({"Error": _("CHOISIR_RECURRENT_CYCLE_NOMBRE_CYCLE")})
-
-    def calculate_payment_late(self):
-        if self.payment_term.type != PaymentTermType.CUSTOM.name:
-            due_date = self._calculate_due_date(self.date, self.payment_term.type)
-            next_schedule = None
-        else:
-            due_date = None
-            next_schedule = self.payment_term.schedules.first()
-        # TODO this is not correct we need to check this logic
-        if next_schedule:
-            for schedule in self.payment_term.schedules.all():
-                if schedule.due_date <= timezone.now().date():
-                    due_date = schedule.due_date
-                else:
-                    break
-
-        if due_date:
-            now = timezone.now().date()
-            if now > due_date:
-                self.is_payment_late = True
-                self.days_in_late = (now - due_date).days
-            else:
-                self.is_payment_late = False
-                self.days_in_late = 0
-        else:
-            self.is_payment_late = False
-            self.days_in_late = 0
-
-        self.next_due_date = due_date
-        self.save()
-
-    def _calculate_due_date(self, sale_date, payment_term_type):
-        if payment_term_type == PaymentTermType.IMMEDIATE.name:
-            return sale_date
-        elif payment_term_type == PaymentTermType.AFTER_ONE_WEEK.name:
-            return sale_date + timedelta(weeks=1)
-        elif payment_term_type == PaymentTermType.AFTER_TWO_WEEK.name:
-            return sale_date + timedelta(weeks=2)
-        elif payment_term_type == PaymentTermType.END_OF_MONTH.name:
-            next_month = sale_date.replace(day=1) + timedelta(days=32)
-            return (next_month.replace(day=1) - timedelta(days=1)).date()
-        elif payment_term_type == PaymentTermType.NEXT_MONTH.name:
-            next_month = sale_date.replace(day=1) + timedelta(days=32)
-            return next_month.replace(day=1).date()
-        else:
-            return None
-
-    def _update_last_due_date(self):
-        self.last_due_date = self.next_due_date
-        self.save()
 
     def has_payment(self):
         return self.transactionsaledocumentpayment_set.exists()

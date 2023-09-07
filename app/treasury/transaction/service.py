@@ -53,14 +53,16 @@ class BimaTreasuryTransactionService:
         for transaction in self.queryset:
             try:
                 row = {
+                    "Number": transaction.number,
                     "Nature": transaction.nature,
                     "Direction": transaction.direction,
                     "Transaction Type": transaction.transaction_type.name,
+                    "Transaction Payment Method": transaction.payment_method.name if transaction.payment_method else "",
                     "Note": transaction.note,
                     "Date": transaction.date,
                     "Expected Date": transaction.expected_date,
                     "Amount": transaction.amount,
-                    "Transaction Source": transaction.transaction_source,
+                    "Transaction Source": transaction.transaction_source.number if transaction.transaction_source else "",
                     "Bank Account Number": transaction.partner_bank_account_number,
                     "Partner": self._get_partner_name(transaction.partner),
                     "Cash": transaction.cash.name if transaction.cash else "",
