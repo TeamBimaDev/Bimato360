@@ -20,10 +20,11 @@ def verify_sale_document_payment_status():
 
     sale_document_to_return = []
     for sale_document in sale_documents:
-        logger.info(f"start verification payment status sale document {sale_document.public_id}")
-        print(f"start verification payment status sale document {sale_document.public_id}")
+        if not sale_document.payment_terms:
+            continue
         try:
-
+            logger.info(f"start verification payment status sale document {sale_document.public_id}")
+            print(f"start verification payment status sale document {sale_document.public_id}")
             if sale_document.payment_terms.type != PaymentTermType.CUSTOM.name:
                 _calculate_payment_late_type_not_custom(sale_document)
             else:
