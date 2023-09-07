@@ -160,8 +160,9 @@ class BimaTreasuryTransactionService:
                 "transaction_source": transaction,
                 "reference": transaction.reference,
             }
-
+        BimaTreasuryTransaction.__class__.skip_child_validation = True
         created_transaction = BimaTreasuryTransaction.objects.create(**params)
+        BimaTreasuryTransaction.__class__.skip_child_validation = False
         logger.info(
             f"Auto transaction {created_transaction.pk} created for transaction {transaction.pk}"
         )
