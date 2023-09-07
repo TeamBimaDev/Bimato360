@@ -1,5 +1,5 @@
 import django_filters
-    from common.converters.default_converters import str_to_bool
+from common.converters.default_converters import str_to_bool
 from common.enums.purchase_document_enum import PurchaseDocumentPaymentStatus, PurchaseDocumentStatus, \
     PurchaseDocumentTypes
 from common.enums.sale_document_enum import (
