@@ -3,7 +3,7 @@ import uuid
 
 from common.enums.sale_document_enum import SaleDocumentPaymentStatus, SaleDocumentStatus
 from django.apps import apps
-from django.db import transaction
+from django.db import transaction as db_transaction
 from django.http import Http404
 from django.utils.translation import gettext_lazy as _
 
@@ -31,13 +31,13 @@ def handle_invoice_payment(sale_document, transaction_public_ids):
             logger.error(f"An error occurred while saving payment invoice: {ex}", exc_info=True,
                          extra={'object_id': object.id})
             raise Http404({"error": _("Erreur lors l'enregistrement du paiement")})
-        
+
     if not verify_status_is_confirmed(sale_document):
         delete_old_paid_transaction_sale_document(sale_document)
 
 
 def delete_old_paid_transaction_sale_document(sale_document):
-    with transaction.atomic():
+    with db_transaction.atomic():
         TransactionSaleDocumentPayment = apps.get_model('treasury', 'TransactionSaleDocumentPayment')
         old_transactions_payments = TransactionSaleDocumentPayment.objects.filter(sale_document=sale_document)
         old_transactions_payments.delete()

@@ -1,8 +1,9 @@
-from common.enums.purchase_document_enum import PurchaseDocumentPaymentStatus, PurchaseDocumentStatus
+from common.enums.purchase_document_enum import PurchaseDocumentPaymentStatus, PurchaseDocumentStatus, \
+    PurchaseDocumentTypes
 from common.enums.sale_document_enum import SaleDocumentPaymentStatus, SaleDocumentStatus, SaleDocumentTypes
 from common.enums.transaction_enum import TransactionTypeIncomeOutcome
 from django.apps import apps
-from django.db import transaction
+from django.db import transaction as db_transaction
 
 
 def handle_invoice_payment(transaction, document_public_ids):
@@ -43,7 +44,7 @@ def handle_credit_note_payment_invoice(transaction, document_public_ids):
     ).order_by('date')
 
     for doc in sale_documents:
-        if not doc.status == SaleDocumentStatus.CONFIRMED.name or not doc.status == SaleDocumentTypes.CREDIT_NOTE.name:
+        if not doc.status == SaleDocumentStatus.CONFIRMED.name and not doc.status == SaleDocumentTypes.CREDIT_NOTE.name:
             continue
 
         _update_amount_paid_sale_document(doc)
@@ -87,7 +88,7 @@ def handle_invoice_payment_customer_invoice(transaction, document_public_ids):
     ).order_by('date')
 
     for doc in sale_documents:
-        if not doc.status == SaleDocumentStatus.CONFIRMED.name:
+        if not doc.status == SaleDocumentStatus.CONFIRMED.name and not doc.type == SaleDocumentTypes.INVOICE.name:
             continue
 
         _update_amount_paid_sale_document(doc)
@@ -131,7 +132,7 @@ def handle_invoice_payment_supplier_invoice(transaction, document_public_ids):
     ).order_by('date')
 
     for doc in purchase_documents:
-        if not doc.status == PurchaseDocumentStatus.CONFIRMED.name:
+        if not doc.status == PurchaseDocumentStatus.CONFIRMED.name and not doc.type == PurchaseDocumentTypes.INVOICE.name:
             continue
         _update_amount_paid_purchase_document(doc)
         doc.refresh_from_db()
@@ -181,7 +182,7 @@ def _update_amount_paid_purchase_document(purchase_document):
 
 
 def _delete_old_paid_transaction_sale_document(transaction_paid):
-    with transaction.atomic():
+    with db_transaction.atomic():
         TransactionSaleDocumentPayment = apps.get_model('treasury', 'TransactionSaleDocumentPayment')
         old_sale_document_payments = TransactionSaleDocumentPayment.objects.filter(transaction=transaction_paid)
         old_sale_documents = [payment.sale_document for payment in old_sale_document_payments]
@@ -191,7 +192,7 @@ def _delete_old_paid_transaction_sale_document(transaction_paid):
 
 
 def _delete_old_paid_transaction_purchase_document(transaction_paid):
-    with transaction.atomic():
+    with db_transaction.atomic():
         TransactionPurchaseDocumentPayment = apps.get_model('treasury', 'TransactionPurchaseDocumentPayment')
         old_purchase_document_payments = TransactionPurchaseDocumentPayment.objects.filter(
             transaction=transaction_paid)
