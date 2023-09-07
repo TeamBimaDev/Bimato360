@@ -134,7 +134,7 @@ class BimaTreasuryTransaction(AbstractModel):
                     "Bank Account and Cash are required for FROM_ACCOUNT_TO_CASH transaction."
                 )
             )
-        # si création d'une transaction automaique donc il ne faut pas verifier 
+        # si création d'une transaction automaique donc il ne faut pas verifier
         if not self.transaction_source:
             self.validate_transaction_type_and_nature_combination()
 

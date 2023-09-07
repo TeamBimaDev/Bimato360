@@ -27,11 +27,12 @@ class SaleDocumentFilter(django_filters.FilterSet):
     is_recurring = django_filters.CharFilter(method='filter_by_recurring')
     is_recurring_parent = django_filters.CharFilter(method='filter_by_recurring_parent')
     payment_status = django_filters.CharFilter(method='filter_by_payment_status')
+    is_payment_late = django_filters.CharFilter(method='filter_is_payment_late')
 
     class Meta:
         model = BimaErpSaleDocument
         fields = ['number', 'status', 'type', 'partner', 'date_gte', 'date_lte', 'total_amount_gte', 'total_amount_lte',
-                  'validity_expired', 'payment_status']
+                  'validity_expired', 'payment_status', 'is_payment_late']
 
     def filter_validity_expired(self, queryset, name, value):
         current_date = timezone.now().date()
@@ -84,3 +85,9 @@ class SaleDocumentFilter(django_filters.FilterSet):
         except Exception as ex:
             logger.error(f"unable to filter by payment status{ex}")
             return queryset
+
+    def filter_is_payment_late(self, queryset, name, value):
+        if value.lower() == 'all' or value is None:
+            return queryset
+        else:
+            return queryset.filter(is_payment_late=str_to_bool(value))

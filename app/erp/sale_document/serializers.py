@@ -118,7 +118,7 @@ class BimaErpSaleDocumentSerializer(AbstractSerializer):
             'recurring_cycle_number_to_repeat', 'recurring_cycle_stop_at', 'recurring_cycle_stopped_at',
             'recurring_last_generated_day', 'recurring_reason_stop', 'recurring_reason_reactivated',
             'recurring_reactivated_date', 'recurring_stopped_by_display', 'recurring_reactivated_by_display',
-            'is_recurring_ended', 'payment_status', 'amount_paid'
+            'is_recurring_ended', 'payment_status', 'amount_paid', 'is_payment_late', 'next_due_date', 'days_in_late'
         ]
         read_only_fields = ('total_vat', 'total_amount', 'total_discount', 'amount_paid',)
 
@@ -209,7 +209,8 @@ class BimaErpSaleDocumentHistorySerializer(serializers.ModelSerializer):
                   'recurring_cycle', 'recurring_cycle_number_to_repeat', 'recurring_cycle_stop_at',
                   'recurring_cycle_stopped_at', 'recurring_last_generated_day', 'recurring_reason_stop',
                   'recurring_reason_reactivated', 'recurring_reactivated_date', 'history_user_display',
-                  'recurring_stopped_by_display', 'recurring_reactivated_by_display', 'is_recurring_ended']
+                  'recurring_stopped_by_display', 'recurring_reactivated_by_display', 'is_recurring_ended',
+                  'payment_status', 'amount_paid', 'is_payment_late', 'next_due_date', 'days_in_late']
 
 
 class BimaErpSaleDocumentProductSerializer(serializers.Serializer):
