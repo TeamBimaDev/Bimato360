@@ -1,3 +1,4 @@
+from common.enums.purchase_document_enum import PurchaseDocumentStatus
 from common.enums.purchase_document_enum import PurchaseDocumentTypes
 from common.enums.purchase_document_enum import get_payment_status
 from common.enums.purchase_document_enum import get_purchase_document_status, \
@@ -135,12 +136,7 @@ class BimaErpPurchaseDocument(AbstractModel):
         if self.pk is not None and not self.skip_child_validation_form_transaction:
             if self.bimaerppurchasedocument_set.exists():
                 raise ValidationError("Cannot modify a PurchaseDocument that has children.")
-
-        if self.payment_terms.type != PaymentTermType.CUSTOM.name:
-            calculate_payment_late_type_not_custom(self, re_save=False)
-        else:
-            calculate_payment_late_type_custom(self, re_save=False)
-
+        self.verify_and_calculate_next_due_date()
         super().save(*args, **kwargs)
 
     def delete(self, *args, **kwargs):
@@ -170,6 +166,15 @@ class BimaErpPurchaseDocument(AbstractModel):
 
     def has_payment(self):
         return self.transactionpurchasedocumentpayment_set.exists()
+
+    def verify_and_calculate_next_due_date(self):
+        if not self.pk or not self.status == PurchaseDocumentStatus.CONFIRMED.name or not self.type == PurchaseDocumentTypes.INVOICE.name:
+            return True
+
+        if self.payment_terms.type != PaymentTermType.CUSTOM.name:
+            calculate_payment_late_type_not_custom(self, re_save=False)
+        else:
+            calculate_payment_late_type_custom(self, re_save=False)
 
 
 def update_purchase_document_totals(purchase_document):
