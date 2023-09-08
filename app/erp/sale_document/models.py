@@ -13,6 +13,7 @@ from common.enums.sale_document_enum import (
     get_payment_status,
     SaleDocumentPaymentStatus
 )
+from common.enums.transaction_enum import PaymentTermType
 from core.abstract.models import AbstractModel
 from django.contrib.auth import get_user_model
 from django.db import models
@@ -20,6 +21,8 @@ from django.db.models import DecimalField, Sum
 from django.utils.translation import gettext_lazy as _
 from erp.partner.models import BimaErpPartner
 from erp.product.models import BimaErpProduct
+from erp.sale_document.service_payment_notification import calculate_payment_late_type_not_custom, \
+    calculate_payment_late_type_custom
 from rest_framework.exceptions import ValidationError
 from simple_history.models import HistoricalRecords
 from treasury.payment_term.models import BimaTreasuryPaymentTerm
@@ -350,6 +353,11 @@ class BimaErpSaleDocument(AbstractModel):
             if self.bimaerpsaledocument_set.exists() and not self.is_recurring:
                 raise ValidationError("Cannot modify a SaleDocument that has children.")
         self.validate_all_required_field_for_recurring()
+
+        if self.payment_terms.type != PaymentTermType.CUSTOM.name:
+            calculate_payment_late_type_not_custom(self, re_save=False)
+        else:
+            calculate_payment_late_type_custom(self, re_save=False)
         super().save(*args, **kwargs)
 
     def delete(self, *args, **kwargs):

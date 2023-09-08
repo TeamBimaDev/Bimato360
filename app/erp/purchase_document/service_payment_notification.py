@@ -6,14 +6,14 @@ from common.enums.purchase_document_enum import PurchaseDocumentTypes, PurchaseD
     PurchaseDocumentStatus
 from common.enums.transaction_enum import PaymentTermType
 from dateutil.relativedelta import relativedelta
+from django.apps import apps
 from django.utils import timezone
-
-from .models import BimaErpPurchaseDocument
 
 logger = logging.getLogger(__name__)
 
 
 def verify_purchase_document_payment_status():
+    BimaErpPurchaseDocument = apps.get_model('erp', 'BimaErpPurchaseDocument')
     purchase_documents = BimaErpPurchaseDocument.objects.filter(
         status=PurchaseDocumentStatus.CONFIRMED.name,
         type=PurchaseDocumentTypes.INVOICE.name
@@ -27,9 +27,9 @@ def verify_purchase_document_payment_status():
             logger.info(f"start verification payment status purchase document {purchase_document.public_id}")
             print(f"start verification payment status purchase document {purchase_document.public_id}")
             if purchase_document.payment_terms.type != PaymentTermType.CUSTOM.name:
-                _calculate_payment_late_type_not_custom(purchase_document)
+                calculate_payment_late_type_not_custom(purchase_document)
             else:
-                _calculate_payment_late_type_custom(purchase_document)
+                calculate_payment_late_type_custom(purchase_document)
             purchase_document_to_return.append(
                 {"purchase_document_public_ud": purchase_document.public_id,
                  "next_due_date": purchase_document.next_due_date})
@@ -42,7 +42,7 @@ def verify_purchase_document_payment_status():
     return purchase_document_to_return
 
 
-def _calculate_payment_late_type_custom(purchase_document):
+def calculate_payment_late_type_custom(purchase_document, re_save=True):
     due_date = None
     next_schedule = purchase_document.payment_terms.payment_term_details.first()
 
@@ -91,13 +91,13 @@ def _calculate_payment_late_type_custom(purchase_document):
         else:
             purchase_document.is_payment_late = False
             purchase_document.days_in_late = 0
+        if re_save:
+            purchase_document.skip_child_validation_form_transaction = True
+            purchase_document.save()
+            purchase_document.skip_child_validation_form_transaction = False
 
-        purchase_document.skip_child_validation_form_transaction = True
-        purchase_document.save()
-        purchase_document.skip_child_validation_form_transaction = False
 
-
-def _calculate_payment_late_type_not_custom(purchase_document):
+def calculate_payment_late_type_not_custom(purchase_document, re_save=True):
     due_date = _calculate_due_date(purchase_document.date, purchase_document.payment_terms.type)
 
     if due_date:
@@ -113,9 +113,10 @@ def _calculate_payment_late_type_not_custom(purchase_document):
         purchase_document.days_in_late = 0
 
     purchase_document.next_due_date = due_date
-    purchase_document.skip_child_validation_form_transaction = True
-    purchase_document.save()
-    purchase_document.skip_child_validation_form_transaction = False
+    if re_save:
+        purchase_document.skip_child_validation_form_transaction = True
+        purchase_document.save()
+        purchase_document.skip_child_validation_form_transaction = False
 
 
 def _calculate_due_date(purchase_date, payment_term_type):

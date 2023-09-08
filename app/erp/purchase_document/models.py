@@ -2,12 +2,15 @@ from common.enums.purchase_document_enum import PurchaseDocumentTypes
 from common.enums.purchase_document_enum import get_payment_status
 from common.enums.purchase_document_enum import get_purchase_document_status, \
     get_purchase_document_types, get_purchase_document_validity
+from common.enums.transaction_enum import PaymentTermType
 from core.abstract.models import AbstractModel
 from django.db import models
 from django.db.models import DecimalField, Sum
 from django.utils.translation import gettext_lazy as _
 from erp.partner.models import BimaErpPartner
 from erp.product.models import BimaErpProduct
+from erp.purchase_document.service_payment_notification import calculate_payment_late_type_not_custom, \
+    calculate_payment_late_type_custom
 from rest_framework.exceptions import ValidationError
 from simple_history.models import HistoricalRecords
 from treasury.payment_term.models import BimaTreasuryPaymentTerm
@@ -132,6 +135,12 @@ class BimaErpPurchaseDocument(AbstractModel):
         if self.pk is not None and not self.skip_child_validation_form_transaction:
             if self.bimaerppurchasedocument_set.exists():
                 raise ValidationError("Cannot modify a PurchaseDocument that has children.")
+
+        if self.payment_terms.type != PaymentTermType.CUSTOM.name:
+            calculate_payment_late_type_not_custom(self, re_save=False)
+        else:
+            calculate_payment_late_type_custom(self, re_save=False)
+
         super().save(*args, **kwargs)
 
     def delete(self, *args, **kwargs):
