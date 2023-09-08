@@ -272,8 +272,7 @@
     {% if company_data.company.show_template_logo %}
         <div class="company_logo" id="header-left">
 
-            <img src="{{ request.scheme }}://
-                    {{ request.get_host }}{{ MEDIA_URL }}{{ company_data.favorite_logo.file_path }}"
+            <img src="{{ request.scheme }}://{{ request.get_host }}{{ MEDIA_URL }}{{ company_data.favorite_logo.file_path }}"
                  alt="{% trans "Company Logo" %}" class="logo"/>
 
         </div>
@@ -325,7 +324,7 @@
         </tr>
         <tr class="invoice_payment_date">
             <td class="td_date_preve">{% trans "SALE_DOCUMENT_DUE_DATE" %}</td>
-            <td>NA/NA/NANA</td>
+            <td>{{ current_document.next_due_date }}</td>
         </tr>
     </table>
 </div>
@@ -397,19 +396,21 @@
     </table>
 {% endif %}
 
-{% if current_document.status == 'CONFIRMED' and (current_document.type == 'INVOICE' or current_document.type == 'CREDIT_NOTE') %}
-    <div class="payment_details">
-        <span class="payment_status_span_label">{% trans 'PAYMENT_STATUS' %} :</span>
-        <span class="payment_status_span_value">{{ current_document.translated_payment_status }}</span>
-        {% if current_document.amount_paid != current_document.total_amount %}
-            <br/>
-            <span class="payment_status_span_label">{% trans 'PAYMENT_AMOUNT_PAID' %} :</span>
-            <span class="payment_status_span_value payment_status_paid_value">{{ current_document.amount_paid }}</span>
-            <br/>
-            <span class="payment_status_span_label">{% trans 'PAYMENT_AMOUNT_REMAIN' %} :</span>
-            <span class="payment_status_span_value payment_status_remain_value">{{ current_document.remain_amount }}</span>
-        {% endif %}
-    </div>
+{% if current_document.status == 'CONFIRMED' %}
+    {% if current_document.type == 'INVOICE' or current_document.type == 'CREDIT_NOTE' %}
+        <div class="payment_details">
+            <span class="payment_status_span_label">{% trans 'PAYMENT_STATUS' %} :</span>
+            <span class="payment_status_span_value">{{ current_document.translated_payment_status }}</span>
+            {% if current_document.amount_paid != current_document.total_amount %}
+                <br/>
+                <span class="payment_status_span_label">{% trans 'PAYMENT_AMOUNT_PAID' %} :</span>
+                <span class="payment_status_span_value payment_status_paid_value">{{ current_document.amount_paid }}</span>
+                <br/>
+                <span class="payment_status_span_label">{% trans 'PAYMENT_AMOUNT_REMAIN' %} :</span>
+                <span class="payment_status_span_value payment_status_remain_value">{{ current_document.remain_amount }}</span>
+            {% endif %}
+        </div>
+    {% endif %}
 {% endif %}
 
 <div class="note">{{ current_document.note }}</div>
