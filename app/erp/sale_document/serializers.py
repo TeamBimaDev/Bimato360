@@ -120,7 +120,9 @@ class BimaErpSaleDocumentSerializer(AbstractSerializer):
             'recurring_reactivated_date', 'recurring_stopped_by_display', 'recurring_reactivated_by_display',
             'is_recurring_ended', 'payment_status', 'amount_paid', 'is_payment_late', 'next_due_date', 'days_in_late'
         ]
-        read_only_fields = ('total_vat', 'total_amount', 'total_discount', 'amount_paid',)
+        read_only_fields = (
+        'total_vat', 'total_amount', 'total_discount', 'amount_paid', 'is_payment_late', 'next_due_date',
+        'days_in_late')
 
 
 class BimaErpSaleDocumentUnpaidSerializer(AbstractSerializer):

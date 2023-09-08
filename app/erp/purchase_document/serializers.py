@@ -90,9 +90,11 @@ class BimaErpPurchaseDocumentSerializer(AbstractSerializer):
             'vat_amount', 'note', 'private_note', 'validity', 'payment_terms', 'payment_terms_public_id',
             'delivery_terms', 'total_amount_without_vat', 'total_after_discount', 'total_vat', 'total_amount',
             'total_discount', 'parents', 'parent_public_ids', 'history', 'created', 'updated', 'children',
-            'payment_status', 'amount_paid'
+            'payment_status', 'amount_paid', 'is_payment_late', 'next_due_date', 'days_in_late'
         ]
-        read_only_fields = ('total_vat', 'total_amount', 'total_discount', 'amount_paid',)
+        read_only_fields = (
+            'total_vat', 'total_amount', 'total_discount', 'amount_paid', 'is_payment_late', 'next_due_date',
+            'days_in_late')
 
 
 class BimaErpPurchaseDocumentHistorySerializer(serializers.ModelSerializer):
@@ -108,7 +110,7 @@ class BimaErpPurchaseDocumentHistorySerializer(serializers.ModelSerializer):
         fields = ['id', 'number', 'number_at_partner', 'date', 'status', 'type', 'partner_id',
                   'note', 'private_note', 'validity', 'payment_terms', 'delivery_terms', 'vat_label', 'vat_amount',
                   'total_amount', 'total_discount', 'total_vat', 'history_type', 'history_date', 'history_user_display',
-                  'payment_status', 'amount_paid']
+                  'payment_status', 'amount_paid', 'is_payment_late', 'next_due_date', 'days_in_late']
 
 
 class BimaErpPurchaseDocumentProductSerializer(serializers.Serializer):

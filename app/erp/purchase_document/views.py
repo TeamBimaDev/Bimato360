@@ -26,6 +26,7 @@ from .serializers import BimaErpPurchaseDocumentSerializer, BimaErpPurchaseDocum
 from .service import PurchaseDocumentService, create_products_from_parents, generate_xls_report, generate_csv_report, \
     calculate_totals_for_selected_items, create_new_document
 from .service_payment_invoice import handle_invoice_payment
+from .service_payment_notification import verify_purchase_document_payment_status
 
 
 class BimaErpPurchaseDocumentViewSet(AbstractViewSet):
@@ -329,6 +330,11 @@ class BimaErpPurchaseDocumentViewSet(AbstractViewSet):
         transaction_public_ids = self.request.data.pop('transaction_public_ids')
         handle_invoice_payment(purchase_document, transaction_public_ids)
         return Response({"Payment": _("Payement effectué avec succes")})
+
+    @action(detail=False, methods=['GET'], url_path='verify_payment_status_purchase_document')
+    def verify_payment_status_purchase_document(self, request, pk=None):
+        return_data = verify_purchase_document_payment_status()
+        return Response(return_data)
 
     def get_request_data(self, request):
         document_type = request.data.get('document_type', '')

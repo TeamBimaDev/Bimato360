@@ -24,6 +24,7 @@ class PurchaseDocumentFilter(django_filters.FilterSet):
     validity_expired = django_filters.CharFilter(method='filter_validity_expired')
     product = django_filters.CharFilter(method='filter_product_hex')
     payment_status = django_filters.CharFilter(method='filter_by_payment_status')
+    is_payment_late = django_filters.CharFilter(method='filter_is_payment_late')
 
     class Meta:
         model = BimaErpPurchaseDocument
@@ -67,3 +68,9 @@ class PurchaseDocumentFilter(django_filters.FilterSet):
         except Exception as ex:
             logger.error(f"unable to filter by payment status{ex}")
             return queryset
+
+    def filter_is_payment_late(self, queryset, name, value):
+        if value.lower() == 'all' or value is None:
+            return queryset
+        else:
+            return queryset.filter(is_payment_late=str_to_bool(value))

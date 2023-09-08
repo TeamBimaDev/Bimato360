@@ -105,6 +105,18 @@ class BimaErpPurchaseDocument(AbstractModel):
         default=0,
         verbose_name=_("Amount Paid"),
     )
+    next_due_date = models.DateField(
+        null=True, blank=True, verbose_name=_("Next Due Date")
+    )
+    is_payment_late = models.BooleanField(
+        default=False, verbose_name=_("Is Payment Late?")
+    )
+    days_in_late = models.PositiveIntegerField(
+        default=0, verbose_name=_("Days in Late")
+    )
+    last_due_date = models.DateField(
+        null=True, blank=True, verbose_name=_("Last Due Date")
+    )
     transactions = models.ManyToManyField(
         BimaTreasuryTransaction,
         through=TransactionPurchaseDocumentPayment,
