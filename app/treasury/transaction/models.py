@@ -24,7 +24,7 @@ from .service import (
     BankTransactionEffectStrategy,
     BimaTreasuryTransactionService,
 )
-from .service_payment_invoice import handle_invoice_payment_deletion, get_total_amount_used_for_transaction
+from .service_payment_invoice import handle_invoice_payment_deletion
 
 logger = logging.getLogger(__name__)
 
@@ -188,7 +188,6 @@ class BimaTreasuryTransaction(AbstractModel):
                 )
                 if not self.__class__.skip_revert_apply_effect_validation:
                     revert_effect(old_transaction)
-                self.remaining_amount = get_total_amount_used_for_transaction(self)
 
                 super(BimaTreasuryTransaction, self).save(*args, **kwargs)
 

@@ -62,12 +62,18 @@ class BimaTreasuryTransactionViewSet(AbstractViewSet):
 
     def perform_create(self, serializer):
         sale_document_public_ids = self.request.data.pop('sale_documents_ids')
+        BimaTreasuryTransactionService.verify_if_payment_credit_not_and_verify_amounts_from_request(
+            serializer.validated_data,
+            sale_document_public_ids)
         instance = serializer.save()
         handle_invoice_payment(instance, sale_document_public_ids)
         handle_credit_note_payment(instance, sale_document_public_ids)
 
     def perform_update(self, serializer):
         sale_document_public_ids = self.request.data.pop('sale_documents_ids')
+        BimaTreasuryTransactionService.verify_if_payment_credit_not_and_verify_amounts_from_request(
+            serializer.validated_data,
+            sale_document_public_ids)
         instance = serializer.save()
         handle_invoice_payment(instance, sale_document_public_ids)
         handle_credit_note_payment(instance, sale_document_public_ids)
@@ -198,14 +204,17 @@ class BimaTreasuryTransactionViewSet(AbstractViewSet):
     @action(detail=True, methods=['GET'], url_path='transaction_sale_document_payments')
     def transaction_sale_document_payments(self, request, pk=None):
         transaction = self.get_object()
-        sale_document_payments = TransactionSaleDocumentPayment.objects.filter(transaction=transaction)
+        sale_document_payments = TransactionSaleDocumentPayment.objects.filter(transaction=transaction).order_by(
+            "sale_document__date", "sale_document__id")
         serializer = TransactionSaleDocumentPaymentSerializer(sale_document_payments, many=True)
         return Response(serializer.data)
 
     @action(detail=True, methods=['GET'], url_path='transaction_purchase_document_payments')
     def transaction_purchase_document_payments(self, request, pk=None):
         transaction = self.get_object()
-        purchase_document_payments = TransactionPurchaseDocumentPayment.objects.filter(transaction=transaction)
+        purchase_document_payments = TransactionPurchaseDocumentPayment.objects.filter(
+            transaction=transaction).order_by("purchase_document__date",
+                                              "purchase_document__id")
         serializer = TransactionPurchaseDocumentPaymentSerializer(purchase_document_payments, many=True)
         return Response(serializer.data)
 
@@ -216,7 +225,7 @@ class BimaTreasuryTransactionViewSet(AbstractViewSet):
             return Response({"Error": _("Please provide a valid UUID")}, status=status.HTTP_400_BAD_REQUEST)
 
         sale_document_payments = TransactionSaleDocumentPayment.objects.filter(
-            sale_document__public_id=sale_document_public_id)
+            sale_document__public_id=sale_document_public_id).order_by("sale_document__date", "sale_document__id")
         serializer = TransactionSaleDocumentPaymentSerializer(sale_document_payments, many=True)
         return Response(serializer.data)
 
@@ -227,7 +236,8 @@ class BimaTreasuryTransactionViewSet(AbstractViewSet):
             return Response({"Error": _("Please provide a valid UUID")}, status=status.HTTP_400_BAD_REQUEST)
 
         purchase_document_payments = TransactionPurchaseDocumentPayment.objects.filter(
-            purchase_document__public_id=purchase_document_public_id)
+            purchase_document__public_id=purchase_document_public_id).order_by("purchase_document__date",
+                                                                               "purchase_document__id")
         serializer = TransactionPurchaseDocumentPaymentSerializer(purchase_document_payments, many=True)
         return Response(serializer.data)
 
@@ -246,7 +256,7 @@ class BimaTreasuryTransactionViewSet(AbstractViewSet):
             & Q(partner=sale_document.partner)
             & (Q(transaction_type__code="INVOICE_PAYMENT_BANK") |
                Q(transaction_type__code="INVOICE_PAYMENT_CASH"))
-        )
+        ).order_by("date", "id")
         serializer = BimaTreasuryTransactionSerializer(transactions, many=True)
         return Response(serializer.data)
 
@@ -265,6 +275,6 @@ class BimaTreasuryTransactionViewSet(AbstractViewSet):
             & Q(partner=purchase_document.partner)
             & (Q(transaction_type__code="INVOICE_PAYMENT_OUTCOME_BANK") |
                Q(transaction_type__code="INVOICE_PAYMENT_OUTCOME_CASH"))
-        )
+        ).order_by("date", "id")
         serializer = BimaTreasuryTransactionSerializer(transactions, many=True)
         return Response(serializer.data)

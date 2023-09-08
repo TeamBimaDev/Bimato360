@@ -4,12 +4,15 @@ from datetime import datetime
 
 import pandas as pd
 from common.enums.transaction_enum import TransactionDirection, TransactionNature
+from django.apps import apps
 from django.db import models
 from django.db.models import Sum, Case, When, F
 from django.utils.crypto import get_random_string
+from django.utils.translation import gettext_lazy as _
 from erp.partner.models import BimaErpPartner
 from openpyxl.styles import Border, Side, Font
 from openpyxl.utils import get_column_letter
+from rest_framework.exceptions import ValidationError
 from treasury.bank_account.models import BimaTreasuryBankAccount
 from treasury.cash.models import BimaTreasuryCash
 from treasury.payment_method.models import BimaTreasuryPaymentMethod
@@ -258,6 +261,25 @@ class BimaTreasuryTransactionService:
         random_string = get_random_string(length=12, allowed_chars='ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789')
         unique_number = f"{first_char}{second_char}_{year}_{random_string}"
         return unique_number
+
+    @staticmethod
+    def verify_if_payment_credit_not_and_verify_amounts_from_request(data_from_request, document_public_id):
+        transaction_type_code = data_from_request.get("transaction_type", None)
+        amount = data_from_request.get("amount", 0)
+        if not transaction_type_code:
+            return False
+        transaction_type_code = transaction_type_code.code
+        if not transaction_type_code in ["CREDIT_NOTE_OUTCOME_BANK", "CREDIT_NOTE_OUTCOME_CASH"]:
+            return True
+        BimaErpSaleDocument = apps.get_model('erp', 'BimaErpSaleDocument')
+        sale_documents = BimaErpSaleDocument.objects.filter(
+            public_id__in=document_public_id
+        )
+        total_sale_document_amounts = sum(sd.total_amount for sd in sale_documents)
+        if amount != total_sale_document_amounts:
+            raise ValidationError(
+                {"Error": _("Amount of the transaction should be equal to the amount of credit note!")})
+        return True
 
 
 class TransactionEffectStrategy:
