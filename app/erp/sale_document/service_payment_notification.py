@@ -42,38 +42,33 @@ def verify_sale_document_payment_status():
 
 def calculate_payment_late_type_custom(sale_document, re_save=True):
     current_date = timezone.now().date()
+    due_dates = []
     payment_schedule = sale_document.payment_terms.payment_term_details.all().order_by('id')
 
-    is_initial_phase = False
-    percentage_to_pay = 0
     next_due_date = sale_document.date
 
     for schedule in payment_schedule:
-        percentage_to_pay += schedule.percentage
-        if sale_document.next_due_date is None:
-            next_due_date = _calculate_due_date(sale_document.date, schedule.value)
-            sale_document.next_due_date = next_due_date
-            is_initial_phase = True
+        next_due_date = _calculate_due_date(next_due_date, schedule.value)
+        due_dates.append({next_due_date: schedule.percentage})
+        if next_due_date > current_date:
             break
-        else:
-            next_due_date = _calculate_due_date(next_due_date, schedule.value)
-            if next_due_date > current_date:
-                break
 
-    if not is_initial_phase:
-        sale_document.next_due_date = next_due_date
+    sale_document.next_due_date = next_due_date
 
-    if sale_document.next_due_date:
-        amount_paid = _calculate_sum_amount_paid(sale_document)
-        percentage_to_pay_decimal = Decimal(str(percentage_to_pay))
+    percentage_to_pay = 0
+    is_payment_late = False
+    for due_date_entry in due_dates:
+        due_date, percentage = list(due_date_entry.items())[0]
+        amount_paid = _calculate_sum_amount_paid(sale_document, due_date)
+        percentage_to_pay += percentage
 
-        if amount_paid is None or amount_paid < (percentage_to_pay_decimal / 100) * sale_document.total_amount:
+        if amount_paid < (Decimal(percentage_to_pay) / 100) * sale_document.total_amount:
             sale_document.is_payment_late = True
-            sale_document.days_in_late = abs((current_date - sale_document.next_due_date).days)
-        else:
-            sale_document.is_payment_late = False
-            sale_document.days_in_late = 0
-    else:
+            sale_document.days_in_late = abs((current_date - due_date).days)
+            is_payment_late = True
+            break
+
+    if not sale_document.next_due_date or not is_payment_late:
         sale_document.is_payment_late = False
         sale_document.days_in_late = 0
 
@@ -81,61 +76,6 @@ def calculate_payment_late_type_custom(sale_document, re_save=True):
         sale_document.skip_child_validation_form_transaction = True
         sale_document.save()
         sale_document.skip_child_validation_form_transaction = False
-
-
-# def calculate_payment_late_type_custom(sale_document, re_save=True):
-#     due_date = None
-#     next_schedule = sale_document.payment_terms.payment_term_details.first()
-#
-#     is_initial_phase = False
-#     percentage_to_pay = 0
-#     next_calculated_due_date = sale_document.date
-#     if next_schedule:
-#         for index, schedule in enumerate(sale_document.payment_terms.payment_term_details.all().order_by('id')):
-#             logger.info(f"sale document {sale_document.public_id} custom type payment  index {index} verification  ")
-#             print(f"sale document {sale_document.public_id} custom type payment  index {index} verification  ")
-#             percentage_to_pay += schedule.percentage
-#             if sale_document.next_due_date is None:
-#                 due_date = _calculate_due_date(sale_document.date, schedule.value)
-#                 sale_document.next_due_date = due_date
-#                 is_initial_phase = True
-#                 break
-#             else:
-#                 now = timezone.now().date()
-#                 next_calculated_due_date = _calculate_due_date(next_calculated_due_date, schedule.value)
-#                 logger.info(
-#                     f"sale document {sale_document.public_id} custom type payment  index {index} verification : next_calculated_due_date{next_calculated_due_date}  ")
-#                 print(
-#                     f"sale document {sale_document.public_id} custom type payment  index {index} verification : next_calculated_due_date{next_calculated_due_date}  ")
-#                 if next_calculated_due_date > now:
-#                     break
-#         if not is_initial_phase:
-#             sale_document.next_due_date = next_calculated_due_date
-#             due_date = next_calculated_due_date
-#
-#         if due_date:
-#             now = timezone.now().date()
-#             if now > due_date:
-#                 amount_paid = _calculate_sum_amount_paid(sale_document)
-#                 percentage_to_pay_decimal = Decimal(str(percentage_to_pay))
-#                 if amount_paid is None or amount_paid == 0 or amount_paid < (
-#                         percentage_to_pay_decimal / 100) * sale_document.total_amount:
-#                     sale_document.is_payment_late = True
-#                     sale_document.days_in_late = (now - due_date).days
-#                 else:
-#                     sale_document.is_payment_late = False
-#                     sale_document.days_in_late = 0
-#             else:
-#                 sale_document.is_payment_late = False
-#                 sale_document.days_in_late = 0
-#         else:
-#             sale_document.is_payment_late = False
-#             sale_document.days_in_late = 0
-#
-#         if re_save:
-#             sale_document.skip_child_validation_form_transaction = True
-#             sale_document.save()
-#             sale_document.skip_child_validation_form_transaction = False
 
 
 def calculate_payment_late_type_not_custom(sale_document, re_save=True):
@@ -177,6 +117,8 @@ def _calculate_due_date(sale_date, payment_term_type):
         return None
 
 
-def _calculate_sum_amount_paid(sale_document):
+def _calculate_sum_amount_paid(sale_document, date_limit=None):
     transactions = sale_document.transactionsaledocumentpayment_set.all()
+    if date_limit is not None:
+        transactions = transactions.filter(transaction__date__lte=date_limit)
     return sum(tr.amount_paid for tr in transactions)

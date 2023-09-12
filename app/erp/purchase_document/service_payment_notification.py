@@ -43,58 +43,41 @@ def verify_purchase_document_payment_status():
 
 
 def calculate_payment_late_type_custom(purchase_document, re_save=True):
-    due_date = None
-    next_schedule = purchase_document.payment_terms.payment_term_details.first()
+    current_date = timezone.now().date()
+    due_dates = []
+    payment_schedule = purchase_document.payment_terms.payment_term_details.all().order_by('id')
 
-    is_initial_phase = False
+    next_due_date = purchase_document.date
+
+    for schedule in payment_schedule:
+        next_due_date = _calculate_due_date(next_due_date, schedule.value)
+        due_dates.append({next_due_date: schedule.percentage})
+        if next_due_date > current_date:
+            break
+
+    purchase_document.next_due_date = next_due_date
+
     percentage_to_pay = 0
-    next_calculated_due_date = purchase_document.date
-    if next_schedule:
-        for index, schedule in enumerate(purchase_document.payment_terms.payment_term_details.all().order_by('id')):
-            logger.info(
-                f"purchase document {purchase_document.public_id} custom type payment  index {index} verification  ")
-            print(f"purchase document {purchase_document.public_id} custom type payment  index {index} verification  ")
-            percentage_to_pay += schedule.percentage
-            if purchase_document.next_due_date is None:
-                due_date = _calculate_due_date(purchase_document.date, schedule.value)
-                purchase_document.next_due_date = due_date
-                is_initial_phase = True
-                break
-            else:
-                now = timezone.now().date()
-                next_calculated_due_date = _calculate_due_date(next_calculated_due_date, schedule.value)
-                logger.info(
-                    f"purchase document {purchase_document.public_id} custom type payment  index {index} verification : next_calculated_due_date{next_calculated_due_date}  ")
-                print(
-                    f"purchase document {purchase_document.public_id} custom type payment  index {index} verification : next_calculated_due_date{next_calculated_due_date}  ")
-                if next_calculated_due_date > now:
-                    break
-        if not is_initial_phase:
-            purchase_document.next_due_date = next_calculated_due_date
-            due_date = next_calculated_due_date
+    is_payment_late = False
+    for due_date_entry in due_dates:
+        due_date, percentage = list(due_date_entry.items())[0]
+        amount_paid = _calculate_sum_amount_paid(purchase_document, due_date)
+        percentage_to_pay += percentage
 
-        if due_date:
-            now = timezone.now().date()
-            if now > due_date:
-                amount_paid = _calculate_sum_amount_paid(purchase_document)
-                percentage_to_pay_decimal = Decimal(str(percentage_to_pay))
-                if amount_paid is None or amount_paid == 0 or amount_paid < (
-                        percentage_to_pay_decimal / 100) * purchase_document.total_amount:
-                    purchase_document.is_payment_late = True
-                    purchase_document.days_in_late = (now - due_date).days
-                else:
-                    purchase_document.is_payment_late = False
-                    purchase_document.days_in_late = 0
-            else:
-                purchase_document.is_payment_late = False
-                purchase_document.days_in_late = 0
-        else:
-            purchase_document.is_payment_late = False
-            purchase_document.days_in_late = 0
-        if re_save:
-            purchase_document.skip_child_validation_form_transaction = True
-            purchase_document.save()
-            purchase_document.skip_child_validation_form_transaction = False
+        if amount_paid < (Decimal(percentage_to_pay) / 100) * purchase_document.total_amount:
+            purchase_document.is_payment_late = True
+            purchase_document.days_in_late = abs((current_date - due_date).days)
+            is_payment_late = True
+            break
+
+    if not purchase_document.next_due_date or not is_payment_late:
+        purchase_document.is_payment_late = False
+        purchase_document.days_in_late = 0
+
+    if re_save:
+        purchase_document.skip_child_validation_form_transaction = True
+        purchase_document.save()
+        purchase_document.skip_child_validation_form_transaction = False
 
 
 def calculate_payment_late_type_not_custom(purchase_document, re_save=True):
@@ -136,6 +119,8 @@ def _calculate_due_date(purchase_date, payment_term_type):
         return None
 
 
-def _calculate_sum_amount_paid(purchase_document):
+def _calculate_sum_amount_paid(purchase_document, date_limit=None):
     transactions = purchase_document.transactionpurchasedocumentpayment_set.all()
+    if date_limit is not None:
+        transactions = transactions.filter(transaction__date__lte=date_limit)
     return sum(tr.amount_paid for tr in transactions)
