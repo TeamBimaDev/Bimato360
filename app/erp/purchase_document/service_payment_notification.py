@@ -61,7 +61,7 @@ def calculate_payment_late_type_custom(purchase_document, re_save=True):
     is_payment_late = False
     for due_date_entry in due_dates:
         due_date, percentage = list(due_date_entry.items())[0]
-        amount_paid = _calculate_sum_amount_paid(purchase_document, due_date)
+        amount_paid = _calculate_sum_amount_paid(purchase_document)
         percentage_to_pay += percentage
 
         if amount_paid < (Decimal(percentage_to_pay) / 100) * purchase_document.total_amount:
