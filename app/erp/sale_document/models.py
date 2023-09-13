@@ -77,13 +77,13 @@ class BimaErpSaleDocumentProduct(models.Model):
             self.sale_document_public_id = self.sale_document.public_id
         self.calculate_totals()
         super().save(*args, **kwargs)
-        update_sale_document_totals(self.sale_document)
+        update_sale_document_totals(self.sale_document, re_save=False)
         self.sale_document.save()
 
     def delete(self, *args, **kwargs):
         sale_document = self.sale_document
         super().delete(*args, **kwargs)
-        update_sale_document_totals(sale_document)
+        update_sale_document_totals(sale_document, re_save=False)
         sale_document.save()
 
     def calculate_totals(self):
@@ -353,8 +353,9 @@ class BimaErpSaleDocument(AbstractModel):
         if self.pk is not None and not self.skip_child_validation_form_transaction:
             if self.bimaerpsaledocument_set.exists() and not self.is_recurring:
                 raise ValidationError("Cannot modify a SaleDocument that has children.")
+        self.verify_all_child_all_parent_have_same_partner()
         self.validate_all_required_field_for_recurring()
-
+        update_sale_document_totals(self, re_save=False)
         self.verify_and_calculate_next_due_date()
         super().save(*args, **kwargs)
 
@@ -432,8 +433,22 @@ class BimaErpSaleDocument(AbstractModel):
         else:
             calculate_payment_late_type_custom(self, re_save=False)
 
+    def verify_all_child_all_parent_have_same_partner(self):
+        if not self.pk:
+            return
+        has_children = self.parents.exists()
+        has_parents = self.bimaerpsaledocument_set.exists()
 
-def update_sale_document_totals(sale_document):
+        if has_children or has_parents:
+            for child in self.parents.all():
+                if child.partner != self.partner:
+                    raise ValidationError({"Partner": _("All child must have the same partner as the parent.")})
+            for parent in self.bimaerpsaledocument_set.all():
+                if parent.partner != self.partner:
+                    raise ValidationError({"Partner": _("All parent must have the same partner as the child.")})
+
+
+def update_sale_document_totals(sale_document, re_save=True):
     sale_document_products = BimaErpSaleDocumentProduct.objects.filter(
         sale_document=sale_document
     )
@@ -455,4 +470,5 @@ def update_sale_document_totals(sale_document):
     sale_document.total_after_discount = (
         totals["total_after_discount"] if totals["total_after_discount"] else 0
     )
-    sale_document.save()
+    if re_save:
+        sale_document.save()

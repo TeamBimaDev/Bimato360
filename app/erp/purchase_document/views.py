@@ -390,5 +390,5 @@ class BimaErpPurchaseDocumentViewSet(AbstractViewSet):
 
     def get_filtered_data(self, request):
         queryset = BimaErpPurchaseDocument.objects.select_related('partner').all()
-        filtered_sale_document = PurchaseDocumentFilter(request.GET, queryset=queryset)
-        return filtered_sale_document.qs
+        filtered_purchase_document = PurchaseDocumentFilter(request.GET, queryset=queryset)
+        return filtered_purchase_document.qs

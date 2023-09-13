@@ -46,13 +46,13 @@ class BimaErpPurchaseDocumentProduct(models.Model):
             self.purchase_document_public_id = self.purchase_document.public_id
         self.calculate_totals()
         super().save(*args, **kwargs)
-        update_purchase_document_totals(self.purchase_document)
+        update_purchase_document_totals(self.purchase_document, re_save=False)
         self.purchase_document.save()
 
     def delete(self, *args, **kwargs):
         purchase_document = self.purchase_document
         super().delete(*args, **kwargs)
-        update_purchase_document_totals(purchase_document)
+        update_purchase_document_totals(purchase_document, re_save=False)
         purchase_document.save()
 
     def calculate_totals(self):
@@ -137,6 +137,7 @@ class BimaErpPurchaseDocument(AbstractModel):
             if self.bimaerppurchasedocument_set.exists():
                 raise ValidationError("Cannot modify a PurchaseDocument that has children.")
         self.verify_and_calculate_next_due_date()
+        update_purchase_document_totals(self, re_save=False)
         super().save(*args, **kwargs)
 
     def delete(self, *args, **kwargs):
@@ -177,8 +178,10 @@ class BimaErpPurchaseDocument(AbstractModel):
             calculate_payment_late_type_custom(self, re_save=False)
 
 
-def update_purchase_document_totals(purchase_document):
+def update_purchase_document_totals(purchase_document, re_save=True):
     purchase_document_products = BimaErpPurchaseDocumentProduct.objects.filter(purchase_document=purchase_document)
+    if not purchase_document_products:
+        return
     totals = purchase_document_products.aggregate(
         total_discounts=Sum('discount_amount', output_field=DecimalField()),
         total_taxes=Sum('vat_amount', output_field=DecimalField()),
@@ -193,4 +196,5 @@ def update_purchase_document_totals(purchase_document):
     purchase_document.total_amount_without_vat = totals['total_amount_without_vat'] \
         if totals['total_amount_without_vat'] else 0
     purchase_document.total_after_discount = totals['total_after_discount'] if totals['total_after_discount'] else 0
-    purchase_document.save()
+    if re_save:
+        purchase_document.save()

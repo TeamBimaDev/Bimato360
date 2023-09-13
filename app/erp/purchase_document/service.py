@@ -125,6 +125,8 @@ def generate_xls_report(data, fields):
                         partner = purchase_document.partner
                         value = partner.company_name if partner.partner_type == PartnerType.COMPANY.name else \
                             f"{partner.first_name} {partner.last_name}"
+                    elif field.name == 'payment_terms':
+                        value = purchase_document.payment_terms.name if purchase_document.payment_terms is not None else ''
                     elif field.choices:
                         value = getattr(purchase_document, f"get_{field.name}_display")()
                     else:
