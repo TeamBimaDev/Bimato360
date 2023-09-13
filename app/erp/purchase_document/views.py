@@ -318,10 +318,14 @@ class BimaErpPurchaseDocumentViewSet(AbstractViewSet):
     @action(detail=True, methods=['GET'], url_path='get_direct_child')
     def get_direct_child(self, request, pk):
         document = self.get_object()
-        paginator = DefaultPagination()
-        child = paginator.paginate_queryset(document.bimaerppurchasedocument_set.all(), request)
+        queryset = document.bimaerppurchasedocument_set.all()
+        filtered_purchase_document = PurchaseDocumentFilter(request.GET, queryset=queryset)
+        filtered_queryset = filtered_purchase_document.qs
 
-        serializer = self.get_serializer(child, many=True)
+        paginator = DefaultPagination()
+        paginated_queryset = paginator.paginate_queryset(filtered_queryset, request)
+
+        serializer = self.get_serializer(paginated_queryset, many=True)
         return paginator.get_paginated_response(serializer.data)
 
     @action(detail=True, methods=['POST'], url_path="save_payment_with_transaction_credits")
