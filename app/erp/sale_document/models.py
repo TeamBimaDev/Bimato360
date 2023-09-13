@@ -426,8 +426,11 @@ class BimaErpSaleDocument(AbstractModel):
         return self.transactionsaledocumentpayment_set.exists()
 
     def verify_and_calculate_next_due_date(self):
-        if not self.pk or not self.status == SaleDocumentStatus.CONFIRMED.name or not self.type == SaleDocumentTypes.INVOICE.name or not self.payment_terms:
-            return True
+        if (not self.pk or not self.status == SaleDocumentStatus.CONFIRMED.name or
+                not self.type == SaleDocumentTypes.INVOICE.name or not self.payment_terms):
+            self.is_payment_late = False
+            self.days_in_late = 0
+            self.next_due_date = None
 
         if self.payment_terms.type != PaymentTermType.CUSTOM.name:
             calculate_payment_late_type_not_custom(self, re_save=False)
