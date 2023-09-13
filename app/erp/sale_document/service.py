@@ -12,6 +12,7 @@ from common.enums.sale_document_enum import SaleDocumentRecurringIntervalCustomU
 from common.enums.sale_document_enum import SaleDocumentStatus
 from common.enums.sale_document_enum import SaleDocumentTypes
 from common.enums.sale_document_enum import time_interval_based_on_recurring_interval, SaleDocumentRecurringInterval
+from common.enums.transaction_enum import PaymentTermType
 from common.service.purchase_sale_service import SalePurchaseService
 from dateutil.relativedelta import relativedelta
 from django.db import transaction
@@ -149,6 +150,11 @@ def create_products_from_parents(parents, new_document, reset_quantity=False):
 
 def create_new_document(document_type, parents, initial_recurrent_parent_id=None,
                         initial_recurrent_parent_public_id=None, is_recurring=False):
+    payment_terms = None
+    if document_type == SaleDocumentTypes.CREDIT_NOTE.name:
+        from django.apps import apps
+        BimaTreasuryPaymentTerm = apps.get_model('treasury', 'BimaTreasuryPaymentTerm')
+        payment_terms = BimaTreasuryPaymentTerm.objects.filter(type=PaymentTermType.IMMEDIATE.name).first()
     new_document = BimaErpSaleDocument.objects.create(
         number=SalePurchaseService.generate_unique_number('sale', document_type.lower()),
         date=datetime.today().strftime('%Y-%m-%d'),
@@ -157,7 +163,8 @@ def create_new_document(document_type, parents, initial_recurrent_parent_id=None
         partner=parents[0].partner,
         recurring_initial_parent_id=initial_recurrent_parent_id,
         recurring_initial_parent_public_id=initial_recurrent_parent_public_id,
-        is_recurring=is_recurring
+        is_recurring=is_recurring,
+        payment_terms=payment_terms
     )
     new_document.parents.add(*parents)
     return new_document

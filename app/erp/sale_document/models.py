@@ -355,6 +355,7 @@ class BimaErpSaleDocument(AbstractModel):
                 raise ValidationError("Cannot modify a SaleDocument that has children.")
         self.verify_all_child_all_parent_have_same_partner()
         self.validate_all_required_field_for_recurring()
+        self.make_note_credit_default_payment_terms()
         update_sale_document_totals(self, re_save=False)
         self.verify_and_calculate_next_due_date()
         super().save(*args, **kwargs)
@@ -446,6 +447,12 @@ class BimaErpSaleDocument(AbstractModel):
             for parent in self.bimaerpsaledocument_set.all():
                 if parent.partner != self.partner:
                     raise ValidationError({"Partner": _("All parent must have the same partner as the child.")})
+
+    def make_note_credit_default_payment_terms(self):
+        if self.type == SaleDocumentTypes.CREDIT_NOTE.name:
+            from django.apps import apps
+            BimaTreasuryPaymentTerm = apps.get_model('treasury', 'BimaTreasuryPaymentTerm')
+            self.payment_terms = BimaTreasuryPaymentTerm.objects.filter(type=PaymentTermType.IMMEDIATE.name).first()
 
 
 def update_sale_document_totals(sale_document, re_save=True):

@@ -65,9 +65,10 @@ def calculate_payment_late_type_custom(purchase_document, re_save=True):
         percentage_to_pay += percentage
 
         if amount_paid < (Decimal(percentage_to_pay) / 100) * purchase_document.total_amount:
-            purchase_document.is_payment_late = True
-            purchase_document.days_in_late = abs((current_date - due_date).days)
-            is_payment_late = True
+            days_in_late = abs((current_date - due_date).days)
+            purchase_document.days_in_late = days_in_late
+            is_payment_late = True if days_in_late > 0 else False
+            purchase_document.is_payment_late = True if days_in_late > 0 else False
             break
 
     if not purchase_document.next_due_date or not is_payment_late:
