@@ -63,11 +63,12 @@ def calculate_payment_late_type_custom(sale_document, re_save=True):
         percentage_to_pay += percentage
 
         if amount_paid < (Decimal(percentage_to_pay) / 100) * sale_document.total_amount:
-            days_in_late = abs((current_date - due_date).days)
-            sale_document.days_in_late = days_in_late
-            is_payment_late = True if days_in_late > 0 else False
-            sale_document.is_payment_late = True if days_in_late > 0 else False
-            break
+            if current_date > due_date:
+                days_in_late = abs((current_date - due_date).days)
+                sale_document.days_in_late = days_in_late
+                is_payment_late = True if days_in_late > 0 else False
+                sale_document.is_payment_late = True if days_in_late > 0 else False
+                break
 
     if not sale_document.next_due_date or not is_payment_late:
         sale_document.is_payment_late = False
@@ -81,20 +82,16 @@ def calculate_payment_late_type_custom(sale_document, re_save=True):
 
 def calculate_payment_late_type_not_custom(sale_document, re_save=True):
     due_date = _calculate_due_date(sale_document.date, sale_document.payment_terms.type)
+    now = timezone.now().date()
+    sale_document.next_due_date = due_date
 
-    if due_date:
-        now = timezone.now().date()
-        if now > due_date:
-            sale_document.is_payment_late = True
-            sale_document.days_in_late = (now - due_date).days
-        else:
-            sale_document.is_payment_late = False
-            sale_document.days_in_late = 0
+    if due_date and now > due_date:
+        sale_document.is_payment_late = True
+        sale_document.days_in_late = (now - due_date).days
     else:
         sale_document.is_payment_late = False
         sale_document.days_in_late = 0
 
-    sale_document.next_due_date = due_date
     if re_save:
         sale_document.skip_child_validation_form_transaction = True
         sale_document.save()

@@ -65,12 +65,13 @@ def calculate_payment_late_type_custom(purchase_document, re_save=True):
         percentage_to_pay += percentage
 
         if amount_paid < (Decimal(percentage_to_pay) / 100) * purchase_document.total_amount:
-            days_in_late = abs((current_date - due_date).days)
-            purchase_document.days_in_late = days_in_late
-            is_payment_late = True if days_in_late > 0 else False
-            purchase_document.is_payment_late = True if days_in_late > 0 else False
-            break
-
+            if current_date > due_date:
+                days_in_late = abs((current_date - due_date).days)
+                purchase_document.days_in_late = days_in_late
+                is_payment_late = True if days_in_late > 0 else False
+                purchase_document.is_payment_late = True if days_in_late > 0 else False
+                break
+      
     if not purchase_document.next_due_date or not is_payment_late:
         purchase_document.is_payment_late = False
         purchase_document.days_in_late = 0
@@ -83,20 +84,15 @@ def calculate_payment_late_type_custom(purchase_document, re_save=True):
 
 def calculate_payment_late_type_not_custom(purchase_document, re_save=True):
     due_date = _calculate_due_date(purchase_document.date, purchase_document.payment_terms.type)
+    purchase_document.next_due_date = due_date
+    now = timezone.now().date()
 
-    if due_date:
-        now = timezone.now().date()
-        if now > due_date:
-            purchase_document.is_payment_late = True
-            purchase_document.days_in_late = (now - due_date).days
-        else:
-            purchase_document.is_payment_late = False
-            purchase_document.days_in_late = 0
+    if due_date and now > due_date:
+        purchase_document.is_payment_late = True
+        purchase_document.days_in_late = (now - due_date).days
     else:
         purchase_document.is_payment_late = False
         purchase_document.days_in_late = 0
-
-    purchase_document.next_due_date = due_date
     if re_save:
         purchase_document.skip_child_validation_form_transaction = True
         purchase_document.save()
