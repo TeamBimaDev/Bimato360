@@ -81,7 +81,6 @@
         }
 
         .sale_document_number, .sale_document_partner_name {
-            width: 10%;
             text-transform: uppercase;
         }
 
@@ -103,6 +102,11 @@
             font-size: 20px;
             font-weight: 800;
         }
+
+        .table_font_style {
+            font-size: 10px;
+            font-weight: 600;
+        }
     </style>
 </head>
 <body>
@@ -111,9 +115,8 @@
         {{ company_data.company.name }}
     </div>
 
-    <div class="company_logo" id="header-right">
-        <img src="{{ request.scheme }}://
-                {{ request.get_host }}{{ MEDIA_URL }}{{ company_data.favorite_logo.file_path }}"
+    <div class="company_logo" id="header-right"> 
+        <img src="{{ request.scheme }}://{{ request.get_host }}{{ MEDIA_URL }}{{ company_data.favorite_logo.file_path }}"
              alt="{% trans "Company Logo" %}" class="logo"/>
     </div>
 
@@ -122,21 +125,21 @@
 
 <table class="products_table">
     <tr>
-        <th class="text_center">{% trans "NUMBER" %}</th>
-        <th class="text_center">{% trans "PARTNER" %}</th>
-        <th class="text_right">{% trans "TOTAL_VAT" %}</th>
-        <th class="text_right">{% trans 'DISCOUNT' %}</th>
-        <th class="text_right">{% trans 'TOTAL_PRICE' %}</th>
+        <th class="table_font_style text_center">{% trans "NUMBER" %}</th>
+        <th class="table_font_style text_center">{% trans "PARTNER" %}</th>
+        <th class="table_font_style text_center">{% trans "Date" %}</th>
+        <th class="table_font_style text_center">{% trans 'PAYMENT_STATUS' %}</th>
+        <th class="table_font_style text_right">{% trans 'TOTAL_PRICE' %}</th>
 
     </tr>
 
     {% for sd in documents %}
         <tr>
-            <td class="sale_document_number text_center">{{ sd.number }}</td>
-            <td class="sale_document_partner_name text_center">{{ sd.partner.first_name }} {{ sd.partner.last_name }} {{ sd.partner.company_name }}</td>
-            <td class="sale_document_price text_right">{{ sd.total_vat }}</td>
-            <td class="sale_document_price text_right">{{ sd.total_discount }}</td>
-            <td class="sale_document_total text_right">{{ sd.total_amount }}</td>
+            <td class="table_font_style sale_document_number text_center">{{ sd.number }}</td>
+            <td class="table_font_style sale_document_partner_name text_center">{{ sd.partner.first_name }} {{ sd.partner.last_name }} {{ sd.partner.company_name }}</td>
+            <td class="table_font_style sale_document_total text_center">{{ sd.date }}</td>
+            <td class="table_font_style sale_document_total text_center">{{ sd.translated_payment_status }}</td>
+            <td class="table_font_style sale_document_total text_right">{{ sd.total_amount }}</td>
         </tr>
     {% endfor %}
 </table>
