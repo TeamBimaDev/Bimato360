@@ -168,7 +168,7 @@ class BimaErpPurchaseDocument(AbstractModel):
         return self.transactionpurchasedocumentpayment_set.exists()
 
     def verify_and_calculate_next_due_date(self):
-        if not self.pk or not self.status == PurchaseDocumentStatus.CONFIRMED.name or not self.type == PurchaseDocumentTypes.INVOICE.name:
+        if not self.pk or not self.status == PurchaseDocumentStatus.CONFIRMED.name or not self.type == PurchaseDocumentTypes.INVOICE.name or not self.payment_terms:
             return True
 
         if self.payment_terms.type != PaymentTermType.CUSTOM.name:

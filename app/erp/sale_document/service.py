@@ -198,6 +198,8 @@ def generate_xls_report(data, fields):
                         partner = sale_document.partner
                         value = partner.company_name if partner.partner_type == PartnerType.COMPANY.name else \
                             f"{partner.first_name} {partner.last_name}"
+                    elif field.name == 'payment_terms':
+                        value = sale_document.payment_terms.name if sale_document.payment_terms is not None else ''
                     elif field.name in ['recurring_stopped_by', 'recurring_reactivated_by']:
                         user = getattr(sale_document, field.name)
                         if user is not None:
