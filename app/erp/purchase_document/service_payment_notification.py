@@ -71,7 +71,7 @@ def calculate_payment_late_type_custom(purchase_document, re_save=True):
                 is_payment_late = True if days_in_late > 0 else False
                 purchase_document.is_payment_late = True if days_in_late > 0 else False
                 break
-      
+
     if not purchase_document.next_due_date or not is_payment_late:
         purchase_document.is_payment_late = False
         purchase_document.days_in_late = 0
@@ -88,8 +88,13 @@ def calculate_payment_late_type_not_custom(purchase_document, re_save=True):
     now = timezone.now().date()
 
     if due_date and now > due_date:
-        purchase_document.is_payment_late = True
-        purchase_document.days_in_late = (now - due_date).days
+        amount_pad = _calculate_sum_amount_paid(purchase_document)
+        if amount_pad < purchase_document.total_amount:
+            purchase_document.is_payment_late = True
+            purchase_document.days_in_late = (now - due_date).days
+        else:
+            purchase_document.is_payment_late = False
+            purchase_document.days_in_late = 0
     else:
         purchase_document.is_payment_late = False
         purchase_document.days_in_late = 0

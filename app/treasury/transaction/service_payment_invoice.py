@@ -216,6 +216,8 @@ def _update_amount_paid_document(document, transactions, payment_status):
 
     if document.amount_paid == document.total_amount:
         document.payment_status = payment_status.PAID.name
+        document.is_payment_late = False
+        document.days_in_late = 0
     elif document.amount_paid > 0:
         document.payment_status = payment_status.PARTIAL_PAID.name
     else:

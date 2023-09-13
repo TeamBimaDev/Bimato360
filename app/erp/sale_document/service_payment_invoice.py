@@ -99,6 +99,8 @@ def handle_amount_paid_and_status_paid_sale_document(sale_document):
 
     if sale_document.amount_paid == sale_document.total_amount:
         sale_document.payment_status = SaleDocumentPaymentStatus.PAID.name
+        sale_document.is_payment_late = False
+        sale_document.days_in_late = 0
     elif sale_document.amount_paid > 0:
         sale_document.payment_status = SaleDocumentPaymentStatus.PARTIAL_PAID.name
     else:

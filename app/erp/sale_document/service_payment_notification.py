@@ -86,8 +86,13 @@ def calculate_payment_late_type_not_custom(sale_document, re_save=True):
     sale_document.next_due_date = due_date
 
     if due_date and now > due_date:
-        sale_document.is_payment_late = True
-        sale_document.days_in_late = (now - due_date).days
+        amount_pad = _calculate_sum_amount_paid(sale_document)
+        if amount_pad < sale_document.total_amount:
+            sale_document.is_payment_late = True
+            sale_document.days_in_late = (now - due_date).days
+        else:
+            sale_document.is_payment_late = False
+            sale_document.days_in_late = 0
     else:
         sale_document.is_payment_late = False
         sale_document.days_in_late = 0
