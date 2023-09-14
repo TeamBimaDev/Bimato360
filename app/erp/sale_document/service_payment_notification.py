@@ -121,6 +121,8 @@ def _calculate_due_date(sale_date, payment_term_type):
 
 
 def _calculate_sum_amount_paid(sale_document, date_limit=None):
+    if not sale_document.pk or not sale_document.transactionsaledocumentpayment_set:
+        return 0
     transactions = sale_document.transactionsaledocumentpayment_set.all()
     if date_limit is not None:
         transactions = transactions.filter(transaction__date__lte=date_limit)

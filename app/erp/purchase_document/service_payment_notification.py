@@ -122,6 +122,9 @@ def _calculate_due_date(purchase_date, payment_term_type):
 
 
 def _calculate_sum_amount_paid(purchase_document, date_limit=None):
+    if not purchase_document.pk or not purchase_document.transactionpurchasedocumentpayment_set:
+        return 0
+
     transactions = purchase_document.transactionpurchasedocumentpayment_set.all()
     if date_limit is not None:
         transactions = transactions.filter(transaction__date__lte=date_limit)

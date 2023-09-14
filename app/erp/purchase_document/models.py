@@ -174,11 +174,11 @@ class BimaErpPurchaseDocument(AbstractModel):
             self.is_payment_late = False
             self.days_in_late = 0
             self.next_due_date = None
-
-        if self.payment_terms.type != PaymentTermType.CUSTOM.name:
-            calculate_payment_late_type_not_custom(self, re_save=False)
         else:
-            calculate_payment_late_type_custom(self, re_save=False)
+            if self.payment_terms.type != PaymentTermType.CUSTOM.name:
+                calculate_payment_late_type_not_custom(self, re_save=False)
+            else:
+                calculate_payment_late_type_custom(self, re_save=False)
 
 
 def update_purchase_document_totals(purchase_document, re_save=True):
