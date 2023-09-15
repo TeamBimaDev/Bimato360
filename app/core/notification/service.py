@@ -1,12 +1,16 @@
 import logging
 import re
+from datetime import timedelta
+from decimal import Decimal
 
+from celery import shared_task
 from common.email.email_service import EmailService
 from common.enums.partner_type import PartnerType
 from common.enums.transaction_enum import PaymentTermType
 from common.service.purchase_sale_service import SalePurchaseService
 from core.notification.models import BimaCoreNotification
 from core.notification_template.service import BimaCoreNotificationTemplateService
+from core.notification_type.models import BimaCoreNotificationType
 from django.contrib.contenttypes.models import ContentType
 from django.utils import timezone
 from erp.partner.service import BimaErpPartnerService
@@ -17,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 class BimaErpNotificationService:
     @staticmethod
-    def send_notification_for_unpaid_sale_document():
+    def send_notification_for_payment_late_sale_documents():
         unpaid_sale_documents = SaleDocumentService.get_sale_document_payment_late()
         sale_document_to_return = []
         for sale_document in unpaid_sale_documents:
@@ -26,12 +30,8 @@ class BimaErpNotificationService:
             try:
                 logger.info(f"start verification payment status sale document {sale_document.public_id}")
                 print(f"start verification payment status sale document {sale_document.public_id}")
-                if sale_document.payment_terms.type != PaymentTermType.CUSTOM.name:
-                    BimaErpNotificationService.send_notification_sale_document_not_custom_type_late_due_date_plus_one_day(
-                        sale_document)
-                else:
-                    BimaErpNotificationService.send_notification_sale_document_custom_type_late_due_date_plus_one_day(
-                        sale_document)
+                BimaErpNotificationService.send_notification_payment_late_sale_document_based_on_payment_term_type(
+                    sale_document)
                 sale_document_to_return.append(
                     {"sale_document_public_ud": sale_document.public_id,
                      "next_due_date": sale_document.next_due_date})
@@ -44,7 +44,16 @@ class BimaErpNotificationService:
         return sale_document_to_return
 
     @staticmethod
-    def send_notification_sale_document_custom_type_late_due_date_plus_one_day(document):
+    def send_notification_payment_late_sale_document_based_on_payment_term_type(sale_document, send_instantly=False):
+        if sale_document.payment_terms.type != PaymentTermType.CUSTOM.name:
+            BimaErpNotificationService.send_notification_sale_document_not_custom_type_late_due_date_plus_one_day(
+                sale_document, send_instantly)
+        else:
+            BimaErpNotificationService.send_notification_sale_document_custom_type_late_due_date_plus_one_day(
+                sale_document, send_instantly)
+
+    @staticmethod
+    def send_notification_sale_document_custom_type_late_due_date_plus_one_day(document, send_instantly=False):
         current_date = timezone.now().date()
         due_dates = []
         payment_schedule = document.payment_terms.payment_term_details.all().order_by('id')
@@ -65,11 +74,11 @@ class BimaErpNotificationService:
             due_date, percentage = list(due_date_entry.items())[0]
             percentage_to_pay += percentage
 
-            # if ((amount_paid < (Decimal(percentage_to_pay) / 100) * document.total_amount) and
-            #         (current_date == due_date + timedelta(days=1))):
-            #     send_notification = True
-        send_notification = True
-        if send_notification:
+            if ((amount_paid < (Decimal(percentage_to_pay) / 100) * document.total_amount) and
+                    (current_date == due_date + timedelta(days=1))):
+                send_notification = True
+
+        if send_notification or send_instantly:
             data_to_send = {
                 'partner_name': document.partner.first_name if document.partner.partner_type == PartnerType.INDIVIDUAL.name else document.partner.company_name,
                 'invoice_number': document.number,
@@ -82,7 +91,7 @@ class BimaErpNotificationService:
             BimaErpNotificationService.send_notification_payment_late(notification_template, document, data_to_send)
 
     @staticmethod
-    def send_notification_sale_document_not_custom_type_late_due_date_plus_one_day(document):
+    def send_notification_sale_document_not_custom_type_late_due_date_plus_one_day(document, send_instantly=False):
         due_date = SalePurchaseService.calculate_due_date(document.date, document.payment_terms.type)
         send_notification = False
         now = timezone.now().date()
@@ -90,14 +99,12 @@ class BimaErpNotificationService:
             'NOTIFICATION_PAYMENT_LATE')
         amount_paid = 0
 
-        # if due_date and now == due_date + timedelta(days=1):
-        #     amount_paid = document.calculate_sum_amount_paid()
-        #     if amount_paid < document.total_amount:
-        #         send_notification = True
+        if due_date and now == due_date + timedelta(days=1):
+            amount_paid = document.calculate_sum_amount_paid()
+            if amount_paid < document.total_amount:
+                send_notification = True
 
-        send_notification = True
-
-        if send_notification:
+        if send_notification or send_instantly:
             data_to_send = {
                 'partner_name': document.partner.first_name if document.partner.partner_type == PartnerType.INDIVIDUAL.name else document.partner.company_name,
                 'invoice_number': document.number,
@@ -115,7 +122,6 @@ class BimaErpNotificationService:
         receivers = [contact.email for contact in partner_contacts if contact.email]
         if document.partner.email:
             receivers.append(document.partner.email)
-
         data = {
             'subject': BimaErpNotificationService.replace_variables_in_template(notification_template.subject,
                                                                                 {'invoice_number': document.number}),
@@ -123,21 +129,22 @@ class BimaErpNotificationService:
                                                                                 data_to_send),
             'receivers': receivers,
             'attachments': [],
-            'notification_type': notification_template.notification_type,
+            'notification_type_id': notification_template.notification_type.id,
             'sender': None,
             'app_name': 'erp',
             'model_name': 'bimaerpsaledocument',
             'parent_id': document.id
         }
-        BimaErpNotificationService.send_email_and_save_notification(data)
+        BimaErpNotificationService.send_email_and_save_notification.delay(data)
 
     @staticmethod
-    def send_email_and_save_notification(data):
+    @shared_task(bind=True, max_retries=3, soft_time_limit=500)
+    def send_email_and_save_notification(task, data):
         subject = data['subject']
         message = data['message']
         receivers = data['receivers']
         attachments = data['attachments']
-        notification_type = data['notification_type']
+        notification_type_id = data.get('notification_type_id')
         sender = data['sender']
         app_name = data['app_name']
         model_name = data['model_name']
@@ -149,7 +156,7 @@ class BimaErpNotificationService:
                 subject=subject,
                 message=message,
                 attachments=attachments,
-                notification_type=notification_type,
+                notification_type_id=notification_type_id,
                 sender=sender,
                 app_name=app_name,
                 model_name=model_name,
@@ -169,7 +176,8 @@ class BimaErpNotificationService:
                     formatted_due_date = ''
                     for due_date_entry in value:
                         due_date, percentage = list(due_date_entry.items())[0]
-                        formatted_due_date += f"{due_date.strftime('%Y/%m/%d')} : {percentage}%" + "<br/>"
+                        percentage_amount = (Decimal(percentage) / 100) * data.get('total_amount', 0)
+                        formatted_due_date += f"Date d'échéance : {due_date.strftime('%Y/%m/%d')} : {percentage}% ({percentage_amount})" + "<br/>"
 
                     return formatted_due_date
 
@@ -182,13 +190,15 @@ class BimaErpNotificationService:
         return replaced_template
 
     @staticmethod
-    def save_notification(receivers, subject, message, attachments, notification_type, sender=None, app_name=None,
+    def save_notification(receivers, subject, message, attachments, notification_type_id, sender=None, app_name=None,
                           model_name=None, parent_id=None):
 
         try:
             parent_type = ContentType.objects.get(app_label=app_name, model=model_name)
         except ContentType.DoesNotExist:
             parent_type = None
+
+        notification_type = BimaCoreNotificationType.objects.get(id=notification_type_id)
 
         notification = BimaCoreNotification.objects.create(
             sender=sender,

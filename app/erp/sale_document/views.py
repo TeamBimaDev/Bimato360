@@ -395,6 +395,11 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
         return_data = verify_sale_document_payment_status()
         return Response(return_data)
 
+    @action(detail=False, methods=['GET'], url_path='get_stats')
+    def get_stats(self, request):
+        data_filtered_queryset = self.get_filtered_data(request)
+        return Response(SaleDocumentService.get_summary_stats(data_filtered_queryset))
+
     def get_request_data(self, request):
         document_type = request.data.get('document_type', '')
         parent_public_ids = request.data.get('parent_public_ids', [])

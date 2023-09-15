@@ -1,6 +1,10 @@
+import uuid
+
 from common.permissions.action_base_permission import ActionBasedPermission
 from core.abstract.views import AbstractViewSet
 from core.notification_type.models import BimaCoreNotificationType
+from django.apps import apps
+from django.utils.translation import gettext_lazy as _
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -52,7 +56,7 @@ class BimaCoreNotificationViewSet(AbstractViewSet):
         sender = request.user if request.user.is_authenticated else None
 
         notification = BimaErpNotificationService.save_notification(receivers, subject, message, attachments,
-                                                                    notification_type, sender, app_name, model_name,
+                                                                    notification_type.id, sender, app_name, model_name,
                                                                     parent_id)
 
         serializer = BimaCoreNotificationSerializer(notification)
@@ -79,6 +83,17 @@ class BimaCoreNotificationViewSet(AbstractViewSet):
         serializer = BimaCoreNotificationSerializer(notification)
         return Response(serializer.data)
 
-    @action(detail=False, methods=['GET'])
-    def test_send_email(self, request):
-        BimaErpNotificationService.send_notification_for_unpaid_sale_document()
+    @action(detail=False, methods=['GET'], url_path="sent_payment_late_notification_sale_document")
+    def sent_payment_late_notification_sale_document(self, request):
+        sale_document_public_id = request.query_params.get('sale_document_public_id', None)
+        if not sale_document_public_id or uuid.UUID(sale_document_public_id, version=4):
+            return Response({"Error": _("Please provide a valid UUID")}, status=status.HTTP_400_BAD_REQUEST)
+
+        BimaErpSaleDocument = apps.get_model('erp', 'BimaErpSaleDocument')
+        sale_document = BimaErpSaleDocument.objects.get_object_by_public_id(sale_document_public_id)
+        if not sale_document:
+            return Response({"Error": _("Unable to find item")}, status=status.HTTP_400_BAD_REQUEST)
+
+        BimaErpNotificationService.send_notification_payment_late_sale_document_based_on_payment_term_type(
+            sale_document, send_instantly=True)
+        return Response(_("NOTIFICATION_SALE_DOCUMENT_PAYMENT_LATE_SENT_SUCCESSFUL"))

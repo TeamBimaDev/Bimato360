@@ -11,7 +11,7 @@ app.autodiscover_tasks()
 app.conf.beat_schedule = {
     'generate_recurring_sale_documents_task': {
         'task': 'erp.tasks.generate_recurring_sale_documents_task',
-        'schedule': crontab(hour='11', minute='00'),
+        'schedule': crontab(hour='08', minute='00'),
         'args': ('celer_beat_security_key_to_access_to_tasks',)
     },
     'verify_sale_document_payment_status_task': {
@@ -24,9 +24,9 @@ app.conf.beat_schedule = {
         'schedule': crontab(hour='08', minute='00'),
         'args': ('celer_beat_security_key_to_access_to_payment_status_tasks',)
     },
-    'send_payment_late_sale_document_notification': {
-        'task': 'core.tasks.send_notification_payment_late_sale_document',
-        'schedule': crontab(hour='9', minute='50'),
+    'send_notification_for_payment_late_sale_documents': {
+        'task': 'core.tasks.send_notification_for_payment_late_sale_documents',
+        'schedule': crontab(hour='8', minute='00'),
         'args': ('celer_beat_security_key_to_access_to_payment_late_sale_document_notification_tasks',)
     },
 

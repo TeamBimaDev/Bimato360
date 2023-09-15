@@ -16,7 +16,10 @@ from common.enums.transaction_enum import PaymentTermType
 from common.service.purchase_sale_service import SalePurchaseService
 from dateutil.relativedelta import relativedelta
 from django.db import transaction
-from django.db.models import Sum
+from django.db.models import Case, When, Q
+from django.db.models import F
+from django.db.models import IntegerField
+from django.db.models import Sum, Count
 from django.http import HttpResponse
 from django.utils.translation import gettext_lazy as _
 from erp.product.models import BimaErpProduct
@@ -54,6 +57,33 @@ class SaleDocumentService:
             status=SaleDocumentStatus.CONFIRMED.name,
             is_payment_late=True
         )
+
+    @staticmethod
+    def get_summary_stats(queryset):
+        stats = queryset.aggregate(
+            number_of_item=Count('id'),
+            number_of_item_paid=Count(Case(When(payment_status='PAID', then=F('id'))), output_field=IntegerField()),
+            number_of_item_unpaid=Count(Case(When(~Q(payment_status='PAID'), then=F('id'))),
+                                        output_field=IntegerField()),
+            number_of_item_payment_late=Count(Case(When(is_payment_late=True, then=F('id'))),
+                                              output_field=IntegerField()),
+            total_amount=Sum('total_amount'),
+            total_amount_paid=Sum('amount_paid')
+        )
+
+        total_amount = stats['total_amount'] or 0
+        total_amount_paid = stats['total_amount_paid'] or 0
+        total_unpaid = float(total_amount - total_amount_paid)
+      
+        return {
+            "number_of_item": stats['number_of_item'],
+            "number_of_item_paid": stats['number_of_item_paid'],
+            "number_of_item_unpaid": stats['number_of_item_unpaid'],
+            "number_of_item_payment_late": stats['number_of_item_payment_late'],
+            "total_amount": stats['total_amount'],
+            "total_amount_paid": stats['total_amount_paid'],
+            "total_unpaid": total_unpaid
+        }
 
 
 def generate_recurring_sale_documents():
