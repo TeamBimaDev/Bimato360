@@ -1,8 +1,7 @@
 import logging
 
 from celery import shared_task
-
-from app.core.notification.service import BimaErpNotificationService
+from core.notification.service import BimaErpNotificationService
 
 logger = logging.getLogger(__name__)
 
