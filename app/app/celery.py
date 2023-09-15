@@ -24,5 +24,10 @@ app.conf.beat_schedule = {
         'schedule': crontab(hour='08', minute='00'),
         'args': ('celer_beat_security_key_to_access_to_payment_status_tasks',)
     },
+    'send_payment_late_sale_document_notification': {
+        'task': 'core.tasks.send_notification_payment_late_sale_document',
+        'schedule': crontab(hour='08', minute='52'),
+        'args': ('celer_beat_security_key_to_access_to_payment_late_sale_document_notification_tasks',)
+    },
 
 }

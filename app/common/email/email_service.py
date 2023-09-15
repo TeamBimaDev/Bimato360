@@ -1,10 +1,12 @@
-from smtplib import SMTPException
-from django.core.mail import EmailMessage
-from app import settings
 import logging
-from celery import shared_task
 import time
+from smtplib import SMTPException
+
+from celery import shared_task
 from celery import states
+from django.core.mail import EmailMessage
+
+from app import settings
 
 
 class EmailService:
@@ -34,11 +36,12 @@ class EmailService:
             self.update_state(state=states.SUCCESS)
             end_time = time.time()
             logger.info(f'Task {self.request.id} completed in {end_time - start_time} seconds.')
+            return True
         except SMTPException as e:
             logger.error(f'SMTP Error sending email: {e}')
             self.update_state(state=states.FAILURE, meta={'exc': str(e)})
-            raise
+            return False
         except Exception as e:
             logger.error(f'Unexpected error sending email: {e}')
             self.update_state(state=states.FAILURE, meta={'exc': str(e)})
-            raise
+            return False

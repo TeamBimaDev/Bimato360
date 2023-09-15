@@ -1,6 +1,7 @@
 import uuid
 from io import BytesIO
 
+from common.converters.default_converters import str_to_bool
 from common.enums.transaction_enum import TransactionTypeIncomeOutcome
 from common.permissions.action_base_permission import ActionBasedPermission
 from core.abstract.views import AbstractViewSet
@@ -26,7 +27,8 @@ from .models import BimaTreasuryTransaction, TransactionSaleDocumentPayment, Tra
 from .serializers import BimaTreasuryTransactionSerializer, TransactionHistorySerializer, \
     TransactionSaleDocumentPaymentSerializer, TransactionPurchaseDocumentPaymentSerializer
 from .service import BimaTreasuryTransactionService
-from .service_payment_invoice import handle_invoice_payment, handle_credit_note_payment
+from .service_payment_invoice import handle_invoice_payment, handle_credit_note_payment, \
+    delete_old_paid_transaction_sale_document
 
 
 class BimaTreasuryTransactionViewSet(AbstractViewSet):
@@ -77,6 +79,20 @@ class BimaTreasuryTransactionViewSet(AbstractViewSet):
         instance = serializer.save()
         handle_invoice_payment(instance, sale_document_public_ids)
         handle_credit_note_payment(instance, sale_document_public_ids)
+
+    def destroy(self, request, *args, **kwargs):
+        force_delete_credit_note_transaction = str_to_bool(
+            self.request.query_params.get('force_delete_credit_note_transaction',
+                                          False))
+        instance = self.get_object()
+        if instance.check_delete_forced_for_credit_note(force_delete_credit_note_transaction):
+            delete_old_paid_transaction_sale_document(instance)
+        elif instance.has_payment():
+            raise ValidationError(
+                {"payment": _("You cannot delete this transaction, you need to unlink invoice payment first")})
+
+        instance.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=False, methods=['get'])
     def get_unique_number(self, request, **kwargs):

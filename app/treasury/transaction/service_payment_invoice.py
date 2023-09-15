@@ -46,7 +46,7 @@ def handle_credit_note_payment_invoice(transaction, document_public_ids):
     if sum_sale_document_amount != transaction.amount:
         raise ValidationError({"Error": _("Amount of the transaction should be equal to the amount of credit note!")})
 
-    _delete_old_paid_transaction_sale_document(transaction)
+    delete_old_paid_transaction_sale_document(transaction)
 
     remaining_amount = transaction.amount
 
@@ -87,7 +87,7 @@ def handle_credit_note_payment_invoice(transaction, document_public_ids):
 def handle_invoice_payment_customer_invoice(transaction, document_public_ids):
     BimaErpSaleDocument = apps.get_model('erp', 'BimaErpSaleDocument')
     TransactionSaleDocumentPayment = apps.get_model('treasury', 'TransactionSaleDocumentPayment')
-    _delete_old_paid_transaction_sale_document(transaction)
+    delete_old_paid_transaction_sale_document(transaction)
 
     remaining_amount = transaction.amount
     sale_documents = BimaErpSaleDocument.objects.filter(
@@ -173,7 +173,7 @@ def handle_invoice_payment_supplier_invoice(transaction, document_public_ids):
 
 def handle_invoice_payment_deletion(transaction_paid):
     if transaction_paid.transaction_type.code in _get_invoice_payment_customer_codes():
-        _delete_old_paid_transaction_sale_document(transaction_paid)
+        delete_old_paid_transaction_sale_document(transaction_paid)
     elif transaction_paid.transaction_type.code in _get_invoice_payment_supplier_codes():
         _delete_old_paid_transaction_purchase_document(transaction_paid)
 
@@ -188,7 +188,7 @@ def _update_amount_paid_purchase_document(purchase_document):
     _update_amount_paid_document(purchase_document, transactions, PurchaseDocumentPaymentStatus)
 
 
-def _delete_old_paid_transaction_sale_document(transaction_paid):
+def delete_old_paid_transaction_sale_document(transaction_paid):
     with db_transaction.atomic():
         TransactionSaleDocumentPayment = apps.get_model('treasury', 'TransactionSaleDocumentPayment')
         old_sale_document_payments = TransactionSaleDocumentPayment.objects.filter(transaction=transaction_paid)

@@ -47,6 +47,14 @@ class SaleDocumentService:
             unique_number = SalePurchaseService.generate_unique_number(sale_or_purchase, quotation_order_invoice)
         return unique_number
 
+    @staticmethod
+    def get_sale_document_payment_late():
+        return BimaErpSaleDocument.objects.filter(
+            type=SaleDocumentTypes.INVOICE.name,
+            status=SaleDocumentStatus.CONFIRMED.name,
+            is_payment_late=True
+        )
+
 
 def generate_recurring_sale_documents():
     today = datetime.today().date()

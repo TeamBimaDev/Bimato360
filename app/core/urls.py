@@ -17,5 +17,8 @@ urlpatterns = [
     path('tag/', include('core.tag.urls')),
     path('entity_tag/', include('core.entity_tag.urls')),
     path('source/', include('core.source.urls')),
+    path('notification/', include('core.notification.urls')),
+    path('notification_template/', include('core.notification_template.urls')),
+    path('notification_type/', include('core.notification_type.urls')),
     path('utils/<str:action>/', CoreView.as_view(), name='utility'),
 ]

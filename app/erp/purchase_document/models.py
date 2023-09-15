@@ -4,14 +4,13 @@ from common.enums.purchase_document_enum import get_payment_status
 from common.enums.purchase_document_enum import get_purchase_document_status, \
     get_purchase_document_types, get_purchase_document_validity
 from common.enums.transaction_enum import PaymentTermType
+from common.service.purchase_sale_service import SalePurchaseService
 from core.abstract.models import AbstractModel
 from django.db import models
 from django.db.models import DecimalField, Sum
 from django.utils.translation import gettext_lazy as _
 from erp.partner.models import BimaErpPartner
 from erp.product.models import BimaErpProduct
-from erp.purchase_document.service_payment_notification import calculate_payment_late_type_not_custom, \
-    calculate_payment_late_type_custom
 from rest_framework.exceptions import ValidationError
 from simple_history.models import HistoricalRecords
 from treasury.payment_term.models import BimaTreasuryPaymentTerm
@@ -176,9 +175,20 @@ class BimaErpPurchaseDocument(AbstractModel):
             self.next_due_date = None
         else:
             if self.payment_terms.type != PaymentTermType.CUSTOM.name:
-                calculate_payment_late_type_not_custom(self, re_save=False)
+                SalePurchaseService.calculate_payment_late_type_not_custom(self, re_save=False)
             else:
-                calculate_payment_late_type_custom(self, re_save=False)
+                SalePurchaseService.calculate_payment_late_type_custom(self, re_save=False)
+
+    def calculate_sum_amount_paid(self, date_limit=None):
+        if not self.pk or not self.transactionpurchasedocumentpayment_set:
+            return 0
+        transactions = self.transactionpurchasedocumentpayment_set.all()
+        if not transactions:
+            return 0
+
+        if date_limit is not None:
+            transactions = transactions.filter(transaction__date__lte=date_limit)
+        return sum(tr.amount_paid for tr in transactions)
 
 
 def update_purchase_document_totals(purchase_document, re_save=True):

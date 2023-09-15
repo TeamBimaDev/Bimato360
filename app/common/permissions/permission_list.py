@@ -159,6 +159,27 @@ class PermissionsList:
     CORE_TAG_DELETE = ("core.tag.can_delete", "Can delete tag", "CORE_TAG")
     CORE_TAG_READ = ("core.tag.can_read", "Can read tag", "CORE_TAG")
 
+    CORE_NOTIFICATION_CREATE = ("core.notification.can_create", "Can create notification", "CORE_NOTIFICATION")
+    CORE_NOTIFICATION_READ = ("core.notification.can_read", "Can read notification", "CORE_NOTIFICATION")
+
+    CORE_NOTIFICATION_TYPE_CREATE = (
+    "core.notification_type.can_create", "Can create notification type", "CORE_NOTIFICATION_TYPE")
+    CORE_NOTIFICATION_TYPE_UPDATE = (
+    "core.notification_type.can_update", "Can update notification type", "CORE_NOTIFICATION_TYPE")
+    CORE_NOTIFICATION_TYPE_DELETE = (
+    "core.notification_type.can_delete", "Can delete notification type", "CORE_NOTIFICATION_TYPE")
+    CORE_NOTIFICATION_TYPE_READ = (
+    "core.notification_type.can_read", "Can read notification type", "CORE_NOTIFICATION_TYPE")
+
+    CORE_NOTIFICATION_TEMPLATE_CREATE = (
+        "core.notification_template.can_create", "Can create notification template", "CORE_NOTIFICATION_TEMPLATE")
+    CORE_NOTIFICATION_TEMPLATE_UPDATE = (
+        "core.notification_template.can_update", "Can update notification template", "CORE_NOTIFICATION_TEMPLATE")
+    CORE_NOTIFICATION_TEMPLATE_DELETE = (
+        "core.notification_template.can_delete", "Can delete notification template", "CORE_NOTIFICATION_TEMPLATE")
+    CORE_NOTIFICATION_TEMPLATE_READ = (
+        "core.notification_template.can_read", "Can read notification template", "CORE_NOTIFICATION_TEMPLATE")
+
     ERP_CATEGORY_CREATE = (
         "erp.category.can_create",
         "Can create category",

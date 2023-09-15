@@ -207,13 +207,18 @@ class BimaTreasuryTransaction(AbstractModel):
     def delete(self, *args, **kwargs):
         system_delete = kwargs.pop("system_delete", False)
         self.check_if_transaction_child_and_prevent_deletion(system_delete)
-        if self.has_payment():
-            raise ValidationError(_("You cannot delete this transaction, you need to unlink invoice payment first"))
         handle_invoice_payment_deletion(self)
         super(BimaTreasuryTransaction, self).delete(*args, **kwargs)
 
     def has_payment(self):
         return self.transactionsaledocumentpayment_set.exists() or self.transactionpurchasedocumentpayment_set.exists()
+
+    def check_delete_forced_for_credit_note(self, force_delete_credit_note_transaction):
+        if (force_delete_credit_note_transaction and
+                self.pk and
+                self.transaction_type.code in ["CREDIT_NOTE_OUTCOME_BANK", "CREDIT_NOTE_OUTCOME_CASH"]):
+            return True
+        return False
 
     def handle_auto_transaction(self, old_transaction=None):
         if (
