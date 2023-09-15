@@ -143,7 +143,7 @@ class BimaErpNotificationService:
         model_name = data['model_name']
         parent_id = data['parent_id']
 
-        if EmailService.send_email(subject, message, receivers, html_message=None):
+        if EmailService.send_email(subject, message, receivers, html_message=True):
             BimaErpNotificationService.save_notification(
                 receivers=receivers,
                 subject=subject,

@@ -20,11 +20,15 @@ class EmailService:
 
         from_email = settings.DEFAULT_FROM_EMAIL
 
+        # Convert to a list if it's a single email address
+        if isinstance(to_email, str):
+            to_email = [to_email]
+
         email = EmailMessage(
             subject,
             message,
             from_email,
-            [to_email],
+            to_email,
         )
 
         if html_message:
