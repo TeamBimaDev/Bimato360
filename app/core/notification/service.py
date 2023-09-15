@@ -1,6 +1,7 @@
 import logging
 import re
 
+from common.email.email_service import EmailService
 from common.enums.partner_type import PartnerType
 from common.enums.transaction_enum import PaymentTermType
 from common.service.purchase_sale_service import SalePurchaseService
@@ -114,7 +115,7 @@ class BimaErpNotificationService:
         receivers = [contact.email for contact in partner_contacts if contact.email]
         if document.partner.email:
             receivers.append(document.partner.email)
-            
+
         data = {
             'subject': BimaErpNotificationService.replace_variables_in_template(notification_template.subject,
                                                                                 {'invoice_number': document.number}),
@@ -142,30 +143,18 @@ class BimaErpNotificationService:
         model_name = data['model_name']
         parent_id = data['parent_id']
 
-        BimaErpNotificationService.save_notification(
-            receivers=receivers,
-            subject=subject,
-            message=message,
-            attachments=attachments,
-            notification_type=notification_type,
-            sender=sender,
-            app_name=app_name,
-            model_name=model_name,
-            parent_id=parent_id
-        )
-
-        # if EmailService.send_email(subject, message, receivers, html_message=None):
-        #     BimaErpNotificationService.save_notification(
-        #         receivers=receivers,
-        #         subject=subject,
-        #         message=message,
-        #         attachments=attachments,
-        #         notification_type=notification_type,
-        #         sender=sender,
-        #         app_name=app_name,
-        #         model_name=model_name,
-        #         parent_id=parent_id
-        #     )
+        if EmailService.send_email(subject, message, receivers, html_message=None):
+            BimaErpNotificationService.save_notification(
+                receivers=receivers,
+                subject=subject,
+                message=message,
+                attachments=attachments,
+                notification_type=notification_type,
+                sender=sender,
+                app_name=app_name,
+                model_name=model_name,
+                parent_id=parent_id
+            )
 
     @staticmethod
     def replace_variables_in_template(template, data):
