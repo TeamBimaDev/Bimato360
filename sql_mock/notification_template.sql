@@ -15,7 +15,7 @@ INSERT INTO public.core_bimacorenotificationtemplate (id, public_id, created, up
                                                       message, notification_type_id)
 VALUES (1, 'cf6fdd6a-2674-4d3b-861d-5f65fba1dc5c', '2023-09-14 13:10:43.065253+01', '2023-08-22 13:10:43.065253+01',
         'Notification payment retard', 1, 'Rappel de Retard de Paiement - Facture {{invoice_number}}',
-        'Cher {{partner_name}},<br/><br/>Malheureusement, nous constatons qu''à ce jour, la facture avec la référence {{invoice_number}} n''a pas été réglée, bien que la date d''échéance soit passée. <br/>Veuillez trouver Ci-joint la communication de votre facture impayée.<br/>Nous vous encourageons à effectuer le paiement dès que possible pour éviter tout retard supplémentaire.<br/><br/>Cordialement,<br/>{{company_name}}',
+        'Cher {{partner_name}},<br/><br/>Malheureusement, nous constatons qu''à ce jour, la facture avec la référence {{invoice_number}} n''a pas été réglée, bien que la date d''échéance soit passée. <br/>Veuillez trouver Ci-joint la communication de votre facture impayée.<br/>{{due_date}}<br/>Montant TTC : {{total_amount}}<br/>Montant payée : {{total_amount_paid}}<br/>Montant restant : {{amount_remaining}}<br/>Nous vous encourageons à effectuer le paiement dès que possible pour éviter tout retard supplémentaire.<br/><br/>Cordialement,<br/>{{company_name}}',
         1);
 
 ALTER SEQUENCE public.core_bimacorenotificationtemplate_id_seq RESTART WITH 2;

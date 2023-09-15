@@ -163,7 +163,18 @@ class BimaErpNotificationService:
         def replace_variable(match):
             variable_name = match.group(1)
             if variable_name in data:
-                return str(data[variable_name])
+                value = data[variable_name]
+
+                if variable_name == 'due_date':
+                    formatted_due_date = ''
+                    for due_date_entry in value:
+                        due_date, percentage = list(due_date_entry.items())[0]
+                        formatted_due_date += f"{due_date.strftime('%Y/%m/%d')} : {percentage}%" + "<br/>"
+
+                    return formatted_due_date
+
+                return str(value)
+
             return match.group(0)
 
         replaced_template = re.sub(pattern, replace_variable, template)
