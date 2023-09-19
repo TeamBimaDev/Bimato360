@@ -111,3 +111,4 @@ zope.interface
 zopfli
 black
 python-json-logger
+bleach

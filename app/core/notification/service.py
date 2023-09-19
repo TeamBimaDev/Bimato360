@@ -30,7 +30,7 @@ class BimaErpNotificationService:
             try:
                 logger.info(f"start verification payment status sale document {sale_document.public_id}")
                 print(f"start verification payment status sale document {sale_document.public_id}")
-                BimaErpNotificationService.send_notification_payment_late_sale_document_based_on_payment_term_type(
+                BimaErpNotificationService.send_notification_payment_sale_document_based_on_payment_term_type(
                     sale_document, template_code='NOTIFICATION_PAYMENT_LATE', days_difference=1)
                 sale_document_to_return.append(
                     {"sale_document_public_ud": sale_document.public_id,
@@ -53,7 +53,7 @@ class BimaErpNotificationService:
             try:
                 logger.info(f"start verification payment status sale document {sale_document.public_id}")
                 print(f"start verification payment status sale document {sale_document.public_id}")
-                BimaErpNotificationService.send_notification_payment_late_sale_document_based_on_payment_term_type(
+                BimaErpNotificationService.send_notification_payment_sale_document_based_on_payment_term_type(
                     sale_document, template_code='NOTIFICATION_PAYMENT_REMINDER', days_difference=-days_before_due_date)
                 sale_document_to_return.append(
                     {"sale_document_public_ud": sale_document.public_id,
@@ -67,8 +67,8 @@ class BimaErpNotificationService:
         return sale_document_to_return
 
     @staticmethod
-    def send_notification_payment_late_sale_document_based_on_payment_term_type(sale_document, template_code,
-                                                                                days_difference, send_instantly=False):
+    def send_notification_payment_sale_document_based_on_payment_term_type(sale_document, template_code,
+                                                                           days_difference, send_instantly=False):
         if sale_document.payment_terms.type != PaymentTermType.CUSTOM.name:
             BimaErpNotificationService.send_notification_sale_document_not_custom_type(
                 sale_document, days_difference, template_code=template_code,

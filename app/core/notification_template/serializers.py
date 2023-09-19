@@ -1,3 +1,4 @@
+import bleach
 from company.models import BimaCompany
 from core.abstract.serializers import AbstractSerializer
 from core.notification_type.models import BimaCoreNotificationType
@@ -7,6 +8,7 @@ from .models import BimaCoreNotificationTemplate
 
 
 class BimaCoreNotificationTemplateSerializer(AbstractSerializer):
+    raw_html_message = serializers.CharField(source='message', required=False, allow_blank=True)
     notification_type = serializers.SerializerMethodField(read_only=True)
     notification_type_public_id = serializers.SlugRelatedField(
         queryset=BimaCoreNotificationType.objects.all(),
@@ -30,6 +32,9 @@ class BimaCoreNotificationTemplateSerializer(AbstractSerializer):
             'name': obj.notification_type.name
         }
 
+    def validate_raw_html_message(self, value):
+        return bleach.clean(value, strip=True, tags=bleach.sanitizer.ALLOWED_TAGS + ["additional_tags_if_needed"])
+
     def get_company(self, obj):
         return {
             'id': obj.company.public_id.hex,
@@ -39,6 +44,6 @@ class BimaCoreNotificationTemplateSerializer(AbstractSerializer):
     class Meta:
         model = BimaCoreNotificationTemplate
         fields = (
-            'id', 'name', 'subject', 'message', 'notification_type', 'notification_type_public_id', 'company',
+            'id', 'name', 'subject', 'raw_html_message', 'notification_type', 'notification_type_public_id', 'company',
             'company_public_id', 'created', 'updated',
         )
