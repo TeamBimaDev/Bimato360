@@ -1,12 +1,13 @@
 import logging
 from collections import defaultdict
-from datetime import datetime
+from datetime import datetime, date
 
 import pandas as pd
 from common.enums.transaction_enum import TransactionDirection, TransactionNature
 from django.apps import apps
 from django.db import models
 from django.db.models import Sum, Case, When, F, Avg
+from django.utils import timezone
 from django.utils.crypto import get_random_string
 from django.utils.translation import gettext_lazy as _
 from erp.partner.models import BimaErpPartner
@@ -415,6 +416,55 @@ class BimaTreasuryTransactionService:
             previous_month_total = trans['total_amount']
 
         return result
+
+    @staticmethod
+    def cash_bank_flow_kpi(duration_years, cash_ids, bank_ids):
+        from .models import BimaTreasuryTransaction
+
+        end_date = timezone.now().date()
+        start_date = date(end_date.year - duration_years + 1, 1, 1)
+        print(f'end_date:{end_date} start_date{start_date}')
+        transactions = BimaTreasuryTransaction.objects.all()
+
+        if cash_ids:
+            transactions = transactions.filter(cash__in=cash_ids)
+        if bank_ids:
+            transactions = transactions.filter(bank_account__in=bank_ids)
+
+        period_transactions = transactions.filter(date__range=(start_date, end_date))
+
+        incomes = sum(t.amount for t in period_transactions if t.direction == TransactionDirection.INCOME.name)
+        outcomes = sum(t.amount for t in period_transactions if t.direction == TransactionDirection.OUTCOME.name)
+        difference = incomes - outcomes
+
+        # Initialize details dict
+        details = defaultdict(lambda: {"incomes": 0, "outcomes": 0, "difference": 0, "increase_percentage": 0})
+
+        for transaction in period_transactions:
+            key = f"{transaction.date.month}/{transaction.date.year}"
+            if transaction.direction == TransactionDirection.INCOME.name:
+                details[key]["incomes"] += transaction.amount
+            else:
+                details[key]["outcomes"] += transaction.amount
+
+        last_month_diff = 0
+        for year in range(start_date.year, end_date.year + 1):
+            for month in range(1, 13):
+                key = f"{month}/{year}"
+                details[key]["difference"] = details[key]["incomes"] - details[key]["outcomes"]
+                if last_month_diff != 0:
+                    details[key]["increase_percentage"] = (details[key][
+                                                               "difference"] - last_month_diff) / last_month_diff * 100
+                last_month_diff = details[key]["difference"]
+
+        ordered_details = dict(
+            sorted(details.items(), key=lambda x: (int(x[0].split('/')[1]), int(x[0].split('/')[0]))))
+        return {
+            "total_income": incomes,
+            "total_outcome": outcomes,
+            "difference": difference,
+            "details": ordered_details
+        }
 
 
 class TransactionEffectStrategy:
