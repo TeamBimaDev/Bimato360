@@ -283,3 +283,5 @@ CELERY_RESULT_SERIALIZER = "json"
 CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
 CELERY_TIMEZONE = "UTC"
 CELERY_ENABLE_UTC = True
+
+html_allowed_tags = ['h1', 'h2', 'h3', 'br', 'p', 'strong', 'em', 'ol', 'li']

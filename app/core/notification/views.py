@@ -112,3 +112,9 @@ class BimaCoreNotificationViewSet(AbstractViewSet):
         BimaErpNotificationService.send_notification_payment_sale_document_based_on_payment_term_type(
             sale_document, days_difference=3, template_code='NOTIFICATION_PAYMENT_REMINDER', send_instantly=True)
         return Response(_("NOTIFICATION_SALE_DOCUMENT_PAYMENT_LATE_SENT_SUCCESSFUL"))
+
+    @action(detail=False, methods=['GET'], url_path="test_send_notification")
+    def test_send_notification(self, request):
+        BimaErpNotificationService.send_notification_for_payment_late_sale_documents()
+        BimaErpNotificationService.send_notification_for_payment_reminder_sale_documents()
+        return Response(_("NOTIFICATION_SALE_DOCUMENT_PAYMENT_LATE_SENT_SUCCESSFUL"))

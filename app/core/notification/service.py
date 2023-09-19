@@ -28,18 +28,15 @@ class BimaErpNotificationService:
             if not sale_document.payment_terms:
                 continue
             try:
-                logger.info(f"start verification payment status sale document {sale_document.public_id}")
-                print(f"start verification payment status sale document {sale_document.public_id}")
+                logger.info(f"start verification payment late status sale document {sale_document.public_id}")
                 BimaErpNotificationService.send_notification_payment_sale_document_based_on_payment_term_type(
                     sale_document, template_code='NOTIFICATION_PAYMENT_LATE', days_difference=1)
                 sale_document_to_return.append(
                     {"sale_document_public_ud": sale_document.public_id,
                      "next_due_date": sale_document.next_due_date})
-                logger.info(f"sale document verification {sale_document.public_id} succeeded")
-                print(f"sale document verification {sale_document.public_id} succeeded")
+                logger.info(f"sale document verification payment late {sale_document.public_id} succeeded")
             except Exception as ex:
-                logger.error(f"sale document verification {sale_document.public_id} failed {ex}")
-                print(f"sale document verification {sale_document.public_id} failed {ex}")
+                logger.error(f"sale document verification payment late {sale_document.public_id} failed {ex}")
 
         return sale_document_to_return
 
@@ -51,18 +48,16 @@ class BimaErpNotificationService:
             if not sale_document.payment_terms:
                 continue
             try:
-                logger.info(f"start verification payment status sale document {sale_document.public_id}")
-                print(f"start verification payment status sale document {sale_document.public_id}")
+                logger.info(f"start verification payment reminder sale document {sale_document.public_id}")
                 BimaErpNotificationService.send_notification_payment_sale_document_based_on_payment_term_type(
                     sale_document, template_code='NOTIFICATION_PAYMENT_REMINDER', days_difference=-days_before_due_date)
                 sale_document_to_return.append(
                     {"sale_document_public_ud": sale_document.public_id,
                      "next_due_date": sale_document.next_due_date})
-                logger.info(f"sale document verification {sale_document.public_id} succeeded")
-                print(f"sale document verification {sale_document.public_id} succeeded")
+                logger.info(f"sale document verification payment late {sale_document.public_id} succeeded")
+
             except Exception as ex:
-                logger.error(f"sale document verification {sale_document.public_id} failed {ex}")
-                print(f"sale document verification {sale_document.public_id} failed {ex}")
+                logger.error(f"sale document verification payment reminder {sale_document.public_id} failed {ex}")
 
         return sale_document_to_return
 

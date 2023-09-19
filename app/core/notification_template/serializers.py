@@ -4,6 +4,7 @@ from core.abstract.serializers import AbstractSerializer
 from core.notification_type.models import BimaCoreNotificationType
 from rest_framework import serializers
 
+from app import settings
 from .models import BimaCoreNotificationTemplate
 
 
@@ -33,7 +34,7 @@ class BimaCoreNotificationTemplateSerializer(AbstractSerializer):
         }
 
     def validate_raw_html_message(self, value):
-        allowed_tags = ['h1', 'h2', 'br', 'p', 'strong', 'em', 'ol', 'li']
+        allowed_tags = settings.html_allowed_tags
         return bleach.clean(value, strip=True, tags=list(bleach.sanitizer.ALLOWED_TAGS) + allowed_tags)
 
     def get_company(self, obj):
