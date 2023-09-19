@@ -447,15 +447,25 @@ class BimaTreasuryTransactionService:
             else:
                 details[key]["outcomes"] += transaction.amount
 
-        last_month_diff = 0
+        last_month_diff = None
+
         for year in range(start_date.year, end_date.year + 1):
             for month in range(1, 13):
                 key = f"{month}/{year}"
+
                 details[key]["difference"] = details[key]["incomes"] - details[key]["outcomes"]
-                if last_month_diff != 0:
-                    details[key]["increase_percentage"] = (details[key][
-                                                               "difference"] - last_month_diff) / last_month_diff * 100
-                last_month_diff = details[key]["difference"]
+                month_difference = details[key]["difference"]
+
+                if last_month_diff is not None:
+                    if last_month_diff == 0:
+                        details[key]["increase_percentage"] = 100 if month_difference != 0 else 0
+                    else:
+                        details[key]["increase_percentage"] = ((
+                                                                           month_difference - last_month_diff) / last_month_diff) * 100
+                else:
+                    details[key]["increase_percentage"] = 0  # Assuming no increase for the first month
+
+                last_month_diff = month_difference
 
         ordered_details = dict(
             sorted(details.items(), key=lambda x: (int(x[0].split('/')[1]), int(x[0].split('/')[0]))))

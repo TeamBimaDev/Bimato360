@@ -1,9 +1,9 @@
-from rest_framework.response import Response
-from rest_framework.decorators import action
-
+from common.permissions.action_base_permission import ActionBasedPermission
 from core.abstract.views import AbstractViewSet
 from core.post.models import BimaCorePost
 from core.post.serializers import BimaCorePostSerializer
+from rest_framework.decorators import action
+from rest_framework.response import Response
 
 from .models import BimaCoreDepartment
 from .serializers import BimaCoreDepartmentSerializer
@@ -12,7 +12,19 @@ from .serializers import BimaCoreDepartmentSerializer
 class BimaCoreDepartmentViewSet(AbstractViewSet):
     queryset = BimaCoreDepartment.objects.select_related('department').all()
     serializer_class = BimaCoreDepartmentSerializer
-    ordering_fields = AbstractViewSet.ordering_fields + ['name', 'manager', 'department__name']
+    permission_classes = []
+    permission_classes = (ActionBasedPermission,)
+    ordering_fields = AbstractViewSet.ordering_fields + \
+                      ['name', 'manager', 'department__name']
+
+    action_permissions = {
+        'list': ['department.can_read'],
+        'create': ['department.can_create'],
+        'retrieve': ['department.can_read'],
+        'update': ['department.can_update'],
+        'partial_update': ['department.can_update'],
+        'destroy': ['department.can_delete'],
+    }
 
     def get_object(self):
         """ Override get_object to retrieve object by public_id """

@@ -63,7 +63,7 @@ class BimaTreasuryTransactionViewSet(AbstractViewSet):
         return obj
 
     def perform_create(self, serializer):
-        sale_document_public_ids = self.request.data.pop('sale_documents_ids')
+        sale_document_public_ids = self.request.data.pop('sale_documents_ids', None)
         BimaTreasuryTransactionService.verify_if_payment_credit_not_and_verify_amounts_from_request(
             serializer.validated_data,
             sale_document_public_ids)
@@ -72,7 +72,7 @@ class BimaTreasuryTransactionViewSet(AbstractViewSet):
         handle_credit_note_payment(instance, sale_document_public_ids)
 
     def perform_update(self, serializer):
-        sale_document_public_ids = self.request.data.pop('sale_documents_ids')
+        sale_document_public_ids = self.request.data.pop('sale_documents_ids', None)
         BimaTreasuryTransactionService.verify_if_payment_credit_not_and_verify_amounts_from_request(
             serializer.validated_data,
             sale_document_public_ids)
