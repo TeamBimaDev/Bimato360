@@ -294,3 +294,44 @@ class BimaTreasuryTransactionViewSet(AbstractViewSet):
         ).order_by("date", "id")
         serializer = BimaTreasuryTransactionSerializer(transactions, many=True)
         return Response(serializer.data)
+
+    @action(detail=False, methods=['GET'], url_path='get_top_n_transaction_by_type_direction')
+    def get_top_n_transaction_by_type_direction(self, request):
+        number_of_type_transaction = int(request.query_params.get('n', 3))
+        direction = request.query_params.get('direction', 'INCOME').upper()
+        if direction not in ['INCOME', 'OUTCOME']:
+            return Response({"Error": _("Please provide a valid Direction")}, status=status.HTTP_400_BAD_REQUEST)
+
+        result = BimaTreasuryTransactionService.get_top_n_transaction_by_type_direction(number_of_type_transaction,
+                                                                                        direction)
+        return Response(result)
+
+    @action(detail=False, methods=['GET'], url_path='monthly_totals')
+    def monthly_totals(self, request):
+        result = BimaTreasuryTransactionService.monthly_totals()
+        return Response(result)
+
+    @action(detail=False, methods=['GET'], url_path='avg_transaction_by_direction')
+    def avg_transaction_by_direction(self, request):
+        result = BimaTreasuryTransactionService.avg_transaction_by_direction()
+        return Response(result)
+
+    @action(detail=False, methods=['GET'], url_path='top_partners_by_month')
+    def top_partners_by_month(self, request):
+        direction = request.query_params.get('direction', 'income').upper()
+        top_n = int(request.query_params.get('top_n', 5))
+        if direction not in ['INCOME', 'OUTCOME']:
+            return Response({"Error": _("Please provide a valid Direction")}, status=status.HTTP_400_BAD_REQUEST)
+
+        result = BimaTreasuryTransactionService.top_partners_by_month(direction, top_n)
+        return Response(result)
+
+    @action(detail=False, methods=['GET'], url_path='remaining_amount_analysis_by_month')
+    def remaining_amount_analysis_by_month(self, request):
+        result = BimaTreasuryTransactionService.remaining_amount_analysis_by_month()
+        return Response({"total_remaining_amount": result})
+
+    @action(detail=False, methods=['GET'], url_path='month_over_month_growth')
+    def month_over_month_growth(self, request):
+        result = BimaTreasuryTransactionService.month_over_month_growth()
+        return Response(result)

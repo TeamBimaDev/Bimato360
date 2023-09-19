@@ -25,6 +25,9 @@ class BimaTreasuryPaymentTerm(AbstractModel):
         permissions = []
         default_permissions = ()
 
+    def __str__(self):
+        return self.name
+
 
 class BimaTreasuryPaymentTermDetail(models.Model):
     payment_term = models.ForeignKey(BimaTreasuryPaymentTerm, on_delete=models.CASCADE,

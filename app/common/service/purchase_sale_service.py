@@ -48,6 +48,24 @@ class SalePurchaseService:
             return None
 
     @staticmethod
+    def sale_document_custom_payment_terms_type_calculate_due_date(document):
+        current_date = timezone.now().date()
+        due_dates_within_month = []
+        payment_schedule = document.payment_terms.payment_term_details.all().order_by('id')
+        next_due_date = document.date
+
+        for schedule in payment_schedule:
+            next_due_date = SalePurchaseService.calculate_due_date(next_due_date, schedule.value)
+            if next_due_date > current_date and (next_due_date - current_date).days <= 30:
+                due_dates_within_month.append(next_due_date)
+
+        return due_dates_within_month
+
+    @staticmethod
+    def sale_document_not_custom_payment_terms_type_calculate_due_date(document):
+        return SalePurchaseService.calculate_due_date(document.date, document.payment_terms.type)
+
+    @staticmethod
     def calculate_payment_late_type_custom(document, re_save=True):
         current_date = timezone.now().date()
         due_dates = []

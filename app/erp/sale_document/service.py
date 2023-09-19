@@ -7,6 +7,7 @@ from uuid import UUID
 
 import openpyxl
 from common.enums.partner_type import PartnerType
+from common.enums.sale_document_enum import SaleDocumentPaymentStatus
 from common.enums.sale_document_enum import SaleDocumentRecurringCycle
 from common.enums.sale_document_enum import SaleDocumentRecurringIntervalCustomUnit
 from common.enums.sale_document_enum import SaleDocumentStatus
@@ -21,6 +22,7 @@ from django.db.models import F
 from django.db.models import IntegerField
 from django.db.models import Sum, Count
 from django.http import HttpResponse
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from erp.product.models import BimaErpProduct
 from erp.sale_document.models import BimaErpSaleDocument
@@ -51,12 +53,18 @@ class SaleDocumentService:
         return unique_number
 
     @staticmethod
-    def get_sale_document_payment_late():
-        return BimaErpSaleDocument.objects.filter(
-            type=SaleDocumentTypes.INVOICE.name,
-            status=SaleDocumentStatus.CONFIRMED.name,
-            is_payment_late=True
-        )
+    def get_sale_document_for_notification(is_payment_late=False, unpaid_only=True):
+        base_query = Q(type=SaleDocumentTypes.INVOICE.name, status=SaleDocumentStatus.CONFIRMED.name)
+
+        if is_payment_late:
+            base_query &= Q(is_payment_late=True)
+
+        sale_documents = BimaErpSaleDocument.objects.filter(base_query)
+
+        if unpaid_only:
+            sale_documents = sale_documents.exclude(payment_status=SaleDocumentPaymentStatus.PAID.name)
+
+        return sale_documents
 
     @staticmethod
     def get_summary_stats(queryset):
@@ -74,7 +82,7 @@ class SaleDocumentService:
         total_amount = stats['total_amount'] or 0
         total_amount_paid = stats['total_amount_paid'] or 0
         total_unpaid = float(total_amount - total_amount_paid)
-      
+
         return {
             "number_of_item": stats['number_of_item'],
             "number_of_item_paid": stats['number_of_item_paid'],
@@ -84,6 +92,54 @@ class SaleDocumentService:
             "total_amount_paid": stats['total_amount_paid'],
             "total_unpaid": total_unpaid
         }
+
+    @staticmethod
+    def expected_amount_by_due_date():
+        current_date = timezone.now().date()
+
+        expected_amounts = {
+            'expected_in_3_days': 0,
+            'expected_in_7_days': 0,
+            'expected_in_15_days': 0,
+            'expected_in_1_month': 0
+        }
+
+        sale_documents = BimaErpSaleDocument.objects.filter(
+            type=SaleDocumentTypes.INVOICE.name,
+            status=SaleDocumentStatus.CONFIRMED.name
+        )
+
+        for document in sale_documents:
+            amount_due = document.total_amount - document.calculate_sum_amount_paid()
+
+            if amount_due <= 0:
+                continue
+
+            due_dates = SaleDocumentService.get_due_dates_based_on_payment_terms(document)
+
+            for due_date in due_dates:
+                SaleDocumentService.classify_and_sum_due_amounts(expected_amounts, due_date, current_date, amount_due)
+
+        return expected_amounts
+
+    @staticmethod
+    def classify_and_sum_due_amounts(expected_amounts, due_date, current_date, amount_due):
+        days_remaining = (due_date - current_date).days
+
+        if 0 < days_remaining <= 3:
+            expected_amounts['expected_in_3_days'] += amount_due
+        elif 4 <= days_remaining <= 7:
+            expected_amounts['expected_in_7_days'] += amount_due
+        elif 8 <= days_remaining <= 15:
+            expected_amounts['expected_in_15_days'] += amount_due
+        elif 16 <= days_remaining <= 30:
+            expected_amounts['expected_in_1_month'] += amount_due
+
+    @staticmethod
+    def get_due_dates_based_on_payment_terms(document):
+        if document.payment_terms.type == PaymentTermType.CUSTOM.name:
+            return SalePurchaseService.sale_document_custom_payment_terms_type_calculate_due_date(document)
+        return [SalePurchaseService.sale_document_not_custom_payment_terms_type_calculate_due_date(document)]
 
 
 def generate_recurring_sale_documents():

@@ -6,7 +6,7 @@ import pandas as pd
 from common.enums.transaction_enum import TransactionDirection, TransactionNature
 from django.apps import apps
 from django.db import models
-from django.db.models import Sum, Case, When, F
+from django.db.models import Sum, Case, When, F, Avg
 from django.utils.crypto import get_random_string
 from django.utils.translation import gettext_lazy as _
 from erp.partner.models import BimaErpPartner
@@ -280,6 +280,141 @@ class BimaTreasuryTransactionService:
             raise ValidationError(
                 {"Error": _("Amount of the transaction should be equal to the amount of credit note!")})
         return True
+
+    @staticmethod
+    def get_top_n_transaction_by_type_direction(number_of_type_transaction, direction):
+        from .models import BimaTreasuryTransaction
+        transactions = BimaTreasuryTransaction.objects.filter(
+            direction=direction
+        ).values(
+            month=F('date__month')
+        ).annotate(
+            total_amount=Sum('amount'),
+            transaction_type=F('transaction_type__name')  # Assuming there's a name field in transaction_type model
+        ).order_by(
+            'month', '-total_amount'
+        )
+
+        result = {}
+        for trans in transactions:
+            month = trans['month']
+            if month not in result:
+                result[month] = {}
+
+            if len(result[month]) < number_of_type_transaction:
+                result[month][trans['transaction_type']] = trans['total_amount']
+
+        return result
+
+    @staticmethod
+    def avg_transaction_by_direction():
+        from .models import BimaTreasuryTransaction
+        transactions = BimaTreasuryTransaction.objects.values(
+            month=F('date__month'),
+            transaction_direction=F('direction')
+        ).annotate(
+            avg_amount=Avg('amount')
+        ).order_by('month')
+
+        result = {}
+        for trans in transactions:
+            month = trans['month']
+            if month not in result:
+                result[month] = {}
+            result[month][trans['transaction_direction']] = trans['avg_amount']
+
+        return result
+
+    @staticmethod
+    def top_partners_by_month(direction, n):
+        from .models import BimaTreasuryTransaction
+        transactions = BimaTreasuryTransaction.objects.filter(
+            direction=direction
+        ).values(
+            month=F('date__month'),
+            contact_first_name=F('partner__first_name'),
+            contact_last_name=F('partner__last_name'),
+            company_name=F('partner__company_name')
+        ).annotate(
+            total_amount=Sum('amount')
+        ).order_by('month', '-total_amount')
+
+        result = {}
+        for trans in transactions:
+            month = trans['month']
+            if month not in result:
+                result[month] = {}
+            partner_name = f"{trans['contact_first_name']} {trans['contact_last_name']} {trans['company_name']}"
+            result[month][partner_name] = trans['total_amount']
+
+        for month, partners in result.items():
+            sorted_partners = dict(sorted(partners.items(), key=lambda item: item[1], reverse=True)[:n])
+            result[month] = sorted_partners
+
+        return result
+
+    @staticmethod
+    def monthly_totals():
+        from .models import BimaTreasuryTransaction
+        transactions = BimaTreasuryTransaction.objects.values(
+            month=F('date__month'),
+            transaction_direction=F('direction')
+        ).annotate(
+            total_amount=Sum('amount')
+        ).order_by('month')
+
+        result = {}
+        for trans in transactions:
+            month = trans['month']
+            if month not in result:
+                result[month] = {
+                    'total_income': 0,
+                    'total_outcome': 0
+                }
+
+            if trans['transaction_direction'] == TransactionDirection.INCOME.name:
+                result[month]['total_income'] += trans['total_amount']
+            else:
+                result[month]['total_outcome'] += trans['total_amount']
+
+        return result
+
+    @staticmethod
+    def remaining_amount_analysis_by_month():
+        from .models import BimaTreasuryTransaction
+        transactions = BimaTreasuryTransaction.objects.values(
+            month=F('date__month'),
+        ).annotate(
+            total_remaining_amount=Sum('remaining_amount')
+        ).order_by('month')
+
+        result = {}
+        for trans in transactions:
+            month = trans['month']
+            result[month] = trans['total_remaining_amount']
+
+        return result
+
+    @staticmethod
+    def month_over_month_growth():
+        from .models import BimaTreasuryTransaction
+        transactions = BimaTreasuryTransaction.objects.values(
+            month=F('date__month'),
+        ).annotate(
+            total_amount=Sum('amount')
+        ).order_by('month')
+
+        result = {}
+        previous_month_total = None
+
+        for trans in transactions:
+            month = trans['month']
+            if previous_month_total is not None:
+                growth_rate = ((trans['total_amount'] - previous_month_total) / previous_month_total) * 100
+                result[f'{month - 1}_to_{month}_growth_rate'] = growth_rate
+            previous_month_total = trans['total_amount']
+
+        return result
 
 
 class TransactionEffectStrategy:

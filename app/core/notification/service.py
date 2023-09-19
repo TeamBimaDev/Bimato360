@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 class BimaErpNotificationService:
     @staticmethod
     def send_notification_for_payment_late_sale_documents():
-        unpaid_sale_documents = SaleDocumentService.get_sale_document_payment_late()
+        unpaid_sale_documents = SaleDocumentService.get_sale_document_for_notification(is_payment_late=True)
         sale_document_to_return = []
         for sale_document in unpaid_sale_documents:
             if not sale_document.payment_terms:
@@ -31,35 +31,60 @@ class BimaErpNotificationService:
                 logger.info(f"start verification payment status sale document {sale_document.public_id}")
                 print(f"start verification payment status sale document {sale_document.public_id}")
                 BimaErpNotificationService.send_notification_payment_late_sale_document_based_on_payment_term_type(
-                    sale_document)
+                    sale_document, template_code='NOTIFICATION_PAYMENT_LATE', days_difference=1)
                 sale_document_to_return.append(
                     {"sale_document_public_ud": sale_document.public_id,
                      "next_due_date": sale_document.next_due_date})
                 logger.info(f"sale document verification {sale_document.public_id} succeeded")
                 print(f"sale document verification {sale_document.public_id} succeeded")
             except Exception as ex:
-                logger.error(f"sale document verification {sale_document.public_id} faild {ex}")
-                print(f"sale document verification {sale_document.public_id} faild {ex}")
+                logger.error(f"sale document verification {sale_document.public_id} failed {ex}")
+                print(f"sale document verification {sale_document.public_id} failed {ex}")
 
         return sale_document_to_return
 
     @staticmethod
-    def send_notification_payment_late_sale_document_based_on_payment_term_type(sale_document, send_instantly=False):
-        if sale_document.payment_terms.type != PaymentTermType.CUSTOM.name:
-            BimaErpNotificationService.send_notification_sale_document_not_custom_type_late_due_date_plus_one_day(
-                sale_document, send_instantly)
-        else:
-            BimaErpNotificationService.send_notification_sale_document_custom_type_late_due_date_plus_one_day(
-                sale_document, send_instantly)
+    def send_notification_for_payment_reminder_sale_documents(days_before_due_date=3):
+        unpaid_sale_documents = SaleDocumentService.get_sale_document_for_notification()
+        sale_document_to_return = []
+        for sale_document in unpaid_sale_documents:
+            if not sale_document.payment_terms:
+                continue
+            try:
+                logger.info(f"start verification payment status sale document {sale_document.public_id}")
+                print(f"start verification payment status sale document {sale_document.public_id}")
+                BimaErpNotificationService.send_notification_payment_late_sale_document_based_on_payment_term_type(
+                    sale_document, template_code='NOTIFICATION_PAYMENT_REMINDER', days_difference=-days_before_due_date)
+                sale_document_to_return.append(
+                    {"sale_document_public_ud": sale_document.public_id,
+                     "next_due_date": sale_document.next_due_date})
+                logger.info(f"sale document verification {sale_document.public_id} succeeded")
+                print(f"sale document verification {sale_document.public_id} succeeded")
+            except Exception as ex:
+                logger.error(f"sale document verification {sale_document.public_id} failed {ex}")
+                print(f"sale document verification {sale_document.public_id} failed {ex}")
+
+        return sale_document_to_return
 
     @staticmethod
-    def send_notification_sale_document_custom_type_late_due_date_plus_one_day(document, send_instantly=False):
+    def send_notification_payment_late_sale_document_based_on_payment_term_type(sale_document, template_code,
+                                                                                days_difference, send_instantly=False):
+        if sale_document.payment_terms.type != PaymentTermType.CUSTOM.name:
+            BimaErpNotificationService.send_notification_sale_document_not_custom_type(
+                sale_document, days_difference, template_code=template_code,
+                send_instantly=send_instantly)
+        else:
+            BimaErpNotificationService.send_notification_sale_document_custom_type(
+                sale_document, days_difference, template_code=template_code,
+                send_instantly=send_instantly)
+
+    @staticmethod
+    def send_notification_sale_document_custom_type(document, days_difference, template_code, send_instantly=False):
         current_date = timezone.now().date()
         due_dates = []
         payment_schedule = document.payment_terms.payment_term_details.all().order_by('id')
         next_due_date = document.date
-        notification_template = BimaCoreNotificationTemplateService.get_notification_template_by_code(
-            'NOTIFICATION_PAYMENT_LATE')
+        notification_template = BimaCoreNotificationTemplateService.get_notification_template_by_code(template_code)
 
         for schedule in payment_schedule:
             next_due_date = SalePurchaseService.calculate_due_date(next_due_date, schedule.value)
@@ -75,7 +100,7 @@ class BimaErpNotificationService:
             percentage_to_pay += percentage
 
             if ((amount_paid < (Decimal(percentage_to_pay) / 100) * document.total_amount) and
-                    (current_date == due_date + timedelta(days=1))):
+                    (current_date == due_date + timedelta(days=days_difference))):
                 send_notification = True
 
         if send_notification or send_instantly:
@@ -91,15 +116,14 @@ class BimaErpNotificationService:
             BimaErpNotificationService.send_notification_payment_late(notification_template, document, data_to_send)
 
     @staticmethod
-    def send_notification_sale_document_not_custom_type_late_due_date_plus_one_day(document, send_instantly=False):
+    def send_notification_sale_document_not_custom_type(document, days_difference, template_code, send_instantly=False):
         due_date = SalePurchaseService.calculate_due_date(document.date, document.payment_terms.type)
         send_notification = False
         now = timezone.now().date()
-        notification_template = BimaCoreNotificationTemplateService.get_notification_template_by_code(
-            'NOTIFICATION_PAYMENT_LATE')
+        notification_template = BimaCoreNotificationTemplateService.get_notification_template_by_code(template_code)
         amount_paid = 0
 
-        if due_date and now == due_date + timedelta(days=1):
+        if due_date and now == due_date + timedelta(days=days_difference):
             amount_paid = document.calculate_sum_amount_paid()
             if amount_paid < document.total_amount:
                 send_notification = True

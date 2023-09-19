@@ -3,6 +3,7 @@ from datetime import timedelta
 from uuid import UUID
 
 import django_filters
+from common.converters.default_converters import str_to_bool
 from common.enums.purchase_document_enum import PurchaseDocumentValidity, PurchaseDocumentPaymentStatus
 from django.db.models import Q
 from django.utils import timezone
