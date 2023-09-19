@@ -33,7 +33,7 @@ class BimaCoreNotificationTemplateSerializer(AbstractSerializer):
         }
 
     def validate_raw_html_message(self, value):
-        return bleach.clean(value, strip=True, tags=list(bleach.sanitizer.ALLOWED_TAGS) + ["additional_tags_if_needed"])
+        return bleach.clean(value, strip=True, tags=list(bleach.sanitizer.ALLOWED_TAGS) + ["h1", "h2", "br"])
 
     def get_company(self, obj):
         return {
