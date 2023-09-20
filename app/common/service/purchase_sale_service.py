@@ -133,3 +133,20 @@ class SalePurchaseService:
         current_time = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
         random_str = uuid.uuid4().hex[:6]
         return f"{public_id}_{current_time}_{random_str}.pdf"
+
+    @staticmethod
+    def get_document_due_date_payment_terms_custom_type(document):
+        due_dates = []
+        payment_schedule = document.payment_terms.payment_term_details.all().order_by('id')
+        next_due_date = document.date
+
+        for schedule in payment_schedule:
+            next_due_date = SalePurchaseService.calculate_due_date(next_due_date, schedule.value)
+            due_dates.append({next_due_date: schedule.percentage})
+
+        return due_dates
+
+    @staticmethod
+    def get_document_due_date_payment_terms_non_custom_type(document):
+        due_date = SalePurchaseService.calculate_due_date(document.date, document.payment_terms.type)
+        return due_date

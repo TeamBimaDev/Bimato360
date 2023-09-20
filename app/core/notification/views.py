@@ -96,6 +96,10 @@ class BimaCoreNotificationViewSet(AbstractViewSet):
         if not sale_document:
             return Response({"Error": _("Unable to find item")}, status=status.HTTP_400_BAD_REQUEST)
 
+        if not sale_document.is_payment_late:
+            return Response({"Error": _("The payment is not late for this invoice")},
+                            status=status.HTTP_400_BAD_REQUEST)
+
         BimaErpNotificationService.send_notification_payment_sale_document_based_on_payment_term_type(
             sale_document, days_difference=1, template_code='NOTIFICATION_PAYMENT_LATE', message=message,
             subject=subject, send_instantly=True)

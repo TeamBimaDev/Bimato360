@@ -9,8 +9,8 @@ from common.enums.partner_type import PartnerType
 from common.enums.transaction_enum import PaymentTermType
 from common.service.purchase_sale_service import SalePurchaseService
 from core.notification.models import BimaCoreNotification
-from core.notification_template.service import BimaCoreNotificationTemplateService
 from core.notification_type.models import BimaCoreNotificationType
+from django.apps import apps
 from django.contrib.contenttypes.models import ContentType
 from django.utils import timezone
 from erp.partner.service import BimaErpPartnerService
@@ -77,11 +77,13 @@ class BimaErpNotificationService:
     @staticmethod
     def send_notification_sale_document_custom_type(document, days_difference, template_code, message=None,
                                                     subject=None, send_instantly=False):
+        BimaCoreNotificationTemplate = apps.get_model('erp', 'BimaCoreNotificationTemplate')
         current_date = timezone.now().date()
         due_dates = []
         payment_schedule = document.payment_terms.payment_term_details.all().order_by('id')
         next_due_date = document.date
-        notification_template = BimaCoreNotificationTemplateService.get_notification_template_by_code(template_code)
+        notification_template = BimaCoreNotificationTemplate.objects.filter(
+            notification_type__code=template_code).first()
 
         for schedule in payment_schedule:
             next_due_date = SalePurchaseService.calculate_due_date(next_due_date, schedule.value)
@@ -117,10 +119,14 @@ class BimaErpNotificationService:
     @staticmethod
     def send_notification_sale_document_not_custom_type(document, days_difference, template_code, message=None,
                                                         subject=None, send_instantly=False):
+
         due_date = SalePurchaseService.calculate_due_date(document.date, document.payment_terms.type)
         send_notification = False
         now = timezone.now().date()
-        notification_template = BimaCoreNotificationTemplateService.get_notification_template_by_code(template_code)
+        
+        BimaCoreNotificationTemplate = apps.get_model('erp', 'BimaCoreNotificationTemplate')
+        notification_template = BimaCoreNotificationTemplate.objects.filter(
+            notification_type__code=template_code).first()
         amount_paid = 0
 
         if due_date and now == due_date + timedelta(days=days_difference):

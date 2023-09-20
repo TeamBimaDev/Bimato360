@@ -1,10 +1,18 @@
+import uuid
+
 import django_filters
 from common.permissions.action_base_permission import ActionBasedPermission
 from core.abstract.views import AbstractViewSet
+from django.apps import apps
 from django.db.models import Q
+from django.utils.translation import gettext_lazy as _
+from rest_framework import status
+from rest_framework.decorators import action
+from rest_framework.response import Response
 
 from .models import BimaCoreNotificationTemplate
 from .serializers import BimaCoreNotificationTemplateSerializer
+from .service import BimaCoreNotificationTemplateService
 
 
 class BimaCoreNotificationTemplateFilter(django_filters.FilterSet):
@@ -42,3 +50,26 @@ class BimaCoreNotificationTemplateViewSet(AbstractViewSet):
     def get_object(self):
         obj = BimaCoreNotificationTemplate.objects.get_object_by_public_id(self.kwargs['pk'])
         return obj
+
+    @action(detail=False, methods=['GET'], url_path="get_template_by_notification_type_code_with_data_rendered")
+    def get_template_by_notification_type_code_with_data_rendered(self, request):
+        notification_type_code = request.query_params.get('notification_type_code', None)
+        document_public_id = request.query_params.get('document_public_id', None)
+        if not notification_type_code:
+            return Response({"Error": _("Please provide a valid Code")}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not document_public_id or uuid.UUID(document_public_id, version=4):
+            return Response({"Error": _("Please provide a valid UUID")}, status=status.HTTP_400_BAD_REQUEST)
+
+        template = BimaCoreNotificationTemplate.objects.filter(notification_type__code=notification_type_code).first()
+        if not template:
+            return Response({"Error": _("Not template find with the giving code")}, status=status.HTTP_404_NOT_FOUND)
+
+        BimaErpSaleDocument = apps.get_model('erp', 'BimaErpSaleDocument')
+        sale_document = BimaErpSaleDocument.objects.get_object_by_public_id(document_public_id)
+        if not sale_document:
+            return Response({"Error": _("Not invoice found with the giving ID")}, status=status.HTTP_404_NOT_FOUND)
+
+        subject, message = BimaCoreNotificationTemplateService.get_rendered_template_for_sale_document(sale_document,
+                                                                                                       template)
+        return Response({'message': message, 'subject': subject})

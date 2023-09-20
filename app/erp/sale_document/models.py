@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from common.enums.partner_type import PartnerType
 from common.enums.sale_document_enum import SaleDocumentStatus
 from common.enums.sale_document_enum import SaleDocumentTypes
 from common.enums.sale_document_enum import (
@@ -385,6 +386,12 @@ class BimaErpSaleDocument(AbstractModel):
     def translated_payment_status(self):
         return str(SaleDocumentPaymentStatus.get_value_by_name(self.payment_status))
 
+    @property
+    def partner_full_name(self):
+        return (f"{self.partner.first_name} {self.partner.last_name}"
+                if self.partner.partner_type == PartnerType.INDIVIDUAL.name
+                else self.partner.company_name,)
+
     def validate_all_required_field_for_recurring(self):
         if self.is_recurring:
             self.validate_custom_recurring_interval()
@@ -468,6 +475,17 @@ class BimaErpSaleDocument(AbstractModel):
         if date_limit is not None:
             transactions = transactions.filter(transaction__date__lte=date_limit)
         return sum(tr.amount_paid for tr in transactions)
+
+    def get_all_due_date(self):
+        if not self.pk or not self.payment_terms:
+            return None
+        due_date = None
+        if self.payment_terms.type == PaymentTermType.CUSTOM.name:
+            due_date = SalePurchaseService.get_document_due_date_payment_terms_custom_type(self)
+        else:
+            due_date = SalePurchaseService.get_document_due_date_payment_terms_non_custom_type(self)
+
+        return due_date
 
 
 def update_sale_document_totals(sale_document, re_save=True):
