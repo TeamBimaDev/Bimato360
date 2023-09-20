@@ -42,6 +42,12 @@ class BimaTreasuryPaymentTermTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(BimaTreasuryPaymentTerm.objects.count(), 1)
 
+    def test_custom_payment_term_percentage_sum(self):
+        custom_payment_term = BimaTreasuryPaymentTermFactory(type='CUSTOM')
+        custom_payment_term.check_percentage_sum()
+        total_percentage = sum(detail.percentage for detail in custom_payment_term.payment_term_details.all())
+        self.assertEqual(total_percentage, 100)
+
     def test_get_payment_methods(self):
         BimaTreasuryPaymentTermFactory.create_batch(5)
         url = reverse('treasury:bimatreasurypaymentterm-list')
