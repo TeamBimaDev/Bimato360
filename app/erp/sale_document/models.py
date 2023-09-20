@@ -392,6 +392,10 @@ class BimaErpSaleDocument(AbstractModel):
                 if self.partner.partner_type == PartnerType.INDIVIDUAL.name
                 else self.partner.company_name,)
 
+    @property
+    def is_confirmed_and_invoice(self):
+        return self.status == SaleDocumentStatus.CONFIRMED.name and self.type == SaleDocumentTypes.INVOICE.name
+
     def validate_all_required_field_for_recurring(self):
         if self.is_recurring:
             self.validate_custom_recurring_interval()

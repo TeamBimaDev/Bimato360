@@ -20,7 +20,7 @@ class BimaCoreNotificationTemplateFilter(django_filters.FilterSet):
 
     class Meta:
         model = BimaCoreNotificationTemplate
-        fields = ['search', 'notification_type']
+        fields = ['search', 'notification_type', 'notification_code']
 
     def filter_search(self, queryset, name, value):
         return queryset.filter(
@@ -67,6 +67,12 @@ class BimaCoreNotificationTemplateViewSet(AbstractViewSet):
         sale_document = BimaErpSaleDocument.objects.get_object_by_public_id(document_public_id)
         if not sale_document:
             return Response({"Error": _("Not invoice found with the giving ID")}, status=status.HTTP_404_NOT_FOUND)
+
+        if not sale_document.is_confirmed_and_invoice:
+            return Response({"Error": _("Only Confirmed Invoice are allowed")}, status=status.HTTP_404_NOT_FOUND)
+
+        if not sale_document.payment_terms:
+            return Response({"Error": _("Invoice does not have any payment terms")}, status=status.HTTP_404_NOT_FOUND)
 
         subject, message = BimaCoreNotificationTemplateService.get_rendered_template_for_sale_document(sale_document,
                                                                                                        template)
