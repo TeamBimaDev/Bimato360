@@ -1,6 +1,5 @@
 from datetime import datetime
 
-from common.enums.partner_type import PartnerType
 from common.enums.sale_document_enum import SaleDocumentStatus
 from common.enums.sale_document_enum import SaleDocumentTypes
 from common.enums.sale_document_enum import (
@@ -389,12 +388,6 @@ class BimaErpSaleDocument(AbstractModel):
     @property
     def is_paid(self):
         return self.payment_status == SaleDocumentPaymentStatus.PAID.name
-
-    @property
-    def partner_full_name(self):
-        return (f"{self.partner.first_name} {self.partner.last_name}"
-                if self.partner.partner_type == PartnerType.INDIVIDUAL.name
-                else self.partner.company_name,)
 
     @property
     def is_confirmed_and_invoice(self):

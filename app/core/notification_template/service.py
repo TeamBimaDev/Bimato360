@@ -20,7 +20,7 @@ class BimaCoreNotificationTemplateService:
         except Exception as ex:
             pass
         data_to_send = {
-            'partner_name': sale_document.partner_full_name,
+            'partner_name': sale_document.partner.partner_full_name,
             'invoice_number': sale_document.number,
             'company_name': 'BimaTech',  # TODO this need to be replaced
             'due_date': due_date,
