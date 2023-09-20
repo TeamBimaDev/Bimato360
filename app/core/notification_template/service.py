@@ -16,7 +16,7 @@ class BimaCoreNotificationTemplateService:
         try:
             due_date = sale_document.get_all_due_date()
             if sale_document.payment_terms.type != PaymentTermType.CUSTOM.name:
-                due_date = [{due_date: 100}],
+                due_date = [{due_date: 100}]
         except Exception as ex:
             pass
         data_to_send = {
@@ -26,7 +26,7 @@ class BimaCoreNotificationTemplateService:
             'due_date': due_date,
             'total_amount_paid': sale_document.amount_paid,
             'total_amount': sale_document.total_amount,
-            'amount_remaining': (sale_document.total_amount - amount_paid),
+            'amount_remaining': (sale_document.total_amount - amount_paid)
         }
         message = BimaErpNotificationService.replace_variables_in_template(template.message, data_to_send)
         subject = BimaErpNotificationService.replace_variables_in_template(template.subject,

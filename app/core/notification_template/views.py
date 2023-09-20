@@ -71,6 +71,9 @@ class BimaCoreNotificationTemplateViewSet(AbstractViewSet):
         if not sale_document.is_confirmed_and_invoice:
             return Response({"Error": _("Only Confirmed Invoice are allowed")}, status=status.HTTP_404_NOT_FOUND)
 
+        if sale_document.is_paid:
+            return Response({"Error": _("The invoice is already paid")}, status=status.HTTP_404_NOT_FOUND)
+
         if not sale_document.payment_terms:
             return Response({"Error": _("Invoice does not have any payment terms")}, status=status.HTTP_404_NOT_FOUND)
 

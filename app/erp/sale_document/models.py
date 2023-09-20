@@ -387,6 +387,10 @@ class BimaErpSaleDocument(AbstractModel):
         return str(SaleDocumentPaymentStatus.get_value_by_name(self.payment_status))
 
     @property
+    def is_paid(self):
+        return self.payment_status == SaleDocumentPaymentStatus.PAID.name
+
+    @property
     def partner_full_name(self):
         return (f"{self.partner.first_name} {self.partner.last_name}"
                 if self.partner.partner_type == PartnerType.INDIVIDUAL.name
