@@ -77,7 +77,7 @@ class BimaErpNotificationService:
     @staticmethod
     def send_notification_sale_document_custom_type(document, days_difference, template_code, message=None,
                                                     subject=None, send_instantly=False):
-        BimaCoreNotificationTemplate = apps.get_model('erp', 'BimaCoreNotificationTemplate')
+        BimaCoreNotificationTemplate = apps.get_model('core', 'BimaCoreNotificationTemplate')
         current_date = timezone.now().date()
         due_dates = []
         payment_schedule = document.payment_terms.payment_term_details.all().order_by('id')
@@ -123,8 +123,8 @@ class BimaErpNotificationService:
         due_date = SalePurchaseService.calculate_due_date(document.date, document.payment_terms.type)
         send_notification = False
         now = timezone.now().date()
-        
-        BimaCoreNotificationTemplate = apps.get_model('erp', 'BimaCoreNotificationTemplate')
+
+        BimaCoreNotificationTemplate = apps.get_model('core', 'BimaCoreNotificationTemplate')
         notification_template = BimaCoreNotificationTemplate.objects.filter(
             notification_type__code=template_code).first()
         amount_paid = 0
