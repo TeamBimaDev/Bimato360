@@ -70,23 +70,29 @@ class SaleDocumentService:
     def get_summary_stats(queryset):
         stats = queryset.aggregate(
             number_of_item=Count('id'),
-            number_of_item_paid=Count(Case(When(payment_status='PAID', then=F('id'))), output_field=IntegerField()),
-            number_of_item_unpaid=Count(Case(When(~Q(payment_status='PAID'), then=F('id'))),
-                                        output_field=IntegerField()),
+            number_of_item_draft=Count(Case(When(status=SaleDocumentStatus.DRAFT.name, then=F('id'))),
+                                       output_field=IntegerField()),
+            number_of_item_paid=Count(Case(When(payment_status=SaleDocumentPaymentStatus.PAID.name, then=F('id'))),
+                                      output_field=IntegerField()),
+            number_of_item_unpaid=Count(
+                Case(When(~Q(payment_status=SaleDocumentPaymentStatus.PAID.name), then=F('id'))),
+                output_field=IntegerField()),
             number_of_item_payment_late=Count(Case(When(is_payment_late=True, then=F('id'))),
                                               output_field=IntegerField()),
             total_amounts=Sum('total_amount'),
+
             total_amount_paid=Sum('amount_paid'),
 
             total_amount_unpaid_and_late=Sum(
                 Case(
-                    When(~Q(payment_status='PAID') & Q(is_payment_late=True), then=F('total_amount') - F('amount_paid'))
+                    When(~Q(payment_status=SaleDocumentPaymentStatus.PAID.name) & Q(is_payment_late=True),
+                         then=F('total_amount') - F('amount_paid'))
                 ),
                 output_field=DecimalField()
             ),
             total_amount_unpaid_and_not_late=Sum(
                 Case(
-                    When(~Q(payment_status='PAID') & Q(is_payment_late=False),
+                    When(~Q(payment_status=SaleDocumentPaymentStatus.PAID.name) & Q(is_payment_late=False),
                          then=F('total_amount') - F('amount_paid'))
                 ),
                 output_field=DecimalField()
@@ -99,6 +105,7 @@ class SaleDocumentService:
 
         return {
             "number_of_item": stats['number_of_item'],
+            "number_of_item_draft": stats['number_of_item_draft'],
             "number_of_item_paid": stats['number_of_item_paid'],
             "number_of_item_unpaid": stats['number_of_item_unpaid'],
             "number_of_item_payment_late": stats['number_of_item_payment_late'],
