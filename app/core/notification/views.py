@@ -19,7 +19,7 @@ class BimaCoreNotificationViewSet(AbstractViewSet):
     queryset = BimaCoreNotification.objects.all()
     serializer_class = BimaCoreNotificationSerializer
     filterset_class = BimaCoreNotificationFilter
-    ordering = ["date_sent"]
+    ordering = ["-date_sent"]
     permission_classes = []
     permission_classes = (ActionBasedPermission,)
 
@@ -83,9 +83,11 @@ class BimaCoreNotificationViewSet(AbstractViewSet):
         serializer = BimaCoreNotificationSerializer(notification)
         return Response(serializer.data)
 
-    @action(detail=False, methods=['GET'], url_path="sent_payment_late_notification_sale_document")
+    @action(detail=False, methods=['POST'], url_path="sent_payment_late_notification_sale_document")
     def sent_payment_late_notification_sale_document(self, request):
         sale_document_public_id = request.query_params.get('sale_document_public_id', None)
+        message = request.query_params.get('message', None)
+        subject = request.query_params.get('subject', None)
         if not sale_document_public_id or uuid.UUID(sale_document_public_id, version=4):
             return Response({"Error": _("Please provide a valid UUID")}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -95,12 +97,16 @@ class BimaCoreNotificationViewSet(AbstractViewSet):
             return Response({"Error": _("Unable to find item")}, status=status.HTTP_400_BAD_REQUEST)
 
         BimaErpNotificationService.send_notification_payment_sale_document_based_on_payment_term_type(
-            sale_document, days_difference=1, template_code='NOTIFICATION_PAYMENT_LATE', send_instantly=True)
+            sale_document, days_difference=1, template_code='NOTIFICATION_PAYMENT_LATE', message=message,
+            subject=subject, send_instantly=True)
         return Response(_("NOTIFICATION_SALE_DOCUMENT_PAYMENT_LATE_SENT_SUCCESSFUL"))
 
-    @action(detail=False, methods=['GET'], url_path="sent_payment_late_notification_sale_document")
+    @action(detail=False, methods=['POST'], url_path="sent_payment_reminder_notification_sale_document")
     def sent_payment_reminder_notification_sale_document(self, request):
         sale_document_public_id = request.query_params.get('sale_document_public_id', None)
+        message = request.query_params.get('message', None)
+        subject = request.query_params.get('subject', None)
+
         if not sale_document_public_id or uuid.UUID(sale_document_public_id, version=4):
             return Response({"Error": _("Please provide a valid UUID")}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -110,7 +116,8 @@ class BimaCoreNotificationViewSet(AbstractViewSet):
             return Response({"Error": _("Unable to find item")}, status=status.HTTP_400_BAD_REQUEST)
 
         BimaErpNotificationService.send_notification_payment_sale_document_based_on_payment_term_type(
-            sale_document, days_difference=3, template_code='NOTIFICATION_PAYMENT_REMINDER', send_instantly=True)
+            sale_document, days_difference=3, template_code='NOTIFICATION_PAYMENT_REMINDER', message=message,
+            subject=subject, send_instantly=True)
         return Response(_("NOTIFICATION_SALE_DOCUMENT_PAYMENT_LATE_SENT_SUCCESSFUL"))
 
     @action(detail=False, methods=['GET'], url_path="test_send_notification")

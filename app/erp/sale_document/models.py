@@ -342,8 +342,10 @@ class BimaErpSaleDocument(AbstractModel):
         related_name='sale_documents',
     )
 
+    last_generated_file_url = models.TextField(blank=True, null=True, verbose_name=_("Fichier"))
+
     class Meta:
-        ordering = ["-created"]
+        ordering = ["-date"]
         permissions = []
         default_permissions = ()
 

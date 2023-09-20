@@ -44,7 +44,7 @@ class BimaTreasuryTransactionViewSet(AbstractViewSet):
         "amount",
         "date",
     ]
-    ordering = ["date"]
+    ordering = ["-date"]
     filterset_class = BimaTreasuryTransactionFilter
     action_permissions = {
         "list": ["transaction.can_read"],

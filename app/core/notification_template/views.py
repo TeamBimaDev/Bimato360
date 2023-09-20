@@ -10,6 +10,7 @@ from .serializers import BimaCoreNotificationTemplateSerializer
 class BimaCoreNotificationTemplateFilter(django_filters.FilterSet):
     search = django_filters.CharFilter(method='filter_search')
     notification_type = django_filters.UUIDFilter(field_name='notification_type__public_id')
+    notification_code = django_filters.CharFilter(field_name='notification_type__code')
 
     class Meta:
         model = BimaCoreNotificationTemplate

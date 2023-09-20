@@ -1,3 +1,4 @@
+import logging
 from collections import defaultdict
 from datetime import datetime
 from itertools import groupby
@@ -5,7 +6,8 @@ from itertools import groupby
 from common.enums.sale_document_enum import SaleDocumentTypes, SaleDocumentStatus, get_sale_document_status, \
     get_sale_document_types
 from common.permissions.action_base_permission import ActionBasedPermission
-from common.utils.utils import render_to_pdf
+from common.service.purchase_sale_service import SalePurchaseService
+from common.utils.utils import render_to_pdf, save_pdf_to_file
 from company.models import BimaCompany
 from company.service import fetch_company_data
 from core.abstract.pagination import DefaultPagination
@@ -28,9 +30,12 @@ from .serializers import BimaErpSaleDocumentSerializer, BimaErpSaleDocumentProdu
     BimaErpSaleDocumentHistorySerializer, BimaErpSaleDocumentProductHistorySerializer
 from .service import SaleDocumentService, generate_recurring_sale_documents, create_products_from_parents, \
     create_new_document, calculate_totals_for_selected_items, generate_xls_report, generate_csv_report, \
-    stop_recurring_sale_document, reactivate_recurring_sale_document, CreditNoteValidator
+    stop_recurring_sale_document, reactivate_recurring_sale_document, CreditNoteValidator, \
+    save_last_generated_pdf_link_sale_document
 from .service_payment_invoice import handle_invoice_payment
 from .service_payment_notification import verify_sale_document_payment_status
+
+logger = logging.getLogger(__name__)
 
 
 class BimaErpSaleDocumentViewSet(AbstractViewSet):
@@ -39,7 +44,7 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
     permission_classes = []
     permission_classes = (ActionBasedPermission,)
     ordering_fields = ['number', 'date', 'status', 'partner__name', 'total_amount']
-    ordering = ['date']
+    ordering = ['-date']
     filterset_class = SaleDocumentFilter
     action_permissions = {
         'list': ['sale_document.can_read'],
@@ -298,7 +303,7 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
 
     @action(detail=True, methods=['get'], url_path='generate_pdf')
     def generate_pdf(self, request, pk=None):
-        pdf_filename = "document.pdf"
+        pdf_filename = "facture.pdf"
         context = self._get_context(pk)
         context['translated_status'] = dict(get_sale_document_status()).get(context['current_document'].status)
         context['translated_type'] = dict(get_sale_document_types()).get(context['current_document'].type)
@@ -306,7 +311,15 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
         company_data = context.get('company_data', None)
         default_sale_document_pdf_format = company_data.get('default_sale_document_pdf_format')
         template_name = f'sale_document/sale_templates/{default_sale_document_pdf_format}'
-        return render_to_pdf(template_name, context, pdf_filename)
+        response = render_to_pdf(template_name, context, pdf_filename)
+        try:
+            current_document = context['current_document']
+            file_name = SalePurchaseService.generate_random_name_file(current_document.public_id.hex)
+            file_url = save_pdf_to_file(response.content, file_name)
+            save_last_generated_pdf_link_sale_document(current_document, file_url)
+        except Exception as ex:
+            logger.error("Unable to save file name in sale document")
+        return response
 
     @action(detail=False, methods=['GET'], url_path='generate_pdf_resume')
     def generate_pdf_resume(self, request):

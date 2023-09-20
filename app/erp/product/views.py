@@ -51,6 +51,7 @@ class BimaErpProductViewSet(AbstractViewSet):
     queryset = BimaErpProduct.objects.select_related('vat', 'category', 'unit_of_measure').all()
     serializer_class = BimaErpProductSerializer
     ordering_fields = AbstractViewSet.ordering_fields + ['reference', 'name', 'type', 'sell_price', 'status']
+    ordering = ["-name"]
     permission_classes = []
     permission_classes = (ActionBasedPermission,)
     filterset_class = ProductFilter

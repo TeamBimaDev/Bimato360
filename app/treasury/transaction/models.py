@@ -109,6 +109,11 @@ class BimaTreasuryTransaction(AbstractModel):
     )
     history = HistoricalRecords()
 
+    class Meta:
+        ordering = ['-date']
+        permissions = []
+        default_permissions = ()
+
     def clean(self):
         if self.amount <= 0:
             logger.warning("Amount should be greater than 0")

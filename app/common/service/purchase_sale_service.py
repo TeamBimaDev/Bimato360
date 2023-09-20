@@ -1,3 +1,4 @@
+import uuid
 from datetime import datetime, timedelta
 from decimal import Decimal
 
@@ -126,3 +127,9 @@ class SalePurchaseService:
             document.skip_child_validation_form_transaction = True
             document.save()
             document.skip_child_validation_form_transaction = False
+
+    @staticmethod
+    def generate_random_name_file(public_id):
+        current_time = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+        random_str = uuid.uuid4().hex[:6]
+        return f"{public_id}_{current_time}_{random_str}.pdf"

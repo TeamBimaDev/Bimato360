@@ -63,18 +63,20 @@ class BimaErpNotificationService:
 
     @staticmethod
     def send_notification_payment_sale_document_based_on_payment_term_type(sale_document, template_code,
-                                                                           days_difference, send_instantly=False):
+                                                                           days_difference, message=None, subject=None,
+                                                                           send_instantly=False):
         if sale_document.payment_terms.type != PaymentTermType.CUSTOM.name:
             BimaErpNotificationService.send_notification_sale_document_not_custom_type(
-                sale_document, days_difference, template_code=template_code,
+                sale_document, days_difference, template_code=template_code, message=message, subject=subject,
                 send_instantly=send_instantly)
         else:
             BimaErpNotificationService.send_notification_sale_document_custom_type(
-                sale_document, days_difference, template_code=template_code,
+                sale_document, days_difference, template_code=template_code, message=message, subject=subject,
                 send_instantly=send_instantly)
 
     @staticmethod
-    def send_notification_sale_document_custom_type(document, days_difference, template_code, send_instantly=False):
+    def send_notification_sale_document_custom_type(document, days_difference, template_code, message=None,
+                                                    subject=None, send_instantly=False):
         current_date = timezone.now().date()
         due_dates = []
         payment_schedule = document.payment_terms.payment_term_details.all().order_by('id')
@@ -106,12 +108,15 @@ class BimaErpNotificationService:
                 'due_date': due_dates,
                 'total_amount_paid': amount_paid,
                 'total_amount': document.total_amount,
-                'amount_remaining': (document.total_amount - amount_paid)
+                'amount_remaining': (document.total_amount - amount_paid),
+                'message': message,
+                'subject': subject
             }
             BimaErpNotificationService.send_notification_payment_late(notification_template, document, data_to_send)
 
     @staticmethod
-    def send_notification_sale_document_not_custom_type(document, days_difference, template_code, send_instantly=False):
+    def send_notification_sale_document_not_custom_type(document, days_difference, template_code, message=None,
+                                                        subject=None, send_instantly=False):
         due_date = SalePurchaseService.calculate_due_date(document.date, document.payment_terms.type)
         send_notification = False
         now = timezone.now().date()
@@ -131,7 +136,9 @@ class BimaErpNotificationService:
                 'due_date': [{due_date: 100}],
                 'total_amount_paid': amount_paid,
                 'total_amount': document.total_amount,
-                'amount_remaining': (document.total_amount - amount_paid)
+                'amount_remaining': (document.total_amount - amount_paid),
+                'message': message,
+                'subject': subject
             }
             BimaErpNotificationService.send_notification_payment_late(notification_template, document, data_to_send)
 
@@ -142,10 +149,11 @@ class BimaErpNotificationService:
         if document.partner.email:
             receivers.append(document.partner.email)
         data = {
-            'subject': BimaErpNotificationService.replace_variables_in_template(notification_template.subject,
-                                                                                {'invoice_number': document.number}),
-            'message': BimaErpNotificationService.replace_variables_in_template(notification_template.message,
-                                                                                data_to_send),
+            'subject': data_to_send['subject'] if data_to_send['subject'] is not None
+            else BimaErpNotificationService.replace_variables_in_template(notification_template.subject,
+                                                                          {'invoice_number': document.number}),
+            'message': data_to_send['message'] if data_to_send['message'] is not None
+            else BimaErpNotificationService.replace_variables_in_template(notification_template.message, data_to_send),
             'receivers': receivers,
             'attachments': [],
             'notification_type_id': notification_template.notification_type.id,
