@@ -143,7 +143,9 @@ class SaleDocumentService:
 
             if amount_due <= 0:
                 continue
-
+            if not document.payment_terms:
+                continue
+                
             due_dates = SalePurchaseService.get_due_dates_based_on_payment_terms(document)
 
             for due_date in due_dates:

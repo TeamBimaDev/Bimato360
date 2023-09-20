@@ -1,4 +1,6 @@
+import datetime
 from io import BytesIO
+from typing import Union
 
 from common.converters.default_converters import str_to_bool
 from common.enums.transaction_enum import TransactionTypeIncomeOutcome
@@ -307,32 +309,56 @@ class BimaTreasuryTransactionViewSet(AbstractViewSet):
 
     @action(detail=False, methods=['GET'], url_path='monthly_totals')
     def monthly_totals(self, request):
-        result = BimaTreasuryTransactionService.monthly_totals()
+        year = request.query_params.get('year', datetime.date.today().year)
+        validated_year = validate_year_param(year)
+        if validated_year is None:
+            return Response({"error": "Invalid year parameter."}, status=400)
+        result = BimaTreasuryTransactionService.monthly_totals(validated_year)
         return Response(result)
 
     @action(detail=False, methods=['GET'], url_path='avg_transaction_by_direction')
     def avg_transaction_by_direction(self, request):
-        result = BimaTreasuryTransactionService.avg_transaction_by_direction()
+        year = request.query_params.get('year', datetime.date.today().year)
+        validated_year = validate_year_param(year)
+        if validated_year is None:
+            return Response({"error": "Invalid year parameter."}, status=400)
+        result = BimaTreasuryTransactionService.avg_transaction_by_direction(validated_year)
         return Response(result)
 
     @action(detail=False, methods=['GET'], url_path='top_partners_by_month')
     def top_partners_by_month(self, request):
         direction = request.query_params.get('direction', 'income').upper()
         top_n = int(request.query_params.get('top_n', 5))
+        year = request.query_params.get('year', datetime.date.today().year)
+        validated_year = validate_year_param(year)
+        if validated_year is None:
+            return Response({"error": "Invalid year parameter."}, status=400)
         if direction not in ['INCOME', 'OUTCOME']:
             return Response({"Error": _("Please provide a valid Direction")}, status=status.HTTP_400_BAD_REQUEST)
 
-        result = BimaTreasuryTransactionService.top_partners_by_month(direction, top_n)
+        result = BimaTreasuryTransactionService.top_partners_by_month(direction, top_n, validated_year)
         return Response(result)
 
     @action(detail=False, methods=['GET'], url_path='remaining_amount_analysis_by_month')
     def remaining_amount_analysis_by_month(self, request):
-        result = BimaTreasuryTransactionService.remaining_amount_analysis_by_month()
+        year = request.query_params.get('year', datetime.date.today().year)
+
+        validated_year = validate_year_param(year)
+        if validated_year is None:
+            return Response({"error": "Invalid year parameter."}, status=400)
+
+        result = BimaTreasuryTransactionService.remaining_amount_analysis_by_month(validated_year)
         return Response({"total_remaining_amount": result})
 
     @action(detail=False, methods=['GET'], url_path='month_over_month_growth')
     def month_over_month_growth(self, request):
-        result = BimaTreasuryTransactionService.month_over_month_growth()
+        year = request.query_params.get('year', datetime.date.today().year)
+
+        validated_year = validate_year_param(year)
+        if validated_year is None:
+            return Response({"error": "Invalid year parameter."}, status=400)
+
+        result = BimaTreasuryTransactionService.month_over_month_growth(validated_year)
         return Response(result)
 
     @action(detail=False, methods=['GET'], url_path='cash_bank_flow_kpi')
@@ -342,3 +368,13 @@ class BimaTreasuryTransactionViewSet(AbstractViewSet):
         duration_years = int(request.GET.get('duration', 1))
         result = BimaTreasuryTransactionService.cash_bank_flow_kpi(duration_years, cash_ids, bank_ids)
         return Response(result)
+
+
+def validate_year_param(year: str) -> Union[int, None]:
+    try:
+        year = int(year)
+        if year < 1900 or year > datetime.date.today().year:
+            raise ValueError("Year out of range")
+        return year
+    except ValueError:
+        return None

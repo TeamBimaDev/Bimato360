@@ -4,6 +4,7 @@ from datetime import datetime, date
 
 import pandas as pd
 from common.enums.transaction_enum import TransactionDirection, TransactionNature
+from common.enums.transaction_enum import TransactionTypeIncomeOutcome
 from django.apps import apps
 from django.db import models
 from django.db.models import Sum, Case, When, F, Avg
@@ -308,29 +309,38 @@ class BimaTreasuryTransactionService:
         return result
 
     @staticmethod
-    def avg_transaction_by_direction():
+    def avg_transaction_by_direction(year):
         from .models import BimaTreasuryTransaction
-        transactions = BimaTreasuryTransaction.objects.values(
+        year = int(year)
+        transactions = BimaTreasuryTransaction.objects.filter(
+            date__year=year
+        ).values(
             month=F('date__month'),
             transaction_direction=F('direction')
         ).annotate(
             avg_amount=Avg('amount')
         ).order_by('month')
 
-        result = {}
+        result = {
+            i: {
+                TransactionTypeIncomeOutcome.INCOME.name: 0,
+                TransactionTypeIncomeOutcome.OUTCOME.name: 0
+            }
+            for i in range(1, 13)
+        }
+
         for trans in transactions:
             month = trans['month']
-            if month not in result:
-                result[month] = {}
             result[month][trans['transaction_direction']] = trans['avg_amount']
 
         return result
 
     @staticmethod
-    def top_partners_by_month(direction, n):
+    def top_partners_by_month(direction, n, year):
         from .models import BimaTreasuryTransaction
         transactions = BimaTreasuryTransaction.objects.filter(
-            direction=direction
+            direction=direction,
+            date__year=year  # Added year filter
         ).values(
             month=F('date__month'),
             contact_first_name=F('partner__first_name'),
@@ -340,11 +350,11 @@ class BimaTreasuryTransactionService:
             total_amount=Sum('amount')
         ).order_by('month', '-total_amount')
 
-        result = {}
+        # Initialize a default result structure for all 12 months
+        result = {i: {} for i in range(1, 13)}
+
         for trans in transactions:
             month = trans['month']
-            if month not in result:
-                result[month] = {}
             partner_name = f"{trans['contact_first_name']} {trans['contact_last_name']} {trans['company_name']}"
             result[month][partner_name] = trans['total_amount']
 
@@ -355,41 +365,53 @@ class BimaTreasuryTransactionService:
         return result
 
     @staticmethod
-    def monthly_totals():
+    def monthly_totals(year):
         from .models import BimaTreasuryTransaction
-        transactions = BimaTreasuryTransaction.objects.values(
+        year = int(year)
+        transactions = BimaTreasuryTransaction.objects.filter(
+            date__year=year
+        ).values(
             month=F('date__month'),
             transaction_direction=F('direction')
         ).annotate(
             total_amount=Sum('amount')
         ).order_by('month')
 
-        result = {}
+        result = {
+            i: {
+                'total_income': 0,
+                'total_outcome': 0,
+                'difference': 0  # Initializing difference as well
+            }
+            for i in range(1, 13)
+        }
+
         for trans in transactions:
             month = trans['month']
-            if month not in result:
-                result[month] = {
-                    'total_income': 0,
-                    'total_outcome': 0
-                }
-
-            if trans['transaction_direction'] == TransactionDirection.INCOME.name:
+            if trans['transaction_direction'] == TransactionTypeIncomeOutcome.INCOME.name:
                 result[month]['total_income'] += trans['total_amount']
             else:
                 result[month]['total_outcome'] += trans['total_amount']
 
+        # Calculating difference for each month
+        for month in result:
+            result[month]['difference'] = result[month]['total_income'] - result[month]['total_outcome']
+
         return result
 
     @staticmethod
-    def remaining_amount_analysis_by_month():
+    def remaining_amount_analysis_by_month(year):
         from .models import BimaTreasuryTransaction
-        transactions = BimaTreasuryTransaction.objects.values(
+        transactions = BimaTreasuryTransaction.objects.filter(
+            date__year=year  # Added year filter
+        ).values(
             month=F('date__month'),
         ).annotate(
             total_remaining_amount=Sum('remaining_amount')
         ).order_by('month')
 
-        result = {}
+        result = {i: 0 for i in range(1, 13)}
+
         for trans in transactions:
             month = trans['month']
             result[month] = trans['total_remaining_amount']
@@ -397,23 +419,49 @@ class BimaTreasuryTransactionService:
         return result
 
     @staticmethod
-    def month_over_month_growth():
+    def month_over_month_growth(year):
         from .models import BimaTreasuryTransaction
-        transactions = BimaTreasuryTransaction.objects.values(
+        transactions = BimaTreasuryTransaction.objects.filter(
+            date__year=year
+        ).values(
             month=F('date__month'),
+            transaction_direction=F('direction')
         ).annotate(
             total_amount=Sum('amount')
-        ).order_by('month')
+        ).order_by('month', 'transaction_direction')
 
         result = {}
-        previous_month_total = None
+        previous_month_totals = {"INCOME": None, "OUTCOME": None}
 
         for trans in transactions:
             month = trans['month']
-            if previous_month_total is not None:
-                growth_rate = ((trans['total_amount'] - previous_month_total) / previous_month_total) * 100
-                result[f'{month - 1}_to_{month}_growth_rate'] = growth_rate
-            previous_month_total = trans['total_amount']
+            direction = trans['transaction_direction']
+            growth_rate = 0
+            if previous_month_totals[direction] is not None:
+                if previous_month_totals[direction] == 0:  # To avoid division by zero
+                    growth_rate = 0
+                else:
+                    growth_rate = ((trans['total_amount'] - previous_month_totals[direction])
+                                   / previous_month_totals[direction]) * 100
+
+            result_key = f'{month - 1}_to_{month}_growth_rate'
+            if result_key not in result:
+                result[result_key] = {}
+            result[result_key][direction.lower()] = round(growth_rate, 2)  # Round to 2 decimal places
+
+            previous_month_totals[direction] = trans['total_amount']
+
+        # Filling the result for months that have no transactions
+        for i in range(2,
+                       13):  # Starting from February (month 2) as January doesn't have a previous month in the same year
+            for direction in ["INCOME", "OUTCOME"]:
+                result_key = f'{i - 1}_to_{i}_growth_rate'
+                if result_key not in result:
+                    result[result_key] = {}
+                result[result_key].setdefault(direction.lower(), 0)
+
+        # Sort results by month
+        result = dict(sorted(result.items(), key=lambda item: int(item[0].split('_to_')[0])))
 
         return result
 
@@ -461,7 +509,7 @@ class BimaTreasuryTransactionService:
                         details[key]["increase_percentage"] = 100 if month_difference != 0 else 0
                     else:
                         details[key]["increase_percentage"] = ((
-                                                                           month_difference - last_month_diff) / last_month_diff) * 100
+                                                                       month_difference - last_month_diff) / last_month_diff) * 100
                 else:
                     details[key]["increase_percentage"] = 0  # Assuming no increase for the first month
 
