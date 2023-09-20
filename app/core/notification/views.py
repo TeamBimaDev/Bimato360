@@ -1,5 +1,3 @@
-import uuid
-
 from common.permissions.action_base_permission import ActionBasedPermission
 from core.abstract.views import AbstractViewSet
 from core.notification_type.models import BimaCoreNotificationType
@@ -88,7 +86,7 @@ class BimaCoreNotificationViewSet(AbstractViewSet):
         sale_document_public_id = request.query_params.get('sale_document_public_id', None)
         message = request.query_params.get('message', None)
         subject = request.query_params.get('subject', None)
-        if not sale_document_public_id or uuid.UUID(sale_document_public_id, version=4):
+        if not sale_document_public_id:
             return Response({"Error": _("Please provide a valid UUID")}, status=status.HTTP_400_BAD_REQUEST)
 
         BimaErpSaleDocument = apps.get_model('erp', 'BimaErpSaleDocument')
@@ -111,7 +109,7 @@ class BimaCoreNotificationViewSet(AbstractViewSet):
         message = request.query_params.get('message', None)
         subject = request.query_params.get('subject', None)
 
-        if not sale_document_public_id or uuid.UUID(sale_document_public_id, version=4):
+        if not sale_document_public_id:
             return Response({"Error": _("Please provide a valid UUID")}, status=status.HTTP_400_BAD_REQUEST)
 
         BimaErpSaleDocument = apps.get_model('erp', 'BimaErpSaleDocument')

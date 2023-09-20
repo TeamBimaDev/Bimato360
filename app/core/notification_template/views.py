@@ -1,5 +1,3 @@
-import uuid
-
 import django_filters
 from common.permissions.action_base_permission import ActionBasedPermission
 from core.abstract.views import AbstractViewSet
@@ -58,7 +56,7 @@ class BimaCoreNotificationTemplateViewSet(AbstractViewSet):
         if not notification_type_code:
             return Response({"Error": _("Please provide a valid Code")}, status=status.HTTP_400_BAD_REQUEST)
 
-        if not document_public_id or uuid.UUID(document_public_id, version=4):
+        if not document_public_id:
             return Response({"Error": _("Please provide a valid UUID")}, status=status.HTTP_400_BAD_REQUEST)
 
         template = BimaCoreNotificationTemplate.objects.filter(notification_type__code=notification_type_code).first()
