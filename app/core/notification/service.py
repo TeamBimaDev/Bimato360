@@ -9,8 +9,8 @@ from common.enums.partner_type import PartnerType
 from common.enums.transaction_enum import PaymentTermType
 from common.service.purchase_sale_service import SalePurchaseService
 from core.notification.models import BimaCoreNotification
-from core.notification_template.service import BimaCoreNotificationTemplateService
 from core.notification_type.models import BimaCoreNotificationType
+from django.apps import apps
 from django.contrib.contenttypes.models import ContentType
 from django.utils import timezone
 from erp.partner.service import BimaErpPartnerService
@@ -28,18 +28,15 @@ class BimaErpNotificationService:
             if not sale_document.payment_terms:
                 continue
             try:
-                logger.info(f"start verification payment status sale document {sale_document.public_id}")
-                print(f"start verification payment status sale document {sale_document.public_id}")
+                logger.info(f"start verification payment late status sale document {sale_document.public_id}")
                 BimaErpNotificationService.send_notification_payment_sale_document_based_on_payment_term_type(
                     sale_document, template_code='NOTIFICATION_PAYMENT_LATE', days_difference=1)
                 sale_document_to_return.append(
                     {"sale_document_public_ud": sale_document.public_id,
                      "next_due_date": sale_document.next_due_date})
-                logger.info(f"sale document verification {sale_document.public_id} succeeded")
-                print(f"sale document verification {sale_document.public_id} succeeded")
+                logger.info(f"sale document verification payment late {sale_document.public_id} succeeded")
             except Exception as ex:
-                logger.error(f"sale document verification {sale_document.public_id} failed {ex}")
-                print(f"sale document verification {sale_document.public_id} failed {ex}")
+                logger.error(f"sale document verification payment late {sale_document.public_id} failed {ex}")
 
         return sale_document_to_return
 
@@ -51,40 +48,42 @@ class BimaErpNotificationService:
             if not sale_document.payment_terms:
                 continue
             try:
-                logger.info(f"start verification payment status sale document {sale_document.public_id}")
-                print(f"start verification payment status sale document {sale_document.public_id}")
+                logger.info(f"start verification payment reminder sale document {sale_document.public_id}")
                 BimaErpNotificationService.send_notification_payment_sale_document_based_on_payment_term_type(
                     sale_document, template_code='NOTIFICATION_PAYMENT_REMINDER', days_difference=-days_before_due_date)
                 sale_document_to_return.append(
                     {"sale_document_public_ud": sale_document.public_id,
                      "next_due_date": sale_document.next_due_date})
-                logger.info(f"sale document verification {sale_document.public_id} succeeded")
-                print(f"sale document verification {sale_document.public_id} succeeded")
+                logger.info(f"sale document verification payment late {sale_document.public_id} succeeded")
+
             except Exception as ex:
-                logger.error(f"sale document verification {sale_document.public_id} failed {ex}")
-                print(f"sale document verification {sale_document.public_id} failed {ex}")
+                logger.error(f"sale document verification payment reminder {sale_document.public_id} failed {ex}")
 
         return sale_document_to_return
 
     @staticmethod
     def send_notification_payment_sale_document_based_on_payment_term_type(sale_document, template_code,
-                                                                           days_difference, send_instantly=False):
+                                                                           days_difference, message=None, subject=None,
+                                                                           send_instantly=False):
         if sale_document.payment_terms.type != PaymentTermType.CUSTOM.name:
             BimaErpNotificationService.send_notification_sale_document_not_custom_type(
-                sale_document, days_difference, template_code=template_code,
+                sale_document, days_difference, template_code=template_code, message=message, subject=subject,
                 send_instantly=send_instantly)
         else:
             BimaErpNotificationService.send_notification_sale_document_custom_type(
-                sale_document, days_difference, template_code=template_code,
+                sale_document, days_difference, template_code=template_code, message=message, subject=subject,
                 send_instantly=send_instantly)
 
     @staticmethod
-    def send_notification_sale_document_custom_type(document, days_difference, template_code, send_instantly=False):
+    def send_notification_sale_document_custom_type(document, days_difference, template_code, message=None,
+                                                    subject=None, send_instantly=False):
+        BimaCoreNotificationTemplate = apps.get_model('erp', 'BimaCoreNotificationTemplate')
         current_date = timezone.now().date()
         due_dates = []
         payment_schedule = document.payment_terms.payment_term_details.all().order_by('id')
         next_due_date = document.date
-        notification_template = BimaCoreNotificationTemplateService.get_notification_template_by_code(template_code)
+        notification_template = BimaCoreNotificationTemplate.objects.filter(
+            notification_type__code=template_code).first()
 
         for schedule in payment_schedule:
             next_due_date = SalePurchaseService.calculate_due_date(next_due_date, schedule.value)
@@ -111,16 +110,23 @@ class BimaErpNotificationService:
                 'due_date': due_dates,
                 'total_amount_paid': amount_paid,
                 'total_amount': document.total_amount,
-                'amount_remaining': (document.total_amount - amount_paid)
+                'amount_remaining': (document.total_amount - amount_paid),
+                'message': message,
+                'subject': subject
             }
             BimaErpNotificationService.send_notification_payment_late(notification_template, document, data_to_send)
 
     @staticmethod
-    def send_notification_sale_document_not_custom_type(document, days_difference, template_code, send_instantly=False):
+    def send_notification_sale_document_not_custom_type(document, days_difference, template_code, message=None,
+                                                        subject=None, send_instantly=False):
+
         due_date = SalePurchaseService.calculate_due_date(document.date, document.payment_terms.type)
         send_notification = False
         now = timezone.now().date()
-        notification_template = BimaCoreNotificationTemplateService.get_notification_template_by_code(template_code)
+        
+        BimaCoreNotificationTemplate = apps.get_model('erp', 'BimaCoreNotificationTemplate')
+        notification_template = BimaCoreNotificationTemplate.objects.filter(
+            notification_type__code=template_code).first()
         amount_paid = 0
 
         if due_date and now == due_date + timedelta(days=days_difference):
@@ -136,7 +142,9 @@ class BimaErpNotificationService:
                 'due_date': [{due_date: 100}],
                 'total_amount_paid': amount_paid,
                 'total_amount': document.total_amount,
-                'amount_remaining': (document.total_amount - amount_paid)
+                'amount_remaining': (document.total_amount - amount_paid),
+                'message': message,
+                'subject': subject
             }
             BimaErpNotificationService.send_notification_payment_late(notification_template, document, data_to_send)
 
@@ -147,10 +155,11 @@ class BimaErpNotificationService:
         if document.partner.email:
             receivers.append(document.partner.email)
         data = {
-            'subject': BimaErpNotificationService.replace_variables_in_template(notification_template.subject,
-                                                                                {'invoice_number': document.number}),
-            'message': BimaErpNotificationService.replace_variables_in_template(notification_template.message,
-                                                                                data_to_send),
+            'subject': data_to_send['subject'] if data_to_send['subject'] is not None
+            else BimaErpNotificationService.replace_variables_in_template(notification_template.subject,
+                                                                          {'invoice_number': document.number}),
+            'message': data_to_send['message'] if data_to_send['message'] is not None
+            else BimaErpNotificationService.replace_variables_in_template(notification_template.message, data_to_send),
             'receivers': receivers,
             'attachments': [],
             'notification_type_id': notification_template.notification_type.id,

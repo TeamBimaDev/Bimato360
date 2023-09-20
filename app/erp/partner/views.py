@@ -86,7 +86,7 @@ class BimaErpPartnerViewSet(AbstractViewSet):
     permission_classes = []
     permission_classes = (ActionBasedPermission,)
     ordering_fields = ["first_name", "email", "phone", "partner_type"]
-    ordering = ["created"]
+    ordering = ["-created"]
     filterset_class = PartnerFilter
     action_permissions = {
         "list": ["partner.can_read"],

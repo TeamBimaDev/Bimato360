@@ -122,7 +122,16 @@ class BimaErpPartner(AbstractModel):
         self.save()
 
     def __str__(self):
-        return f"{self.public_id, self.partner_type, self.first_name}"
+        partner_full_name = f"{self.first_name} {self.last_name}" \
+            if self.partner_type == PartnerType.INDIVIDUAL.name \
+            else self.company_name
+        return f"{self.public_id, self.partner_type, partner_full_name}"
+
+    @property
+    def partner_full_name(self):
+        return (f"{self.first_name} {self.last_name}"
+                if self.partner_type == PartnerType.INDIVIDUAL.name
+                else self.company_name)
 
     class Meta:
         ordering = ["-created"]

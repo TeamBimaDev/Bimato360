@@ -481,6 +481,13 @@ def reactivate_recurring_sale_document(sale_document, reactivation_date, reason=
         return False
 
 
+def save_last_generated_pdf_link_sale_document(sale_document, pdf_url):
+    sale_document.skip_child_validation_form_transaction = True
+    sale_document.last_generated_file_url = pdf_url
+    sale_document.save()
+    sale_document.skip_child_validation_form_transaction = False
+
+
 class CreditNoteValidator:
 
     @staticmethod

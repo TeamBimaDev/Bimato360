@@ -1,4 +1,3 @@
-import uuid
 from io import BytesIO
 
 from common.converters.default_converters import str_to_bool
@@ -44,7 +43,7 @@ class BimaTreasuryTransactionViewSet(AbstractViewSet):
         "amount",
         "date",
     ]
-    ordering = ["date"]
+    ordering = ["-date"]
     filterset_class = BimaTreasuryTransactionFilter
     action_permissions = {
         "list": ["transaction.can_read"],
@@ -237,7 +236,7 @@ class BimaTreasuryTransactionViewSet(AbstractViewSet):
     @action(detail=False, methods=['GET'], url_path='transaction_by_sale_document')
     def transaction_by_sale_document(self, request, pk=None):
         sale_document_public_id = request.query_params.get('sale_document_public_id')
-        if not sale_document_public_id or not uuid.UUID(sale_document_public_id, version=4):
+        if not sale_document_public_id:
             return Response({"Error": _("Please provide a valid UUID")}, status=status.HTTP_400_BAD_REQUEST)
 
         sale_document_payments = TransactionSaleDocumentPayment.objects.filter(
@@ -248,7 +247,7 @@ class BimaTreasuryTransactionViewSet(AbstractViewSet):
     @action(detail=False, methods=['GET'], url_path='transaction_by_purchase_document')
     def transaction_by_purchase_document(self, request, pk=None):
         purchase_document_public_id = request.query_params.get('purchase_document_public_id')
-        if not purchase_document_public_id or not uuid.UUID(purchase_document_public_id, version=4):
+        if not purchase_document_public_id:
             return Response({"Error": _("Please provide a valid UUID")}, status=status.HTTP_400_BAD_REQUEST)
 
         purchase_document_payments = TransactionPurchaseDocumentPayment.objects.filter(
@@ -260,7 +259,7 @@ class BimaTreasuryTransactionViewSet(AbstractViewSet):
     @action(detail=False, methods=['GET'], url_path='get_transactions_available_for_sale_document')
     def get_transactions_available_for_sale_document(self, request, pk=None):
         sale_document_public_id = request.query_params.get("document_public_id")
-        if not sale_document_public_id or not uuid.UUID(sale_document_public_id, version=4):
+        if not sale_document_public_id:
             return Response({"Error": _("Please provide a valid UUID")}, status=status.HTTP_400_BAD_REQUEST)
         BimaErpSaleDocument = apps.get_model('erp', 'BimaErpSaleDocument')
         sale_document = BimaErpSaleDocument.objects.get_object_by_public_id(sale_document_public_id)
@@ -279,7 +278,7 @@ class BimaTreasuryTransactionViewSet(AbstractViewSet):
     @action(detail=False, methods=['GET'], url_path='get_transactions_available_for_purchase_document')
     def get_transactions_available_for_purchase_document(self, request, pk=None):
         purchase_document_public_id = request.query_params.get("document_public_id")
-        if not purchase_document_public_id or not uuid.UUID(purchase_document_public_id, version=4):
+        if not purchase_document_public_id:
             return Response({"Error": _("Please provide a valid UUID")}, status=status.HTTP_400_BAD_REQUEST)
         BimaErpPurchaseDocument = apps.get_model('erp', 'BimaErpPurchaseDocument')
         purchase_document = BimaErpPurchaseDocument.objects.get_object_by_public_id(purchase_document_public_id)

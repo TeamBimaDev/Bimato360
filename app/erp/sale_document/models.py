@@ -342,8 +342,10 @@ class BimaErpSaleDocument(AbstractModel):
         related_name='sale_documents',
     )
 
+    last_generated_file_url = models.TextField(blank=True, null=True, verbose_name=_("Fichier"))
+
     class Meta:
-        ordering = ["-created"]
+        ordering = ["-date"]
         permissions = []
         default_permissions = ()
 
@@ -382,6 +384,14 @@ class BimaErpSaleDocument(AbstractModel):
     @property
     def translated_payment_status(self):
         return str(SaleDocumentPaymentStatus.get_value_by_name(self.payment_status))
+
+    @property
+    def is_paid(self):
+        return self.payment_status == SaleDocumentPaymentStatus.PAID.name
+
+    @property
+    def is_confirmed_and_invoice(self):
+        return self.status == SaleDocumentStatus.CONFIRMED.name and self.type == SaleDocumentTypes.INVOICE.name
 
     def validate_all_required_field_for_recurring(self):
         if self.is_recurring:
@@ -466,6 +476,17 @@ class BimaErpSaleDocument(AbstractModel):
         if date_limit is not None:
             transactions = transactions.filter(transaction__date__lte=date_limit)
         return sum(tr.amount_paid for tr in transactions)
+
+    def get_all_due_date(self):
+        if not self.pk or not self.payment_terms:
+            return None
+        due_date = None
+        if self.payment_terms.type == PaymentTermType.CUSTOM.name:
+            due_date = SalePurchaseService.get_document_due_date_payment_terms_custom_type(self)
+        else:
+            due_date = SalePurchaseService.get_document_due_date_payment_terms_non_custom_type(self)
+
+        return due_date
 
 
 def update_sale_document_totals(sale_document, re_save=True):

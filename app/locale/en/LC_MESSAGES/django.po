@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-09-15 15:10+0100\n"
+"POT-Creation-Date: 2023-09-19 15:12+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -644,23 +644,28 @@ msgstr "Invalid file content type."
 msgid "document not found"
 msgstr "Document not found"
 
-#: .\core\notification\views.py:90 .\treasury\transaction\views.py:241
-#: .\treasury\transaction\views.py:252 .\treasury\transaction\views.py:264
-#: .\treasury\transaction\views.py:283
+#: .\core\notification\views.py:90 .\core\notification\views.py:105
+#: .\treasury\transaction\views.py:241 .\treasury\transaction\views.py:252
+#: .\treasury\transaction\views.py:264 .\treasury\transaction\views.py:283
 #, fuzzy
 #| msgid "Please provide all needed data"
 msgid "Please provide a valid UUID"
 msgstr "Please provide all needed data"
 
-#: .\core\notification\views.py:95
+#: .\core\notification\views.py:95 .\core\notification\views.py:110
 #, fuzzy
 #| msgid "Unable to get the item"
 msgid "Unable to find item"
 msgstr "Unable to get the item"
 
-#: .\core\notification\views.py:99
+#: .\core\notification\views.py:99 .\core\notification\views.py:114
+#: .\core\notification\views.py:120
 msgid "NOTIFICATION_SALE_DOCUMENT_PAYMENT_LATE_SENT_SUCCESSFUL"
 msgstr "Email was successfully sent"
+
+#: .\core\notification_template\models.py:12
+msgid "A template with this notification type already exists."
+msgstr "A template with this notification type already exists!"
 
 #: .\core\tag\serializers.py:37
 msgid "This field should be a valid hex color."
@@ -998,15 +1003,15 @@ msgstr "Report"
 msgid "Payement effectué avec succes"
 msgstr "Payment created successfully"
 
-#: .\erp\purchase_document\views.py:353 .\erp\sale_document\views.py:413
+#: .\erp\purchase_document\views.py:353 .\erp\sale_document\views.py:418
 msgid "No valid parent documents found"
 msgstr "No valid parent documents found"
 
-#: .\erp\purchase_document\views.py:357 .\erp\sale_document\views.py:417
+#: .\erp\purchase_document\views.py:357 .\erp\sale_document\views.py:422
 msgid "All documents should belong to the same partner"
 msgstr "All documents should belong to the same partner"
 
-#: .\erp\purchase_document\views.py:361 .\erp\sale_document\views.py:421
+#: .\erp\purchase_document\views.py:361 .\erp\sale_document\views.py:426
 msgid "Please give the type of the document"
 msgstr "Please give the type of the document"
 
@@ -1193,17 +1198,17 @@ msgstr "All parent must have the same partner as the child!"
 msgid "Not enough stock available for this product."
 msgstr "Not enough stock available for this product."
 
-#: .\erp\sale_document\service.py:440
+#: .\erp\sale_document\service.py:496
 msgid "This document does not have a parent"
 msgstr "This document does not have a parent"
 
-#: .\erp\sale_document\service.py:445
+#: .\erp\sale_document\service.py:501
 #, fuzzy
 #| msgid "Item exists in a sale document"
 msgid "This product does not exist in the parent document"
 msgstr "Item exists in a sale document"
 
-#: .\erp\sale_document\service.py:448
+#: .\erp\sale_document\service.py:504
 msgid "Exceeding quantity from the parent document"
 msgstr "Exceeding quantity from the parent document"
 
@@ -1633,7 +1638,7 @@ msgstr "Cash / Bank"
 msgid "Cannot delete system item"
 msgstr "Cannot find the item to edit"
 
-#: .\treasury\payment_term\models.py:38
+#: .\treasury\payment_term\models.py:41
 #, fuzzy
 #| msgid "Payment Term Lines"
 msgid "Only custom payment terms can have details."
@@ -1695,36 +1700,36 @@ msgstr "Transaction Source"
 msgid "Bank account number"
 msgstr "Bank account number"
 
-#: .\treasury\transaction\models.py:115
+#: .\treasury\transaction\models.py:120
 msgid "Amount should be greater than 0."
 msgstr "Amount should be greater than 0."
 
-#: .\treasury\transaction\models.py:119
+#: .\treasury\transaction\models.py:124
 msgid "Cash is required when nature is set to CASH."
 msgstr "Cash is required when nature is set to CASH."
 
-#: .\treasury\transaction\models.py:123
+#: .\treasury\transaction\models.py:128
 msgid "Bank Account is required when nature is set to BANK."
 msgstr "Bank Account is required when nature is set to BANK."
 
-#: .\treasury\transaction\models.py:134
+#: .\treasury\transaction\models.py:139
 msgid ""
 "Bank Account and Cash are required for FROM_ACCOUNT_TO_CASH transaction."
 msgstr "Bank Account and Cash are required"
 
-#: .\treasury\transaction\models.py:162
+#: .\treasury\transaction\models.py:167
 #, fuzzy
 #| msgid "You cannot do that. You should make this operation from Cash nature."
 msgid "You cannot do that. You should make this operation from Cash."
 msgstr " cannot do that. You should make this operation from Cash nature."
 
-#: .\treasury\transaction\models.py:172
+#: .\treasury\transaction\models.py:177
 #, fuzzy
 #| msgid "You cannot do that. You should make this operation from Bank nature."
 msgid "You cannot do that. You should make this operation from Bank."
 msgstr "You cannot do that. You should make this operation from Bank nature."
 
-#: .\treasury\transaction\models.py:252
+#: .\treasury\transaction\models.py:257
 msgid ""
 "This transaction is created automatically from another one, it's not "
 "possible to delete it"
@@ -1732,7 +1737,7 @@ msgstr ""
 "This transaction is created automatically from another one, it's not "
 "possible to delete it"
 
-#: .\treasury\transaction\models.py:266
+#: .\treasury\transaction\models.py:271
 msgid ""
 "This transaction is created automatically form another one, it's not "
 "possible to edit it"
@@ -1740,7 +1745,7 @@ msgstr ""
 "This transaction is created automatically form another one, it's not "
 "possible to edit it"
 
-#: .\treasury\transaction\service.py:281
+#: .\treasury\transaction\service.py:282
 #: .\treasury\transaction\service_payment_invoice.py:47
 msgid "Amount of the transaction should be equal to the amount of credit note!"
 msgstr ""
@@ -1751,6 +1756,12 @@ msgid ""
 "You cannot delete this transaction, you need to unlink invoice payment first"
 msgstr ""
 "You cannot delete this transaction, you need to unlink invoice payment first"
+
+#: .\treasury\transaction\views.py:303 .\treasury\transaction\views.py:324
+#, fuzzy
+#| msgid "Please provide all needed data"
+msgid "Please provide a valid Direction"
+msgstr "Please provide all needed data"
 
 #: .\user\models.py:17
 msgid "User must have an email address."

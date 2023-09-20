@@ -127,7 +127,7 @@ class BimaErpPurchaseDocument(AbstractModel):
     )
 
     class Meta:
-        ordering = ['-created']
+        ordering = ['-date']
         permissions = []
         default_permissions = ()
 

@@ -60,7 +60,7 @@ MIDDLEWARE = [
     "django.middleware.locale.LocaleMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
-    "common.middlewares.error_handling_middleware.ErrorHandlingMiddleware",
+    # "common.middlewares.error_handling_middleware.ErrorHandlingMiddleware",
     # 'debug_toolbar.middleware.DebugToolbarMiddleware',
     "django.middleware.common.CommonMiddleware",
     "simple_history.middleware.HistoryRequestMiddleware",
@@ -141,7 +141,8 @@ LOCALE_PATHS = [
 ]
 
 STATIC_URL = "/static/"
-MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, "media/")
 STATIC_ROOT = "/vol/web/static"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
@@ -283,3 +284,5 @@ CELERY_RESULT_SERIALIZER = "json"
 CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
 CELERY_TIMEZONE = "UTC"
 CELERY_ENABLE_UTC = True
+
+html_allowed_tags = ['h1', 'h2', 'h3', 'br', 'p', 'strong', 'em', 'ol', 'li']

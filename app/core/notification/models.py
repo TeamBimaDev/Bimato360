@@ -24,7 +24,7 @@ class BimaCoreNotification(AbstractModel):
     content_object = GenericForeignKey('parent_type', 'parent_id')
 
     class Meta:
-        ordering = ['date_sent']
+        ordering = ['-date_sent']
         permissions = []
         default_permissions = ()
 

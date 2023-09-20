@@ -35,7 +35,7 @@ class BimaErpPurchaseDocumentViewSet(AbstractViewSet):
     permission_classes = []
     permission_classes = (ActionBasedPermission,)
     ordering_fields = ['number', 'date', 'status', 'partner__name', 'total_amount']
-    ordering = ['date']
+    ordering = ['-date']
     filterset_class = PurchaseDocumentFilter
     action_permissions = {
         'list': ['purchase_document.can_read'],
