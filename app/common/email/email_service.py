@@ -1,9 +1,11 @@
 import logging
+import os
 import time
 from smtplib import SMTPException
 
 from celery import shared_task
 from celery import states
+from django.core.files.storage import default_storage
 from django.core.mail import EmailMessage
 
 from app import settings
@@ -12,7 +14,7 @@ from app import settings
 class EmailService:
     @staticmethod
     @shared_task(bind=True, max_retries=3, soft_time_limit=500)
-    def send_email(self, subject, message, to_email, html_message=None):
+    def send_email(self, subject, message, to_email, attachments=None, html_message=None):
         start_time = time.time()
         logger = logging.getLogger(__name__)
         logger.info(
@@ -20,7 +22,6 @@ class EmailService:
 
         from_email = settings.DEFAULT_FROM_EMAIL
 
-        # Convert to a list if it's a single email address
         if isinstance(to_email, str):
             to_email = [to_email]
 
@@ -33,6 +34,15 @@ class EmailService:
 
         if html_message:
             email.content_subtype = 'html'
+
+        if attachments:
+            for attachment_url in attachments:
+                relative_path = attachment_url.replace(settings.MEDIA_URL, '')
+                if default_storage.exists(relative_path):
+                    with default_storage.open(relative_path, 'rb') as file:
+                        email.attach(os.path.basename(relative_path), file.read())
+                else:
+                    logger.warning(f"Attachment {attachment_url} does not exist and will be skipped.")
 
         try:
             email.send(fail_silently=False)

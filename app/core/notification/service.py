@@ -111,6 +111,7 @@ class BimaErpNotificationService:
                 'total_amount_paid': amount_paid,
                 'total_amount': document.total_amount,
                 'amount_remaining': (document.total_amount - amount_paid),
+                'file_url': document.last_generated_file_url,
                 'message': message,
                 'subject': subject
             }
@@ -143,6 +144,7 @@ class BimaErpNotificationService:
                 'total_amount_paid': amount_paid,
                 'total_amount': document.total_amount,
                 'amount_remaining': (document.total_amount - amount_paid),
+                'file_url': document.last_generated_file_url,
                 'message': message,
                 'subject': subject
             }
@@ -161,7 +163,7 @@ class BimaErpNotificationService:
             'message': data_to_send['message'] if data_to_send['message'] is not None
             else BimaErpNotificationService.replace_variables_in_template(notification_template.message, data_to_send),
             'receivers': receivers,
-            'attachments': [],
+            'attachments': [data_to_send['file_url']],
             'notification_type_id': notification_template.notification_type.id,
             'sender': None,
             'app_name': 'erp',
@@ -183,7 +185,7 @@ class BimaErpNotificationService:
         model_name = data['model_name']
         parent_id = data['parent_id']
 
-        if EmailService.send_email(subject, message, receivers, html_message=True):
+        if EmailService.send_email(subject, message, receivers, attachments=attachments, html_message=True):
             BimaErpNotificationService.save_notification(
                 receivers=receivers,
                 subject=subject,
