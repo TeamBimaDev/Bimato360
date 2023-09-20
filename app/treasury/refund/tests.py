@@ -2,11 +2,14 @@ import pytest
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient
+
 from .models import BimaTreasuryRefund
+
 
 @pytest.fixture
 def api_client():
     return APIClient()
+
 
 @pytest.fixture
 def model_data():
@@ -14,8 +17,9 @@ def model_data():
         'transaction': None,
         'amount': 33.87,
         'reason': 'zwyWztTUpO3UMCFswQqj8BBTiZ29K',
-        'date': 2023-06-27,
+        'date': '2023-06-27'
     }
+
 
 @pytest.mark.django_db
 class TestBimaTreasuryRefundAPI:

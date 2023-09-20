@@ -67,6 +67,25 @@ class SalePurchaseService:
         return SalePurchaseService.calculate_due_date(document.date, document.payment_terms.type)
 
     @staticmethod
+    def get_due_dates_based_on_payment_terms(document):
+        if document.payment_terms.type == PaymentTermType.CUSTOM.name:
+            return SalePurchaseService.sale_document_custom_payment_terms_type_calculate_due_date(document)
+        return [SalePurchaseService.sale_document_not_custom_payment_terms_type_calculate_due_date(document)]
+
+    @staticmethod
+    def classify_and_sum_due_amounts(expected_amounts, due_date, current_date, amount_due):
+        days_remaining = (due_date - current_date).days
+
+        if 0 < days_remaining <= 3:
+            expected_amounts['expected_in_3_days'] += amount_due
+        elif 4 <= days_remaining <= 7:
+            expected_amounts['expected_in_7_days'] += amount_due
+        elif 8 <= days_remaining <= 15:
+            expected_amounts['expected_in_15_days'] += amount_due
+        elif 16 <= days_remaining <= 30:
+            expected_amounts['expected_in_1_month'] += amount_due
+
+    @staticmethod
     def calculate_payment_late_type_custom(document, re_save=True):
         current_date = timezone.now().date()
         due_dates = []

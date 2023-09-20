@@ -340,6 +340,11 @@ class BimaErpPurchaseDocumentViewSet(AbstractViewSet):
         return_data = verify_purchase_document_payment_status()
         return Response(return_data)
 
+    @action(detail=False, methods=['GET'], url_path='expected_amount_by_due_date')
+    def expected_amount_by_due_date(self, request):
+        result = PurchaseDocumentService.expected_amount_by_due_date()
+        return Response(result)
+
     def get_request_data(self, request):
         document_type = request.data.get('document_type', '')
         parent_public_ids = request.data.get('parent_public_ids', [])

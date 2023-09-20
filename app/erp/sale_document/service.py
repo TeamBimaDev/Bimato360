@@ -79,7 +79,7 @@ class SaleDocumentService:
                 output_field=IntegerField()),
             number_of_item_payment_late=Count(Case(
                 When(~Q(payment_status=SaleDocumentPaymentStatus.PAID.name) & Q(is_payment_late=True), then=F('id'))),
-                                              output_field=IntegerField()),
+                output_field=IntegerField()),
             number_of_item_unpaid_and_not_late=Count(
                 Case(When(~Q(payment_status=SaleDocumentPaymentStatus.PAID.name) & Q(is_payment_late=False),
                           then=F('id'))),
@@ -144,31 +144,12 @@ class SaleDocumentService:
             if amount_due <= 0:
                 continue
 
-            due_dates = SaleDocumentService.get_due_dates_based_on_payment_terms(document)
+            due_dates = SalePurchaseService.get_due_dates_based_on_payment_terms(document)
 
             for due_date in due_dates:
-                SaleDocumentService.classify_and_sum_due_amounts(expected_amounts, due_date, current_date, amount_due)
+                SalePurchaseService.classify_and_sum_due_amounts(expected_amounts, due_date, current_date, amount_due)
 
         return expected_amounts
-
-    @staticmethod
-    def classify_and_sum_due_amounts(expected_amounts, due_date, current_date, amount_due):
-        days_remaining = (due_date - current_date).days
-
-        if 0 < days_remaining <= 3:
-            expected_amounts['expected_in_3_days'] += amount_due
-        elif 4 <= days_remaining <= 7:
-            expected_amounts['expected_in_7_days'] += amount_due
-        elif 8 <= days_remaining <= 15:
-            expected_amounts['expected_in_15_days'] += amount_due
-        elif 16 <= days_remaining <= 30:
-            expected_amounts['expected_in_1_month'] += amount_due
-
-    @staticmethod
-    def get_due_dates_based_on_payment_terms(document):
-        if document.payment_terms.type == PaymentTermType.CUSTOM.name:
-            return SalePurchaseService.sale_document_custom_payment_terms_type_calculate_due_date(document)
-        return [SalePurchaseService.sale_document_not_custom_payment_terms_type_calculate_due_date(document)]
 
 
 def generate_recurring_sale_documents():

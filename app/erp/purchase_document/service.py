@@ -7,9 +7,12 @@ from uuid import UUID
 import openpyxl
 from common.enums.partner_type import PartnerType
 from common.enums.purchase_document_enum import PurchaseDocumentStatus
+from common.enums.sale_document_enum import SaleDocumentStatus
+from common.enums.sale_document_enum import SaleDocumentTypes
 from common.service.purchase_sale_service import SalePurchaseService
 from django.db.models import Sum
 from django.http import HttpResponse
+from django.utils import timezone
 from pandas import DataFrame
 
 from .models import BimaErpPurchaseDocument, BimaErpPurchaseDocumentProduct, update_purchase_document_totals
@@ -35,6 +38,35 @@ class PurchaseDocumentService:
             unique_number = SalePurchaseService.generate_unique_number(sale_or_purchase,
                                                                        quotation_order_invoice)
         return unique_number
+
+    @staticmethod
+    def expected_amount_by_due_date():
+        current_date = timezone.now().date()
+
+        expected_amounts = {
+            'expected_in_3_days': 0,
+            'expected_in_7_days': 0,
+            'expected_in_15_days': 0,
+            'expected_in_1_month': 0
+        }
+
+        sale_documents = BimaErpPurchaseDocument.objects.filter(
+            type=SaleDocumentTypes.INVOICE.name,
+            status=SaleDocumentStatus.CONFIRMED.name
+        )
+
+        for document in sale_documents:
+            amount_due = document.total_amount - document.calculate_sum_amount_paid()
+
+            if amount_due <= 0:
+                continue
+
+            due_dates = SalePurchaseService.get_due_dates_based_on_payment_terms(document)
+
+            for due_date in due_dates:
+                SalePurchaseService.classify_and_sum_due_amounts(expected_amounts, due_date, current_date, amount_due)
+
+        return expected_amounts
 
 
 def create_products_from_parents(parents, new_document, reset_quantity=False):
