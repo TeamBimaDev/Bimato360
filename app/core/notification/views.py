@@ -83,9 +83,9 @@ class BimaCoreNotificationViewSet(AbstractViewSet):
 
     @action(detail=False, methods=['POST'], url_path="sent_payment_late_notification_sale_document")
     def sent_payment_late_notification_sale_document(self, request):
-        sale_document_public_id = request.query_params.get('sale_document_public_id', None)
-        message = request.query_params.get('message', None)
-        subject = request.query_params.get('subject', None)
+        sale_document_public_id = request.data.get('sale_document_public_id', None)
+        message = request.data.get('message', None)
+        subject = request.data.get('subject', None)
         if not sale_document_public_id:
             return Response({"Error": _("Please provide a valid UUID")}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -94,9 +94,18 @@ class BimaCoreNotificationViewSet(AbstractViewSet):
         if not sale_document:
             return Response({"Error": _("Unable to find item")}, status=status.HTTP_400_BAD_REQUEST)
 
+        if not sale_document.is_confirmed_and_invoice:
+            return Response({"Error": _("Only Confirmed Invoice are allowed")}, status=status.HTTP_404_NOT_FOUND)
+
         if not sale_document.is_payment_late:
             return Response({"Error": _("The payment is not late for this invoice")},
                             status=status.HTTP_400_BAD_REQUEST)
+
+        if sale_document.is_paid:
+            return Response({"Error": _("The invoice is already paid")}, status=status.HTTP_404_NOT_FOUND)
+
+        if not sale_document.payment_terms:
+            return Response({"Error": _("Invoice does not have any payment terms")}, status=status.HTTP_404_NOT_FOUND)
 
         BimaErpNotificationService.send_notification_payment_sale_document_based_on_payment_term_type(
             sale_document, days_difference=1, template_code='NOTIFICATION_PAYMENT_LATE', message=message,
@@ -105,9 +114,9 @@ class BimaCoreNotificationViewSet(AbstractViewSet):
 
     @action(detail=False, methods=['POST'], url_path="sent_payment_reminder_notification_sale_document")
     def sent_payment_reminder_notification_sale_document(self, request):
-        sale_document_public_id = request.query_params.get('sale_document_public_id', None)
-        message = request.query_params.get('message', None)
-        subject = request.query_params.get('subject', None)
+        sale_document_public_id = request.data.get('sale_document_public_id', None)
+        message = request.data.get('message', None)
+        subject = request.data.get('subject', None)
 
         if not sale_document_public_id:
             return Response({"Error": _("Please provide a valid UUID")}, status=status.HTTP_400_BAD_REQUEST)
@@ -116,6 +125,15 @@ class BimaCoreNotificationViewSet(AbstractViewSet):
         sale_document = BimaErpSaleDocument.objects.get_object_by_public_id(sale_document_public_id)
         if not sale_document:
             return Response({"Error": _("Unable to find item")}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not sale_document.is_confirmed_and_invoice:
+            return Response({"Error": _("Only Confirmed Invoice are allowed")}, status=status.HTTP_404_NOT_FOUND)
+
+        if sale_document.is_paid:
+            return Response({"Error": _("The invoice is already paid")}, status=status.HTTP_404_NOT_FOUND)
+
+        if not sale_document.payment_terms:
+            return Response({"Error": _("Invoice does not have any payment terms")}, status=status.HTTP_404_NOT_FOUND)
 
         BimaErpNotificationService.send_notification_payment_sale_document_based_on_payment_term_type(
             sale_document, days_difference=3, template_code='NOTIFICATION_PAYMENT_REMINDER', message=message,
