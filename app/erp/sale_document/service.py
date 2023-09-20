@@ -77,8 +77,13 @@ class SaleDocumentService:
             number_of_item_unpaid=Count(
                 Case(When(~Q(payment_status=SaleDocumentPaymentStatus.PAID.name), then=F('id'))),
                 output_field=IntegerField()),
-            number_of_item_payment_late=Count(Case(When(is_payment_late=True, then=F('id'))),
+            number_of_item_payment_late=Count(Case(
+                When(~Q(payment_status=SaleDocumentPaymentStatus.PAID.name) & Q(is_payment_late=True), then=F('id'))),
                                               output_field=IntegerField()),
+            number_of_item_unpaid_and_not_late=Count(
+                Case(When(~Q(payment_status=SaleDocumentPaymentStatus.PAID.name) & Q(is_payment_late=False),
+                          then=F('id'))),
+                output_field=IntegerField()),
             total_amounts=Sum('total_amount'),
 
             total_amount_paid=Sum('amount_paid'),
@@ -108,6 +113,7 @@ class SaleDocumentService:
             "number_of_item_draft": stats['number_of_item_draft'],
             "number_of_item_paid": stats['number_of_item_paid'],
             "number_of_item_unpaid": stats['number_of_item_unpaid'],
+            "number_of_item_unpaid_and_not_late": stats['number_of_item_unpaid_and_not_late'],
             "number_of_item_payment_late": stats['number_of_item_payment_late'],
             "total_amount": stats['total_amounts'],
             "total_amount_paid": stats['total_amount_paid'],
