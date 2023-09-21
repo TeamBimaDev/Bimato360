@@ -16,6 +16,7 @@ from django.apps import apps
 from django.db.models import Q
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from openpyxl.reader.excel import load_workbook
 from rest_framework import status
@@ -299,12 +300,15 @@ class BimaTreasuryTransactionViewSet(AbstractViewSet):
     @action(detail=False, methods=['GET'], url_path='get_top_n_transaction_by_type_direction')
     def get_top_n_transaction_by_type_direction(self, request):
         number_of_type_transaction = int(request.query_params.get('n', 3))
+        year = int(request.query_params.get('year', timezone.now().year))
+        month = int(request.query_params.get('month', timezone.now().month))
         direction = request.query_params.get('direction', 'INCOME').upper()
+
         if direction not in ['INCOME', 'OUTCOME']:
             return Response({"Error": _("Please provide a valid Direction")}, status=status.HTTP_400_BAD_REQUEST)
 
-        result = BimaTreasuryTransactionService.get_top_n_transaction_by_type_direction(number_of_type_transaction,
-                                                                                        direction)
+        result = BimaTreasuryTransactionService.get_top_n_transaction_by_type_direction(
+            number_of_type_transaction, direction, year, month)
         return Response(result)
 
     @action(detail=False, methods=['GET'], url_path='monthly_totals')

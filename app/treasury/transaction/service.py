@@ -286,27 +286,24 @@ class BimaTreasuryTransactionService:
         return True
 
     @staticmethod
-    def get_top_n_transaction_by_type_direction(number_of_type_transaction, direction):
+    def get_top_n_transaction_by_type_direction(number_of_type_transaction, direction, year, month):
         from .models import BimaTreasuryTransaction
         transactions = BimaTreasuryTransaction.objects.filter(
-            direction=direction
+            direction=direction,
+            date__year=year,
+            date__month=month
         ).values(
-            month=F('date__month')
+            'transaction_type__name'  # Assuming there's a name field in transaction_type model
         ).annotate(
-            total_amount=Sum('amount'),
-            transaction_type=F('transaction_type__name')  # Assuming there's a name field in transaction_type model
+            total_amount=Sum('amount')
         ).order_by(
-            'month', '-total_amount'
-        )
+            '-total_amount'
+        )[:number_of_type_transaction]
 
         result = {}
         for trans in transactions:
-            month = trans['month']
-            if month not in result:
-                result[month] = {}
-
-            if len(result[month]) < number_of_type_transaction:
-                result[month][trans['transaction_type']] = trans['total_amount']
+            transaction_type_name = trans['transaction_type__name']
+            result[transaction_type_name] = trans['total_amount']
 
         return result
 
