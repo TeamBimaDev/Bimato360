@@ -14,6 +14,6 @@ class BimaTreasuryRefund(AbstractModel):
     date = models.DateField(null=False, blank=False)
 
     class Meta:
-        ordering = ["name"]
+        ordering = ["-date"]
         permissions = []
         default_permissions = ()

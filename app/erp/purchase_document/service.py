@@ -50,12 +50,12 @@ class PurchaseDocumentService:
             'expected_in_1_month': 0
         }
 
-        sale_documents = BimaErpPurchaseDocument.objects.filter(
+        documents = BimaErpPurchaseDocument.objects.filter(
             type=SaleDocumentTypes.INVOICE.name,
             status=SaleDocumentStatus.CONFIRMED.name
         )
 
-        for document in sale_documents:
+        for document in documents:
             amount_due = document.total_amount - document.calculate_sum_amount_paid()
 
             if amount_due <= 0:

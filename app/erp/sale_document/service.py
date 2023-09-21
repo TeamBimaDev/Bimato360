@@ -133,19 +133,19 @@ class SaleDocumentService:
             'expected_in_1_month': 0
         }
 
-        sale_documents = BimaErpSaleDocument.objects.filter(
+        documents = BimaErpSaleDocument.objects.filter(
             type=SaleDocumentTypes.INVOICE.name,
             status=SaleDocumentStatus.CONFIRMED.name
         )
 
-        for document in sale_documents:
+        for document in documents:
             amount_due = document.total_amount - document.calculate_sum_amount_paid()
 
             if amount_due <= 0:
                 continue
             if not document.payment_terms:
                 continue
-                
+
             due_dates = SalePurchaseService.get_due_dates_based_on_payment_terms(document)
 
             for due_date in due_dates:

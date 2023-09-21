@@ -1,6 +1,6 @@
 import logging
 from collections import defaultdict
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 
 import pandas as pd
 from common.enums.transaction_enum import TransactionDirection, TransactionNature
@@ -471,7 +471,7 @@ class BimaTreasuryTransactionService:
 
         end_date = timezone.now().date()
         start_date = date(end_date.year - duration_years + 1, 1, 1)
-        print(f'end_date:{end_date} start_date{start_date}')
+
         transactions = BimaTreasuryTransaction.objects.all()
 
         if cash_ids:
@@ -479,50 +479,75 @@ class BimaTreasuryTransactionService:
         if bank_ids:
             transactions = transactions.filter(bank_account__in=bank_ids)
 
-        period_transactions = transactions.filter(date__range=(start_date, end_date))
+        all_transactions = transactions.filter(date__lte=end_date)
 
-        incomes = sum(t.amount for t in period_transactions if t.direction == TransactionDirection.INCOME.name)
-        outcomes = sum(t.amount for t in period_transactions if t.direction == TransactionDirection.OUTCOME.name)
-        difference = incomes - outcomes
+        starting_balance = sum(
+            t.amount if t.direction == TransactionDirection.INCOME.name else -t.amount
+            for t in all_transactions.filter(date__lt=start_date)
+        )
 
-        # Initialize details dict
-        details = defaultdict(lambda: {"incomes": 0, "outcomes": 0, "difference": 0, "increase_percentage": 0})
+        month_year_keys = generate_month_year_keys(start_date, end_date)
 
-        for transaction in period_transactions:
+        details = {key: {"total_income": 0, "total_outcome": 0, "difference": 0,
+                         "starting_balance": 0, "closing_balance": 0, "increase_percentage": 0}
+                   for key in month_year_keys}
+
+        closing_balance = starting_balance
+
+        total_income = 0
+        total_outcome = 0
+
+        for transaction in transactions.filter(date__range=(start_date, end_date)):
             key = f"{transaction.date.month}/{transaction.date.year}"
+
             if transaction.direction == TransactionDirection.INCOME.name:
-                details[key]["incomes"] += transaction.amount
+                details[key]["total_income"] += transaction.amount
+                total_income += transaction.amount
             else:
-                details[key]["outcomes"] += transaction.amount
+                details[key]["total_outcome"] += transaction.amount
+                total_outcome += transaction.amount
 
         last_month_diff = None
 
-        for year in range(start_date.year, end_date.year + 1):
-            for month in range(1, 13):
-                key = f"{month}/{year}"
+        for key in month_year_keys:
+            details[key]["difference"] = details[key]["total_income"] - details[key]["total_outcome"]
+            details[key]["starting_balance"] = closing_balance
+            closing_balance += details[key]["difference"]
+            details[key]["closing_balance"] = closing_balance
 
-                details[key]["difference"] = details[key]["incomes"] - details[key]["outcomes"]
-                month_difference = details[key]["difference"]
-
-                if last_month_diff is not None:
-                    if last_month_diff == 0:
-                        details[key]["increase_percentage"] = 100 if month_difference != 0 else 0
-                    else:
-                        details[key]["increase_percentage"] = ((
-                                                                       month_difference - last_month_diff) / last_month_diff) * 100
+            if last_month_diff is not None:
+                if last_month_diff == 0:
+                    details[key]["increase_percentage"] = 100 if details[key]["difference"] != 0 else 0
                 else:
-                    details[key]["increase_percentage"] = 0  # Assuming no increase for the first month
+                    details[key]["increase_percentage"] = ((details[key][
+                                                                "difference"] - last_month_diff) / last_month_diff) * 100
 
-                last_month_diff = month_difference
+            last_month_diff = details[key]["difference"]
 
         ordered_details = dict(
-            sorted(details.items(), key=lambda x: (int(x[0].split('/')[1]), int(x[0].split('/')[0]))))
+            sorted(details.items(), key=lambda x: (int(x[0].split('/')[1]), int(x[0].split('/')[0])))
+        )
+
+        difference = total_income - total_outcome
+
         return {
-            "total_income": incomes,
-            "total_outcome": outcomes,
+            "starting_balance": starting_balance,
+            "end_balance": closing_balance,
+            "total_income": total_income,
+            "total_outcome": total_outcome,
             "difference": difference,
             "details": ordered_details
         }
+
+
+def generate_month_year_keys(start_date, end_date):
+    keys = []
+    curr_date = start_date
+    while curr_date <= end_date:
+        keys.append(f"{curr_date.month}/{curr_date.year}")
+        curr_date += timedelta(days=(1 - curr_date.day) + 31)
+        curr_date = curr_date.replace(day=1)
+    return keys
 
 
 class TransactionEffectStrategy:
