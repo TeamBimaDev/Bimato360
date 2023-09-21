@@ -9,7 +9,7 @@ from common.enums.transaction_enum import TransactionTypeIncomeOutcome
 from common.helpers.bima360_helper import Bima360Helper
 from django.apps import apps
 from django.db import models
-from django.db.models import Sum, Case, When, F, Avg
+from django.db.models import Sum, Case, When, F, Avg, Q
 from django.utils import timezone
 from django.utils.crypto import get_random_string
 from django.utils.translation import gettext_lazy as _
@@ -473,8 +473,16 @@ class BimaTreasuryTransactionService:
         end_date = timezone.now().date()
         start_date = date(end_date.year - duration_years + 1, 1, 1)
 
-        transactions = BimaTreasuryTransaction.objects.all()
-        all_transactions = transactions.filter(date__lte=end_date)
+        q_objects = Q()
+
+        if cash_ids:
+            q_objects |= Q(cash__public_id__in=cash_ids)
+
+        if bank_ids:
+            q_objects |= Q(bank_account__public_id__in=bank_ids)
+
+        transactions = BimaTreasuryTransaction.objects.filter(q_objects)
+        all_transactions = BimaTreasuryTransaction.objects.filter(q_objects).filter(date__lte=end_date)
 
         if cash_ids:
             transactions = transactions.filter(cash__public_id__in=cash_ids)
