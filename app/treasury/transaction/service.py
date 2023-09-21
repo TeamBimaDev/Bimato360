@@ -484,12 +484,12 @@ class BimaTreasuryTransactionService:
         transactions = BimaTreasuryTransaction.objects.filter(q_objects)
         all_transactions = BimaTreasuryTransaction.objects.filter(q_objects).filter(date__lte=end_date)
 
-        if cash_ids:
-            transactions = transactions.filter(cash__public_id__in=cash_ids)
-            all_transactions = transactions.filter(cash__public_id__in=cash_ids)
-        if bank_ids:
-            transactions = transactions.filter(bank_account__public_id__in=bank_ids)
-            all_transactions = transactions.filter(bank_account__public_id__in=bank_ids)
+        # if cash_ids:
+        #     transactions = transactions.filter(cash__public_id__in=cash_ids)
+        #     all_transactions = transactions.filter(cash__public_id__in=cash_ids)
+        # if bank_ids:
+        #     transactions = transactions.filter(bank_account__public_id__in=bank_ids)
+        #     all_transactions = transactions.filter(bank_account__public_id__in=bank_ids)
 
         starting_balance = sum(
             t.amount if t.direction == TransactionDirection.INCOME.name else -t.amount
