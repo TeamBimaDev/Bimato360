@@ -363,7 +363,7 @@ class BimaTreasuryTransactionViewSet(AbstractViewSet):
 
     @action(detail=False, methods=['GET'], url_path='cash_bank_flow_kpi')
     def cash_bank_flow_kpi(self, request):
-        cash_ids = request.GET.getlist('cash_public_id', [])
+        cash_ids = request.GET.getlist('cash_public_ids', [])
         bank_ids = request.GET.getlist('bank_public_ids', [])
         duration_years = int(request.GET.get('duration', 1))
         result = BimaTreasuryTransactionService.cash_bank_flow_kpi(duration_years, cash_ids, bank_ids)

@@ -1,10 +1,12 @@
 import logging
 from collections import defaultdict
 from datetime import datetime, date, timedelta
+from decimal import Decimal
 
 import pandas as pd
 from common.enums.transaction_enum import TransactionDirection, TransactionNature
 from common.enums.transaction_enum import TransactionTypeIncomeOutcome
+from common.helpers.bima360_helper import Bima360Helper
 from django.apps import apps
 from django.db import models
 from django.db.models import Sum, Case, When, F, Avg
@@ -451,7 +453,6 @@ class BimaTreasuryTransactionService:
 
             previous_month_totals[direction] = trans['total_amount']
 
-        # Filling the result for months that have no transactions
         for i in range(2,
                        13):  # Starting from February (month 2) as January doesn't have a previous month in the same year
             for direction in ["INCOME", "OUTCOME"]:
@@ -473,13 +474,14 @@ class BimaTreasuryTransactionService:
         start_date = date(end_date.year - duration_years + 1, 1, 1)
 
         transactions = BimaTreasuryTransaction.objects.all()
+        all_transactions = transactions.filter(date__lte=end_date)
 
         if cash_ids:
-            transactions = transactions.filter(cash__in=cash_ids)
+            transactions = transactions.filter(cash__public_id__in=cash_ids)
+            all_transactions = transactions.filter(cash__public_id__in=cash_ids)
         if bank_ids:
-            transactions = transactions.filter(bank_account__in=bank_ids)
-
-        all_transactions = transactions.filter(date__lte=end_date)
+            transactions = transactions.filter(bank_account__public_id__in=bank_ids)
+            all_transactions = transactions.filter(bank_account__public_id__in=bank_ids)
 
         starting_balance = sum(
             t.amount if t.direction == TransactionDirection.INCOME.name else -t.amount
@@ -510,25 +512,27 @@ class BimaTreasuryTransactionService:
         last_month_diff = None
 
         for key in month_year_keys:
-            details[key]["difference"] = details[key]["total_income"] - details[key]["total_outcome"]
-            details[key]["starting_balance"] = closing_balance
+            details[key]["difference"] = Bima360Helper.truncate(
+                Decimal(details[key]["total_income"]) - Decimal(details[key]["total_outcome"]))
+            details[key]["starting_balance"] = Bima360Helper.truncate(Decimal(closing_balance))
             closing_balance += details[key]["difference"]
-            details[key]["closing_balance"] = closing_balance
+            details[key]["closing_balance"] = Bima360Helper.truncate(Decimal(closing_balance))
 
             if last_month_diff is not None:
                 if last_month_diff == 0:
                     details[key]["increase_percentage"] = 100 if details[key]["difference"] != 0 else 0
                 else:
-                    details[key]["increase_percentage"] = ((details[key][
-                                                                "difference"] - last_month_diff) / last_month_diff) * 100
+                    value = (Decimal(details[key]["difference"]) - Decimal(last_month_diff)) / Decimal(
+                        last_month_diff) * 100
+                    details[key]["increase_percentage"] = Bima360Helper.truncate(value)
 
-            last_month_diff = details[key]["difference"]
+            last_month_diff = Bima360Helper.truncate(Decimal(details[key]["difference"]))
 
         ordered_details = dict(
             sorted(details.items(), key=lambda x: (int(x[0].split('/')[1]), int(x[0].split('/')[0])))
         )
 
-        difference = total_income - total_outcome
+        difference = Bima360Helper.truncate(total_income - total_outcome)
 
         return {
             "starting_balance": starting_balance,
