@@ -303,7 +303,7 @@ class BimaTreasuryTransactionViewSet(AbstractViewSet):
         pdf_filename = "payment_receipt.pdf"
         context = self._get_payment_receipt_context(pk)
         context['request'] = request
-        template_name = f'treasury/payment_receipt_template.html'
+        template_name = 'treasury/payment_receipt_template.html'
         response = render_to_pdf(template_name, context, pdf_filename)
         return response
 
