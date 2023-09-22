@@ -124,7 +124,7 @@ def create_new_document(document_type, parents):
     return new_document
 
 
-def duplicate_sale_document_service(parents):
+def duplicate_purchase_document_service(parents):
     new_created_documents = []
     for sale_doc in parents:
         parent_values = BimaErpPurchaseDocument.objects.filter(id=sale_doc.id).values().first()

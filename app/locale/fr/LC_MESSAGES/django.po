@@ -1482,7 +1482,7 @@ msgstr "N° de récu :"
 #, fuzzy
 #| msgid "Transaction Type"
 msgid "Date of Transaction"
-msgstr "Date de transaction :"
+msgstr "Date de paiment :"
 
 #: .\templates\treasury\payment_receipt_template.html:59
 msgid "Date of Issue"

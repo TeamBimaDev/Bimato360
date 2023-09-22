@@ -28,7 +28,7 @@ from .models import BimaErpPurchaseDocument, BimaErpPurchaseDocumentProduct
 from .serializers import BimaErpPurchaseDocumentSerializer, BimaErpPurchaseDocumentProductSerializer, \
     BimaErpPurchaseDocumentHistorySerializer, BimaErpPurchaseDocumentProductHistorySerializer
 from .service import PurchaseDocumentService, create_products_from_parents, generate_xls_report, generate_csv_report, \
-    calculate_totals_for_selected_items, create_new_document, duplicate_sale_document_service
+    calculate_totals_for_selected_items, create_new_document, duplicate_purchase_document_service
 from .service_payment_invoice import handle_invoice_payment
 from .service_payment_notification import verify_purchase_document_payment_status
 
@@ -166,14 +166,14 @@ class BimaErpPurchaseDocumentViewSet(AbstractViewSet):
         return Response({"success": _("Item created")}, status=status.HTTP_201_CREATED)
 
     @transaction.atomic
-    @action(detail=False, methods=['post'], url_path='duplicate_sale_document')
-    def duplicate_sale_document(self, request, *args, **kwargs):
+    @action(detail=False, methods=['post'], url_path='duplicate_purchase_document')
+    def duplicate_purchase_document(self, request, *args, **kwargs):
         document_type, parent_public_ids = self.get_request_data(request)
         parents = self.get_parents(parent_public_ids)
 
         self.validate_parents(parents, validate_unique_partner=False)
 
-        duplicate_sale_document_service(parents)
+        duplicate_purchase_document_service(parents)
 
         return Response({"success": _("Item created")}, status=status.HTTP_201_CREATED)
 
