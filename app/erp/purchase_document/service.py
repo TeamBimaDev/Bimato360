@@ -124,6 +124,32 @@ def create_new_document(document_type, parents):
     return new_document
 
 
+def duplicate_sale_document_service(parents):
+    new_created_documents = []
+    for sale_doc in parents:
+        parent_values = BimaErpPurchaseDocument.objects.filter(id=sale_doc.id).values().first()
+        del parent_values['id']
+        del parent_values['public_id']
+        del parent_values['number']
+        del parent_values['date']
+        del parent_values['status']
+
+        parent_values['number'] = SalePurchaseService.generate_unique_number('sale', sale_doc.type.lower())
+        parent_values['date'] = timezone.now().date()
+        parent_values['status'] = SaleDocumentStatus.DRAFT.name
+        parent_values['next_due_date'] = None
+        parent_values['is_payment_late'] = False
+        parent_values['days_in_late'] = 0
+        parent_values['last_due_date'] = None
+
+        new_document = BimaErpPurchaseDocument.objects.create(**parent_values)
+        create_products_from_parents([sale_doc], new_document)
+
+        new_created_documents.append(new_document)
+
+    return new_created_documents
+
+
 def calculate_totals_for_selected_items(items):
     sums = items.aggregate(
         total_amount_without_vat=Sum('total_amount_without_vat'),
