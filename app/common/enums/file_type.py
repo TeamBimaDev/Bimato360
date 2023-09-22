@@ -1,4 +1,5 @@
 from enum import Enum
+
 from django.utils.translation import gettext_lazy as _
 
 
@@ -29,6 +30,12 @@ class FileTypeUser(FileType):
     USER_OTHER = _('USER_OTHER')
 
 
+class FilePurchaseDocument(FileType):
+    SELLER_PURCHASE_QUOTE_DOCUMENT = _('SELLER_PURCHASE_QUOTE_DOCUMENT')
+    SELLER_PURCHASE_ORDER_DOCUMENT = _('SELLER_PURCHASE_ORDER_DOCUMENT')
+    SELLER_PURCHASE_INVOICE_DOCUMENT = _('SELLER_PURCHASE_INVOICE_DOCUMENT')
+
+
 def get_file_type_choices():
     choices = []
     for enum_class in FileType.__subclasses__():
@@ -46,3 +53,7 @@ def return_list_file_type_company():
 
 def return_list_file_type_user():
     return [(file_type.name, file_type.value) for file_type in FileTypeUser]
+
+
+def return_list_file_purchase_document():
+    return [(file_type.name, file_type.value) for file_type in FilePurchaseDocument]

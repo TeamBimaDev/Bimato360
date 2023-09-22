@@ -50,8 +50,8 @@ class BimaCompanyViewSet(AbstractViewSet):
     def list_documents(self, request, *args, **kwargs):
         company = BimaCompany.objects.get_object_by_public_id(self.kwargs['public_id'])
         documents = get_documents_for_parent_entity(company)
-        serialized_contact = BimaCoreDocumentSerializer(documents, many=True)
-        return Response(serialized_contact.data)
+        serialized_document = BimaCoreDocumentSerializer(documents, many=True)
+        return Response(serialized_document.data)
 
     def create_document(self, request, *args, **kwargs):
         company = BimaCompany.objects.get_object_by_public_id(self.kwargs['public_id'])

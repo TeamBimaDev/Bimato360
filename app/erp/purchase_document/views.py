@@ -1,6 +1,7 @@
 from collections import defaultdict
 from itertools import groupby
 
+from common.enums.file_type import return_list_file_purchase_document
 from common.enums.sale_document_enum import get_sale_document_status, get_sale_document_types
 from common.permissions.action_base_permission import ActionBasedPermission
 from common.utils.utils import render_to_pdf
@@ -9,6 +10,9 @@ from company.service import fetch_company_data
 from core.abstract.pagination import DefaultPagination
 from core.abstract.views import AbstractViewSet
 from core.address.models import BimaCoreAddress
+from core.document.models import BimaCoreDocument
+from core.document.models import get_documents_for_parent_entity
+from core.document.serializers import BimaCoreDocumentSerializer
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.db import transaction
@@ -344,6 +348,40 @@ class BimaErpPurchaseDocumentViewSet(AbstractViewSet):
     def expected_amount_by_due_date(self, request):
         result = PurchaseDocumentService.expected_amount_by_due_date()
         return Response(result)
+
+    def list_documents(self, request, *args, **kwargs):
+        purchase_document = BimaErpPurchaseDocument.objects.get_object_by_public_id(self.kwargs['public_id'])
+        documents = get_documents_for_parent_entity(purchase_document)
+        serialized_document = BimaCoreDocumentSerializer(documents, many=True)
+        return Response(serialized_document.data)
+
+    def create_document(self, request, *args, **kwargs):
+        purchase_document = BimaErpPurchaseDocument.objects.get_object_by_public_id(self.kwargs['public_id'])
+        document_data = request.data
+        document_data['file_path'] = request.FILES['file_path']
+        result = BimaCoreDocument.create_document_for_parent(purchase_document, document_data)
+        if isinstance(result, BimaCoreDocument):
+            return Response({
+                "id": result.public_id,
+                "document_name": result.document_name,
+                "description": result.description,
+                "date_file": result.date_file,
+                "file_type": result.file_type,
+            }, status=status.HTTP_201_CREATED)
+        else:
+            return Response(result, status=result.get("status", status.HTTP_500_INTERNAL_SERVER_ERROR))
+
+    def get_document(self, request, *args, **kwargs):
+        company = BimaCompany.objects.get_object_by_public_id(self.kwargs['public_id'])
+        document = get_object_or_404(BimaCoreDocument,
+                                     public_id=self.kwargs['document_public_id'],
+                                     parent_id=company.id)
+        serialized_document = BimaCoreDocumentSerializer(document)
+        return Response(serialized_document.data)
+
+    @action(detail=False, methods=['GET'], url_path='get_document_type_purchase')
+    def get_document_type_purchase(self, request, *args, **kwargs):
+        return Response(return_list_file_purchase_document())
 
     def get_request_data(self, request):
         document_type = request.data.get('document_type', '')
