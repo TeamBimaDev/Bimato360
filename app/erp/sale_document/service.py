@@ -275,7 +275,7 @@ def create_new_document(document_type, parents, initial_recurrent_parent_id=None
     return new_document
 
 
-def duplicate_sale_document_service(document_type, parents):
+def duplicate_sale_document_service(parents):
     new_created_documents = []
     for sale_doc in parents:
         parent_values = BimaErpSaleDocument.objects.filter(id=sale_doc.id).values().first()
@@ -285,7 +285,7 @@ def duplicate_sale_document_service(document_type, parents):
         del parent_values['date']
         del parent_values['status']
 
-        parent_values['number'] = SalePurchaseService.generate_unique_number('sale', document_type.lower())
+        parent_values['number'] = SalePurchaseService.generate_unique_number('sale', sale_doc.type.lower())
         parent_values['date'] = timezone.now().date()
         parent_values['status'] = SaleDocumentStatus.DRAFT.name
         parent_values['next_due_date'] = None
@@ -295,7 +295,7 @@ def duplicate_sale_document_service(document_type, parents):
 
         new_document = BimaErpSaleDocument.objects.create(**parent_values)
         create_products_from_parents([sale_doc], new_document)
-        
+
         new_created_documents.append(new_document)
 
     return new_created_documents

@@ -196,9 +196,8 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
         parents = self.get_parents(parent_public_ids)
 
         self.validate_parents(parents, validate_unique_partner=False)
-        self.validate_document_type(document_type)
 
-        duplicate_sale_document_service(document_type, parents)
+        duplicate_sale_document_service(parents)
 
         return Response({"success": _("Item created")}, status=status.HTTP_201_CREATED)
 
