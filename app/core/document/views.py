@@ -1,17 +1,14 @@
+from common.enums.file_type import return_list_file_type_partner, return_list_file_purchase_document
+from common.enums.file_type import return_list_file_type_user, return_list_file_type_company
 from core.abstract.views import AbstractViewSet
 from core.document.models import BimaCoreDocument
-from django.utils.translation import gettext_lazy as _
+from core.document.serializers import BimaCoreDocumentGetSerializer
 from core.document.serializers import BimaCoreDocumentSerializer
 from django.http import HttpResponse
+from django.utils.translation import gettext_lazy as _
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-
-from common.enums.file_type import return_list_file_type_partner
-
-from core.document.serializers import BimaCoreDocumentGetSerializer
-
-from common.enums.file_type import return_list_file_type_user, return_list_file_type_company
 
 
 class BimaCoreDocumentViewSet(AbstractViewSet):
@@ -51,3 +48,10 @@ class BimaCoreDocumentViewSet(AbstractViewSet):
     def company_documents_type(self, request, *args, **kwargs):
         return Response(return_list_file_type_company())
 
+    @action(detail=False, methods=['get'], url_path='list_file_type_company')
+    def company_documents_type(self, request, *args, **kwargs):
+        return Response(return_list_file_type_company())
+
+    @action(detail=False, methods=['GET'], url_path='list_file_type_purchase_document')
+    def list_file_type_purchase_document(self, request, *args, **kwargs):
+        return Response(return_list_file_purchase_document())

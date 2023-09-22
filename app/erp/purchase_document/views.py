@@ -1,7 +1,6 @@
 from collections import defaultdict
 from itertools import groupby
 
-from common.enums.file_type import return_list_file_purchase_document
 from common.enums.sale_document_enum import get_sale_document_status, get_sale_document_types
 from common.permissions.action_base_permission import ActionBasedPermission
 from common.utils.utils import render_to_pdf
@@ -390,10 +389,6 @@ class BimaErpPurchaseDocumentViewSet(AbstractViewSet):
                                      parent_id=company.id)
         serialized_document = BimaCoreDocumentSerializer(document)
         return Response(serialized_document.data)
-
-    @action(detail=False, methods=['GET'], url_path='get_document_type_purchase')
-    def get_document_type_purchase(self, request, *args, **kwargs):
-        return Response(return_list_file_purchase_document())
 
     def get_request_data(self, request):
         document_type = request.data.get('document_type', '')
