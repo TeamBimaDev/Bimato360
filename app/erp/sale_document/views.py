@@ -302,11 +302,14 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
 
     @action(detail=True, methods=['get'], url_path='generate_delivery_note')
     def generate_delivery_note(self, request, pk=None):
-        if not self.partner.partner_has_at_least_one_address:
-            return Response({"Adresse": _("Impossible de generer une bon de livraison, aucune adresse trouvé")},
-                            status=status.HTTP_400_BAD_REQUEST)
+
         pdf_filename = "document.pdf"
         context = self._get_context(pk)
+        sale_document = context['current_document']
+        if not sale_document.partner.partner_has_at_least_one_address:
+            return Response({"Adresse": _("Impossible de generer une bon de livraison, aucune adresse trouvé")},
+                            status=status.HTTP_400_BAD_REQUEST)
+
         context['document_title'] = str(_('Delivery Note'))
         context['translated_status'] = dict(get_sale_document_status()).get(context['current_document'].status)
         context['translated_type'] = str(_('Delivery Note'))
