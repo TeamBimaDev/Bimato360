@@ -5,6 +5,7 @@ from common.enums.partner_type import PartnerType
 from common.enums.partner_type import get_partner_type_choices
 from common.enums.transaction_enum import TransactionDirection
 from core.abstract.models import AbstractModel
+from core.address.models import return_parent_has_at_least_one_address
 from django.contrib.contenttypes.fields import GenericRelation
 from django.db import models
 from django.db.models import Q
@@ -132,6 +133,10 @@ class BimaErpPartner(AbstractModel):
         return (f"{self.first_name} {self.last_name}"
                 if self.partner_type == PartnerType.INDIVIDUAL.name
                 else self.company_name)
+
+    @property
+    def partner_has_at_least_one_address(self):
+        return return_parent_has_at_least_one_address(self)
 
     class Meta:
         ordering = ["-created"]

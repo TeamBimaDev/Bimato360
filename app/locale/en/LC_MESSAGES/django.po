@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-09-19 15:12+0100\n"
+"POT-Creation-Date: 2023-09-22 09:49+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -88,49 +88,65 @@ msgstr "Inactive"
 msgid "Blocked"
 msgstr "Blocked"
 
-#: .\common\enums\file_type.py:10
+#: .\common\enums\file_type.py:11
 msgid "PARTNER_PICTURE"
 msgstr "Partner picture"
 
-#: .\common\enums\file_type.py:11
+#: .\common\enums\file_type.py:12
 msgid "PARTNER_PRIVATE_DOCUMENT"
 msgstr "Partner private document"
 
-#: .\common\enums\file_type.py:12
+#: .\common\enums\file_type.py:13
 msgid "PARTNER_CIRET_DOCUMENT"
 msgstr "Partner Ciret document"
 
-#: .\common\enums\file_type.py:16
+#: .\common\enums\file_type.py:17
 msgid "Logo"
 msgstr "Logo"
 
-#: .\common\enums\file_type.py:17
+#: .\common\enums\file_type.py:18
 msgid "Documents"
 msgstr "Documents"
 
-#: .\common\enums\file_type.py:21
+#: .\common\enums\file_type.py:22
 msgid "EMPLOYEE_CV"
 msgstr "Employee CV"
 
-#: .\common\enums\file_type.py:22
+#: .\common\enums\file_type.py:23
 msgid "EMPLOYEE_RESUME"
 msgstr "Employee resume"
 
-#: .\common\enums\file_type.py:23
+#: .\common\enums\file_type.py:24
 msgid "EMPLOYEE_DRIVER_LICENCE"
 msgstr "Employee driver's license"
 
-#: .\common\enums\file_type.py:24
+#: .\common\enums\file_type.py:25
 msgid "EMPLOYEE_PICTURE"
 msgstr "Employee picture"
 
-#: .\common\enums\file_type.py:28
+#: .\common\enums\file_type.py:29
 msgid "USER_PROFILE_PICTURE"
 msgstr "User profile picture"
 
-#: .\common\enums\file_type.py:29
+#: .\common\enums\file_type.py:30
 msgid "USER_OTHER"
 msgstr "User other"
+
+#: .\common\enums\file_type.py:34
+#, fuzzy
+#| msgid "PARTNER_PRIVATE_DOCUMENT"
+msgid "SELLER_PURCHASE_QUOTE_DOCUMENT"
+msgstr "Purchase Quote"
+
+#: .\common\enums\file_type.py:35
+msgid "SELLER_PURCHASE_ORDER_DOCUMENT"
+msgstr "Purchase Order"
+
+#: .\common\enums\file_type.py:36
+#, fuzzy
+#| msgid "PARTNER_PRIVATE_DOCUMENT"
+msgid "SELLER_PURCHASE_INVOICE_DOCUMENT"
+msgstr "Purchase Invoice"
 
 #: .\common\enums\gender.py:6
 msgid "Male"
@@ -186,7 +202,7 @@ msgstr "Not for sale"
 
 #: .\common\enums\purchase_document_enum.py:7
 #: .\common\enums\sale_document_enum.py:8 .\erp\purchase_document\models.py:148
-#: .\erp\sale_document\models.py:368
+#: .\erp\sale_document\models.py:370
 msgid "Quote"
 msgstr "Quote"
 
@@ -197,18 +213,18 @@ msgstr "ORDER"
 
 #: .\common\enums\purchase_document_enum.py:9
 #: .\common\enums\sale_document_enum.py:10
-#: .\erp\purchase_document\models.py:150 .\erp\sale_document\models.py:370
+#: .\erp\purchase_document\models.py:150 .\erp\sale_document\models.py:372
 msgid "Invoice"
 msgstr "Invoice"
 
 #: .\common\enums\purchase_document_enum.py:10
-#: .\common\enums\sale_document_enum.py:11 .\erp\sale_document\models.py:371
+#: .\common\enums\sale_document_enum.py:11 .\erp\sale_document\models.py:373
 msgid "Credit note"
 msgstr "Credit note"
 
 #: .\common\enums\purchase_document_enum.py:11
-#: .\erp\purchase_document\models.py:151 .\erp\purchase_document\views.py:280
-#: .\erp\purchase_document\views.py:282
+#: .\erp\purchase_document\models.py:151 .\erp\purchase_document\views.py:284
+#: .\erp\purchase_document\views.py:286
 msgid "Request for Quotation"
 msgstr "Request for Quotation"
 
@@ -382,11 +398,11 @@ msgstr "Incorrect file type"
 msgid "Dossier template manquant"
 msgstr "Cannot find template"
 
-#: .\common\service\purchase_sale_service.py:31
+#: .\common\service\purchase_sale_service.py:32
 msgid "Please provide all needed data"
 msgstr "Please provide all needed data"
 
-#: .\common\utils\utils.py:20
+#: .\common\utils\utils.py:24
 msgid "An error occurred during PDF generation:<pre>"
 msgstr "An error occurred during PDF generation:<pre>"
 
@@ -402,53 +418,53 @@ msgid ""
 "join(valid_extensions)}"
 msgstr "File extension is not valid"
 
-#: .\company\models.py:23 .\erp\partner\models.py:76
+#: .\company\models.py:23 .\erp\partner\models.py:77
 #, fuzzy
 #| msgid "Company name"
 msgid "Company Date Creation"
 msgstr "Company name"
 
-#: .\company\models.py:24 .\erp\partner\models.py:79
+#: .\company\models.py:24 .\erp\partner\models.py:80
 #, fuzzy
 #| msgid "Company name"
 msgid "Company Siren"
 msgstr "Company name"
 
-#: .\company\models.py:25 .\erp\partner\models.py:82
+#: .\company\models.py:25 .\erp\partner\models.py:83
 #, fuzzy
 #| msgid "Company name"
 msgid "Company Siret"
 msgstr "Company name"
 
-#: .\company\models.py:26 .\erp\partner\models.py:85
+#: .\company\models.py:26 .\erp\partner\models.py:86
 #, fuzzy
 #| msgid "New User Registration"
 msgid "Company Date Registration"
 msgstr "New User Registration"
 
-#: .\company\models.py:27 .\erp\partner\models.py:87
+#: .\company\models.py:27 .\erp\partner\models.py:88
 #, fuzzy
 #| msgid "Serial Number"
 msgid "RCS Number"
 msgstr "Serial Number"
 
-#: .\company\models.py:28 .\erp\partner\models.py:89
+#: .\company\models.py:28 .\erp\partner\models.py:90
 msgid "Company Date Struck Off"
 msgstr "Company Date Struck Off"
 
-#: .\company\models.py:29 .\erp\partner\models.py:92
+#: .\company\models.py:29 .\erp\partner\models.py:93
 #, fuzzy
 #| msgid "Company name"
 msgid "Company APE Text"
 msgstr "Company name"
 
-#: .\company\models.py:30 .\erp\partner\models.py:95
+#: .\company\models.py:30 .\erp\partner\models.py:96
 #, fuzzy
 #| msgid "Company name"
 msgid "Company APE Code"
 msgstr "Company name"
 
-#: .\company\models.py:31 .\erp\partner\models.py:98
+#: .\company\models.py:31 .\erp\partner\models.py:99
 #, fuzzy
 #| msgid "Company name"
 msgid "Company Capital"
@@ -600,17 +616,17 @@ msgid "Integrity error occurred"
 msgstr "A server error occurred"
 
 #: .\core\country\views.py:175 .\core\currency\views.py:77
-#: .\erp\partner\views.py:387 .\erp\product\views.py:133
+#: .\erp\partner\views.py:387 .\erp\product\views.py:134
 msgid "Some rows could not be processed"
 msgstr "Some rows could not be processed"
 
 #: .\core\country\views.py:180 .\core\currency\views.py:82
-#: .\erp\partner\views.py:396 .\erp\product\views.py:138
+#: .\erp\partner\views.py:396 .\erp\product\views.py:139
 msgid "All rows processed successfully"
 msgstr "All rows processed successfully"
 
 #: .\core\country\views.py:184 .\core\currency\views.py:86
-#: .\erp\partner\views.py:403 .\erp\product\views.py:142
+#: .\erp\partner\views.py:403 .\erp\product\views.py:143
 msgid "an error occurred while treating the file"
 msgstr "An error occurred while treating the file"
 
@@ -644,28 +660,62 @@ msgstr "Invalid file content type."
 msgid "document not found"
 msgstr "Document not found"
 
-#: .\core\notification\views.py:90 .\core\notification\views.py:105
-#: .\treasury\transaction\views.py:241 .\treasury\transaction\views.py:252
-#: .\treasury\transaction\views.py:264 .\treasury\transaction\views.py:283
+#: .\core\notification\views.py:90 .\core\notification\views.py:122
+#: .\core\notification_template\views.py:60 .\treasury\transaction\views.py:244
+#: .\treasury\transaction\views.py:255 .\treasury\transaction\views.py:267
+#: .\treasury\transaction\views.py:286
 #, fuzzy
 #| msgid "Please provide all needed data"
 msgid "Please provide a valid UUID"
 msgstr "Please provide all needed data"
 
-#: .\core\notification\views.py:95 .\core\notification\views.py:110
+#: .\core\notification\views.py:95 .\core\notification\views.py:127
 #, fuzzy
 #| msgid "Unable to get the item"
 msgid "Unable to find item"
 msgstr "Unable to get the item"
 
-#: .\core\notification\views.py:99 .\core\notification\views.py:114
-#: .\core\notification\views.py:120
+#: .\core\notification\views.py:98 .\core\notification\views.py:130
+msgid "Only Confirmed Invoice are allowed"
+msgstr "Only Confirmed Invoice are allowed"
+
+#: .\core\notification\views.py:101
+msgid "The payment is not late for this invoice"
+msgstr "The payment is not late for this invoice"
+
+#: .\core\notification\views.py:105 .\core\notification\views.py:133
+msgid "The invoice is already paid"
+msgstr "The invoice is already paid"
+
+#: .\core\notification\views.py:108 .\core\notification\views.py:136
+#: .\core\notification_template\views.py:72
+#, fuzzy
+#| msgid "This document does not have a parent"
+msgid "Invoice does not have any payment terms"
+msgstr "This document does not have a parent"
+
+#: .\core\notification\views.py:113 .\core\notification\views.py:141
+#: .\core\notification\views.py:147
 msgid "NOTIFICATION_SALE_DOCUMENT_PAYMENT_LATE_SENT_SUCCESSFUL"
 msgstr "Email was successfully sent"
 
 #: .\core\notification_template\models.py:12
 msgid "A template with this notification type already exists."
 msgstr "A template with this notification type already exists!"
+
+#: .\core\notification_template\views.py:57
+#, fuzzy
+#| msgid "Please provide all needed data"
+msgid "Please provide a valid Code"
+msgstr "Please provide all needed data"
+
+#: .\core\notification_template\views.py:64
+msgid "Not template find with the giving code"
+msgstr "Not template find with the giving code"
+
+#: .\core\notification_template\views.py:69
+msgid "Not invoice found with the giving ID"
+msgstr "Not invoice found with the giving ID"
 
 #: .\core\tag\serializers.py:37
 msgid "This field should be a valid hex color."
@@ -683,105 +733,105 @@ msgstr "A department cannot have its parent as its child."
 msgid "A Category cannot have its descendant as its parent."
 msgstr "A department cannot have its parent as its child."
 
-#: .\erp\partner\models.py:17
+#: .\erp\partner\models.py:18
 msgid "Is Supplier"
 msgstr "Is Supplier"
 
-#: .\erp\partner\models.py:20
+#: .\erp\partner\models.py:21
 msgid "Is Customer"
 msgstr "Is Customer"
 
-#: .\erp\partner\models.py:27
+#: .\erp\partner\models.py:28
 msgid "Partner Type"
 msgstr "Partner Type"
 
-#: .\erp\partner\models.py:34
+#: .\erp\partner\models.py:35
 #, fuzzy
 #| msgid "Company name"
 msgid "Company Type"
 msgstr "Company name"
 
-#: .\erp\partner\models.py:37
+#: .\erp\partner\models.py:38
 #, fuzzy
 #| msgid "First & last name"
 msgid "First Name"
 msgstr "First & last name"
 
-#: .\erp\partner\models.py:40
+#: .\erp\partner\models.py:41
 #, fuzzy
 #| msgid "Name"
 msgid "Last Name"
 msgstr "Name"
 
-#: .\erp\partner\models.py:47
+#: .\erp\partner\models.py:48
 msgid "Gender"
 msgstr "Gender"
 
-#: .\erp\partner\models.py:50
+#: .\erp\partner\models.py:51
 #, fuzzy
 #| msgid "Serial Number"
 msgid "Social Security Number"
 msgstr "Serial Number"
 
-#: .\erp\partner\models.py:53
+#: .\erp\partner\models.py:54
 #, fuzzy
 #| msgid "Serial Number"
 msgid "ID Number"
 msgstr "Serial Number"
 
-#: .\erp\partner\models.py:55
+#: .\erp\partner\models.py:56
 #, fuzzy
 #| msgid "E-mail"
 msgid "Email"
 msgstr "E-mail"
 
-#: .\erp\partner\models.py:56
+#: .\erp\partner\models.py:57
 msgid "Phone"
 msgstr "Phone"
 
-#: .\erp\partner\models.py:57
+#: .\erp\partner\models.py:58
 msgid "Fax"
 msgstr "Fax"
 
-#: .\erp\partner\models.py:59
+#: .\erp\partner\models.py:60
 #, fuzzy
 #| msgid "Company name"
 msgid "Company Name"
 msgstr "Company name"
 
-#: .\erp\partner\models.py:62 .\templates\partner\pdf.html:39
+#: .\erp\partner\models.py:63 .\templates\partner\pdf.html:39
 msgid "Company Activity"
 msgstr "Company Activity"
 
-#: .\erp\partner\models.py:65
+#: .\erp\partner\models.py:66
 msgid "VAT ID Number"
 msgstr "VAT ID Number"
 
-#: .\erp\partner\models.py:72 .\erp\product\models.py:35
+#: .\erp\partner\models.py:73 .\erp\product\models.py:35
 #: .\erp\sale_document\models.py:117
 msgid "Status"
 msgstr "Status"
 
-#: .\erp\partner\models.py:74 .\erp\sale_document\models.py:142
+#: .\erp\partner\models.py:75 .\erp\sale_document\models.py:142
 msgid "Note"
 msgstr "Note"
 
-#: .\erp\partner\models.py:101
+#: .\erp\partner\models.py:102
 #, fuzzy
 #| msgid "Credit note"
 msgid "Credit"
 msgstr "Credit note"
 
-#: .\erp\partner\models.py:104 .\treasury\bank_account\models.py:16
+#: .\erp\partner\models.py:105 .\treasury\bank_account\models.py:16
 #: .\treasury\cash\models.py:11
 msgid "Balance"
 msgstr "Balance"
 
-#: .\erp\partner\models.py:149
+#: .\erp\partner\models.py:163
 msgid "N° siren & siret doit être unique"
 msgstr "Siren & Siret numbers must be unique"
 
-#: .\erp\partner\models.py:164
+#: .\erp\partner\models.py:178
 msgid "N° identité et N° sécurité sociale doit être unique"
 msgstr "Identity number and security number must be unique"
 
@@ -911,7 +961,7 @@ msgstr "Resource does not exist"
 msgid "Category, VAT or Unit of Measure does not exist"
 msgstr "Category, VAT or Unit of Measure does not exist"
 
-#: .\erp\product\views.py:84
+#: .\erp\product\views.py:85
 msgid "Item exists in a sale document"
 msgstr "Item exists in a sale document"
 
@@ -948,17 +998,17 @@ msgstr "Days in Late"
 msgid "Last Due Date"
 msgstr "Last Due Date"
 
-#: .\erp\purchase_document\models.py:144 .\erp\sale_document\models.py:364
+#: .\erp\purchase_document\models.py:144 .\erp\sale_document\models.py:366
 msgid "Cannot delete this invoice, you need to unpaid it first!"
 msgstr "Cannot delete this invoice, you need to unpaid it first!"
 
-#: .\erp\purchase_document\models.py:149 .\erp\sale_document\models.py:369
+#: .\erp\purchase_document\models.py:149 .\erp\sale_document\models.py:371
 msgid "Order"
 msgstr "Order"
 
 #: .\erp\purchase_document\serializers.py:159
-#: .\erp\sale_document\serializers.py:268
-#: .\erp\sale_document\serializers.py:277
+#: .\erp\sale_document\serializers.py:271
+#: .\erp\sale_document\serializers.py:280
 msgid "No product with this id exists."
 msgstr "No product with this id exists."
 
@@ -971,47 +1021,48 @@ msgstr "Error occurred while saving payment"
 msgid "Confirmed Item must contain at least one Product."
 msgstr "Confirmed Item must contain at least one Product."
 
-#: .\erp\purchase_document\views.py:64 .\erp\sale_document\views.py:67
+#: .\erp\purchase_document\views.py:68 .\erp\sale_document\views.py:72
 msgid "You do not have permission to change the status"
 msgstr "You do not have permission to change the status"
 
-#: .\erp\purchase_document\views.py:68 .\erp\sale_document\views.py:71
+#: .\erp\purchase_document\views.py:72 .\erp\sale_document\views.py:76
 msgid "You do not have permission to rollback the status"
 msgstr "You do not have permission to rollback the status"
 
-#: .\erp\purchase_document\views.py:78 .\erp\sale_document\views.py:81
+#: .\erp\purchase_document\views.py:82 .\erp\sale_document\views.py:86
 msgid "You do not have permission to set the status"
 msgstr "You do not have permission to set the status"
 
-#: .\erp\purchase_document\views.py:114 .\erp\purchase_document\views.py:138
+#: .\erp\purchase_document\views.py:118 .\erp\purchase_document\views.py:142
 msgid "Mismatched purchase_document_id"
 msgstr "Mismatched purchase_document_id"
 
-#: .\erp\purchase_document\views.py:123 .\erp\sale_document\views.py:133
+#: .\erp\purchase_document\views.py:127 .\erp\sale_document\views.py:138
 msgid "Cannot find the item to edit"
 msgstr "Cannot find the item to edit"
 
-#: .\erp\purchase_document\views.py:162 .\erp\sale_document\views.py:185
+#: .\erp\purchase_document\views.py:166 .\erp\sale_document\views.py:190
+#: .\erp\sale_document\views.py:203
 msgid "Item created"
 msgstr "Item created"
 
-#: .\erp\purchase_document\views.py:295 .\erp\sale_document\views.py:316
+#: .\erp\purchase_document\views.py:299 .\erp\sale_document\views.py:345
 msgid "Rapport"
 msgstr "Report"
 
-#: .\erp\purchase_document\views.py:336 .\erp\sale_document\views.py:391
+#: .\erp\purchase_document\views.py:340 .\erp\sale_document\views.py:420
 msgid "Payement effectué avec succes"
 msgstr "Payment created successfully"
 
-#: .\erp\purchase_document\views.py:353 .\erp\sale_document\views.py:418
+#: .\erp\purchase_document\views.py:396 .\erp\sale_document\views.py:447
 msgid "No valid parent documents found"
 msgstr "No valid parent documents found"
 
-#: .\erp\purchase_document\views.py:357 .\erp\sale_document\views.py:422
+#: .\erp\purchase_document\views.py:400 .\erp\sale_document\views.py:452
 msgid "All documents should belong to the same partner"
 msgstr "All documents should belong to the same partner"
 
-#: .\erp\purchase_document\views.py:361 .\erp\sale_document\views.py:426
+#: .\erp\purchase_document\views.py:404 .\erp\sale_document\views.py:456
 msgid "Please give the type of the document"
 msgstr "Please give the type of the document"
 
@@ -1170,45 +1221,49 @@ msgstr "Recurring Reactivated Date"
 msgid "Sale Document Products"
 msgstr "Products"
 
-#: .\erp\sale_document\models.py:398
+#: .\erp\sale_document\models.py:345
+msgid "Fichier"
+msgstr "File"
+
+#: .\erp\sale_document\models.py:408
 msgid "CHOISIR_RECURRENT_CUSTOM_TYPE_UNIT_OR_NUMBER"
 msgstr "Number"
 
-#: .\erp\sale_document\models.py:406
+#: .\erp\sale_document\models.py:416
 msgid "CHOISIR_RECURRENT_CYCLE_DATE_FIN"
 msgstr "Ends date"
 
-#: .\erp\sale_document\models.py:414
+#: .\erp\sale_document\models.py:424
 msgid "CHOISIR_RECURRENT_CYCLE_DATE_FIN_FUTURE"
 msgstr "Future ends date"
 
-#: .\erp\sale_document\models.py:422
+#: .\erp\sale_document\models.py:432
 msgid "CHOISIR_RECURRENT_CYCLE_NOMBRE_CYCLE"
 msgstr "After "
 
-#: .\erp\sale_document\models.py:448
+#: .\erp\sale_document\models.py:458
 msgid "All child must have the same partner as the parent."
 msgstr "All child must have the same partner as the parent!"
 
-#: .\erp\sale_document\models.py:451
+#: .\erp\sale_document\models.py:461
 msgid "All parent must have the same partner as the child."
 msgstr "All parent must have the same partner as the child!"
 
-#: .\erp\sale_document\serializers.py:272
+#: .\erp\sale_document\serializers.py:275
 msgid "Not enough stock available for this product."
 msgstr "Not enough stock available for this product."
 
-#: .\erp\sale_document\service.py:496
+#: .\erp\sale_document\service.py:540
 msgid "This document does not have a parent"
 msgstr "This document does not have a parent"
 
-#: .\erp\sale_document\service.py:501
+#: .\erp\sale_document\service.py:545
 #, fuzzy
 #| msgid "Item exists in a sale document"
 msgid "This product does not exist in the parent document"
 msgstr "Item exists in a sale document"
 
-#: .\erp\sale_document\service.py:504
+#: .\erp\sale_document\service.py:548
 msgid "Exceeding quantity from the parent document"
 msgstr "Exceeding quantity from the parent document"
 
@@ -1216,41 +1271,45 @@ msgstr "Exceeding quantity from the parent document"
 msgid "Cannot delete item because it contains products."
 msgstr "Cannot delete item because it contains products."
 
-#: .\erp\sale_document\views.py:125 .\erp\sale_document\views.py:155
+#: .\erp\sale_document\views.py:130 .\erp\sale_document\views.py:160
 msgid "Mismatched sale_document_id"
 msgstr "Mismatched sale_document_id"
 
-#: .\erp\sale_document\views.py:175
+#: .\erp\sale_document\views.py:180
 #, fuzzy
 #| msgid "No valid parent documents found"
 msgid "No confirmed parent document found"
 msgstr "No valid parent documents found"
 
-#: .\erp\sale_document\views.py:290 .\erp\sale_document\views.py:292
+#: .\erp\sale_document\views.py:307
+msgid "Impossible de generer une bon de livraison, aucune adresse trouvé"
+msgstr "You must add an address for the partner first"
+
+#: .\erp\sale_document\views.py:311 .\erp\sale_document\views.py:313
 msgid "Delivery Note"
 msgstr "Delivery Note"
 
-#: .\erp\sale_document\views.py:343
+#: .\erp\sale_document\views.py:372
 msgid "Recurring sale documents generation process has started."
 msgstr "Recurring sale documents generation process has started."
 
-#: .\erp\sale_document\views.py:370
+#: .\erp\sale_document\views.py:399
 #, fuzzy
 #| msgid "Impossible de générer le code à barre"
 msgid "Impossible de stopper la facture récurrente"
 msgstr "Cannot generate EAN13"
 
-#: .\erp\sale_document\views.py:373
+#: .\erp\sale_document\views.py:402
 msgid "Facture récurrente arrêter"
 msgstr "Recurrent invoice stopped"
 
-#: .\erp\sale_document\views.py:381
+#: .\erp\sale_document\views.py:410
 #, fuzzy
 #| msgid "Impossible de générer le code à barre"
 msgid "Impossible de reactiver la facture récurrente"
 msgstr "Cannot generate EAN13"
 
-#: .\erp\sale_document\views.py:384
+#: .\erp\sale_document\views.py:413
 msgid "Facture récurrente reactiver"
 msgstr "Recurrent invoice activated"
 
@@ -1408,6 +1467,63 @@ msgstr "Amount paid"
 #: .\templates\sale_document\sale_templates\sale_document_elegant.html:354
 msgid "PAYMENT_AMOUNT_REMAIN"
 msgstr "Remaining amount"
+
+#: .\templates\treasury\payment_receipt_template.html:52
+#, fuzzy
+#| msgid "Payment Terms"
+msgid "Payment Receipt"
+msgstr "Payment Receipt:"
+
+#: .\templates\treasury\payment_receipt_template.html:57
+#, fuzzy
+#| msgid "Serial Number"
+msgid "Receipt Number"
+msgstr "Receipt Number:"
+
+#: .\templates\treasury\payment_receipt_template.html:58
+#, fuzzy
+#| msgid "Transaction Type"
+msgid "Date of Transaction"
+msgstr "Date of Transaction:"
+
+#: .\templates\treasury\payment_receipt_template.html:59
+msgid "Date of Issue"
+msgstr "Date of Issue:"
+
+#: .\templates\treasury\payment_receipt_template.html:60
+#, fuzzy
+#| msgid "Partner Type"
+msgid "Partner Name"
+msgstr "Partner Name:"
+
+#: .\templates\treasury\payment_receipt_template.html:61
+#: .\treasury\transaction\models.py:87
+#, fuzzy
+#| msgid "Total Amount"
+msgid "Amount"
+msgstr "Total Amount:"
+
+#: .\templates\treasury\payment_receipt_template.html:62
+#: .\treasury\transaction\models.py:51 .\treasury\transaction\models.py:56
+msgid "Transaction Type"
+msgstr "Transaction Type:"
+
+#: .\templates\treasury\payment_receipt_template.html:63
+#, fuzzy
+#| msgid "Payment Terms"
+msgid "Payment Method"
+msgstr "Payment Method:"
+
+#: .\templates\treasury\payment_receipt_template.html:64
+#: .\treasury\bank_account\models.py:20 .\treasury\transaction\models.py:81
+#, fuzzy
+#| msgid "Note"
+msgid "Notes"
+msgstr "Note:"
+
+#: .\templates\treasury\payment_receipt_template.html:68
+msgid "Thank you for your payment."
+msgstr "Thank you for your payment."
 
 #: .\templates\user\activation_confirmation_email.html:5
 msgid "Account Created,"
@@ -1608,12 +1724,6 @@ msgstr "Currency"
 msgid "Account Holder Name"
 msgstr "Account Created"
 
-#: .\treasury\bank_account\models.py:20 .\treasury\transaction\models.py:81
-#, fuzzy
-#| msgid "Note"
-msgid "Notes"
-msgstr "Note"
-
 #: .\treasury\payment_method\models.py:10 .\treasury\payment_term\models.py:14
 #: .\treasury\transaction_type\models.py:12
 #, fuzzy
@@ -1672,10 +1782,6 @@ msgstr "Nature"
 msgid "Direction"
 msgstr "Description"
 
-#: .\treasury\transaction\models.py:51 .\treasury\transaction\models.py:56
-msgid "Transaction Type"
-msgstr "Transaction Type"
-
 #: .\treasury\transaction\models.py:72
 #, fuzzy
 #| msgid "Activate Account"
@@ -1685,12 +1791,6 @@ msgstr "Activate Account"
 #: .\treasury\transaction\models.py:84
 msgid "Expected Date"
 msgstr "Expected Date"
-
-#: .\treasury\transaction\models.py:87
-#, fuzzy
-#| msgid "Total Amount"
-msgid "Amount"
-msgstr "Total Amount"
 
 #: .\treasury\transaction\models.py:105
 msgid "Transaction Source"
@@ -1745,19 +1845,19 @@ msgstr ""
 "This transaction is created automatically form another one, it's not "
 "possible to edit it"
 
-#: .\treasury\transaction\service.py:282
+#: .\treasury\transaction\service.py:285
 #: .\treasury\transaction\service_payment_invoice.py:47
 msgid "Amount of the transaction should be equal to the amount of credit note!"
 msgstr ""
 "Amount of the transaction should be equal to the amount of credit note!"
 
-#: .\treasury\transaction\views.py:92
+#: .\treasury\transaction\views.py:95
 msgid ""
 "You cannot delete this transaction, you need to unlink invoice payment first"
 msgstr ""
 "You cannot delete this transaction, you need to unlink invoice payment first"
 
-#: .\treasury\transaction\views.py:303 .\treasury\transaction\views.py:324
+#: .\treasury\transaction\views.py:318 .\treasury\transaction\views.py:351
 #, fuzzy
 #| msgid "Please provide all needed data"
 msgid "Please provide a valid Direction"

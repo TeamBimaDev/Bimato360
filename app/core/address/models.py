@@ -1,9 +1,9 @@
-from django.db import models
 from core.abstract.models import AbstractModel
-from django.contrib.contenttypes.fields import GenericForeignKey
-from django.contrib.contenttypes.models import ContentType
 from core.country.models import BimaCoreCountry
 from core.state.models import BimaCoreState
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
+from django.db import models
 from django.forms import model_to_dict
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
@@ -82,3 +82,10 @@ def get_addresses_for_parent(parent):
         parent_type=ContentType.objects.get_for_model(parent),
         parent_id=parent.id
     )
+
+
+def return_parent_has_at_least_one_address(parent):
+    return BimaCoreAddress.objects.filter(
+        parent_type=ContentType.objects.get_for_model(parent),
+        parent_id=parent.id
+    ).exists()

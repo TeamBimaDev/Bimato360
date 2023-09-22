@@ -31,7 +31,7 @@ from .serializers import BimaErpSaleDocumentSerializer, BimaErpSaleDocumentProdu
 from .service import SaleDocumentService, generate_recurring_sale_documents, create_products_from_parents, \
     create_new_document, calculate_totals_for_selected_items, generate_xls_report, generate_csv_report, \
     stop_recurring_sale_document, reactivate_recurring_sale_document, CreditNoteValidator, \
-    save_last_generated_pdf_link_sale_document
+    save_last_generated_pdf_link_sale_document, duplicate_sale_document_service
 from .service_payment_invoice import handle_invoice_payment
 from .service_payment_notification import verify_sale_document_payment_status
 
@@ -189,6 +189,19 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
 
         return Response({"success": _("Item created")}, status=status.HTTP_201_CREATED)
 
+    @transaction.atomic
+    @action(detail=False, methods=['post'], url_path='duplicate_sale_document')
+    def duplicate_sale_document(self, request, *args, **kwargs):
+        document_type, parent_public_ids = self.get_request_data(request)
+        parents = self.get_parents(parent_public_ids)
+
+        self.validate_parents(parents, validate_unique_partner=False)
+        self.validate_document_type(document_type)
+
+        duplicate_sale_document_service(document_type, parents)
+
+        return Response({"success": _("Item created")}, status=status.HTTP_201_CREATED)
+
     @action(detail=True, methods=['get'], url_path='get_history_diff')
     def get_history_diff(self, request, pk=None):
         sale_document = self.get_object()
@@ -290,6 +303,9 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
 
     @action(detail=True, methods=['get'], url_path='generate_delivery_note')
     def generate_delivery_note(self, request, pk=None):
+        if not self.partner.partner_has_at_least_one_address:
+            return Response({"Adresse": _("Impossible de generer une bon de livraison, aucune adresse trouvé")},
+                            status=status.HTTP_400_BAD_REQUEST)
         pdf_filename = "document.pdf"
         context = self._get_context(pk)
         context['document_title'] = str(_('Delivery Note'))
@@ -426,13 +442,14 @@ class BimaErpSaleDocumentViewSet(AbstractViewSet):
     def get_parents(self, parent_public_ids):
         return BimaErpSaleDocument.objects.filter(public_id__in=parent_public_ids)
 
-    def validate_parents(self, parents):
+    def validate_parents(self, parents, validate_unique_partner=True):
         if not parents.exists():
             raise ValidationError({'error': _('No valid parent documents found')})
-        unique_partners = parents.values_list('partner__id', flat=True).distinct()
-        unique_ids = list(set(unique_partners))
-        if len(unique_ids) > 1:
-            raise ValidationError({'error': _('All documents should belong to the same partner')})
+        if validate_unique_partner:
+            unique_partners = parents.values_list('partner__id', flat=True).distinct()
+            unique_ids = list(set(unique_partners))
+            if len(unique_ids) > 1:
+                raise ValidationError({'error': _('All documents should belong to the same partner')})
 
     def validate_document_type(self, document_type):
         if not document_type:

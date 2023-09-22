@@ -5,6 +5,7 @@ from typing import Union
 from common.converters.default_converters import str_to_bool
 from common.enums.transaction_enum import TransactionTypeIncomeOutcome
 from common.permissions.action_base_permission import ActionBasedPermission
+from common.utils.utils import render_to_pdf
 from core.abstract.views import AbstractViewSet
 from core.entity_tag.models import (
     get_entity_tags_for_parent_entity,
@@ -297,6 +298,15 @@ class BimaTreasuryTransactionViewSet(AbstractViewSet):
         serializer = BimaTreasuryTransactionSerializer(transactions, many=True)
         return Response(serializer.data)
 
+    @action(detail=True, methods=['get'], url_path='generate_payment_receipt_pdf')
+    def generate_payment_receipt_pdf(self, request, pk=None):
+        pdf_filename = "payment_receipt.pdf"
+        context = self._get_payment_receipt_context(pk)
+        context['request'] = request
+        template_name = f'treasury/payment_receipt_template.html'
+        response = render_to_pdf(template_name, context, pdf_filename)
+        return response
+
     @action(detail=False, methods=['GET'], url_path='get_top_n_transaction_by_type_direction')
     def get_top_n_transaction_by_type_direction(self, request):
         number_of_type_transaction = int(request.query_params.get('n', 3))
@@ -372,6 +382,19 @@ class BimaTreasuryTransactionViewSet(AbstractViewSet):
         duration_years = int(request.GET.get('duration', 1))
         result = BimaTreasuryTransactionService.cash_bank_flow_kpi(duration_years, cash_ids, bank_ids)
         return Response(result)
+
+    def _get_payment_receipt_context(self, pk=None):
+        current_transaction = self.get_object()
+        partner = current_transaction.partner
+        today_date = timezone.now().date()
+
+        context = {
+            'current_transaction': current_transaction,
+            'partner': partner,
+            'today_date': today_date,
+        }
+
+        return context
 
 
 def validate_year_param(year: str) -> Union[int, None]:
