@@ -284,6 +284,8 @@ def duplicate_sale_document_service(parents):
         del parent_values['number']
         del parent_values['date']
         del parent_values['status']
+        del parent_values['amount_paid']
+        del parent_values['payment_status']
 
         parent_values['number'] = SalePurchaseService.generate_unique_number('sale', sale_doc.type.lower())
         parent_values['date'] = timezone.now().date()
@@ -292,6 +294,8 @@ def duplicate_sale_document_service(parents):
         parent_values['is_payment_late'] = False
         parent_values['days_in_late'] = 0
         parent_values['last_due_date'] = None
+        parent_values['amount_paid'] = 0
+        parent_values['payment_status'] = SaleDocumentPaymentStatus.NOT_PAID.name
 
         new_document = BimaErpSaleDocument.objects.create(**parent_values)
         create_products_from_parents([sale_doc], new_document)
