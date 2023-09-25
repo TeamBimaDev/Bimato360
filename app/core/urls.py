@@ -13,7 +13,6 @@ urlpatterns = [
     path('address/', include('core.address.urls')),
     path('document/', include('core.document.urls')),
     path('department/', include('core.department.urls')),
-    path('post/', include('core.post.urls')),
     path('tag/', include('core.tag.urls')),
     path('entity_tag/', include('core.entity_tag.urls')),
     path('source/', include('core.source.urls')),

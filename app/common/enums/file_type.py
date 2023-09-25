@@ -18,11 +18,12 @@ class FileTypeCompany(FileType):
     COMPANY_DOCUMENT = _('Documents')
 
 
-class FileTypeBank(FileType):
+class FileTypeEmployee(FileType):
     EMPLOYEE_CV = _('EMPLOYEE_CV')
     EMPLOYEE_RESUME = _('EMPLOYEE_RESUME')
     EMPLOYEE_DRIVER_LICENCE = _('EMPLOYEE_DRIVER_LICENCE')
     EMPLOYEE_PICTURE = _('EMPLOYEE_PICTURE')
+    EMPLOYEE_CONTRACT = _('EMPLOYEE_CONTRACT')
 
 
 class FileTypeUser(FileType):
@@ -57,3 +58,7 @@ def return_list_file_type_user():
 
 def return_list_file_purchase_document():
     return [(file_type.name, file_type.value) for file_type in FilePurchaseDocument]
+
+
+def return_list_file_employee():
+    return [(emp.name, emp.value) for emp in FileTypeEmployee]

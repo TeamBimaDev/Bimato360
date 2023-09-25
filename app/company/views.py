@@ -45,6 +45,7 @@ class BimaCompanyViewSet(AbstractViewSet):
         'partial_update': ['company.can_update'],
         'destroy': ['company.can_delete'],
         'documents': ['company.can_add_document'],
+        'bank_account': ['company.can_add_bank_account'],
     }
 
     def list_documents(self, request, *args, **kwargs):

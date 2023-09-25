@@ -1,7 +1,5 @@
 from common.permissions.action_base_permission import ActionBasedPermission
 from core.abstract.views import AbstractViewSet
-from core.post.models import BimaCorePost
-from core.post.serializers import BimaCorePostSerializer
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
@@ -29,12 +27,6 @@ class BimaCoreDepartmentViewSet(AbstractViewSet):
     def get_object(self):
         """ Override get_object to retrieve object by public_id """
         return BimaCoreDepartment.objects.get_object_by_public_id(self.kwargs['pk'])
-
-    def get_posts_by_department(self, request, public_id=None):
-        department = BimaCoreDepartment.objects.get_object_by_public_id(self.kwargs['public_id'])
-        posts = BimaCorePost.objects.filter(department=department)
-        serializer = BimaCorePostSerializer(posts, many=True)
-        return Response(serializer.data)
 
     @action(detail=True, methods=['GET'], url_path='all_parents')
     def all_parents(self, request, pk=None):

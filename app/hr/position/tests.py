@@ -1,15 +1,16 @@
-from django.urls import reverse
-from rest_framework.test import APITestCase, APIClient
-from rest_framework import status
-from .factories import BimaCorePostFactory
-from .models import BimaCorePost
+from core.department.factories import BimaCoreDepartmentFactory
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
+from django.urls import reverse
+from rest_framework import status
+from rest_framework.test import APITestCase, APIClient
 from user.factories import UserFactory
-from core.department.factories import BimaCoreDepartmentFactory
+
+from .factories import BimaHrPositionFactory
+from .models import BimaHrPosition
 
 
-class BimaCorePostTest(APITestCase):
+class BimaHrPositionTest(APITestCase):
 
     def setUp(self):
         self.create_permissions()
@@ -40,10 +41,10 @@ class BimaCorePostTest(APITestCase):
         url = reverse('core:bimacorepost-list')
         response = self.client.post(url, self.post_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(BimaCorePost.objects.count(), 1)
+        self.assertEqual(BimaHrPosition.objects.count(), 1)
 
     def test_get_posts(self):
-        BimaCorePostFactory.create_batch(5)
+        BimaHrPositionFactory.create_batch(5)
         url = reverse('core:bimacorepost-list')
         response = self.client.get(url, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -51,18 +52,19 @@ class BimaCorePostTest(APITestCase):
         self.assertEqual(len(response.data['results']), 5)
 
     def test_update_post(self):
-        post = BimaCorePostFactory()
+        post = BimaHrPositionFactory()
         url = reverse('core:bimacorepost-detail', kwargs={'pk': str(post.public_id)})
         data = {'name': 'Updated Name'}
         response = self.client.patch(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(BimaCorePost.objects.get(pk=post.pk).name, 'Updated Name')
+        self.assertEqual(BimaHrPosition.objects.get(pk=post.pk).name, 'Updated Name')
 
     def test_delete_post(self):
-        post = BimaCorePostFactory()
+        post = BimaHrPositionFactory()
         url = reverse('core:bimacorepost-detail', kwargs={'pk': str(post.public_id)})
         response = self.client.delete(url, format='json')
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
     def test_unauthenticated(self):
         self.client.logout()
         url = reverse('core:bimacorepost-list')
@@ -80,7 +82,7 @@ class BimaCorePostTest(APITestCase):
         self.client.logout()
         user_without_permission = UserFactory()
         self.client.force_authenticate(user_without_permission)
-        post = BimaCorePostFactory()
+        post = BimaHrPositionFactory()
         url = reverse('core:bimacorepost-detail', kwargs={'pk': str(post.public_id)})
         data = {'name': 'Updated Name'}
         response = self.client.patch(url, data, format='json')
@@ -90,7 +92,7 @@ class BimaCorePostTest(APITestCase):
         self.client.logout()
         user_without_permission = UserFactory()
         self.client.force_authenticate(user_without_permission)
-        post = BimaCorePostFactory()
+        post = BimaHrPositionFactory()
         url = reverse('core:bimacorepost-detail', kwargs={'pk': str(post.public_id)})
         response = self.client.delete(url, format='json')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
@@ -98,14 +100,14 @@ class BimaCorePostTest(APITestCase):
     def create_permissions(self):
         permission_list = [
             # Add your permission tuples here.
-            ('core.post.can_create', 'Can create post'),
-            ('core.post.can_update', 'Can update post'),
-            ('core.post.can_delete', 'Can delete post'),
-            ('core.post.can_read', 'Can read post'),
+            ('hr.position.can_create', 'Can create position'),
+            ('hr.position.can_update', 'Can update position'),
+            ('hr.position.can_delete', 'Can delete position'),
+            ('hr.position.can_read', 'Can read position'),
         ]
 
         for permission_code, permission_name in permission_list:
-            content_type = ContentType.objects.get_for_model(BimaCorePost)
+            content_type = ContentType.objects.get_for_model(BimaHrPosition)
             Permission.objects.get_or_create(
                 codename=permission_code,
                 name=permission_name,

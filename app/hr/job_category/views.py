@@ -10,16 +10,16 @@ from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from .models import BimaHrSkillCategory
-from .serializers import BimaHrSkillCategorySerializer
+from .models import BimaHrJobCategory
+from .serializers import BimaHrJobCategorySerializer
 
 
-class BimaHrSkillCategoryFilter(django_filters.FilterSet):
+class BimaHrJobCategoryFilter(django_filters.FilterSet):
     search = django_filters.CharFilter(method='filter_search')
     active = django_filters.CharFilter(method='filter_active')
 
     class Meta:
-        model = BimaHrSkillCategory
+        model = BimaHrJobCategory
         fields = ['active', 'search']
 
     def filter_search(self, queryset, name, value):
@@ -35,33 +35,33 @@ class BimaHrSkillCategoryFilter(django_filters.FilterSet):
             return queryset.filter(active=str_to_bool(value))
 
 
-class BimaHrSkillCategoryViewSet(AbstractViewSet):
-    queryset = BimaHrSkillCategory.objects.all()
-    serializer_class = BimaHrSkillCategorySerializer
-    filterset_class = BimaHrSkillCategoryFilter
+class BimaHrJobCategoryViewSet(AbstractViewSet):
+    queryset = BimaHrJobCategory.objects.all()
+    serializer_class = BimaHrJobCategorySerializer
+    filterset_class = BimaHrJobCategoryFilter
     permission_classes = []
     permission_classes = (ActionBasedPermission,)
     action_permissions = {
-        'list': ['skill_category.can_read'],
-        'create': ['skill_category.can_create'],
-        'retrieve': ['skill_category.can_read'],
-        'update': ['skill_category.can_update'],
-        'partial_update': ['skill_category.can_update'],
-        'destroy': ['skill_category.can_delete'],
+        'list': ['job_category.can_read'],
+        'create': ['job_category.can_create'],
+        'retrieve': ['job_category.can_read'],
+        'update': ['job_category.can_update'],
+        'partial_update': ['job_category.can_update'],
+        'destroy': ['job_category.can_delete'],
     }
 
     def get_object(self):
-        obj = BimaHrSkillCategory.objects.get_object_by_public_id(self.kwargs['pk'])
+        obj = BimaHrJobCategory.objects.get_object_by_public_id(self.kwargs['pk'])
         return obj
 
     def list_tags(self, request, *args, **kwargs):
-        category = BimaHrSkillCategory.objects.get_object_by_public_id(self.kwargs['public_id'])
+        category = BimaHrJobCategory.objects.get_object_by_public_id(self.kwargs['public_id'])
         entity_tags = get_entity_tags_for_parent_entity(category).order_by('order')
         serialized_entity_tags = BimaCoreEntityTagSerializer(entity_tags, many=True)
         return Response(serialized_entity_tags.data)
 
     def create_tag(self, request, *args, **kwargs):
-        category = BimaHrSkillCategory.objects.get_object_by_public_id(self.kwargs['public_id'])
+        category = BimaHrJobCategory.objects.get_object_by_public_id(self.kwargs['public_id'])
         result = create_single_entity_tag(request.data, category)
         if isinstance(result, BimaCoreEntityTag):
             serializer = BimaCoreEntityTagSerializer(result)
@@ -74,7 +74,7 @@ class BimaHrSkillCategoryViewSet(AbstractViewSet):
             return Response(result, status=result.get("status", status.HTTP_500_INTERNAL_SERVER_ERROR))
 
     def get_tag(self, request, *args, **kwargs):
-        category = BimaHrSkillCategory.objects.get_object_by_public_id(self.kwargs['public_id'])
+        category = BimaHrJobCategory.objects.get_object_by_public_id(self.kwargs['public_id'])
         entity_tags = get_object_or_404(BimaCoreEntityTag,
                                         public_id=self.kwargs['entity_tag_public_id'],
                                         parent_id=category.id)
@@ -87,7 +87,7 @@ class BimaHrSkillCategoryViewSet(AbstractViewSet):
         parents = []
         parent = category.category
         while parent is not None:
-            parents.append(BimaHrSkillCategorySerializer(parent).data)
+            parents.append(BimaHrJobCategorySerializer(parent).data)
             parent = parent.category
         return Response(parents)
 
@@ -99,7 +99,7 @@ class BimaHrSkillCategoryViewSet(AbstractViewSet):
         def get_children(category):
             if category.category_children.exists():
                 for child in category.category_children.all():
-                    children.append(BimaHrSkillCategorySerializer(child).data)
+                    children.append(BimaHrJobCategorySerializer(child).data)
                     get_children(child)
 
         get_children(category)
@@ -109,7 +109,7 @@ class BimaHrSkillCategoryViewSet(AbstractViewSet):
     def direct_children(self, request, pk=None):
         category = self.get_object()
         direct_children = category.category_children.all()
-        serializer = BimaHrSkillCategorySerializer(direct_children, many=True)
+        serializer = BimaHrJobCategorySerializer(direct_children, many=True)
         return Response(serializer.data)
 
     @action(detail=True, methods=['GET'], url_path='all_parents_nested')

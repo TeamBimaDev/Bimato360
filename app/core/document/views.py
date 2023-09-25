@@ -1,5 +1,5 @@
 from common.enums.file_type import return_list_file_type_partner, return_list_file_purchase_document
-from common.enums.file_type import return_list_file_type_user, return_list_file_type_company
+from common.enums.file_type import return_list_file_type_user, return_list_file_type_company, return_list_file_employee
 from core.abstract.views import AbstractViewSet
 from core.document.models import BimaCoreDocument
 from core.document.serializers import BimaCoreDocumentGetSerializer
@@ -55,3 +55,7 @@ class BimaCoreDocumentViewSet(AbstractViewSet):
     @action(detail=False, methods=['GET'], url_path='list_file_type_purchase_document')
     def list_file_type_purchase_document(self, request, *args, **kwargs):
         return Response(return_list_file_purchase_document())
+
+    @action(detail=False, methods=['GET'], url_path='list_file_type_employee')
+    def list_file_type_employee(self, request, *args, **kwargs):
+        return Response(return_list_file_employee())

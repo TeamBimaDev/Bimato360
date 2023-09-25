@@ -1,15 +1,15 @@
 import factory
-from .models import BimaCorePost
 from core.department.factories import BimaCoreDepartmentFactory
 
+from .models import BimaHrPosition
 
-class BimaCorePostFactory(factory.django.DjangoModelFactory):
+
+class BimaHrPositionFactory(factory.django.DjangoModelFactory):
     class Meta:
-        model = BimaCorePost
+        model = BimaHrPosition
 
     name = factory.Faker('name')
     description = factory.Faker('text')
     requirements = factory.Faker('text')
     responsibilities = factory.Faker('text')
     department = factory.SubFactory(BimaCoreDepartmentFactory)
-

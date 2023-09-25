@@ -1,13 +1,13 @@
 from core.abstract.serializers import AbstractSerializer
 from django.utils.translation import gettext_lazy as _
-from hr.skill_category.models import BimaHrSkillCategory
+from hr.job_category.models import BimaHrJobCategory
 from rest_framework import serializers
 
 
-class BimaHrSkillCategorySerializer(AbstractSerializer):
+class BimaHrJobCategorySerializer(AbstractSerializer):
     category = serializers.SerializerMethodField(read_only=True)
     category_public_id = serializers.SlugRelatedField(
-        queryset=BimaHrSkillCategory.objects.all(),
+        queryset=BimaHrJobCategory.objects.all(),
         slug_field='public_id',
         source='category',
         write_only=True,
@@ -27,7 +27,7 @@ class BimaHrSkillCategorySerializer(AbstractSerializer):
         return None
 
     class Meta:
-        model = BimaHrSkillCategory
+        model = BimaHrJobCategory
         fields = ['id', 'name', 'description', 'active', 'public_id', 'category', 'category_public_id',
                   'direct_children_count']
 

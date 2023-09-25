@@ -1,9 +1,10 @@
 from django.contrib import admin
-from .models import BimaCorePost
+
+from .models import BimaHrPosition
 
 
-class BimaCorePostAdmin(admin.ModelAdmin):
+class BimaHrPostAdmin(admin.ModelAdmin):
     list_display = ['name', 'description', 'requirements', 'responsibilities', 'department_id']
 
 
-admin.site.register(BimaCorePost, BimaCorePostAdmin)
+admin.site.register(BimaHrPosition, BimaHrPostAdmin)
