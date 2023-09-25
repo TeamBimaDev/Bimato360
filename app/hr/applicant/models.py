@@ -10,7 +10,7 @@ class BimaHrApplicant(AbstractModel):
     description = models.TextField(max_length=256)
     refuse = models.CharField(max_length=28, blank=False)
     comments = models.TextField(max_length=256)
-    applicant_posts = models.ManyToManyField('hr.BimaHrPosition', through='hr.BimaHrApplicantPost')
+    applicant_posts = models.ManyToManyField('BimaHrPosition', through='BimaHrApplicantPost')
 
     def __str__(self):
         return self.full_name
@@ -27,7 +27,7 @@ class BimaHrApplicantPost(AbstractModel):
     proposed_salary = models.FloatField(blank=True, null=True, default=None)
     accepted_salary = models.FloatField(blank=True, null=True, default=None)
     date = models.DateTimeField(auto_now_add=True)
-    refuse = models.CharField(max_length=28, blank=False)
+    refuse = models.ForeignKey('BimaHrApplicantRefusal', on_delete=models.SET_NULL, null=True, blank=True)
     comments = models.TextField(max_length=256)
     id_source_type = models.ForeignKey(BimaCoreSource, on_delete=models.CASCADE)
     source_name = models.TextField(max_length=256)

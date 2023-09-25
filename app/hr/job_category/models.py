@@ -14,5 +14,4 @@ class BimaHrJobCategory(AbstractModel):
 
     class Meta:
         ordering = ['name']
-        verbose_name_plural = 'categories'
         permissions = []

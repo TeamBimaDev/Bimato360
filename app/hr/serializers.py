@@ -35,7 +35,7 @@ class BimaHrPersonExperienceSerializer(AbstractSerializer):
         if self.person:
             return {
                 'id': obj.person.public_id.hex,
-                'name': obj.person.get_full_name,
+                'name': obj.person.full_name,
             }
         return None
 
@@ -68,7 +68,7 @@ class BimaHrPersonSkillSerializer(AbstractSerializer):
         if self.person:
             return {
                 'id': obj.person.public_id.hex,
-                'name': obj.person.get_full_name,
+                'name': obj.person.full_name,
             }
         return None
 
