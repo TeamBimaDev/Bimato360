@@ -1,3 +1,4 @@
+from common.enums.employee_enum import get_marital_status_choices
 from common.enums.gender import get_gender_choices
 from core.abstract.models import AbstractModel
 from core.country.models import BimaCoreCountry
@@ -7,6 +8,8 @@ from django.db import models
 class BimaHrPerson(AbstractModel):
     unique_id = models.CharField(max_length=32, unique=True, null=True, blank=True)
     gender = models.CharField(max_length=16, choices=get_gender_choices())
+    marital_status = models.CharField(max_length=20, choices=get_marital_status_choices(), null=True, blank=True)
+    num_children = models.IntegerField(default=0, null=True, blank=True)
     first_name = models.CharField(max_length=64)
     last_name = models.CharField(max_length=64)
     date_of_birth = models.DateField(null=True, blank=True)

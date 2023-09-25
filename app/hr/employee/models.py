@@ -1,4 +1,4 @@
-from common.enums.employee_enum import get_marital_status_choices, get_employment_type_choices, \
+from common.enums.employee_enum import get_employment_type_choices, \
     get_work_mode_choices, get_job_type_choices, get_employee_status_choices
 from django.db import models
 from hr.models import BimaHrPerson
@@ -7,8 +7,6 @@ from hr.position.models import BimaHrPosition
 
 
 class BimaHrEmployee(BimaHrPerson):
-    marital_status = models.CharField(max_length=20, choices=get_marital_status_choices(), null=True, blank=True)
-    num_children = models.IntegerField(default=0, null=True, blank=True)
     employment_type = models.CharField(max_length=20, choices=get_employment_type_choices())
     work_mode = models.CharField(max_length=20, choices=get_work_mode_choices())
     job_type = models.CharField(max_length=20, choices=get_job_type_choices())
