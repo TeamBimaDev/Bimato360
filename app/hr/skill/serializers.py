@@ -10,7 +10,7 @@ class BimaHrSkillSerializer(AbstractSerializer):
     skill_category_public_id = serializers.SlugRelatedField(
         queryset=BimaHrSkillCategory.objects.all(),
         slug_field='public_id',
-        source='country',
+        source='skill_category',
         write_only=True
     )
 

@@ -531,146 +531,54 @@ class PermissionsList:
         "TREASURY_TRANSACTION_TYPE",
     )
 
-    HR_EMPLOYEE_CREATE = (
-        "hr.employee.can_create",
-        "Can create employee",
-        "HR_EMPLOYEE",
-    )
-    HR_EMPLOYEE_UPDATE = (
-        "hr.employee.can_update",
-        "Can update employee",
-        "HR_EMPLOYEE",
-    )
-    HR_EMPLOYEE_DELETE = (
-        "hr.employee.can_delete",
-        "Can delete employee",
-        "HR_EMPLOYEE",
-    )
-    HR_EMPLOYEE_READ = (
-        "hr.employee.can_read",
-        "Can read employee",
-        "HR_EMPLOYEE",
-    )
-    HR_EMPLOYEE_ADD_DOCUMENT = (
-        "hr.employee.can_add_document",
-        "Can add document to employee",
-        "HR_EMPLOYEE",
-    )
-    HR_EMPLOYEE_ADD_ADDRESS = (
-        "hr.employee.can_add_address",
-        "Can add address to employee",
-        "HR_EMPLOYEE",
-    )
-    HR_EMPLOYEE_ADD_CONTACT = (
-        "hr.employee.can_add_address",
-        "Can add address to employee",
-        "HR_EMPLOYEE",
-    )
+    HR_EMPLOYEE_CREATE = ("hr.employee.can_create", "Can create employee", "HR_EMPLOYEE",)
+    HR_EMPLOYEE_UPDATE = ("hr.employee.can_update", "Can update employee", "HR_EMPLOYEE",)
+    HR_EMPLOYEE_DELETE = ("hr.employee.can_delete", "Can delete employee", "HR_EMPLOYEE",)
+    HR_EMPLOYEE_READ = ("hr.employee.can_read", "Can read employee", "HR_EMPLOYEE",)
+    HR_EMPLOYEE_ADD_DOCUMENT = ("hr.employee.can_add_document", "Can add document to employee", "HR_EMPLOYEE",)
+    HR_EMPLOYEE_ADD_ADDRESS = ("hr.employee.can_add_address", "Can add address to employee", "HR_EMPLOYEE",)
+    HR_EMPLOYEE_ADD_CONTACT = ("hr.employee.can_add_address", "Can add address to employee", "HR_EMPLOYEE",)
     HR_EMPLOYEE_ADD_BANK_ACCOUNT = (
-        "hr.employee.can_add_bank_account",
-        "Can add bank account to employee",
-        "HR_EMPLOYEE",
-    )
+        "hr.employee.can_add_bank_account", "Can add bank account to employee", "HR_EMPLOYEE",)
+    HR_EMPLOYEE_MANAGE_SKILL = ("hr.employee.can_manage_skill", "Can manage employee skills", "HR_EMPLOYEE",)
 
-    HR_EMPLOYEE_MANAGE_SKILL = (
-        "hr.employee.can_add_manage_skill",
-        "Can add manage employee skills",
-        "HR_EMPLOYEE",
-    )
-
-    HR_APPLICANT_CREATE = (
-        "hr.applicant.can_create",
-        "Can create applicant",
-        "HR_EMPLOYEE",
-    )
-    HR_APPLICANT_UPDATE = (
-        "hr.applicant.can_update",
-        "Can update applicant",
-        "HR_EMPLOYEE",
-    )
-    HR_APPLICANT_DELETE = (
-        "hr.applicant.can_delete",
-        "Can delete applicant",
-        "HR_EMPLOYEE",
-    )
-    HR_APPLICANT_READ = (
-        "hr.applicant.can_read",
-        "Can read applicant",
-        "HR_EMPLOYEE",
-    )
-    HR_APPLICANT_ADD_DOCUMENT = (
-        "hr.applicant.can_add_document",
-        "Can add document to applicant",
-        "HR_EMPLOYEE",
-    )
-    HR_APPLICANT_ADD_ADDRESS = (
-        "hr.applicant.can_add_address",
-        "Can add address to applicant",
-        "HR_EMPLOYEE",
-    )
-    HR_APPLICANT_ADD_CONTACT = (
-        "hr.applicant.can_add_address",
-        "Can add address to applicant",
-        "HR_EMPLOYEE",
-    )
+    HR_APPLICANT_CREATE = ("hr.applicant.can_create", "Can create applicant", "HR_EMPLOYEE",)
+    HR_APPLICANT_UPDATE = ("hr.applicant.can_update", "Can update applicant", "HR_EMPLOYEE",)
+    HR_APPLICANT_DELETE = ("hr.applicant.can_delete", "Can delete applicant", "HR_EMPLOYEE",)
+    HR_APPLICANT_READ = ("hr.applicant.can_read", "Can read applicant", "HR_EMPLOYEE",)
+    HR_APPLICANT_ADD_DOCUMENT = ("hr.applicant.can_add_document", "Can add document to applicant", "HR_EMPLOYEE",)
+    HR_APPLICANT_ADD_ADDRESS = ("hr.applicant.can_add_address", "Can add address to applicant", "HR_EMPLOYEE",)
+    HR_APPLICANT_ADD_CONTACT = ("hr.applicant.can_add_address", "Can add address to applicant", "HR_EMPLOYEE",)
     HR_APPLICANT_ADD_BANK_ACCOUNT = (
-        "hr.applicant.can_add_bank_account",
-        "Can add bank account to applicant",
-        "HR_EMPLOYEE",
-    )
+        "hr.applicant.can_add_bank_account", "Can add bank account to applicant", "HR_EMPLOYEE",)
+    HR_APPLICANT_MANAGE_SKILL = ("hr.applicant.can_manage_skill", "Can manage applicant skills", "HR_APPLICANT",)
 
-    HR_SKILL_CATEGORY_CREATE = (
-        "hr.skill_category.can_create",
-        "Can create skill category",
-        "HR_SKILL_CATEGORY",
-    )
-    HR_SKILL_CATEGORY_UPDATE = (
-        "hr.skill_category.can_update",
-        "Can update skill category",
-        "HR_SKILL_CATEGORY",
-    )
-    HR_SKILL_CATEGORY_DELETE = (
-        "hr.skill_category.can_delete",
-        "Can delete skill category",
-        "HR_SKILL_CATEGORY",
-    )
+    HR_SKILL_CATEGORY_CREATE = ("hr.skill_category.can_create", "Can create skill category", "HR_SKILL_CATEGORY",)
+    HR_SKILL_CATEGORY_UPDATE = ("hr.skill_category.can_update", "Can update skill category", "HR_SKILL_CATEGORY",)
+    HR_SKILL_CATEGORY_DELETE = ("hr.skill_category.can_delete", "Can delete skill category", "HR_SKILL_CATEGORY",)
     HR_SKILL_CATEGORY_READ = ("hr.skill_category.can_read", "Can read skill category", "HR_SKILL_CATEGORY")
 
-    HR_SKILL_CREATE = (
-        "hr.skill.can_create",
-        "Can create skill",
-        "HR_SKILL",
-    )
-    HR_SKILL_UPDATE = (
-        "hr.skill.can_update",
-        "Can update skill",
-        "HR_SKILL",
-    )
-    HR_SKILL_DELETE = (
-        "hr.skill.can_delete",
-        "Can delete skill",
-        "HR_SKILL",
-    )
+    HR_SKILL_CREATE = ("hr.skill.can_create", "Can create skill", "HR_SKILL",)
+    HR_SKILL_UPDATE = ("hr.skill.can_update", "Can update skill", "HR_SKILL",)
+    HR_SKILL_DELETE = ("hr.skill.can_delete", "Can delete skill", "HR_SKILL",)
     HR_SKILL_READ = ("hr.skill.can_read", "Can read skill", "HR_SKILL")
 
-    HR_JOB_CATEGORY_CREATE = (
-        "hr.job_category.can_create",
-        "Can create job category",
-        "HR_JOB_CATEGORY",
-    )
-    HR_JOB_CATEGORY_UPDATE = (
-        "hr.job_category.can_update",
-        "Can update job category",
-        "HR_JOB_CATEGORY",
-    )
-    HR_JOB_CATEGORY_DELETE = (
-        "hr.job_category.can_delete",
-        "Can delete job category",
-        "HR_JOB_CATEGORY",
-    )
+    HR_JOB_CATEGORY_CREATE = ("hr.job_category.can_create", "Can create job category", "HR_JOB_CATEGORY",)
+    HR_JOB_CATEGORY_UPDATE = ("hr.job_category.can_update", "Can update job category", "HR_JOB_CATEGORY",)
+    HR_JOB_CATEGORY_DELETE = ("hr.job_category.can_delete", "Can delete job category", "HR_JOB_CATEGORY",)
     HR_JOB_CATEGORY_READ = ("hr.job_category.can_read", "Can read job category", "HR_JOB_CATEGORY")
 
     HR_POSITION_CREATE = ("hr.position.can_create", "Can create position", "HR_POSITION")
     HR_POSITION_UPDATE = ("hr.position.can_update", "Can update position", "HR_POSITION")
     HR_POSITION_DELETE = ("hr.position.can_delete", "Can delete position", "HR_POSITION")
     HR_POSITION_READ = ("hr.position.can_read", "Can read position", "HR_POSITION")
+
+    HR_ACTIVITY_CREATE = ("hr.activity.can_create", "Can create activity", "HR_ACTIVITY")
+    HR_ACTIVITY_UPDATE = ("hr.activity.can_update", "Can update activity", "HR_ACTIVITY")
+    HR_ACTIVITY_DELETE = ("hr.activity.can_delete", "Can delete activity", "HR_ACTIVITY")
+    HR_ACTIVITY_READ = ("hr.activity.can_read", "Can read activity", "HR_ACTIVITY")
+
+    HR_ACTIVITY_TYPE_CREATE = ("hr.activity_type.can_create", "Can create activity type", "HR_ACTIVITY_TYPE")
+    HR_ACTIVITY_TYPE_UPDATE = ("hr.activity_type.can_update", "Can update activity type", "HR_ACTIVITY_TYPE")
+    HR_ACTIVITY_TYPE_DELETE = ("hr.activity_type.can_delete", "Can delete activity type", "HR_ACTIVITY_TYPE")
+    HR_ACTIVITY_TYPE_READ = ("hr.activity_type.can_read", "Can read activity type", "HR_ACTIVITY_TYPE")

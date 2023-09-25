@@ -35,12 +35,12 @@ class BimaHrEmployeeViewSet(AbstractViewSet):
     permission_classes = (ActionBasedPermission,)
     filterset_class = BimaHrEmployeeFilter
     action_permissions = {
-        'list': ['company.can_read'],
-        'create': ['company.can_create'],
-        'retrieve': ['company.can_read'],
-        'update': ['company.can_update'],
-        'partial_update': ['company.can_update'],
-        'destroy': ['company.can_delete'],
+        'list': ['employee.can_read'],
+        'create': ['employee.can_create'],
+        'retrieve': ['employee.can_read'],
+        'update': ['employee.can_update'],
+        'partial_update': ['employee.can_update'],
+        'destroy': ['employee.can_delete'],
         'documents': ['employee.can_add_document'],
         'bank_accounts': ['employee.can_add_bank_account'],
         'contacts': ['employee.can_add_contact'],
