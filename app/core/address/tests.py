@@ -107,6 +107,7 @@ class BimaCoreAddressTest(APITestCase):
         url2 = reverse('erp:bimaerppartner-list') + f'{public_id}/addresses/'
         self.address_data['parent_type'] = ContentType.objects.get_for_model(self.partner).id
         self.address_data['parent_id'] = self.partner.id
+        print(self.address_data)
         response = self.client.post(url2, self.address_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(BimaCoreAddress.objects.count(), 1)
