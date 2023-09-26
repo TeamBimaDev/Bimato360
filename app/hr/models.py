@@ -1,3 +1,5 @@
+from datetime import date
+
 from common.enums.employee_enum import get_marital_status_choices
 from common.enums.gender import get_gender_choices
 from core.abstract.models import AbstractModel
@@ -36,7 +38,7 @@ class BimaHrPersonSkill(AbstractModel):
     level = models.IntegerField(choices=[(i, str(i)) for i in range(1, 6)])
 
     def __str__(self) -> str:
-        return self.person__first_name
+        return f"{self.person} {self.skill} {self.level}"
 
 
 class BimaHrPersonExperience(AbstractModel):
@@ -47,5 +49,26 @@ class BimaHrPersonExperience(AbstractModel):
     date_end = models.DateField(null=True, blank=True)
     is_current_position = models.BooleanField(default=False)
 
+    @property
+    def experience_duration(self):
+        if self.is_current_position:
+            end_date = date.today()
+        else:
+            end_date = self.date_end
+
+        if not end_date:
+            return "End date not specified"
+
+        delta = end_date - self.date_begin
+        years = delta.days // 365
+        months = (delta.days % 365) // 30
+
+        if years and months:
+            return f"{years} year(s) and {months} month(s)"
+        elif years:
+            return f"{years} year(s)"
+        else:
+            return f"{months} month(s)"
+
     def __str__(self):
-        return f"{self.person} at {self.company_name}"
+        return f"{self.person} at {self.company_name} : {self.experience_duration}"

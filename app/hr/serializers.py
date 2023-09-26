@@ -15,6 +15,7 @@ class BimaHrSerializer(AbstractSerializer):
 
 
 class BimaHrPersonExperienceSerializer(AbstractSerializer):
+    experience_duration = serializers.ReadOnlyField()
     person = serializers.SerializerMethodField(read_only=True)
     person_public_id = serializers.SlugRelatedField(
         queryset=BimaHrPerson.objects.all(),
@@ -51,7 +52,7 @@ class BimaHrPersonExperienceSerializer(AbstractSerializer):
         model = BimaHrPersonExperience
         fields = [
             'id', 'person', 'person_public_id', 'skill', 'skill_public_id', 'company_name', 'description', 'date_begin',
-            'date_end', 'is_current_position', 'created', 'updated'
+            'date_end', 'is_current_position', 'experience_duration', 'created', 'updated'
         ]
 
 

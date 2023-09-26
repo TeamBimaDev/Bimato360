@@ -12,7 +12,7 @@ class BimaHrSkill(AbstractModel):
     persons = models.ManyToManyField(BimaHrPerson, through='BimaHrPersonSkill')
 
     def __str__(self) -> str:
-        return f"{self.name, self.public_id}"
+        return f"{self.name}"
 
     class Meta:
         permissions = []

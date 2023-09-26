@@ -10,7 +10,7 @@ class BimaHrSkillCategory(AbstractModel):
                                  blank=True, related_name='children')
 
     def __str__(self) -> str:
-        return f"{self.name, self.id}"
+        return f"{self.name}"
 
     class Meta:
         ordering = ['name']
