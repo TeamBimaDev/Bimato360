@@ -31,6 +31,7 @@ logger = logging.getLogger(__name__)
 class BimaHrEmployeeViewSet(AbstractViewSet):
     queryset = BimaHrEmployee.objects.all()
     serializer_class = BimaHrEmployeeSerializer
+    ordering = ["-first_name"]
     permission_classes = []
     permission_classes = (ActionBasedPermission,)
     filterset_class = BimaHrEmployeeFilter
