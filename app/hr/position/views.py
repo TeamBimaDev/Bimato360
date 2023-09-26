@@ -11,7 +11,7 @@ class BimaHrPositionViewSet(AbstractViewSet):
     serializer_class = BimaHrPositionSerializer
     permission_classes = []
     permission_classes = (ActionBasedPermission,)
-    ordering_fields = AbstractViewSet.ordering_fields + ['title', 'department__name']
+    ordering_fields = ['title', 'department__name']
     filterset_class = BimaHrPositionFilter
 
     action_permissions = {

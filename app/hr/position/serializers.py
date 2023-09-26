@@ -42,7 +42,7 @@ class BimaHrPositionSerializer(AbstractSerializer):
         }
 
     def get_job_category(self, obj):
-        if self.job_category:
+        if obj.job_category:
             return {
                 'id': obj.job_category.public_id.hex,
                 'name': obj.job_category.name,

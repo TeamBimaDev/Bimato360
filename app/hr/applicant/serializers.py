@@ -20,7 +20,7 @@ class BimaHrApplicantSerializer(AbstractSerializer):
     )
 
     def get_country(self, obj):
-        if self.country:
+        if obj.country:
             return {
                 'id': obj.country.public_id.hex,
                 'name': obj.country.name,
