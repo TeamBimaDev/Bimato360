@@ -1,5 +1,6 @@
 from core.abstract.serializers import AbstractSerializer
 from core.country.models import BimaCoreCountry
+from hr.position.models import BimaHrPosition
 from rest_framework import serializers
 
 from .models import BimaHrEmployee
@@ -14,6 +15,14 @@ class BimaHrEmployeeSerializer(AbstractSerializer):
         write_only=True
     )
 
+    position = serializers.SerializerMethodField(read_only=True)
+    position_public_id = serializers.SlugRelatedField(
+        queryset=BimaHrPosition.objects.all(),
+        slug_field='public_id',
+        source='position',
+        write_only=True
+    )
+
     def get_country(self, obj):
         if obj.country:
             return {
@@ -22,14 +31,22 @@ class BimaHrEmployeeSerializer(AbstractSerializer):
             }
         return None
 
+    def get_position(self, obj):
+        if obj.position:
+            return {
+                'id': obj.position.public_id.hex,
+                'name': obj.position.title,
+            }
+        return None
+
     class Meta:
         model = BimaHrEmployee
         fields = [
             'id', 'unique_id', 'gender', 'marital_status', 'num_children', 'first_name', 'last_name', 'date_of_birth',
-            'place_of_birth', 'country',
-            'country_public_id', 'nationality', 'identity_card_number', 'phone_number', 'second_phone_number', 'email',
-            'education_level', 'latest_degree', 'latest_degree_date', 'institute', 'employment_type', 'work_mode',
-            'job_type', 'employment_status', 'probation_end_date', 'salary', 'created', 'updated'
+            'place_of_birth', 'country', 'position', 'position_public_id', 'country_public_id', 'nationality',
+            'identity_card_number', 'phone_number', 'second_phone_number', 'email', 'education_level', 'latest_degree',
+            'latest_degree_date', 'institute', 'employment_type', 'work_mode', 'job_type', 'employment_status',
+            'probation_end_date', 'salary', 'created', 'updated'
         ]
 
 

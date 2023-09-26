@@ -15,8 +15,7 @@ class BimaHrEmployee(BimaHrPerson):
     probation_end_date = models.DateField(null=True, blank=True)
     last_performance_review = models.DateField(null=True, blank=True)
     salary = models.DecimalField(max_digits=10, decimal_places=3, null=True, blank=True)
-    position = models.OneToOneField(BimaHrPosition, related_name='employee', blank=True, null=True,
-                                    on_delete=models.SET_NULL)
+    position = models.ForeignKey(BimaHrPosition, blank=True, null=True, on_delete=models.SET_NULL)
     history = HistoricalRecords()
 
     def __str__(self):
