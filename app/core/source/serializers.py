@@ -5,4 +5,4 @@ from core.source.models import BimaCoreSource
 class BimaCoreSourceSerializer(AbstractSerializer):
     class Meta:
         model = BimaCoreSource
-        fields = '__all__'
+        fields = ['id', 'name', 'description', 'active', 'public_id', 'created', 'updated']

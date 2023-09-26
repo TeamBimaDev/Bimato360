@@ -23,12 +23,12 @@ urlpatterns = [
          BimaHrEmployeeViewSet.as_view({'get': 'get_bank_account'}),
          name='employee-bank_account'),
 
-    path('<str:public_id>/contacts/',
-         BimaHrEmployeeViewSet.as_view({'get': 'list_contacts', 'post': 'create_contact'}),
-         name='employee-contacts'),
-    path('<str:public_id>/contacts/<str:contact_public_id>/',
-         BimaHrEmployeeViewSet.as_view({'get': 'get_contact'}),
-         name='employee-contact'),
+    path('<str:public_id>/addresses/',
+         BimaHrEmployeeViewSet.as_view({'get': 'list_addresses', 'post': 'create_address'}),
+         name='employee-addresses'),
+    path('<str:public_id>/addresses/<str:contact_public_id>/',
+         BimaHrEmployeeViewSet.as_view({'get': 'get_address'}),
+         name='employee-addresses'),
 
     path('<str:public_id>/contacts/',
          BimaHrEmployeeViewSet.as_view({'get': 'list_contacts', 'post': 'create_contact'}),

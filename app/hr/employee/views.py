@@ -46,7 +46,11 @@ class BimaHrEmployeeViewSet(AbstractViewSet):
         'contacts': ['employee.can_add_contact'],
         'addresses': ['employee.can_add_address'],
         'delete_skill': ['employee.can_manage_skill'],
-        'add_update_skill': ['employee.can_manage_skill']
+        'add_update_skill': ['employee.can_manage_skill'],
+        'get_person_skills': ['employee.can_manage_skill'],
+        'delete_experience': ['employee.can_manage_experience'],
+        'get_skills': ['employee.can_manage_skill'],
+        'get_experiences': ['employee.can_manage_experience'],
     }
 
     def list_documents(self, request, *args, **kwargs):
@@ -221,14 +225,14 @@ class BimaHrEmployeeViewSet(AbstractViewSet):
             return Response(e.detail, status=status.HTTP_404_NOT_FOUND)
 
     @action(detail=True, methods=['GET'], url_path='get_skills')
-    def get_person_skills(self, request, public_id=None):
+    def get_skills(self, request, public_id=None):
         person = self.get_object()
         person_skills = BimaHrPersonSkill.objects.filter(person=person)
         serializer = BimaHrPersonSkillSerializer(person_skills, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['GET'], url_path='get_experiences')
-    def get_person_experiences(self, request, public_id=None):
+    def get_experiences(self, request, public_id=None):
         person = self.get_object()
         person_experiences = BimaHrPersonExperience.objects.filter(person=person)
         serializer = BimaHrPersonExperienceSerializer(person_experiences, many=True)

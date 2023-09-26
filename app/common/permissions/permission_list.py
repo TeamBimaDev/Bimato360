@@ -541,6 +541,8 @@ class PermissionsList:
     HR_EMPLOYEE_ADD_BANK_ACCOUNT = (
         "hr.employee.can_add_bank_account", "Can add bank account to employee", "HR_EMPLOYEE",)
     HR_EMPLOYEE_MANAGE_SKILL = ("hr.employee.can_manage_skill", "Can manage employee skills", "HR_EMPLOYEE",)
+    HR_EMPLOYEE_MANAGE_EXPERIENCE = (
+        "hr.employee.can_manage_experience", "Can manage employee experience", "HR_EMPLOYEE",)
 
     HR_APPLICANT_CREATE = ("hr.applicant.can_create", "Can create applicant", "HR_EMPLOYEE",)
     HR_APPLICANT_UPDATE = ("hr.applicant.can_update", "Can update applicant", "HR_EMPLOYEE",)
@@ -552,6 +554,8 @@ class PermissionsList:
     HR_APPLICANT_ADD_BANK_ACCOUNT = (
         "hr.applicant.can_add_bank_account", "Can add bank account to applicant", "HR_EMPLOYEE",)
     HR_APPLICANT_MANAGE_SKILL = ("hr.applicant.can_manage_skill", "Can manage applicant skills", "HR_APPLICANT",)
+    HR_APPLICANT_MANAGE_EXPERIENCE = (
+        "hr.applicant.can_manage_experience", "Can manage applicant experience", "HR_APPLICANT",)
 
     HR_SKILL_CATEGORY_CREATE = ("hr.skill_category.can_create", "Can create skill category", "HR_SKILL_CATEGORY",)
     HR_SKILL_CATEGORY_UPDATE = ("hr.skill_category.can_update", "Can update skill category", "HR_SKILL_CATEGORY",)
@@ -582,3 +586,13 @@ class PermissionsList:
     HR_ACTIVITY_TYPE_UPDATE = ("hr.activity_type.can_update", "Can update activity type", "HR_ACTIVITY_TYPE")
     HR_ACTIVITY_TYPE_DELETE = ("hr.activity_type.can_delete", "Can delete activity type", "HR_ACTIVITY_TYPE")
     HR_ACTIVITY_TYPE_READ = ("hr.activity_type.can_read", "Can read activity type", "HR_ACTIVITY_TYPE")
+
+    HR_INTERVIEW_CREATE = ("hr.interview.can_create", "Can create interview", "HR_INTERVIEW")
+    HR_INTERVIEW_UPDATE = ("hr.interview.can_update", "Can update interview", "HR_INTERVIEW")
+    HR_INTERVIEW_DELETE = ("hr.interview.can_delete", "Can delete interview", "HR_INTERVIEW")
+    HR_INTERVIEW_READ = ("hr.interview.can_read", "Can read interview", "HR_INTERVIEW")
+
+    HR_INTERVIEW_STEP_CREATE = ("hr.interview_step.can_create", "Can create interview step", "HR_INTERVIEW_STEP")
+    HR_INTERVIEW_STEP_UPDATE = ("hr.interview_step.can_update", "Can update interview step", "HR_INTERVIEW_STEP")
+    HR_INTERVIEW_STEP_DELETE = ("hr.interview_step.can_delete", "Can delete interview step", "HR_INTERVIEW_STEP")
+    HR_INTERVIEW_STEP_READ = ("hr.interview_step.can_read", "Can read interview step", "HR_INTERVIEW_STEP")

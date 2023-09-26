@@ -29,7 +29,10 @@ class BimaHrPositionSerializer(AbstractSerializer):
         queryset=BimaHrEmployee.objects.all(),
         slug_field='public_id',
         source='manager',
-        write_only=True
+        write_only=True,
+        required=False,
+        allow_empty=True,
+        allow_null=True
     )
 
     def get_department(self, obj):
@@ -38,7 +41,7 @@ class BimaHrPositionSerializer(AbstractSerializer):
             'name': obj.department.name,
         }
 
-    def get_department(self, obj):
+    def get_job_category(self, obj):
         if self.job_category:
             return {
                 'id': obj.job_category.public_id.hex,
@@ -57,7 +60,6 @@ class BimaHrPositionSerializer(AbstractSerializer):
     class Meta:
         model = BimaHrPosition
         fields = [
-            'id', 'title', 'description', 'requirements', 'responsibilities',
-            'department', 'department_public_id', 'job_category', 'job_category_public_id',
-            'manager', 'manager_public_id', 'created', 'updated'
+            'id', 'title', 'description', 'requirements', 'responsibilities', 'department', 'department_public_id',
+            'job_category', 'job_category_public_id', 'manager', 'manager_public_id', 'created', 'updated'
         ]

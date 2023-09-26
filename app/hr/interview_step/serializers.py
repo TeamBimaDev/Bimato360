@@ -1,6 +1,6 @@
-
 from core.abstract.serializers import AbstractSerializer
-from hr.step.models import BimaHrInterviewStep
+
+from .models import BimaHrInterviewStep
 
 
 class BimaHrInterviewStepSerializer(AbstractSerializer):
