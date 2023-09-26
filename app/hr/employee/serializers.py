@@ -25,7 +25,36 @@ class BimaHrEmployeeSerializer(AbstractSerializer):
     class Meta:
         model = BimaHrEmployee
         fields = [
-            'id', 'unique_id', 'gender', 'first_name', 'last_name', 'date_of_birth', 'place_of_birth', 'country',
+            'id', 'unique_id', 'gender', 'marital_status', 'num_children', 'first_name', 'last_name', 'date_of_birth',
+            'place_of_birth', 'country',
             'country_public_id', 'nationality', 'identity_card_number', 'phone_number', 'second_phone_number', 'email',
-            'education_level', 'latest_degree', 'latest_degree_date', 'institute', 'created', 'updated'
+            'education_level', 'latest_degree', 'latest_degree_date', 'institute', 'employment_type', 'work_mode',
+            'job_type', 'employment_status', 'probation_end_date', 'salary', 'created', 'updated'
         ]
+
+
+class EmployeeHistorySerializer(serializers.ModelSerializer):
+    changes = serializers.SerializerMethodField()
+    changed_by = serializers.SerializerMethodField()
+
+    class Meta:
+        model = BimaHrEmployee.history.model
+        fields = ("id", "changes", "changed_by", "history_date")
+
+    def get_changes(self, instance):
+        changes = []
+        if instance.prev_record:
+            diffs = instance.diff_against(instance.prev_record)
+            for change in diffs.changes:
+                old_value = self.get_readable_value(change.field, change.old)
+                new_value = self.get_readable_value(change.field, change.new)
+                changes.append(
+                    {"field": change.field, "old": old_value, "new": new_value}
+                )
+        return changes
+
+    def get_readable_value(self, field, value):
+        return value
+
+    def get_changed_by(self, instance):
+        return instance.history_user.name if instance.history_user else None

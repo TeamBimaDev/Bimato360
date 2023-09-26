@@ -30,7 +30,8 @@ class BimaHrApplicantSerializer(AbstractSerializer):
     class Meta:
         model = BimaHrApplicant
         fields = [
-            'id', 'unique_id', 'gender', 'first_name', 'last_name', 'date_of_birth', 'place_of_birth', 'country',
+            'id', 'unique_id', 'gender', 'marital_status', 'num_children', 'first_name', 'last_name', 'date_of_birth',
+            'place_of_birth', 'country',
             'country_public_id', 'nationality', 'identity_card_number', 'phone_number', 'second_phone_number', 'email',
             'education_level', 'latest_degree', 'latest_degree_date', 'institute', 'priority', 'availability_days',
             'description', 'comments', 'created', 'updated'

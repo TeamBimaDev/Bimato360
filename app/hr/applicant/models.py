@@ -4,6 +4,7 @@ from core.source.models import BimaCoreSource
 from django.db import models
 from hr.interview_step.models import BimaHrInterviewStep
 from hr.models import BimaHrPerson
+from simple_history.models import HistoricalRecords
 
 
 class BimaHrApplicant(BimaHrPerson):
@@ -12,6 +13,7 @@ class BimaHrApplicant(BimaHrPerson):
     description = models.TextField(max_length=256)
     comments = models.TextField(max_length=256)
     applicant_posts = models.ManyToManyField('BimaHrPosition', through='BimaHrApplicantPost')
+    history = HistoricalRecords()
 
     def __str__(self):
         return self.full_name

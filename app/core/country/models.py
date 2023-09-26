@@ -1,6 +1,6 @@
-from django.db import models
 from core.abstract.models import AbstractModel
 from core.currency.models import BimaCoreCurrency
+from django.db import models
 
 
 class BimaCoreCountry(AbstractModel):
@@ -16,7 +16,7 @@ class BimaCoreCountry(AbstractModel):
     currency = models.ForeignKey(BimaCoreCurrency, on_delete=models.PROTECT)
 
     def __str__(self):
-        return f"{self.name, self.currency, self.id}"
+        return f"{self.name}"
 
     class Meta:
         ordering = ['-name']

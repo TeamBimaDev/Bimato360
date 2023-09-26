@@ -4,6 +4,7 @@ from django.db import models
 from hr.models import BimaHrPerson
 
 from hr.position.models import BimaHrPosition
+from simple_history.models import HistoricalRecords
 
 
 class BimaHrEmployee(BimaHrPerson):
@@ -16,6 +17,7 @@ class BimaHrEmployee(BimaHrPerson):
     salary = models.DecimalField(max_digits=10, decimal_places=3, null=True, blank=True)
     position = models.OneToOneField(BimaHrPosition, related_name='employee', blank=True, null=True,
                                     on_delete=models.SET_NULL)
+    history = HistoricalRecords()
 
     def __str__(self):
         return f"{self.first_name, self.last_name}"
