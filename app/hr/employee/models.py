@@ -17,6 +17,8 @@ class BimaHrEmployee(BimaHrPerson):
     last_performance_review = models.DateField(null=True, blank=True)
     salary = models.DecimalField(max_digits=10, decimal_places=3, null=True, blank=True)
     position = models.ForeignKey(BimaHrPosition, blank=True, null=True, on_delete=models.SET_NULL)
+    balance_vacation = models.FloatField(default=0)
+    virtual_balance_vacation = models.FloatField(default=0)
     history = HistoricalRecords()
 
     def __str__(self):

@@ -35,4 +35,10 @@ app.conf.beat_schedule = {
         'args': ('celer_beat_security_key_to_access_to_payment_reminder_sale_document_notification_tasks',)
     },
 
+    'update_all_employee_vacation_balances': {
+        'task': 'hr.tasks.update_all_employee_vacation_balances',
+        'schedule': crontab(minute='0', hour='0', day_of_month='1'),
+        'args': ('celer_beat_security_key_to_access_to_update_employee_vacation_balance',)
+    },
+
 }

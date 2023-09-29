@@ -596,3 +596,10 @@ class PermissionsList:
     HR_INTERVIEW_STEP_UPDATE = ("hr.interview_step.can_update", "Can update interview step", "HR_INTERVIEW_STEP")
     HR_INTERVIEW_STEP_DELETE = ("hr.interview_step.can_delete", "Can delete interview step", "HR_INTERVIEW_STEP")
     HR_INTERVIEW_STEP_READ = ("hr.interview_step.can_read", "Can read interview step", "HR_INTERVIEW_STEP")
+
+    HR_VACATION_CREATE = ("hr.vacation.can_create", "Can create vacation", "HR_VACATION")
+    HR_VACATION_UPDATE = ("hr.vacation.can_update", "Can update vacation", "HR_VACATION")
+    HR_VACATION_DELETE = ("hr.vacation.can_delete", "Can delete vacation", "HR_VACATION")
+    HR_VACATION_READ = ("hr.vacation.can_read", "Can read vacation", "HR_VACATION")
+    HR_VACATION_MANAGE_FOR_OTHER = (
+        "hr.vacation.can_manage_other_vacation", "Can manage other's vacation", "HR_VACATION")

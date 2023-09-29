@@ -228,16 +228,25 @@ class BimaHrEmployeeViewSet(AbstractViewSet):
     @action(detail=True, methods=['GET'], url_path='get_skills')
     def get_skills(self, request, pk=None):
         person = self.get_object()
-        person_skills = BimaHrPersonSkill.objects.filter(person=person)
+        person_skills = BimaHrPersonSkill.objects.filter(person=person).order_by('skill__name')
         serializer = BimaHrPersonSkillSerializer(person_skills, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['GET'], url_path='get_experiences')
     def get_experiences(self, request, pk=None):
         person = self.get_object()
-        person_experiences = BimaHrPersonExperience.objects.filter(person=person)
+        person_experiences = BimaHrPersonExperience.objects.filter(person=person).order_by('date_begin')
         serializer = BimaHrPersonExperienceSerializer(person_experiences, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=['get'], url_path='get_vacation_balance')
+    def get_vacation_balance(self, request, pk=None):
+        employee = self.get_object()
+        balance = {
+            'balance_vacation': employee.balance_vacation,
+            'virtual_balance_vacation': employee.virtual_balance_vacation
+        }
+        return Response(balance)
 
     def get_object(self):
         obj = BimaHrEmployee.objects.get_object_by_public_id(self.kwargs['pk'])

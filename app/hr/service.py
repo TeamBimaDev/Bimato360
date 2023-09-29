@@ -58,7 +58,7 @@ def add_or_update_person_experience(person, experience_data):
 def delete_person_experience(person, experience_public_id):
     try:
         experience = get_experience_by_public_id(experience_public_id)
-        if experience.person != person:
+        if experience.person.public_id.hex != person.public_id.hex:
             raise NotFound(detail={'error': 'Experience not found for this person'})
         experience.delete()
     except BimaHrPersonExperience.DoesNotExist:

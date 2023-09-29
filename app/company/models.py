@@ -42,6 +42,14 @@ class BimaCompany(AbstractModel):
                                      verbose_name=_('Couleur par défaut'))
     bank_accounts = GenericRelation('treasury.BimaTreasuryBankAccount')
 
+    vacation_coefficient = models.FloatField(default=1.82)
+    start_working_day = models.PositiveSmallIntegerField(
+        choices=[(0, 'Monday'), (1, 'Tuesday'), (2, 'Wednesday'), (3, 'Thursday'), (4, 'Friday'), (5, 'Saturday'),
+                 (6, 'Sunday')], default=0)
+    end_working_day = models.PositiveSmallIntegerField(
+        choices=[(0, 'Monday'), (1, 'Tuesday'), (2, 'Wednesday'), (3, 'Thursday'), (4, 'Friday'), (5, 'Saturday'),
+                 (6, 'Sunday')], default=4)
+
     def __str__(self):
         return f"{self.name, self.public_id}"
 
