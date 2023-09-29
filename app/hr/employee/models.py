@@ -12,6 +12,7 @@ class BimaHrEmployee(BimaHrPerson):
     work_mode = models.CharField(max_length=20, choices=get_work_mode_choices(), null=True, blank=True)
     job_type = models.CharField(max_length=20, choices=get_job_type_choices(), null=True, blank=True)
     employment_status = models.CharField(max_length=20, choices=get_employee_status_choices(), null=True, blank=True)
+    hiring_date = models.DateField(null=True, blank=True)
     probation_end_date = models.DateField(null=True, blank=True)
     last_performance_review = models.DateField(null=True, blank=True)
     salary = models.DecimalField(max_digits=10, decimal_places=3, null=True, blank=True)

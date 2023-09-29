@@ -171,7 +171,7 @@ class BimaHrEmployeeViewSet(AbstractViewSet):
         return Response(serialized_contact.data)
 
     @action(detail=True, methods=['POST'], url_path='add_update_skill')
-    def add_update_skill(self, request, public_id=None):
+    def add_update_skill(self, request, pk=None):
         employee = self.get_object()
         skill_public_id = request.data.get('skill_public_id')
         level = request.data.get('level')
@@ -186,7 +186,7 @@ class BimaHrEmployeeViewSet(AbstractViewSet):
             return Response(e.detail, status=status.HTTP_404_NOT_FOUND)
 
     @action(detail=True, methods=['DELETE'], url_path='delete_skill')
-    def delete_skill(self, request, public_id=None):
+    def delete_skill(self, request, pk=None):
         employee = self.get_object()
         skill_public_id = request.data.get('skill_public_id')
 
@@ -197,7 +197,7 @@ class BimaHrEmployeeViewSet(AbstractViewSet):
             return Response(e.detail, status=status.HTTP_404_NOT_FOUND)
 
     @action(detail=True, methods=['POST', 'PUT'], url_path='add_update_experience')
-    def add_update_experience(self, request, public_id=None):
+    def add_update_experience(self, request, pk=None):
         person = self.get_object()
         experience_data = request.data
 
@@ -215,7 +215,7 @@ class BimaHrEmployeeViewSet(AbstractViewSet):
             return Response(e.detail, status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=True, methods=['DELETE'], url_path='delete_experience')
-    def delete_experience(self, request, public_id=None):
+    def delete_experience(self, request, pk=None):
         person = self.get_object()
         experience_public_id = request.data.get('experience_public_id')
 
@@ -226,14 +226,14 @@ class BimaHrEmployeeViewSet(AbstractViewSet):
             return Response(e.detail, status=status.HTTP_404_NOT_FOUND)
 
     @action(detail=True, methods=['GET'], url_path='get_skills')
-    def get_skills(self, request, public_id=None):
+    def get_skills(self, request, pk=None):
         person = self.get_object()
         person_skills = BimaHrPersonSkill.objects.filter(person=person)
         serializer = BimaHrPersonSkillSerializer(person_skills, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['GET'], url_path='get_experiences')
-    def get_experiences(self, request, public_id=None):
+    def get_experiences(self, request, pk=None):
         person = self.get_object()
         person_experiences = BimaHrPersonExperience.objects.filter(person=person)
         serializer = BimaHrPersonExperienceSerializer(person_experiences, many=True)

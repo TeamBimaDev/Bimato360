@@ -16,10 +16,10 @@ urlpatterns = [
          BimaHrEmployeeViewSet.as_view({'get': 'get_document'}),
          name='employee-document'),
 
-    path('<str:public_id>/bank_accounts/',
+    path('<str:public_id>/bank_account/',
          BimaHrEmployeeViewSet.as_view({'get': 'list_bank_account', 'post': 'create_bank_account'}),
          name='employee-bank_accounts'),
-    path('<str:public_id>/bank_accounts/<str:bank_account_public_id>/',
+    path('<str:public_id>/bank_account/<str:bank_account_public_id>/',
          BimaHrEmployeeViewSet.as_view({'get': 'get_bank_account'}),
          name='employee-bank_account'),
 

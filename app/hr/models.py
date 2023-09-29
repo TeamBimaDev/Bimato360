@@ -44,6 +44,7 @@ class BimaHrPersonSkill(AbstractModel):
 class BimaHrPersonExperience(AbstractModel):
     person = models.ForeignKey(BimaHrPerson, related_name='experiences', on_delete=models.CASCADE)
     company_name = models.CharField(max_length=255)
+    position = models.CharField(max_length=255)
     description = models.TextField(null=True, blank=True)
     date_begin = models.DateField()
     date_end = models.DateField(null=True, blank=True)

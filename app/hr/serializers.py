@@ -51,8 +51,8 @@ class BimaHrPersonExperienceSerializer(AbstractSerializer):
     class Meta:
         model = BimaHrPersonExperience
         fields = [
-            'id', 'person', 'person_public_id', 'skill', 'skill_public_id', 'company_name', 'description', 'date_begin',
-            'date_end', 'is_current_position', 'experience_duration', 'created', 'updated'
+            'id', 'person', 'person_public_id', 'skill', 'skill_public_id', 'company_name', 'position', 'description',
+            'date_begin', 'date_end', 'is_current_position', 'experience_duration', 'created', 'updated'
         ]
 
 
