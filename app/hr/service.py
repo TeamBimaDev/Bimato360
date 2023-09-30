@@ -14,9 +14,20 @@ def get_skill_by_public_id(skill_public_id):
 
 def add_or_update_person_skill(person, skill_public_id, level):
     skill = get_skill_by_public_id(skill_public_id)
-    person_skill, created = BimaHrPersonSkill.objects.get_or_create(person=person, skill=skill, level=level)
-    person_skill.level = level
-    person_skill.save()
+    person_skill, created = _get_or_update_person_skill_instance(person, skill, level)
+    return person_skill, created
+
+
+def _get_or_update_person_skill_instance(person, skill, level):
+    try:
+        person_skill = BimaHrPersonSkill.objects.get(person=person, skill=skill)
+        person_skill.level = level
+        person_skill.save(update_fields=['level'])
+        created = False
+    except BimaHrPersonSkill.DoesNotExist:
+        person_skill = BimaHrPersonSkill.objects.create(person=person, skill=skill, level=level)
+        created = True
+
     return person_skill, created
 
 
