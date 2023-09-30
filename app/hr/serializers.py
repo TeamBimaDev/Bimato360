@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from common.converters.default_converters import str_to_bool
 from core.abstract.serializers import AbstractSerializer
 from hr.skill.models import BimaHrSkill
@@ -7,12 +9,25 @@ from .models import BimaHrPerson, BimaHrPersonExperience
 
 
 class BimaHrSerializer(AbstractSerializer):
+    full_name = serializers.ReadOnlyField()
+
     class Meta:
         model = BimaHrPerson
         fields = [
-            'id', 'unique_id', 'gender', 'first_name', 'last_name',
+            'id', 'unique_id', 'gender', 'first_name', 'last_name', 'full_name',
             'date_of_birth', 'place_of_birth', 'created', 'updated'
         ]
+
+    def validate(self, data):
+        date_fields = ['date_of_birth', 'latest_degree_date']
+        for field_name in date_fields:
+            date_value = data.get(field_name)
+            if date_value:
+                try:
+                    datetime.strptime(str(date_value), '%Y-%m-%d')
+                except ValueError:
+                    data[field_name] = None
+        return data
 
 
 class BimaHrPersonExperienceSerializer(AbstractSerializer):

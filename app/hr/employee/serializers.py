@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from core.abstract.serializers import AbstractSerializer
 from core.country.models import BimaCoreCountry
 from hr.position.models import BimaHrPosition
@@ -7,6 +9,7 @@ from .models import BimaHrEmployee
 
 
 class BimaHrEmployeeSerializer(AbstractSerializer):
+    full_name = serializers.ReadOnlyField()
     country = serializers.SerializerMethodField(read_only=True)
     country_public_id = serializers.SlugRelatedField(
         queryset=BimaCoreCountry.objects.all(),
@@ -50,10 +53,21 @@ class BimaHrEmployeeSerializer(AbstractSerializer):
         fields = [
             'id', 'unique_id', 'gender', 'marital_status', 'num_children', 'first_name', 'last_name', 'date_of_birth',
             'place_of_birth', 'country', 'position', 'position_public_id', 'country_public_id', 'nationality',
-            'identity_card_number', 'phone_number', 'second_phone_number', 'email', 'education_level', 'latest_degree',
-            'latest_degree_date', 'institute', 'employment_type', 'work_mode', 'job_type', 'employment_status',
-            'probation_end_date', 'salary', 'created', 'updated'
+            'full_name', 'identity_card_number', 'phone_number', 'second_phone_number', 'email', 'education_level',
+            'latest_degree', 'latest_degree_date', 'institute', 'employment_type', 'work_mode', 'job_type',
+            'employment_status', 'probation_end_date', 'salary', 'created', 'updated'
         ]
+
+    def validate(self, data):
+        date_fields = ['last_performance_review', 'probation_end_date', 'hiring_date']
+        for field_name in date_fields:
+            date_value = data.get(field_name)
+            if date_value:
+                try:
+                    datetime.strptime(str(date_value), '%Y-%m-%d')
+                except ValueError:
+                    data[field_name] = None
+        return data
 
 
 class EmployeeHistorySerializer(serializers.ModelSerializer):

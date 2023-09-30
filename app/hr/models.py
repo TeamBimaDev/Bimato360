@@ -1,8 +1,7 @@
-from datetime import date, datetime
+from datetime import date
 
 from common.enums.employee_enum import get_marital_status_choices
 from common.enums.gender import get_gender_choices
-from common.validators.date_format_validator import DateFormatValidator
 from core.abstract.models import AbstractModel
 from core.country.models import BimaCoreCountry
 from django.db import models
@@ -15,7 +14,7 @@ class BimaHrPerson(AbstractModel):
     num_children = models.IntegerField(default=0, null=True, blank=True)
     first_name = models.CharField(max_length=64)
     last_name = models.CharField(max_length=64)
-    date_of_birth = models.DateField(null=True, blank=True, validators=[DateFormatValidator.validate])
+    date_of_birth = models.DateField(null=True, blank=True)
     place_of_birth = models.CharField(max_length=64, null=True, blank=True)
     country = models.ForeignKey(BimaCoreCountry, on_delete=models.PROTECT, null=True, blank=True)
     nationality = models.CharField(max_length=64, null=True, blank=True)
@@ -25,26 +24,12 @@ class BimaHrPerson(AbstractModel):
     email = models.EmailField(null=True, blank=True)
     education_level = models.CharField(max_length=128, null=True, blank=True)
     latest_degree = models.CharField(max_length=128, null=True, blank=True)
-    latest_degree_date = models.DateField(null=True, blank=True, validators=[DateFormatValidator.validate])
+    latest_degree_date = models.DateField(null=True, blank=True)
     institute = models.CharField(max_length=128, null=True, blank=True)
 
     @property
     def full_name(self):
         return f"{self.first_name} {self.last_name}"
-
-    def save(self, *args, **kwargs):
-        self.clean_dates()
-        super().save(*args, **kwargs)
-
-    def clean_dates(self):
-        date_fields = ['date_of_birth', 'latest_degree_date']
-        for field_name in date_fields:
-            date_value = getattr(self, field_name)
-            if date_value:
-                try:
-                    datetime.strptime(str(date_value), '%Y-%m-%d')
-                except ValueError:
-                    setattr(self, field_name, None)
 
 
 class BimaHrPersonExperience(AbstractModel):

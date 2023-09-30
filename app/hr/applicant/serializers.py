@@ -11,6 +11,7 @@ from .models import BimaHrApplicant
 
 
 class BimaHrApplicantSerializer(AbstractSerializer):
+    full_name = serializers.ReadOnlyField()
     country = serializers.SerializerMethodField(read_only=True)
     country_public_id = serializers.SlugRelatedField(
         queryset=BimaCoreCountry.objects.all(),
@@ -31,10 +32,9 @@ class BimaHrApplicantSerializer(AbstractSerializer):
         model = BimaHrApplicant
         fields = [
             'id', 'unique_id', 'gender', 'marital_status', 'num_children', 'first_name', 'last_name', 'date_of_birth',
-            'place_of_birth', 'country',
-            'country_public_id', 'nationality', 'identity_card_number', 'phone_number', 'second_phone_number', 'email',
-            'education_level', 'latest_degree', 'latest_degree_date', 'institute', 'priority', 'availability_days',
-            'description', 'comments', 'created', 'updated'
+            'place_of_birth', 'country', 'full_name', 'country_public_id', 'nationality', 'identity_card_number',
+            'phone_number', 'second_phone_number', 'email', 'education_level', 'latest_degree', 'latest_degree_date',
+            'institute', 'priority', 'availability_days', 'description', 'comments', 'created', 'updated'
         ]
 
 
