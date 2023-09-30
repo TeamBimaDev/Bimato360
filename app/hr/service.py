@@ -14,7 +14,7 @@ def get_skill_by_public_id(skill_public_id):
 
 def add_or_update_person_skill(person, skill_public_id, level):
     skill = get_skill_by_public_id(skill_public_id)
-    person_skill, created = BimaHrPersonSkill.objects.get_or_create(person=person, skill=skill)
+    person_skill, created = BimaHrPersonSkill.objects.get_or_create(person=person, skill=skill, level=level)
     person_skill.level = level
     person_skill.save()
     return person_skill, created

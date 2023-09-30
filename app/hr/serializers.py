@@ -6,6 +6,7 @@ from hr.skill.models import BimaHrSkill
 from rest_framework import serializers
 
 from .models import BimaHrPerson, BimaHrPersonExperience
+from .skill.models import BimaHrPersonSkill
 
 
 class BimaHrSerializer(AbstractSerializer):
@@ -96,8 +97,7 @@ class BimaHrPersonSkillSerializer(AbstractSerializer):
         return None
 
     class Meta:
-        model = BimaHrPersonExperience
+        model = BimaHrPersonSkill
         fields = [
-            'id', 'person', 'person_public_id', 'company_name', 'skill', 'skill_public_id', 'description', 'date_begin',
-            'date_end', 'is_current_position', 'created', 'updated'
+            'id', 'person', 'person_public_id', 'level', 'skill', 'skill_public_id', 'created', 'updated'
         ]
