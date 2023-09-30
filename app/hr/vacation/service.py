@@ -22,7 +22,7 @@ def calculate_vacation_balances(employee):
             datetime.now().month - employee.hiring_date.month
     )
 
-    bima_company = BimaCompany.objects.first()
+    bima_company = BimaCompany.objects.first()  # TODO need to verify the company data
     vacation_coefficient = bima_company.vacation_coefficient
 
     total_working_days_approved = sum(

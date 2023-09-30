@@ -1,6 +1,6 @@
 from hr.models import BimaHrPersonExperience
-from hr.models import BimaHrPersonSkill
 from hr.serializers import BimaHrPersonExperienceSerializer
+from hr.skill.models import BimaHrPersonSkill
 from hr.skill.models import BimaHrSkill
 from rest_framework.exceptions import NotFound, ValidationError
 

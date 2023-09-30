@@ -18,6 +18,7 @@ class BimaHrVacationViewSet(AbstractViewSet):
     queryset = BimaHrVacation.objects.all()
     serializer_class = BimaHrVacationSerializer
     filterset_class = BimaHrVacationFilter
+    ordering = ["-date_start"]
     permission_classes = []
     permission_classes = (ActionBasedPermission,)
     action_permissions = {

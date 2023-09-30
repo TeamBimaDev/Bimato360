@@ -12,7 +12,10 @@ class BimaHrEmployeeSerializer(AbstractSerializer):
         queryset=BimaCoreCountry.objects.all(),
         slug_field='public_id',
         source='country',
-        write_only=True
+        write_only=True,
+        required=False,
+        allow_null=True,
+        allow_empty=True
     )
 
     position = serializers.SerializerMethodField(read_only=True)
@@ -20,7 +23,10 @@ class BimaHrEmployeeSerializer(AbstractSerializer):
         queryset=BimaHrPosition.objects.all(),
         slug_field='public_id',
         source='position',
-        write_only=True
+        write_only=True,
+        required=False,
+        allow_null=True,
+        allow_empty=True
     )
 
     def get_country(self, obj):
