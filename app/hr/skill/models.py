@@ -16,3 +16,12 @@ class BimaHrSkill(AbstractModel):
 
     class Meta:
         permissions = []
+
+
+class BimaHrPersonSkill(AbstractModel):
+    person = models.ForeignKey(BimaHrPerson, on_delete=models.CASCADE)
+    skill = models.ForeignKey(BimaHrSkill, on_delete=models.CASCADE)
+    level = models.IntegerField(choices=[(i, str(i)) for i in range(1, 6)])
+
+    def __str__(self) -> str:
+        return f"{self.person} {self.skill} {self.level}"

@@ -6,10 +6,11 @@ from core.contact.serializers import BimaCoreContactSerializer
 from core.document.models import get_documents_for_parent_entity, BimaCoreDocument
 from core.document.serializers import BimaCoreDocumentSerializer
 from django.shortcuts import get_object_or_404
-from hr.models import BimaHrPersonSkill, BimaHrPersonExperience
+from hr.models import BimaHrPersonExperience
 from hr.serializers import BimaHrPersonSkillSerializer, BimaHrPersonExperienceSerializer
 from hr.service import add_or_update_person_skill, delete_person_skill, add_or_update_person_experience, \
     delete_person_experience
+from hr.skill.models import BimaHrPersonSkill
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError, NotFound
