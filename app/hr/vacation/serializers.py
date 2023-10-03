@@ -39,5 +39,7 @@ class BimaHrVacationSerializer(AbstractSerializer):
         model = BimaHrVacation
         fields = [
             'id', 'employee', 'employee_public_id', 'manager', 'manager_public_id', 'date_start', 'date_end',
-            'reason', 'vacation_type', 'status', 'reason_refused', 'created', 'updated'
+            'reason', 'vacation_type', 'status', 'request_date', 'status_change_date', 'reason_refused', 'created',
+            'updated'
+
         ]

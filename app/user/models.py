@@ -4,8 +4,8 @@ from django.contrib.auth.base_user import BaseUserManager, AbstractBaseUser
 from django.contrib.auth.models import PermissionsMixin
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
-from django.utils.translation import gettext_lazy as _
 from django.http import Http404
+from django.utils.translation import gettext_lazy as _
 
 
 class UserManager(BaseUserManager):
@@ -74,3 +74,6 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def has_perm(self, perm, obj=None):
         return self.user_permissions.filter(codename=perm).exists()
+
+    def is_employee(self):
+        return hasattr(self, 'employee')

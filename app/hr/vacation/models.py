@@ -14,6 +14,8 @@ class BimaHrVacation(AbstractModel):
     status = models.CharField(max_length=20, choices=get_vacation_status_list(),
                               default=VacationStatus.PENDING.value)
     reason_refused = models.TextField(null=True, blank=True)
+    request_date = models.DateTimeField(auto_now_add=True)
+    status_change_date = models.DateTimeField(null=True, blank=True)
 
     def __str__(self) -> str:
         return f"{self.employee} from {self.date_start} to {self.date_end}"

@@ -60,7 +60,7 @@ def is_vacation_request_valid(vacation):
     return requested_working_days <= vacation.employee.balance_vacation, requested_working_days
 
 
-def update_vacation_status(vacation, status_update, reason_refused=None):
+def update_vacation_status(vacation, status_update, reason_refused=None, save=True):
     if status_update == VacationStatus.APPROVED.value:
         vacation.status = VacationStatus.APPROVED.value
     elif status_update == VacationStatus.REFUSED.value and reason_refused:
@@ -68,6 +68,7 @@ def update_vacation_status(vacation, status_update, reason_refused=None):
         vacation.reason_refused = reason_refused
     else:
         raise ValueError('Invalid data')
-    vacation.save()
+    if save:
+        vacation.save()
     calculate_vacation_balances(vacation.employee)
     return vacation

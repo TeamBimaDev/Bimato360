@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from common.enums.vacation import VacationStatus
 from common.permissions.action_base_permission import ActionBasedPermission
 from core.abstract.views import AbstractViewSet
@@ -6,7 +8,7 @@ from django.utils.translation import gettext_lazy as _
 from hr.employee.models import BimaHrEmployee
 from rest_framework import status
 from rest_framework.decorators import action
-from rest_framework.exceptions import PermissionDenied
+from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.response import Response
 
 from .filters import BimaHrVacationFilter
@@ -32,39 +34,61 @@ class BimaHrVacationViewSet(AbstractViewSet):
         'manage_vacation': ['vacation.can_manage_other_vacation'],
     }
 
-    @action(detail=False, methods=['post'])
-    def request_vacation(self, request):
-        serializer = self.get_serializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    def perform_create(self, serializer):
+        employee_public_id = serializer.validated_data.get("employee_public_id")
+        try:
+            employee = BimaHrEmployee.objects.get_object_by_public_id(employee_public_id)
+        except BimaHrEmployee.DoesNotExist:
+            raise ValidationError({"employee": _("Employee with provided id does not exist.")})
 
-    @action(detail=True, methods=['post'], url_path='manage_vacation')
-    def manage_vacation(self, request, pk=None):
+        if not employee.position or not employee.position.manager:
+            raise ValidationError({"manager": _("Manager for the employee's position is not set.")})
+
+        manager = employee.position.manager
+
+        if self.request.user != employee:
+            raise PermissionDenied(_("You are not authorized to request a vacation for another employee."))
+
+        serializer.save(manager=manager, employee=employee)
+
+    def perform_update(self, serializer):
         vacation = self.get_object()
 
-        manager_public_id = str(request.user.public_id)
-        if str(vacation.manager.public_id) != manager_public_id:
-            raise PermissionDenied(_("You are not authorized to manage this vacation."))
+        if self.request.user != vacation.employee and self.request.user != vacation.manager:
+            raise PermissionDenied(_("You are not authorized to perform this action."))
 
-        status_update = request.data.get('status')
-        reason_refused = request.data.get('reason_refused', None)
+        if self.request.user == vacation.employee:
+            if vacation.status != VacationStatus.PENDING.value:
+                raise PermissionDenied(_("You can only update a vacation if its status is PENDING."))
+            serializer.save()
+            return
 
-        with transaction.atomic():
-            if status_update == VacationStatus.APPROVED.value:
-                is_valid, requested_days = is_vacation_request_valid(vacation)
-                if not is_valid:
-                    return Response({
-                        'error': _('Requested vacation days exceed available balance by {} days.').format(
-                            requested_days - vacation.employee.balance_vacation)},
-                        status=status.HTTP_400_BAD_REQUEST)
-            try:
-                updated_vacation = update_vacation_status(vacation, status_update, reason_refused)
-            except ValueError:
-                return Response({'error': _('Invalid data')}, status=status.HTTP_400_BAD_REQUEST)
+        is_status_changing = serializer.validated_data.get('status') != vacation.status
 
-        return Response(self.get_serializer(updated_vacation).data)
+        if self.request.user == vacation.manager:
+            if serializer.validated_data.get('status') not in [VacationStatus.APPROVED.value,
+                                                               VacationStatus.REFUSED.value]:
+                raise PermissionDenied(_("As a manager, you can only approve or refuse a vacation."))
+
+            with transaction.atomic():
+                if serializer.validated_data.get('status') == VacationStatus.APPROVED.value:
+                    is_valid, requested_days = is_vacation_request_valid(vacation)
+                    if not is_valid:
+                        raise ValidationError({
+                            'error': _('Requested vacation days exceed available balance by {} days.').format(
+                                requested_days - vacation.employee.balance_vacation
+                            )
+                        })
+
+                try:
+                    if is_status_changing:
+                        vacation.status_change_date = datetime.now()
+                        vacation.save(update_fields=['status_change_date'])
+                    update_vacation_status(vacation, serializer.validated_data.get('status'),
+                                           serializer.validated_data.get('reason_refused'), save=False)
+                except ValueError:
+                    raise ValidationError({'error': _('Invalid data')})
+                serializer.save()
 
     @action(detail=False, methods=['get'])
     def employee_vacations(self, request):

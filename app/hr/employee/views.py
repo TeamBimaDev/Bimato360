@@ -8,7 +8,9 @@ from core.contact.models import get_contacts_for_parent_entity, create_single_co
 from core.contact.serializers import BimaCoreContactSerializer
 from core.document.models import BimaCoreDocument, get_documents_for_parent_entity
 from core.document.serializers import BimaCoreDocumentSerializer
+from django.db import transaction
 from django.shortcuts import get_object_or_404
+from django.utils.translation import gettext_lazy as _
 from hr.models import BimaHrPersonExperience
 from hr.serializers import BimaHrPersonSkillSerializer, BimaHrPersonExperienceSerializer
 from hr.service import delete_person_experience, delete_person_skill, add_or_update_person_skill, \
@@ -248,6 +250,27 @@ class BimaHrEmployeeViewSet(AbstractViewSet):
             'virtual_balance_vacation': employee.virtual_balance_vacation
         }
         return Response(balance)
+
+    @action(detail=True, methods=['POST'], url_path='create_user_from_employee')
+    def create_user_from_employee(self, request, pk=None):
+        employee = self.get_object()
+
+        if employee.user:
+            return Response({"detail": _("User already exists for this employee.")}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            with transaction.atomic():
+                user = employee.create_user_account()
+
+                return Response({
+                    "detail": _(
+                        "User account created for {}. An email has been sent to {} for further instructions.").format(
+                        employee.full_name, employee.email),
+                    "user_id": user.id
+                }, status=status.HTTP_201_CREATED)
+
+        except ValidationError as e:
+            return Response({"errors": e.args}, status=status.HTTP_400_BAD_REQUEST)
 
     def get_object(self):
         obj = BimaHrEmployee.objects.get_object_by_public_id(self.kwargs['pk'])
