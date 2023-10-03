@@ -10,6 +10,7 @@ from .models import BimaHrEmployee
 
 class BimaHrEmployeeSerializer(AbstractSerializer):
     full_name = serializers.ReadOnlyField()
+    is_user_account_created = serializers.ReadOnlyField()
     country = serializers.SerializerMethodField(read_only=True)
     country_public_id = serializers.SlugRelatedField(
         queryset=BimaCoreCountry.objects.all(),
@@ -55,7 +56,7 @@ class BimaHrEmployeeSerializer(AbstractSerializer):
             'place_of_birth', 'country', 'position', 'position_public_id', 'country_public_id', 'nationality',
             'full_name', 'identity_card_number', 'phone_number', 'second_phone_number', 'email', 'education_level',
             'latest_degree', 'latest_degree_date', 'institute', 'employment_type', 'work_mode', 'job_type',
-            'employment_status', 'probation_end_date', 'salary', 'created', 'updated'
+            'employment_status', 'probation_end_date', 'salary', 'is_user_account_created', 'created', 'updated'
         ]
 
     def validate(self, data):
