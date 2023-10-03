@@ -41,6 +41,9 @@ class BimaHrEmployee(BimaHrPerson):
         if not self.email:
             raise ValidationError({'Email': _("Email is required")})
 
+        if get_user_model().objects.filter(email=self.email).exists():
+            raise ValidationError({'Email': _("This email is already used")})
+
         random_password = get_random_string(length=12)
         user = get_user_model().objects.create_user(
             email=self.email,

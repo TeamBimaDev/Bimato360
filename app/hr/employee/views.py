@@ -273,8 +273,8 @@ class BimaHrEmployeeViewSet(AbstractViewSet):
         except ValidationError as e:
             return Response({"errors": e.args}, status=status.HTTP_400_BAD_REQUEST)
 
-    @action(detail=True, methods=["GET"], url_path="get_transaction_history")
-    def get_transaction_history(self, request, pk=None):
+    @action(detail=True, methods=["GET"], url_path="get_employee_history")
+    def get_employee_history(self, request, pk=None):
         employee = self.get_object()
         history = employee.history.all()
         if not history.exists():
