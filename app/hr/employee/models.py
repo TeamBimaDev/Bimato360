@@ -1,12 +1,11 @@
 from common.enums.employee_enum import get_employment_type_choices, \
     get_work_mode_choices, get_job_type_choices, get_employee_status_choices
+from common.exceptions.email_required_validation import EmailRequiredValidation
+from common.exceptions.user_exists_validation import UserExistsValidation
 from django.contrib.auth import get_user_model
 from django.db import models
-from django.utils.crypto import get_random_string
-from django.utils.translation import gettext_lazy as _
 from hr.models import BimaHrPerson
 from hr.position.models import BimaHrPosition
-from rest_framework.exceptions import ValidationError
 from simple_history.models import HistoricalRecords
 
 
@@ -43,12 +42,12 @@ class BimaHrEmployee(BimaHrPerson):
             return self.user
 
         if not self.email:
-            raise ValidationError({'Email': _("Email is required")})
+            raise EmailRequiredValidation()
 
         if get_user_model().objects.filter(email=self.email).exists():
-            raise ValidationError({'Email': _("This email is already used")})
+            raise UserExistsValidation()
 
-        random_password = get_random_string(length=12)
+        random_password = get_user_model().objects.make_random_password()
         user = get_user_model().objects.create_user(
             email=self.email,
             password=random_password,

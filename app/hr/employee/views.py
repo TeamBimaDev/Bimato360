@@ -1,5 +1,7 @@
 import logging
 
+from common.exceptions.email_required_validation import EmailRequiredValidation
+from common.exceptions.user_exists_validation import UserExistsValidation
 from common.permissions.action_base_permission import ActionBasedPermission
 from core.abstract.views import AbstractViewSet
 from core.address.models import get_addresses_for_parent, create_single_address, BimaCoreAddress
@@ -270,6 +272,10 @@ class BimaHrEmployeeViewSet(AbstractViewSet):
                     "user_id": user.id
                 }, status=status.HTTP_201_CREATED)
 
+        except EmailRequiredValidation:
+            return Response({"E-mail": EmailRequiredValidation.default_detail}, status=status.HTTP_400_BAD_REQUEST)
+        except UserExistsValidation:
+            return Response({"Utilisateur": UserExistsValidation.default_detail}, status=status.HTTP_400_BAD_REQUEST)
         except ValidationError as e:
             return Response({"errors": e.args}, status=status.HTTP_400_BAD_REQUEST)
 
