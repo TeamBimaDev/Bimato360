@@ -26,7 +26,8 @@ from treasury.bank_account.service import BimaTreasuryBankAccountService
 
 from .filters import BimaHrEmployeeFilter
 from .models import BimaHrEmployee
-from .serializers import BimaHrEmployeeSerializer
+from .serializers import BimaHrEmployeeSerializer, EmployeeHistorySerializer
+from .service import BimaHrEmployeeService
 
 logger = logging.getLogger(__name__)
 
@@ -271,6 +272,22 @@ class BimaHrEmployeeViewSet(AbstractViewSet):
 
         except ValidationError as e:
             return Response({"errors": e.args}, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=True, methods=["GET"], url_path="get_transaction_history")
+    def get_transaction_history(self, request, pk=None):
+        employee = self.get_object()
+        history = employee.history.all()
+        if not history.exists():
+            return Response([], status=status.HTTP_200_OK)
+
+        serialized_history = EmployeeHistorySerializer(history, many=True).data
+        grouped_history = BimaHrEmployeeService.group_by_date(
+            serialized_history
+        )
+        response_data = [
+            {"date": key, "changes": value} for key, value in grouped_history.items()
+        ]
+        return Response(response_data)
 
     def get_object(self):
         obj = BimaHrEmployee.objects.get_object_by_public_id(self.kwargs['pk'])
