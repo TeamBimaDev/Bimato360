@@ -109,6 +109,9 @@ class BimaTreasuryTransaction(AbstractModel):
     )
     history = HistoricalRecords()
 
+    def __str__(self):
+        return f"{self.number} : {self.partner.partner_full_name} "
+
     class Meta:
         ordering = ['-date']
         permissions = []

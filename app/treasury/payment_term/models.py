@@ -26,7 +26,7 @@ class BimaTreasuryPaymentTerm(AbstractModel):
         default_permissions = ()
 
     def __str__(self):
-        return self.name
+        return f"{self.name}  ({self.type})"
 
 
 class BimaTreasuryPaymentTermDetail(models.Model):

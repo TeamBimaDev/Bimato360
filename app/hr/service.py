@@ -1,3 +1,4 @@
+from django.utils.translation import gettext_lazy as _
 from hr.models import BimaHrPersonExperience
 from hr.serializers import BimaHrPersonExperienceSerializer
 from hr.skill.models import BimaHrPersonSkill
@@ -37,14 +38,14 @@ def delete_person_skill(person, skill_public_id):
         person_skill = BimaHrPersonSkill.objects.get(person=person, skill=skill)
         person_skill.delete()
     except BimaHrPersonSkill.DoesNotExist:
-        raise NotFound(detail={'error': 'Skill not found for this person'})
+        raise NotFound(detail={'error': _('Skill not found for this person')})
 
 
 def get_experience_by_public_id(public_id):
     try:
         return BimaHrPersonExperience.objects.get_object_by_public_id(public_id=public_id)
     except BimaHrPersonExperience.DoesNotExist:
-        raise NotFound(detail={'error': 'Experience not found'})
+        raise NotFound(detail={'error': _('Experience not found')})
 
 
 def add_or_update_person_experience(person, experience_data):
@@ -54,7 +55,7 @@ def add_or_update_person_experience(person, experience_data):
         try:
             experience = get_experience_by_public_id(experience_id)
         except NotFound:
-            raise NotFound(detail={'error': 'Experience not found'})
+            raise NotFound(detail={'error': _('Experience not found')})
     else:
         experience = None
 
@@ -70,7 +71,7 @@ def delete_person_experience(person, experience_public_id):
     try:
         experience = get_experience_by_public_id(experience_public_id)
         if experience.person.public_id.hex != person.public_id.hex:
-            raise NotFound(detail={'error': 'Experience not found for this person'})
+            raise NotFound(detail={'error': _('Experience not found for this person')})
         experience.delete()
     except BimaHrPersonExperience.DoesNotExist:
-        raise NotFound(detail={'error': 'Experience not found'})
+        raise NotFound(detail={'error': _('Experience not found')})

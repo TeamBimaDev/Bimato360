@@ -17,6 +17,9 @@ class BimaTreasuryPaymentMethod(AbstractModel):
                                  choices=get_transaction_type_for_cash_or_bank(),
                                  verbose_name=_('CASH_BANK'))
 
+    def __str__(self):
+        return f"{self.name}  ({self.income_outcome})"
+
     class Meta:
         ordering = ['-created']
         permissions = []
