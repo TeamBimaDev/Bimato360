@@ -37,7 +37,7 @@ class BimaHrEmployee(BimaHrPerson):
     def is_user_account_created(self):
         return self.user is not None
 
-    def create_user_account(self, password, **extra_fields):
+    def create_user_account(self, **extra_fields):
         if self.user:
             return self.user
 
