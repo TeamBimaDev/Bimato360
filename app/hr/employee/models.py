@@ -52,7 +52,7 @@ class BimaHrEmployee(BimaHrPerson):
             email=self.email,
             password=random_password,
             name=self.full_name,
-            is_password_change_when_created=True,
+            is_password_change_when_created=False,
             created_by_admin=True,
             **extra_fields
         )
