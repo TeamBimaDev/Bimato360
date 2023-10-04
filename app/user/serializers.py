@@ -8,6 +8,7 @@ from django.contrib.auth import (
 from django.contrib.auth.password_validation import validate_password
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
+from hr.employee.serializers import BimaHrEmployeeSerializer
 from rest_framework import exceptions
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
@@ -28,6 +29,7 @@ def password_match_validator(data):
 class UserSerializer(serializers.ModelSerializer):
     id = serializers.UUIDField(source="public_id", read_only=True, format="hex")
     confirm_password = serializers.CharField(write_only=True, required=False)
+    employee = serializers.SerializerMethodField(read_only=True)
 
     """Serializer for the user object."""
 
@@ -46,6 +48,7 @@ class UserSerializer(serializers.ModelSerializer):
             "approved_at",
             "password",
             "confirm_password",
+            "employee"
         ]
         extra_kwargs = {
             "password": {
@@ -56,6 +59,11 @@ class UserSerializer(serializers.ModelSerializer):
         }
 
     approved_by = serializers.SlugRelatedField(slug_field="name", read_only=True)
+
+    def get_employee(self, obj):
+        if hasattr(obj, 'employee'):
+            return BimaHrEmployeeSerializer(obj.employee).data
+        return None
 
     def get_fields(self, *args, **kwargs):
         fields = super().get_fields(*args, **kwargs)
