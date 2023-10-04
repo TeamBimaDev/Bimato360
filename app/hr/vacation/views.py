@@ -6,7 +6,6 @@ from core.abstract.views import AbstractViewSet
 from django.db import transaction
 from django.utils.translation import gettext_lazy as _
 from hr.employee.models import BimaHrEmployee
-from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.response import Response
@@ -34,6 +33,12 @@ class BimaHrVacationViewSet(AbstractViewSet):
         'manage_vacation': ['vacation.can_manage_other_vacation'],
     }
 
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        if self.can_view_all_vacations():
+            return queryset
+        return queryset.filter(employee__user=self.request.user)
+
     def perform_create(self, serializer):
         employee_public_id = serializer.validated_data.get("employee_public_id")
         try:
@@ -46,7 +51,7 @@ class BimaHrVacationViewSet(AbstractViewSet):
 
         manager = employee.position.manager
 
-        if self.request.user != employee:
+        if self.request.user != employee.user:
             raise PermissionDenied(_("You are not authorized to request a vacation for another employee."))
 
         serializer.save(manager=manager, employee=employee)
@@ -54,7 +59,11 @@ class BimaHrVacationViewSet(AbstractViewSet):
     def perform_update(self, serializer):
         vacation = self.get_object()
 
-        if self.request.user != vacation.employee and self.request.user != vacation.manager:
+        if not (
+                self.request.user == vacation.employee.user
+                or self.request.user == vacation.manager.user
+                or self.request.user.has_perm('vacation.can_manage_other_vacation')
+        ):
             raise PermissionDenied(_("You are not authorized to perform this action."))
 
         if self.request.user == vacation.employee:
@@ -65,7 +74,10 @@ class BimaHrVacationViewSet(AbstractViewSet):
 
         is_status_changing = serializer.validated_data.get('status') != vacation.status
 
-        if self.request.user == vacation.manager:
+        if (
+                self.request.user == vacation.manager.user
+                or self.request.user.has_perm('vacation.can_manage_other_vacation')
+        ):
             if serializer.validated_data.get('status') not in [VacationStatus.APPROVED.value,
                                                                VacationStatus.REFUSED.value]:
                 raise PermissionDenied(_("As a manager, you can only approve or refuse a vacation."))
@@ -90,17 +102,6 @@ class BimaHrVacationViewSet(AbstractViewSet):
                     raise ValidationError({'error': _('Invalid data')})
                 serializer.save()
 
-    @action(detail=False, methods=['get'])
-    def employee_vacations(self, request):
-        employee_id = request.query_params.get('employee_id')
-        try:
-            employee = BimaHrEmployee.objects.get(public_id=employee_id)
-        except BimaHrEmployee.DoesNotExist:
-            return Response({'error': 'Employee not found'}, status=status.HTTP_404_NOT_FOUND)
-        vacations = self.get_queryset().filter(employee=employee)
-        serializer = self.get_serializer(vacations, many=True)
-        return Response(serializer.data)
-
     @action(detail=True, methods=['get'], url_path='get_vacation_balance')
     def get_vacation_balance(self, request, pk=None):
         vacation = self.get_object()
@@ -111,6 +112,20 @@ class BimaHrVacationViewSet(AbstractViewSet):
         }
         return Response(balance)
 
+    @action(detail=False, methods=['get'], url_path='see_affected_vacation')
+    def see_affected_vacation(self, request):
+        if self.can_view_all_vacations():
+            queryset = BimaHrVacation.objects.all()
+        else:
+            queryset = BimaHrVacation.objects.filter(manager__user=self.request.user)
+
+        filtered_queryset = self.filter_queryset(queryset)
+        serializer = self.get_serializer(filtered_queryset, many=True)
+        return Response(serializer.data)
+
     def get_object(self):
         obj = BimaHrVacation.objects.get_object_by_public_id(self.kwargs['pk'])
         return obj
+
+    def can_view_all_vacations(self):
+        return self.request.user.has_perm('vacation.can_view_all_vacation')

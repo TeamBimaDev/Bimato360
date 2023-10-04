@@ -603,3 +603,5 @@ class PermissionsList:
     HR_VACATION_READ = ("hr.vacation.can_read", "Can read vacation", "HR_VACATION")
     HR_VACATION_MANAGE_FOR_OTHER = (
         "hr.vacation.can_manage_other_vacation", "Can manage other's vacation", "HR_VACATION")
+    HR_VACATION_VIEW_FOR_OTHER = (
+        "hr.vacation.can_view_all_vacation", "Can view other's vacation", "HR_VACATION")
