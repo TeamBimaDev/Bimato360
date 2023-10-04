@@ -17,9 +17,10 @@ def working_days_count(start_date, end_date, start_working_day, end_working_day)
 
 def calculate_vacation_balances(employee):
     current_year = datetime.now().year
-    hiring_year = employee.hiring_date.year
+    hiring_year = employee.hiring_date.year if employee.hiring_date else datetime.now().year
+    hiring_month = employee.hiring_date.month if employee.hiring_date else datetime.now().month
     worked_months = (current_year - hiring_year) * 12 if current_year > hiring_year else (
-            datetime.now().month - employee.hiring_date.month
+            datetime.now().month - hiring_month
     )
 
     bima_company = BimaCompany.objects.first()  # TODO need to verify the company data

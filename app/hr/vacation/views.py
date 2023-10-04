@@ -13,7 +13,7 @@ from rest_framework.response import Response
 from .filters import BimaHrVacationFilter
 from .models import BimaHrVacation
 from .serializers import BimaHrVacationSerializer
-from .service import is_vacation_request_valid, update_vacation_status
+from .service import is_vacation_request_valid, update_vacation_status, calculate_vacation_balances
 
 
 class BimaHrVacationViewSet(AbstractViewSet):
@@ -123,9 +123,25 @@ class BimaHrVacationViewSet(AbstractViewSet):
         return Response(serializer.data)
 
     @action(detail=False, methods=['get'], url_path='list_vacation_type')
-    def list_vacation_type(self, request, *args, **kwargs):
+    def list_vacation_type(self, request):
         formatted_response = {str(item[0]): str(item[1]) for item in get_vacation_type_list_for_api()}
         return Response(formatted_response)
+
+    @action(detail=False, methods=['GET'], url_path='calculate_vacation_balance')
+    def calculate_vacation_balance(self, request):
+        balance_array = []
+        with transaction.atomic():
+            for employee in BimaHrEmployee.objects.all():
+                employee_old_vacation_balance = employee.balance_vacation
+                calculate_vacation_balances(employee)
+                employee_new_vacation_balance = employee.balance_vacation
+                balance_array.append(
+                    {"employee_public_id": employee.public_id,
+                     "employee_full_name": employee.full_name,
+                     "old_vacation_balance": employee_old_vacation_balance,
+                     "new_vacation_balance": employee_new_vacation_balance})
+
+        return Response(balance_array)
 
     def get_object(self):
         obj = BimaHrVacation.objects.get_object_by_public_id(self.kwargs['pk'])

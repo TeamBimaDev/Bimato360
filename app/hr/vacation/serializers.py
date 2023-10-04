@@ -11,7 +11,10 @@ class BimaHrVacationSerializer(AbstractSerializer):
         queryset=BimaHrEmployee.objects.all(),
         slug_field='public_id',
         source='manager',
-        write_only=True
+        write_only=True,
+        required=False,
+        allow_empty=True,
+        allow_null=True
 
     )
 
