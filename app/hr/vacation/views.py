@@ -39,12 +39,7 @@ class BimaHrVacationViewSet(AbstractViewSet):
         return queryset.filter(employee__user=self.request.user)
 
     def perform_create(self, serializer):
-        employee_public_id = serializer.validated_data.get("employee_public_id")
-        try:
-            employee = BimaHrEmployee.objects.get_object_by_public_id(employee_public_id)
-        except BimaHrEmployee.DoesNotExist:
-            raise ValidationError({"employee": _("Employee with provided id does not exist.")})
-
+        employee = serializer.validated_data.get("employee")
         if not employee.position or not employee.position.manager:
             raise ValidationError({"manager": _("Manager for the employee's position is not set.")})
 
@@ -133,13 +128,18 @@ class BimaHrVacationViewSet(AbstractViewSet):
         with transaction.atomic():
             for employee in BimaHrEmployee.objects.all():
                 employee_old_vacation_balance = employee.balance_vacation
+                employee_old_virtual_vacation_balance = employee.virtual_balance_vacation
                 calculate_vacation_balances(employee)
                 employee_new_vacation_balance = employee.balance_vacation
+                employee_new_virtual_vacation_balance = employee.virtual_balance_vacation
                 balance_array.append(
                     {"employee_public_id": employee.public_id,
                      "employee_full_name": employee.full_name,
                      "old_vacation_balance": employee_old_vacation_balance,
-                     "new_vacation_balance": employee_new_vacation_balance})
+                     "new_vacation_balance": employee_new_vacation_balance,
+                     "old_virtual_vacation_balance": employee_old_virtual_vacation_balance,
+                     "new_virtual_vacation_balance": employee_new_virtual_vacation_balance
+                     })
 
         return Response(balance_array)
 

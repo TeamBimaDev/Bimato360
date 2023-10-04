@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 
 from common.enums.vacation import VacationStatus
 from company.models import BimaCompany
+from django.db import models
 from hr.vacation.models import BimaHrVacation
 
 
@@ -16,42 +17,60 @@ def working_days_count(start_date, end_date, start_working_day, end_working_day)
 
 
 def calculate_vacation_balances(employee):
-    current_year = datetime.now().year
-    hiring_date = employee.hiring_date if employee.hiring_date else datetime.now()
-    hiring_year = hiring_date.year
-    hiring_month = hiring_date.month
-    worked_months = (current_year - hiring_year) * 12 if current_year > hiring_year else (
-            datetime.now().month - hiring_month
-    )
-
-    bima_company = BimaCompany.objects.first()  # TODO need to verify the company data
+    bima_company = BimaCompany.objects.first()  # TODO: Handle case where BimaCompany does not exist
     vacation_coefficient = bima_company.vacation_coefficient
+    hiring_date = employee.hiring_date if employee.hiring_date else datetime.now()
+    current_year = datetime.now().year
+    end_of_year = datetime(current_year, 12, 31)
 
-    total_working_days_approved = sum(
-        working_days_count(vacation.date_start, vacation.date_end, bima_company.start_working_day,
-                           bima_company.end_working_day)
-        for vacation in BimaHrVacation.objects.filter(
-            employee=employee,
-            date_end__gte=datetime.now(),
-            status=VacationStatus.APPROVED.value
-        )
-    )
+    if hiring_date.year == current_year:
+        worked_months = datetime.now().month - hiring_date.month + 1
+        employee.balance_vacation = worked_months * vacation_coefficient
+    elif hiring_date.year < current_year:
+        employee.balance_vacation = datetime.now().month * vacation_coefficient
 
     total_working_days_upcoming = sum(
-        working_days_count(vacation.date_start, vacation.date_end, bima_company.start_working_day,
-                           bima_company.end_working_day)
+        working_days_count(
+            vacation.date_start, vacation.date_end,
+            bima_company.start_working_day, bima_company.end_working_day
+        )
         for vacation in BimaHrVacation.objects.filter(
             employee=employee,
             date_end__gte=datetime.now(),
-            status__in=[VacationStatus.APPROVED.value, VacationStatus.PENDING.value]
+            status__in=[VacationStatus.APPROVED.value]
         )
     )
+    employee.balance_vacation -= total_working_days_upcoming
 
-    balance_vacation = vacation_coefficient * worked_months - total_working_days_approved
-    virtual_balance_vacation = balance_vacation - (total_working_days_upcoming - total_working_days_approved)
+    last_vacation_date = BimaHrVacation.objects.filter(
+        employee=employee,
+        date_end__lte=end_of_year,
+        status__in=[VacationStatus.APPROVED.value]
+    ).aggregate(models.Max('date_end'))['date_end__max']
 
-    employee.balance_vacation = balance_vacation
-    employee.virtual_balance_vacation = virtual_balance_vacation
+    if last_vacation_date:
+        months_until_last_vacation = last_vacation_date.month - datetime.now().month
+        expected_new_balance = months_until_last_vacation * vacation_coefficient
+
+        total_working_days_upcoming = sum(
+            working_days_count(
+                vacation.date_start, vacation.date_end,
+                bima_company.start_working_day, bima_company.end_working_day
+            )
+            for vacation in BimaHrVacation.objects.filter(
+                employee=employee,
+                date_end__lte=last_vacation_date,
+                status__in=[VacationStatus.APPROVED.value]
+            )
+        )
+    else:
+        expected_new_balance = 0
+        total_working_days_upcoming = 0
+
+    employee.virtual_balance_vacation = (
+            employee.balance_vacation + expected_new_balance - total_working_days_upcoming
+    )
+
     employee.save()
 
 

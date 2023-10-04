@@ -1,4 +1,5 @@
 from core.abstract.serializers import AbstractSerializer
+from django.utils.translation import gettext_lazy as _
 from hr.employee.models import BimaHrEmployee
 from rest_framework import serializers
 
@@ -37,6 +38,13 @@ class BimaHrVacationSerializer(AbstractSerializer):
             'id': obj.employee.public_id.hex,
             'name': obj.employee.full_name,
         }
+
+    def validate(self, data):
+        if data['date_end'] < data['date_start']:
+            raise serializers.ValidationError({
+                "date_end": _("End date must be on or after the start date.")
+            })
+        return data
 
     class Meta:
         model = BimaHrVacation

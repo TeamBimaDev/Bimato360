@@ -16,10 +16,15 @@ def update_all_employee_vacation_balances(secret_key=None):
     with transaction.atomic():
         for employee in BimaHrEmployee.objects.all():
             employee_old_vacation_balance = employee.balance_vacation
+            employee_old_virtual_vacation_balance = employee.virtual_balance_vacation
             calculate_vacation_balances(employee)
             employee_new_vacation_balance = employee.balance_vacation
+            employee_new_virtual_vacation_balance = employee.virtual_balance_vacation
             logger.info(
                 {"employee_public_id": employee.public_id,
                  "employee_full_name": employee.full_name,
                  "old_vacation_balance": employee_old_vacation_balance,
-                 "new_vacation_balance": employee_new_vacation_balance})
+                 "new_vacation_balance": employee_new_vacation_balance,
+                 "old_virtual_vacation_balance": employee_old_virtual_vacation_balance,
+                 "new_virtual_vacation_balance": employee_new_virtual_vacation_balance
+                 })
