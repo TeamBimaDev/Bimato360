@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from common.enums.vacation import VacationStatus, get_vacation_type_list
+from common.enums.vacation import VacationStatus, get_vacation_type_list_for_api
 from common.permissions.action_base_permission import ActionBasedPermission
 from core.abstract.views import AbstractViewSet
 from django.db import transaction
@@ -124,7 +124,8 @@ class BimaHrVacationViewSet(AbstractViewSet):
 
     @action(detail=False, methods=['get'], url_path='list_vacation_type')
     def list_vacation_type(self, request, *args, **kwargs):
-        return Response(get_vacation_type_list())
+        formatted_response = {str(item[0]): str(item[1]) for item in get_vacation_type_list_for_api()}
+        return Response(formatted_response)
 
     def get_object(self):
         obj = BimaHrVacation.objects.get_object_by_public_id(self.kwargs['pk'])

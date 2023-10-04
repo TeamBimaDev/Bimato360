@@ -1,21 +1,27 @@
 from enum import Enum
 
+from django.utils.translation import gettext_lazy as _
+
 
 class VacationType(Enum):
-    ANNUAL = "Annual"
-    SICK = "Sick"
-    UNPAID = "Unpaid"
-    OTHER = "Other"
+    ANNUAL = _("Annual")
+    SICK = _("Sick")
+    UNPAID = _("Unpaid")
+    OTHER = _("Other")
 
 
 class VacationStatus(Enum):
-    PENDING = "Pending"
-    APPROVED = "Approved"
-    REFUSED = "Refused"
+    PENDING = _("Pending")
+    APPROVED = _("Approved")
+    REFUSED = _("Refused")
 
 
 def get_vacation_type_list():
     return [(ff.value, ff.value) for ff in VacationType]
+
+
+def get_vacation_type_list_for_api():
+    return [(ff.name, ff.value) for ff in VacationType]
 
 
 def get_vacation_status_list():
