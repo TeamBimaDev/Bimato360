@@ -17,12 +17,8 @@ class VacationStatus(Enum):
 
 
 def get_vacation_type_list():
-    return [(ff.value, ff.value) for ff in VacationType]
-
-
-def get_vacation_type_list_for_api():
     return [(ff.name, ff.value) for ff in VacationType]
 
 
 def get_vacation_status_list():
-    return [(ff.value, ff.value) for ff in VacationStatus]
+    return [(ff.name, ff.value) for ff in VacationStatus]
