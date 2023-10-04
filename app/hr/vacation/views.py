@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from common.enums.vacation import VacationStatus
+from common.enums.vacation import VacationStatus, get_vacation_type_list
 from common.permissions.action_base_permission import ActionBasedPermission
 from core.abstract.views import AbstractViewSet
 from django.db import transaction
@@ -30,7 +30,6 @@ class BimaHrVacationViewSet(AbstractViewSet):
         'update': ['vacation.can_update'],
         'partial_update': ['vacation.can_update'],
         'destroy': ['vacation.can_delete'],
-        'manage_vacation': ['vacation.can_manage_other_vacation'],
     }
 
     def get_queryset(self):
@@ -122,6 +121,10 @@ class BimaHrVacationViewSet(AbstractViewSet):
         filtered_queryset = self.filter_queryset(queryset)
         serializer = self.get_serializer(filtered_queryset, many=True)
         return Response(serializer.data)
+
+    @action(detail=False, methods=['get'], url_path='list_vacation_type')
+    def list_vacation_type(self, request, *args, **kwargs):
+        return Response(get_vacation_type_list())
 
     def get_object(self):
         obj = BimaHrVacation.objects.get_object_by_public_id(self.kwargs['pk'])
