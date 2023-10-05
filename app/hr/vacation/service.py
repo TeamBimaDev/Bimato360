@@ -22,30 +22,34 @@ def calculate_vacation_balances(employee):
     hiring_date = employee.hiring_date if employee.hiring_date else datetime.now()
     current_year = datetime.now().year
     end_of_year = datetime(current_year, 12, 31)
-
+    current_balance = 0
     if hiring_date.year == current_year:
         worked_months = datetime.now().month - hiring_date.month + 1
-        employee.balance_vacation = worked_months * vacation_coefficient
-    elif hiring_date.year < current_year:
-        employee.balance_vacation = datetime.now().month * vacation_coefficient
+        current_balance = worked_months * vacation_coefficient
+        employee.balance_vacation = current_balance
 
-    total_working_days_upcoming = sum(
+    elif hiring_date.year < current_year:
+        current_balance = datetime.now().month * vacation_coefficient
+        employee.balance_vacation = current_balance
+
+    vacation_from_total_working_days_upcoming = sum(
         working_days_count(
             vacation.date_start, vacation.date_end,
             bima_company.start_working_day, bima_company.end_working_day
         )
         for vacation in BimaHrVacation.objects.filter(
             employee=employee,
-            date_end__gte=datetime.now(),
-            status__in=[VacationStatus.APPROVED.value]
+            date_start__lte=datetime.now(),
+            status__in=[VacationStatus.APPROVED.name]
         )
     )
-    employee.balance_vacation -= total_working_days_upcoming
+    new_balance_vacation = employee.balance_vacation - vacation_from_total_working_days_upcoming
+    employee.balance_vacation = round(new_balance_vacation, 2)
 
     last_vacation_date = BimaHrVacation.objects.filter(
         employee=employee,
         date_end__lte=end_of_year,
-        status__in=[VacationStatus.APPROVED.value]
+        status__in=[VacationStatus.APPROVED.name]
     ).aggregate(models.Max('date_end'))['date_end__max']
 
     if last_vacation_date:
@@ -59,17 +63,16 @@ def calculate_vacation_balances(employee):
             )
             for vacation in BimaHrVacation.objects.filter(
                 employee=employee,
-                date_end__lte=last_vacation_date,
-                status__in=[VacationStatus.APPROVED.value]
+                date_start__lte=last_vacation_date,
+                status__in=[VacationStatus.APPROVED.name]
             )
         )
     else:
         expected_new_balance = 0
         total_working_days_upcoming = 0
 
-    employee.virtual_balance_vacation = (
-            employee.balance_vacation + expected_new_balance - total_working_days_upcoming
-    )
+    new_virtual_balance = current_balance + expected_new_balance - total_working_days_upcoming
+    employee.virtual_balance_vacation = round(new_virtual_balance, 2)
 
     employee.save()
 

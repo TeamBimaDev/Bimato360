@@ -1,7 +1,8 @@
 from datetime import datetime
 
-from common.enums.vacation import VacationStatus, get_vacation_type_list
+from common.enums.vacation import VacationStatus, get_vacation_type_list, get_vacation_status_list
 from common.permissions.action_base_permission import ActionBasedPermission
+from core.abstract.pagination import DefaultPagination
 from core.abstract.views import AbstractViewSet
 from django.db import transaction
 from django.utils.translation import gettext_lazy as _
@@ -114,12 +115,22 @@ class BimaHrVacationViewSet(AbstractViewSet):
             queryset = BimaHrVacation.objects.filter(manager__user=self.request.user)
 
         filtered_queryset = self.filter_queryset(queryset)
-        serializer = self.get_serializer(filtered_queryset, many=True)
-        return Response(serializer.data)
+
+        paginator = DefaultPagination()
+        paginated_queryset = paginator.paginate_queryset(filtered_queryset, request)
+
+        serializer = self.get_serializer(paginated_queryset, many=True)
+
+        return paginator.get_paginated_response(serializer.data)
 
     @action(detail=False, methods=['get'], url_path='list_vacation_type')
     def list_vacation_type(self, request):
         formatted_response = {str(item[0]): str(item[1]) for item in get_vacation_type_list()}
+        return Response(formatted_response)
+
+    @action(detail=False, methods=['get'], url_path='list_vacation_status')
+    def list_vacation_status(self, request):
+        formatted_response = {str(item[0]): str(item[1]) for item in get_vacation_status_list()}
         return Response(formatted_response)
 
     @action(detail=False, methods=['GET'], url_path='calculate_vacation_balance')

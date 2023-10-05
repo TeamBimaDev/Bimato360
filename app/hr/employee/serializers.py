@@ -56,7 +56,8 @@ class BimaHrEmployeeSerializer(AbstractSerializer):
             'place_of_birth', 'country', 'position', 'position_public_id', 'country_public_id', 'nationality',
             'full_name', 'identity_card_number', 'phone_number', 'second_phone_number', 'email', 'education_level',
             'latest_degree', 'latest_degree_date', 'institute', 'employment_type', 'work_mode', 'job_type',
-            'employment_status', 'probation_end_date', 'salary', 'is_user_account_created', 'created', 'updated'
+            'employment_status', 'probation_end_date', 'salary', 'is_user_account_created', 'hiring_date',
+            'last_performance_review', 'created', 'updated'
         ]
 
     def validate(self, data):
