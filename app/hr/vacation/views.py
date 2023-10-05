@@ -214,7 +214,7 @@ class BimaHrVacationViewSet(AbstractViewSet):
         vacation.status_change_date = timezone.now()
         vacation.save(update_fields=['status_change_date'])
 
-    @action(detail=True, methods=['post'], url_path='approve_refuse')
+    @action(detail=True, methods=['post'], url_path='approve_refuse_vacation')
     def approve_refuse_vacation(self, request, pk=None):
         vacation = self.get_object()
         self.check_user_permissions(vacation)
