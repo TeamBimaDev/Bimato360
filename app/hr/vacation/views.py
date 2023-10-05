@@ -219,10 +219,10 @@ class BimaHrVacationViewSet(AbstractViewSet):
         vacation = self.get_object()
         self.check_user_permissions(vacation)
 
-        status = request.data.get('status')
-        reason_refused = request.data.get('reason_refused')
+        status = request.data.get('status').upper()
+        reason_refused = request.data.get('reason_refused', None)
 
-        if status not in [VacationStatus.APPROVED.value, VacationStatus.REFUSED.value]:
+        if status not in [VacationStatus.APPROVED.name, VacationStatus.REFUSED.name]:
             raise ValidationError({"status": _("Invalid status value.")})
 
         with transaction.atomic():
