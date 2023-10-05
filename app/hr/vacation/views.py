@@ -5,6 +5,8 @@ from common.permissions.action_base_permission import ActionBasedPermission
 from core.abstract.pagination import DefaultPagination
 from core.abstract.views import AbstractViewSet
 from django.db import transaction
+from django.http import HttpResponse
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from hr.employee.models import BimaHrEmployee
 from rest_framework.decorators import action
@@ -14,7 +16,8 @@ from rest_framework.response import Response
 from .filters import BimaHrVacationFilter
 from .models import BimaHrVacation
 from .serializers import BimaHrVacationSerializer
-from .service import is_vacation_request_valid, update_vacation_status, calculate_vacation_balances
+from .service import is_vacation_request_valid, update_vacation_status, calculate_vacation_balances, \
+    BimaHrVacationExportService
 
 
 class BimaHrVacationViewSet(AbstractViewSet):
@@ -31,6 +34,8 @@ class BimaHrVacationViewSet(AbstractViewSet):
         'update': ['vacation.can_update'],
         'partial_update': ['vacation.can_update'],
         'destroy': ['vacation.can_delete'],
+        'export_xls': ['vacation.can_view_all_vacation'],
+        'export_csv': ['vacation.can_view_all_vacation'],
     }
 
     def get_queryset(self):
@@ -153,6 +158,83 @@ class BimaHrVacationViewSet(AbstractViewSet):
                      })
 
         return Response(balance_array)
+
+    @action(detail=False, methods=["GET"], url_path="export_csv")
+    def export_csv(self, request):
+        filtered_qs = BimaHrVacationFilter(request.GET, queryset=self.get_queryset()).qs
+        service = BimaHrVacationExportService(filtered_qs)
+        csv_data = service.export_to_csv()
+
+        response = HttpResponse(csv_data, content_type="text/csv")
+        response["Content-Disposition"] = "attachment; filename=vacations_export.csv"
+        return response
+
+    @action(detail=False, methods=["GET"], url_path="export_xls")
+    def export_xls(self, request):
+        filtered_qs = BimaHrVacationFilter(request.GET, queryset=self.get_queryset()).qs
+        service = BimaHrVacationExportService(filtered_qs)
+        excel_data = service.export_to_excel()
+
+        response = HttpResponse(
+            excel_data,
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
+        response["Content-Disposition"] = "attachment; filename=vacations_export.xlsx"
+        return response
+
+    @action(detail=False, methods=["GET"], url_path="export_employee_vacation")
+    def export_employee_vacation(self, request):
+        employee_public_id = request.query_params.get('employee_public_id')
+        employee = None
+        try:
+            if employee_public_id:
+                employee = BimaHrEmployee.objects.get_object_by_public_id(employee_public_id)
+        except Exception:
+            employee = None
+
+        service = BimaHrVacationExportService(None)
+        excel_data = service.export_employee_vacation_to_excel(employee)
+
+        response = HttpResponse(
+            excel_data,
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
+        response["Content-Disposition"] = "attachment; filename=employee_vacation_export.xlsx"
+        return response
+
+    def check_user_permissions(self, vacation):
+        user = self.request.user
+        if not (
+                user == vacation.manager.user
+                or user.has_perm('vacation.can_manage_other_vacation')
+        ):
+            raise PermissionDenied(_("You are not authorized to perform this action."))
+
+    def update_status_change_date(self, vacation):
+        vacation.status_change_date = timezone.now()
+        vacation.save(update_fields=['status_change_date'])
+
+    @action(detail=True, methods=['post'], url_path='approve_refuse')
+    def approve_refuse_vacation(self, request, pk=None):
+        vacation = self.get_object()
+        self.check_user_permissions(vacation)
+
+        status = request.data.get('status')
+        reason_refused = request.data.get('reason_refused')
+
+        if status not in [VacationStatus.APPROVED.value, VacationStatus.REFUSED.value]:
+            raise ValidationError({"status": _("Invalid status value.")})
+
+        with transaction.atomic():
+            vacation.status = status
+            if status == VacationStatus.REFUSED.value and reason_refused:
+                vacation.reason_refused = reason_refused
+
+            self.update_status_change_date(vacation)
+            vacation.save()
+
+        serializer = self.get_serializer(vacation)
+        return Response(serializer.data)
 
     def get_object(self):
         obj = BimaHrVacation.objects.get_object_by_public_id(self.kwargs['pk'])

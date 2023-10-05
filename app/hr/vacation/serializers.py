@@ -37,6 +37,8 @@ class BimaHrVacationSerializer(AbstractSerializer):
         return {
             'id': obj.employee.public_id.hex,
             'name': obj.employee.full_name,
+            'balance_vacation': obj.employee.balance_vacation,
+            'virtual_balance_vacation': obj.employee.virtual_balance_vacation,
         }
 
     def validate(self, data):
