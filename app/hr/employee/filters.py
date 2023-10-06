@@ -7,7 +7,6 @@ from .models import BimaHrEmployee
 
 
 class BimaHrEmployeeFilter(filters.FilterSet):
-    unique_id = django_filters.CharFilter(field_name='unique_id', lookup_expr='iexact')
     marital_status = django_filters.ChoiceFilter(choices=get_marital_status_choices())
     position = django_filters.UUIDFilter(field_name='position__public_id', lookup_expr='iexact')
 

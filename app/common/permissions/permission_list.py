@@ -605,3 +605,8 @@ class PermissionsList:
         "hr.vacation.can_manage_other_vacation", "Can manage other's vacation", "HR_VACATION")
     HR_VACATION_VIEW_FOR_OTHER = (
         "hr.vacation.can_view_all_vacation", "Can view other's vacation", "HR_VACATION")
+
+    HR_CONTRACT_CREATE = ("hr.contract.can_create", "Can create contract", "HR_CONTRACT")
+    HR_CONTRACT_UPDATE = ("hr.contract.can_update", "Can update contract", "HR_CONTRACT")
+    HR_CONTRACT_DELETE = ("hr.contract.can_delete", "Can delete contract", "HR_CONTRACT")
+    HR_CONTRACT_READ = ("hr.contract.can_read", "Can read contract", "HR_CONTRACT")

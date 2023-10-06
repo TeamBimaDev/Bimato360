@@ -11,9 +11,17 @@ class SeniorityType(Enum):
 
 
 class ContractType(Enum):
-    CDI = _('CDI')
     CDD = _('CDD')
-    APPRENTICESHIP = _('Apprenticeship')
+    CDI = _('CDI')
+    CVP = _('CVP')
+    INTERNSHIP = _('Internship')
+    KARAMA = _('Karama')
+
+
+class ContractStatus(Enum):
+    ACTIVE = _('Active')
+    SUSPENDED = _('Suspended')
+    EXPIRED = _('Expired')
 
 
 def get_seniority_choices():
@@ -22,3 +30,7 @@ def get_seniority_choices():
 
 def get_contract_type_choices():
     return [(contract.name, contract.value) for contract in ContractType]
+
+
+def get_contract_status_choices():
+    return [(st.name, st.value) for st in ContractStatus]
