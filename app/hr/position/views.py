@@ -9,6 +9,7 @@ from .serializers import BimaHrPositionSerializer
 class BimaHrPositionViewSet(AbstractViewSet):
     queryset = BimaHrPosition.objects.select_related('department', 'job_category', 'manager').all()
     serializer_class = BimaHrPositionSerializer
+    ordering = ["-title"]
     permission_classes = []
     permission_classes = (ActionBasedPermission,)
     ordering_fields = ['title', 'department__name']
