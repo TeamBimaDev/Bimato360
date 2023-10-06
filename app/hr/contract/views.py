@@ -2,6 +2,8 @@ import django_filters
 from common.enums.position import get_contract_type_choices, get_contract_status_choices
 from common.permissions.action_base_permission import ActionBasedPermission
 from core.abstract.views import AbstractViewSet
+from core.document.models import BimaCoreDocument, get_documents_for_parent_entity
+from core.document.serializers import BimaCoreDocumentSerializer
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from rest_framework import status
@@ -80,3 +82,34 @@ class BimaHrContractViewSet(AbstractViewSet):
         amendment = get_object_or_404(BimaHrContractAmendment, public_id=amendment_public_id, contract=contract)
         amendment.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def list_documents(self, request, *args, **kwargs):
+        contract = BimaHrContract.objects.get_object_by_public_id(self.kwargs['public_id'])
+        documents = get_documents_for_parent_entity(contract)
+        serialized_document = BimaCoreDocumentSerializer(documents, many=True)
+        return Response(serialized_document.data)
+
+    def create_document(self, request, *args, **kwargs):
+        contract = BimaHrContract.objects.get_object_by_public_id(self.kwargs['public_id'])
+        document_data = request.data
+        document_data['file_path'] = request.FILES['file_path']
+        result = BimaCoreDocument.create_document_for_parent(contract, document_data)
+        if isinstance(result, BimaCoreDocument):
+            return Response({
+                "id": result.public_id,
+                "document_name": result.document_name,
+                "description": result.description,
+                "date_file": result.date_file,
+                "file_type": result.file_type
+
+            }, status=status.HTTP_201_CREATED)
+        else:
+            return Response(result, status=result.get("status", status.HTTP_500_INTERNAL_SERVER_ERROR))
+
+    def get_document(self, request, *args, **kwargs):
+        contract = BimaHrContract.objects.get_object_by_public_id(self.kwargs['public_id'])
+        document = get_object_or_404(BimaCoreDocument,
+                                     public_id=self.kwargs['document_public_id'],
+                                     parent_id=contract.id)
+        serialized_document = BimaCoreDocumentSerializer(document)
+        return Response(serialized_document.data)

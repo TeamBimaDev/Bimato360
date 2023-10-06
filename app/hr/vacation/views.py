@@ -4,11 +4,15 @@ from common.enums.vacation import VacationStatus, get_vacation_type_list, get_va
 from common.permissions.action_base_permission import ActionBasedPermission
 from core.abstract.pagination import DefaultPagination
 from core.abstract.views import AbstractViewSet
+from core.document.models import get_documents_for_parent_entity, BimaCoreDocument
+from core.document.serializers import BimaCoreDocumentSerializer
 from django.db import transaction
 from django.http import HttpResponse
+from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from hr.employee.models import BimaHrEmployee
+from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.response import Response
@@ -202,18 +206,6 @@ class BimaHrVacationViewSet(AbstractViewSet):
         response["Content-Disposition"] = "attachment; filename=employee_vacation_export.xlsx"
         return response
 
-    def check_user_permissions(self, vacation):
-        user = self.request.user
-        if not (
-                user == vacation.manager.user
-                or user.has_perm('vacation.can_manage_other_vacation')
-        ):
-            raise PermissionDenied(_("You are not authorized to perform this action."))
-
-    def update_status_change_date(self, vacation):
-        vacation.status_change_date = timezone.now()
-        vacation.save(update_fields=['status_change_date'])
-
     @action(detail=True, methods=['post'], url_path='approve_refuse_vacation')
     def approve_refuse_vacation(self, request, pk=None):
         vacation = self.get_object()
@@ -235,6 +227,49 @@ class BimaHrVacationViewSet(AbstractViewSet):
 
         serializer = self.get_serializer(vacation)
         return Response(serializer.data)
+
+    def list_documents(self, request, *args, **kwargs):
+        vacation = BimaHrVacation.objects.get_object_by_public_id(self.kwargs['public_id'])
+        documents = get_documents_for_parent_entity(vacation)
+        serialized_document = BimaCoreDocumentSerializer(documents, many=True)
+        return Response(serialized_document.data)
+
+    def create_document(self, request, *args, **kwargs):
+        vacation = BimaHrVacation.objects.get_object_by_public_id(self.kwargs['public_id'])
+        document_data = request.data
+        document_data['file_path'] = request.FILES['file_path']
+        result = BimaCoreDocument.create_document_for_parent(vacation, document_data)
+        if isinstance(result, BimaCoreDocument):
+            return Response({
+                "id": result.public_id,
+                "document_name": result.document_name,
+                "description": result.description,
+                "date_file": result.date_file,
+                "file_type": result.file_type
+
+            }, status=status.HTTP_201_CREATED)
+        else:
+            return Response(result, status=result.get("status", status.HTTP_500_INTERNAL_SERVER_ERROR))
+
+    def get_document(self, request, *args, **kwargs):
+        vacation = BimaHrVacation.objects.get_object_by_public_id(self.kwargs['public_id'])
+        document = get_object_or_404(BimaCoreDocument,
+                                     public_id=self.kwargs['document_public_id'],
+                                     parent_id=vacation.id)
+        serialized_document = BimaCoreDocumentSerializer(document)
+        return Response(serialized_document.data)
+
+    def check_user_permissions(self, vacation):
+        user = self.request.user
+        if not (
+                user == vacation.manager.user
+                or user.has_perm('vacation.can_manage_other_vacation')
+        ):
+            raise PermissionDenied(_("You are not authorized to perform this action."))
+
+    def update_status_change_date(self, vacation):
+        vacation.status_change_date = timezone.now()
+        vacation.save(update_fields=['status_change_date'])
 
     def get_object(self):
         obj = BimaHrVacation.objects.get_object_by_public_id(self.kwargs['pk'])
