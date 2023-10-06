@@ -9,6 +9,7 @@ from django.apps import apps
 from django.db import models
 from django.db.models import Value, CharField
 from django.db.models.functions import Concat
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from hr.vacation.models import BimaHrVacation
 from openpyxl.styles import Border, Side
@@ -100,6 +101,8 @@ def update_vacation_status(vacation, status_update, reason_refused=None, save=Tr
         vacation.reason_refused = reason_refused
     else:
         raise ValueError('Invalid data')
+
+    vacation.status_change_date = timezone.now()
     if save:
         vacation.save()
     calculate_vacation_balances(vacation.employee)

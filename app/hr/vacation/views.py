@@ -9,7 +9,6 @@ from core.document.serializers import BimaCoreDocumentSerializer
 from django.db import transaction
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
-from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from hr.employee.models import BimaHrEmployee
 from rest_framework import status
@@ -213,16 +212,14 @@ class BimaHrVacationViewSet(AbstractViewSet):
 
         status = request.data.get('status').upper()
         reason_refused = request.data.get('reason_refused', None)
+        is_status_changing = status != vacation.status
 
         if status not in [VacationStatus.APPROVED.name, VacationStatus.REFUSED.name]:
             raise ValidationError({"status": _("Invalid status value.")})
 
         with transaction.atomic():
-            vacation.status = status
-            if status == VacationStatus.REFUSED.value and reason_refused:
-                vacation.reason_refused = reason_refused
-
-            self.update_status_change_date(vacation)
+            if is_status_changing:
+                update_vacation_status(vacation, status, reason_refused, save=False)
             vacation.save()
 
         serializer = self.get_serializer(vacation)
@@ -266,10 +263,6 @@ class BimaHrVacationViewSet(AbstractViewSet):
                 or user.has_perm('vacation.can_manage_other_vacation')
         ):
             raise PermissionDenied(_("You are not authorized to perform this action."))
-
-    def update_status_change_date(self, vacation):
-        vacation.status_change_date = timezone.now()
-        vacation.save(update_fields=['status_change_date'])
 
     def get_object(self):
         obj = BimaHrVacation.objects.get_object_by_public_id(self.kwargs['pk'])
