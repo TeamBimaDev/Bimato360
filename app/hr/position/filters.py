@@ -7,9 +7,9 @@ from .models import BimaHrPosition
 
 
 class BimaHrPositionFilter(filters.FilterSet):
-    department = django_filters.UUIDFilter(field_name='department__public_id', lookup_expr='iexact')
-    job_category = django_filters.UUIDFilter(field_name='job_category__public_id', lookup_expr='iexact')
-    manager = django_filters.UUIDFilter(field_name='manager__public_id', lookup_expr='iexact')
+    department = django_filters.UUIDFilter(field_name='department__public_id')
+    job_category = django_filters.UUIDFilter(field_name='job_category__public_id')
+    manager = django_filters.UUIDFilter(field_name='manager__public_id')
     seniority = django_filters.ChoiceFilter(choices=get_seniority_choices())
 
     search = django_filters.CharFilter(

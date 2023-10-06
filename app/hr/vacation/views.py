@@ -219,7 +219,7 @@ class BimaHrVacationViewSet(AbstractViewSet):
 
         with transaction.atomic():
             if is_status_changing:
-                update_vacation_status(vacation, status, reason_refused, save=False)
+                vacation = update_vacation_status(vacation, status, reason_refused, save=False)
             vacation.save()
 
         serializer = self.get_serializer(vacation)

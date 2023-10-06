@@ -7,7 +7,6 @@ from .models import BimaHrApplicant
 
 
 class BimaHrApplicantFilter(filters.FilterSet):
-    unique_id = django_filters.CharFilter(field_name='unique_id', lookup_expr='iexact')
     marital_status = django_filters.ChoiceFilter(choices=get_marital_status_choices())
     search = django_filters.CharFilter(
         method='filter_search',
