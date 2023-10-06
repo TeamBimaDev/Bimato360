@@ -1,9 +1,10 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 from io import BytesIO
 
 import pandas as pd
 import pytz
 from common.enums.vacation import VacationStatus
+from common.service.bima_service import BimaService
 from company.models import BimaCompany
 from django.apps import apps
 from django.db import models
@@ -13,16 +14,6 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from hr.vacation.models import BimaHrVacation
 from openpyxl.styles import Border, Side
-
-
-def working_days_count(start_date, end_date, start_working_day, end_working_day):
-    total_days = 0
-    current_day = start_date
-    while current_day <= end_date:
-        if start_working_day <= current_day.weekday() <= end_working_day:
-            total_days += 1
-        current_day += timedelta(days=1)
-    return total_days
 
 
 def calculate_vacation_balances(employee):
@@ -42,7 +33,7 @@ def calculate_vacation_balances(employee):
         employee.balance_vacation = current_balance
 
     vacation_from_total_working_days_upcoming = sum(
-        working_days_count(
+        BimaService.working_days_count(
             vacation.date_start, vacation.date_end,
             bima_company.start_working_day, bima_company.end_working_day
         )
@@ -66,7 +57,7 @@ def calculate_vacation_balances(employee):
         expected_new_balance = months_until_last_vacation * vacation_coefficient
 
         total_working_days_upcoming = sum(
-            working_days_count(
+            BimaService.working_days_count(
                 vacation.date_start, vacation.date_end,
                 bima_company.start_working_day, bima_company.end_working_day
             )
@@ -88,8 +79,9 @@ def calculate_vacation_balances(employee):
 
 def is_vacation_request_valid(vacation):
     bima_company = BimaCompany.objects.first()
-    requested_working_days = working_days_count(vacation.date_start, vacation.date_end, bima_company.start_working_day,
-                                                bima_company.end_working_day)
+    requested_working_days = BimaService.working_days_count(vacation.date_start, vacation.date_end,
+                                                            bima_company.start_working_day,
+                                                            bima_company.end_working_day)
     return requested_working_days <= vacation.employee.balance_vacation, requested_working_days
 
 

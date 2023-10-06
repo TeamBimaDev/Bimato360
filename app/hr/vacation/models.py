@@ -1,4 +1,5 @@
 from common.enums.vacation import get_vacation_type_list, get_vacation_status_list, VacationStatus
+from common.service.bima_service import BimaService
 from core.abstract.models import AbstractModel
 from django.db import models
 
@@ -19,6 +20,11 @@ class BimaHrVacation(AbstractModel):
 
     def __str__(self) -> str:
         return f"{self.employee} from {self.date_start} to {self.date_end}"
+
+    @property
+    def total_working_day_vacation(self):
+        start_working_day, end_working_day = BimaService.get_working_days_for_company()
+        return BimaService.working_days_count(self.start_date, self.end_date, start_working_day, end_working_day)
 
     class Meta:
         permissions = []
