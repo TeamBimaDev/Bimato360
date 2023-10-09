@@ -20,6 +20,8 @@ class BimaHrContract(AbstractModel):
     reason_stopped = models.CharField(max_length=255, null=True, blank=True)
     manager_who_stopped = models.ForeignKey('BimaHrEmployee', null=True, blank=True, on_delete=models.SET_NULL,
                                             related_name='stopped_contracts')
+    probation_end_date = models.DateField(null=True, blank=True)
+    exit_notice_date = models.DateField(null=True, blank=True)
     history = HistoricalRecords()
 
     def __str__(self) -> str:
