@@ -9,7 +9,7 @@ from simple_history.models import HistoricalRecords
 class BimaHrContract(AbstractModel):
     employee = models.ForeignKey('BimaHrEmployee', on_delete=models.CASCADE, related_name='contracts')
     start_date = models.DateField()
-    end_date = models.DateField(null=True, blank=True)  # Only applicable if contract_type != 'CDI'
+    end_date = models.DateField(null=True, blank=True)
     contract_type = models.CharField(max_length=16, choices=get_contract_type_choices())
     salary = models.DecimalField(max_digits=10, decimal_places=3)
     note = models.TextField(blank=True, null=True)

@@ -1,5 +1,7 @@
+from common.enums.position import ContractStatus
 from core.abstract.serializers import AbstractSerializer
 from core.department.models import BimaCoreDepartment
+from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
 from hr.employee.models import BimaHrEmployee
 from rest_framework import serializers
@@ -71,6 +73,22 @@ class BimaHrContractSerializer(AbstractSerializer):
             raise serializers.ValidationError({
                 "date_end": _("End date must be on or after the start date.")
             })
+
+        active_contract = BimaHrContract.objects.filter(status=ContractStatus.ACTIVE.name).first()
+        if active_contract and (self.instance is None or self.instance.pk != active_contract.pk):
+            raise serializers.ValidationError({"contract": "There's already an active contract."})
+
+        start_date = data.get('start_date')
+        end_date = data.get('end_date')
+
+        overlapping_contracts = BimaHrContract.objects.filter(
+            (Q(start_date__lte=start_date, end_date__gte=start_date) |
+             Q(start_date__lte=end_date, end_date__gte=end_date)) &
+            ~Q(pk=self.instance.pk if self.instance else None)
+        )
+        if overlapping_contracts.exists():
+            raise serializers.ValidationError({"date": "The contract date range overlaps with an existing contract."})
+
         return data
 
 

@@ -22,6 +22,7 @@ class ContractStatus(Enum):
     ACTIVE = _('Active')
     SUSPENDED = _('Suspended')
     EXPIRED = _('Expired')
+    TERMINATED = _('Terminated')
 
 
 def get_seniority_choices():

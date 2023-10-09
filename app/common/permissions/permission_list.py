@@ -610,3 +610,5 @@ class PermissionsList:
     HR_CONTRACT_UPDATE = ("hr.contract.can_update", "Can update contract", "HR_CONTRACT")
     HR_CONTRACT_DELETE = ("hr.contract.can_delete", "Can delete contract", "HR_CONTRACT")
     HR_CONTRACT_READ = ("hr.contract.can_read", "Can read contract", "HR_CONTRACT")
+    HR_CONTRACT_CAN_MANAGE_OTHERS_CONTRACT = (
+    "hr.contract.can_manage_others_contract", "Can manage other contract", "HR_CONTRACT")

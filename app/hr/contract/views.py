@@ -1,4 +1,5 @@
 import django_filters
+from common.enums.position import ContractStatus
 from common.enums.position import get_contract_type_choices, get_contract_status_choices
 from common.permissions.action_base_permission import ActionBasedPermission
 from core.abstract.views import AbstractViewSet
@@ -6,6 +7,7 @@ from core.document.models import BimaCoreDocument, get_documents_for_parent_enti
 from core.document.serializers import BimaCoreDocumentSerializer
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -37,6 +39,7 @@ class BimaHrContractViewSet(AbstractViewSet):
     queryset = BimaHrContract.objects.all()
     serializer_class = BimaHrContractSerializer
     permission_classes = []
+    ordering = ["-end_date"]
     filterset_class = BimaHrContractFilter
     permission_classes = (ActionBasedPermission,)
     action_permissions = {
@@ -46,6 +49,7 @@ class BimaHrContractViewSet(AbstractViewSet):
         'update': ['contract.can_update'],
         'partial_update': ['contract.can_update'],
         'destroy': ['contract.can_delete'],
+        'suspend_or_terminate': ['contract.can_manage_others_contract'],
     }
 
     def get_object(self):
@@ -113,3 +117,47 @@ class BimaHrContractViewSet(AbstractViewSet):
                                      parent_id=contract.id)
         serialized_document = BimaCoreDocumentSerializer(document)
         return Response(serialized_document.data)
+
+    @action(detail=False, methods=['get'], url_path='list_contract_types')
+    def list_contract_types(self, request):
+        formatted_response = {str(item[0]): str(item[1]) for item in get_contract_type_choices()}
+        return Response(formatted_response)
+
+    @action(detail=False, methods=['get'], url_path='list_contract_status')
+    def list_contract_status(self, request):
+        formatted_response = {str(item[0]): str(item[1]) for item in get_contract_status_choices()}
+        return Response(formatted_response)
+
+    @action(detail=True, methods=['post'], permission_classes=[], url_path='suspend-or-terminate')
+    def suspend_or_terminate(self, request, pk=None):
+        contract = self.get_object()
+
+        if not request.user.has_perm('contract.can_manage_others_contract'):
+            return Response({'detail': 'Permission denied.'}, status=status.HTTP_403_FORBIDDEN)
+
+        if contract.contract_type != ContractStatus.ACTIVE.name:
+            return Response({'detail': 'Contract is not active.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if contract.reason_stopped is None:
+            return Response({'detail': 'Reason stopped is not provided.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        suspend_terminate = request.data.get('suspend_terminate', '').upper()
+        if suspend_terminate not in ['SUSPENDED', 'TERMINATED']:
+            return Response({'detail': 'Invalid suspend_terminate value.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        contract.status = suspend_terminate
+        contract.manager_who_stopped = request.user
+
+        stopped_at = request.data.get('stopped_at')
+        if stopped_at:
+            try:
+                contract.stopped_at = timezone.datetime.strptime(stopped_at, '%Y-%m-%d').date()
+            except ValueError:
+                return Response({'detail': 'Invalid date format for stopped_at.'}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            contract.stopped_at = timezone.now().date()
+
+        contract.save()
+
+        serializer = BimaHrContractSerializer(contract)
+        return Response(serializer.data)
