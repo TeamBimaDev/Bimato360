@@ -49,7 +49,7 @@ class BimaHrContractSerializer(AbstractSerializer):
     def get_department(self, obj):
         return {
             'id': obj.department.public_id.hex,
-            'name': obj.department.full_name,
+            'name': obj.department.name,
         }
 
     def get_manager_who_stopped(self, obj):
@@ -70,7 +70,7 @@ class BimaHrContractSerializer(AbstractSerializer):
         ]
 
     def validate(self, data):
-        if data['end_date'] and data['end_date'] < data['date_start']:
+        if data['end_date'] and data['end_date'] < data['start_date']:
             raise serializers.ValidationError({
                 "end_date": _("End date must be on or after the start date.")
             })
