@@ -83,6 +83,7 @@ class BimaHrContractSerializer(AbstractSerializer):
 
     def validate_active_contract(self, data):
         employee = data.get('employee', self.instance.employee if self.instance else None)
+        current_status = data.get('status', None)
         if not employee:
             raise serializers.ValidationError({"employee": "An employee must be associated with the contract."})
 
@@ -90,7 +91,8 @@ class BimaHrContractSerializer(AbstractSerializer):
             employee=employee,
             status=ContractStatus.ACTIVE.name
         ).first()
-        if active_contract and (self.instance is None or self.instance.pk != active_contract.pk):
+        if active_contract and current_status == ContractStatus.ACTIVE.name and (
+                self.instance is None or self.instance.pk != active_contract.pk):
             raise serializers.ValidationError({
                 "contract": "This employee already has an active contract."
             })
