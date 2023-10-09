@@ -70,9 +70,9 @@ class BimaHrContractSerializer(AbstractSerializer):
         ]
 
     def validate(self, data):
-        if data['date_end'] and data['date_end'] < data['date_start']:
+        if data['end_date'] and data['end_date'] < data['date_start']:
             raise serializers.ValidationError({
-                "date_end": _("End date must be on or after the start date.")
+                "end_date": _("End date must be on or after the start date.")
             })
 
         active_contract = BimaHrContract.objects.filter(status=ContractStatus.ACTIVE.name).first()
