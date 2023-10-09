@@ -1,7 +1,8 @@
-from datetime import datetime
+from datetime import datetime, date
 
 from common.converters.default_converters import str_to_bool
 from core.abstract.serializers import AbstractSerializer
+from django.utils.translation import gettext_lazy as _
 from hr.skill.models import BimaHrSkill
 from rest_framework import serializers
 
@@ -55,6 +56,17 @@ class BimaHrPersonExperienceSerializer(AbstractSerializer):
             self.validated_data['date_end'] = None
 
         return super().save(**kwargs)
+
+    def validate(self, data):
+        if data['date_end'] < data['date_begin']:
+            raise serializers.ValidationError({
+                "date_end": _("End date must be on or after the start date.")
+            })
+        if data['date_begin'] > date.today():
+            raise serializers.ValidationError({
+                "date_begin": _("Start date must be less the current date")
+            })
+        return data
 
     class Meta:
         model = BimaHrPersonExperience

@@ -131,6 +131,8 @@ class BimaHrContractViewSet(AbstractViewSet):
     @action(detail=True, methods=['post'], permission_classes=[], url_path='suspend-or-terminate')
     def suspend_or_terminate(self, request, pk=None):
         contract = self.get_object()
+        suspend_terminate = request.data.get('suspend_terminate', '').upper()
+        stopped_at = request.data.get('stopped_at')
 
         if not request.user.has_perm('contract.can_manage_others_contract'):
             return Response({'detail': 'Permission denied.'}, status=status.HTTP_403_FORBIDDEN)
@@ -141,14 +143,12 @@ class BimaHrContractViewSet(AbstractViewSet):
         if contract.reason_stopped is None:
             return Response({'detail': 'Reason stopped is not provided.'}, status=status.HTTP_400_BAD_REQUEST)
 
-        suspend_terminate = request.data.get('suspend_terminate', '').upper()
         if suspend_terminate not in ['SUSPENDED', 'TERMINATED']:
             return Response({'detail': 'Invalid suspend_terminate value.'}, status=status.HTTP_400_BAD_REQUEST)
 
         contract.status = suspend_terminate
         contract.manager_who_stopped = request.user
 
-        stopped_at = request.data.get('stopped_at')
         if stopped_at:
             try:
                 contract.stopped_at = timezone.datetime.strptime(stopped_at, '%Y-%m-%d').date()
