@@ -165,7 +165,7 @@ class BimaHrContractAmendmentSerializer(AbstractSerializer):
     def get_contract(self, obj):
         return {
             'id': obj.contract.public_id.hex,
-            'name': obj.contract.name,
+            'contract': f"{obj.contract.start_date} {obj.contract.end_date} ",
         }
 
     class Meta:

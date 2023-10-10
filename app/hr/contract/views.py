@@ -136,10 +136,10 @@ class BimaHrContractViewSet(AbstractViewSet):
         stopped_at = request.data.get('stopped_at')
         reason_stopped = request.data.get('reason_stopped', None)
 
-        if not request.user.has_perm('contract.can_manage_others_contract'):
+        if not request.user.has_perm('hr.contract.can_manage_others_contract'):
             return Response({'detail': 'Permission denied.'}, status=status.HTTP_403_FORBIDDEN)
 
-        if contract.contract_type != ContractStatus.ACTIVE.name:
+        if contract.status != ContractStatus.ACTIVE.name:
             return Response({'detail': 'Contract is not active.'}, status=status.HTTP_400_BAD_REQUEST)
 
         if reason_stopped is None:

@@ -170,7 +170,7 @@ class BimaHrVacationViewSet(AbstractViewSet):
             queryset = BimaHrVacation.objects.all()
         else:
             queryset = BimaHrVacation.objects.filter(manager__user=self.request.user)
-            
+
         filtered_qs = BimaHrVacationFilter(request.GET, queryset=queryset).qs
         service = BimaHrVacationExportService(filtered_qs)
         csv_data = service.export_to_csv()
@@ -270,7 +270,7 @@ class BimaHrVacationViewSet(AbstractViewSet):
         user = self.request.user
         if not (
                 user == vacation.manager.user
-                or user.has_perm('vacation.can_manage_other_vacation')
+                or user.has_perm('hr.vacation.can_manage_other_vacation')
         ):
             raise PermissionDenied(_("You are not authorized to perform this action."))
 
@@ -279,4 +279,4 @@ class BimaHrVacationViewSet(AbstractViewSet):
         return obj
 
     def can_view_all_vacations(self):
-        return self.request.user.has_perm('vacation.can_view_all_vacation')
+        return self.request.user.has_perm('hr.vacation.can_view_all_vacation')
