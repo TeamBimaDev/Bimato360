@@ -25,6 +25,23 @@ class ContractStatus(Enum):
     TERMINATED = _('Terminated')
 
 
+class TerminationReason(Enum):
+    MUTUAL_TERMINATION = _('Mutual Termination')
+    DISMISSAL = _('Dismissal')
+    RESIGNATION = _('Resignation')
+    CONTRACT_TERMINATION = _('Contract Termination')
+    OTHER = _('Other')
+
+
+class SuspensionReason(Enum):
+    SICK_LEAVE = _('Sick Leave')
+    MATERNITY_LEAVE = _('Maternity Leave')
+    PROFESSIONAL_TRAINING = _('Professional Training')
+    WORK_ACCIDENT = _('Work Accident')
+    DISCIPLINARY_SUSPENSION = _('Disciplinary Suspension')
+    OTHER = _('Other')
+
+
 def get_seniority_choices():
     return [(seniority.name, seniority.value) for seniority in SeniorityType]
 
@@ -35,3 +52,11 @@ def get_contract_type_choices():
 
 def get_contract_status_choices():
     return [(st.name, st.value) for st in ContractStatus]
+
+
+def get_termination_reason_choices():
+    return [(reason.name, reason.value) for reason in TerminationReason]
+
+
+def get_suspension_reason_choices():
+    return [(reason.name, reason.value) for reason in SuspensionReason]

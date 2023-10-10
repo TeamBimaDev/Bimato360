@@ -1,4 +1,5 @@
-from common.enums.position import get_contract_type_choices, get_contract_status_choices, ContractType
+from common.enums.position import get_contract_type_choices, get_contract_status_choices, ContractType, ContractStatus
+from common.enums.position import get_termination_reason_choices, get_suspension_reason_choices
 from core.abstract.models import AbstractModel
 from django.db import models
 from django.utils.translation import gettext_lazy as _
@@ -18,6 +19,18 @@ class BimaHrContract(AbstractModel):
     status = models.CharField(choices=get_contract_status_choices())
     stopped_at = models.DateField(null=True, blank=True)
     reason_stopped = models.CharField(max_length=255, null=True, blank=True)
+    termination_reason_type = models.CharField(
+        max_length=50,
+        choices=get_termination_reason_choices(),
+        null=True,
+        blank=True,
+    )
+    suspension_reason_type = models.CharField(
+        max_length=50,
+        choices=get_suspension_reason_choices(),
+        null=True,
+        blank=True,
+    )
     manager_who_stopped = models.ForeignKey('BimaHrEmployee', null=True, blank=True, on_delete=models.SET_NULL,
                                             related_name='stopped_contracts')
     probation_end_date = models.DateField(null=True, blank=True)
@@ -30,6 +43,12 @@ class BimaHrContract(AbstractModel):
     def save(self, *args, **kwargs):
         if self.contract_type != ContractType.CDI.name and not self.end_date:
             raise ValidationError({"Date fin": _("End date must be provided for contract types other than CDI")})
+        if self.status == ContractStatus.TERMINATED.name:
+            self.reason.choices = get_termination_reason_choices()
+        elif self.status == ContractStatus.SUSPENDED.name:
+            self.reason.choices = get_suspension_reason_choices()
+        else:
+            self.reason.choices = []
         super().save(*args, **kwargs)
 
     class Meta:
@@ -43,11 +62,20 @@ class BimaHrContractAmendment(AbstractModel):
     new_salary = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     new_start_date = models.DateField(null=True, blank=True)
     new_end_date = models.DateField(null=True, blank=True)
-    other_changes = models.TextField(blank=True)
+    other_changes = models.TextField(null=True, blank=True)
     status = models.CharField(max_length=10, choices=get_contract_status_choices())
 
     def save(self, *args, **kwargs):
-        for field_name, field_value in self.__dict__.items():
-            if field_value is None or field_value == '':
-                setattr(self, field_name, getattr(self.contract, field_name))
+        fields_mapping = {
+            'new_salary': 'salary',
+            'new_start_date': 'start_date',
+            'new_end_date': 'end_date',
+        }
+
+        for amendment_field, contract_field in fields_mapping.items():
+            amendment_value = getattr(self, amendment_field)
+            if amendment_value is None or amendment_value == '':
+                contract_value = getattr(self.contract, contract_field)
+                setattr(self, amendment_field, contract_value)
+
         super().save(*args, **kwargs)
