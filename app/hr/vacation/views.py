@@ -165,7 +165,13 @@ class BimaHrVacationViewSet(AbstractViewSet):
 
     @action(detail=False, methods=["GET"], url_path="export_csv")
     def export_csv(self, request):
-        filtered_qs = BimaHrVacationFilter(request.GET, queryset=self.get_queryset()).qs
+        queryset = None
+        if self.can_view_all_vacations():
+            queryset = BimaHrVacation.objects.all()
+        else:
+            queryset = BimaHrVacation.objects.filter(manager__user=self.request.user)
+            
+        filtered_qs = BimaHrVacationFilter(request.GET, queryset=queryset).qs
         service = BimaHrVacationExportService(filtered_qs)
         csv_data = service.export_to_csv()
 

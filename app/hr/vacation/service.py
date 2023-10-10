@@ -124,7 +124,7 @@ class BimaHrVacationExportService:
                 output_field=CharField()
             )
         ).values(
-            'employee_full_name', 'employee__balance_vacation',
+            'employee_full_name', 'employee__balance_vacation', 'employee__virtual_balance_vacation',
             'manager_full_name', 'date_start', 'date_end',
             'vacation_type', 'status',
             'request_date', 'status_change_date', 'reason_refused'
@@ -134,7 +134,7 @@ class BimaHrVacationExportService:
 
         # Specify column order
         columns_order = [
-            'employee_full_name', 'employee__balance_vacation',
+            'employee_full_name', 'employee__balance_vacation', 'employee__virtual_balance_vacation',
             'manager_full_name', 'date_start', 'date_end',
             'vacation_type', 'status',
             'request_date', 'status_change_date', 'reason_refused'
@@ -166,7 +166,7 @@ class BimaHrVacationExportService:
         df = self.to_dataframe()
         df = self.translate_enum_values(df)
         df.columns = [
-            _('Employee'), _('Vacation Balance'),
+            _('Employee'), _('Vacation Balance'), _('Virtual Vacation Balance'),
             _('Manager'), _('Start Date'), _('End Date'),
             _('Vacation Type'), _('Status'),
             _('Request Date'), _('Date Approve/Refuse'), _('Reason Refuse')
@@ -179,7 +179,7 @@ class BimaHrVacationExportService:
         df = self.to_dataframe()
         df = self.translate_enum_values(df)
         df.columns = [
-            _('Employee'), _('Vacation Balance'),
+            _('Employee'), _('Vacation Balance'), _('Virtual Vacation Balance'),
             _('Manager'), _('Start Date'), _('End Date'),
             _('Vacation Type'), _('Status'),
             _('Request Date'), _('Date Approve/Refuse'), _('Reason Refuse')
