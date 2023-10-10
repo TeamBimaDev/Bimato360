@@ -69,8 +69,8 @@ class BimaHrVacationViewSet(AbstractViewSet):
         ):
             raise PermissionDenied(_("You are not authorized to perform this action."))
 
-        if self.request.user == vacation.employee:
-            if vacation.status != VacationStatus.PENDING.value:
+        if self.request.user == vacation.employee.user:
+            if vacation.status != VacationStatus.PENDING.name:
                 raise PermissionDenied(_("You can only update a vacation if its status is PENDING."))
             serializer.save()
             return
@@ -81,12 +81,12 @@ class BimaHrVacationViewSet(AbstractViewSet):
                 self.request.user == vacation.manager.user
                 or self.request.user.has_perm('vacation.can_manage_other_vacation')
         ):
-            if serializer.validated_data.get('status') not in [VacationStatus.APPROVED.value,
-                                                               VacationStatus.REFUSED.value]:
+            if serializer.validated_data.get('status') not in [VacationStatus.APPROVED.name,
+                                                               VacationStatus.REFUSED.name]:
                 raise PermissionDenied(_("As a manager, you can only approve or refuse a vacation."))
 
             with transaction.atomic():
-                if serializer.validated_data.get('status') == VacationStatus.APPROVED.value:
+                if serializer.validated_data.get('status') == VacationStatus.APPROVED.name:
                     is_valid, requested_days = is_vacation_request_valid(vacation)
                     if not is_valid:
                         raise ValidationError({
