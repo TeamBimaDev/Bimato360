@@ -67,8 +67,8 @@ class BimaHrContractSerializer(AbstractSerializer):
         fields = [
             'id', 'employee', 'employee_public_id', 'start_date', 'end_date', 'contract_type', 'salary', 'note',
             'job_description', 'department', 'department_public_id', 'manager_who_stopped', 'status', 'stopped_at',
-            'reason_stopped', 'manager_who_stopped_public_id', 'probation_end_date', 'exit_notice_date', 'created',
-            'updated'
+            'reason_stopped', 'manager_who_stopped_public_id', 'probation_end_date', 'exit_notice_date',
+            'termination_reason_type', 'suspension_reason_type', 'created', 'updated'
         ]
 
     def validate(self, data):
