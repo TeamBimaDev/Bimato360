@@ -39,8 +39,9 @@ class BimaHrContract(AbstractModel):
 class BimaHrContractAmendment(AbstractModel):
     contract = models.ForeignKey('BimaHrContract', on_delete=models.CASCADE)
     amendment_date = models.DateField()
-    notes = models.TextField()
+    notes = models.TextField(null=True, blank=True)
     new_salary = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    new_start_date = models.DateField(null=True, blank=True)
     new_end_date = models.DateField(null=True, blank=True)
     other_changes = models.TextField(blank=True)
     status = models.CharField(max_length=10, choices=get_contract_status_choices())

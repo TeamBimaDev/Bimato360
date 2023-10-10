@@ -37,6 +37,13 @@ class FilePurchaseDocument(FileType):
     SELLER_PURCHASE_INVOICE_DOCUMENT = _('SELLER_PURCHASE_INVOICE_DOCUMENT')
 
 
+class FileContract(FileType):
+    CONTRACT_MAIN = _('CONTRACT_MAIN')
+    CONTRACT_RENEW = _('CONTRACT_RENEW')
+    CONTRACT_AMENDMENT = _('CONTRACT_AMENDMENT')
+    RESIGNATION = _('RESIGNATION')
+
+
 def get_file_type_choices():
     choices = []
     for enum_class in FileType.__subclasses__():
@@ -62,3 +69,7 @@ def return_list_file_purchase_document():
 
 def return_list_file_employee():
     return [(emp.name, emp.value) for emp in FileTypeEmployee]
+
+
+def return_list_file_contract():
+    return [(emp.name, emp.value) for emp in FileContract]

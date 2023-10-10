@@ -47,10 +47,12 @@ class BimaHrContractSerializer(AbstractSerializer):
         }
 
     def get_department(self, obj):
-        return {
-            'id': obj.department.public_id.hex,
-            'name': obj.department.name,
-        }
+        if obj.department:
+            return {
+                'id': obj.department.public_id.hex,
+                'name': obj.department.name,
+            }
+        return None
 
     def get_manager_who_stopped(self, obj):
         if obj.manager_who_stopped:
@@ -172,5 +174,16 @@ class BimaHrContractAmendmentSerializer(AbstractSerializer):
         model = BimaHrContractAmendment
         fields = [
             'id', 'contract', 'contract_public_id', 'amendment_date', 'notes',
-            'new_salary', 'new_end_date', 'other_changes', 'status', 'created', 'updated'
+            'new_salary', 'new_end_date', 'new_start_date', 'other_changes', 'status', 'created', 'updated'
         ]
+
+    def validate(self, data):
+        self.validate_date_range(data)
+
+        return data
+
+    def validate_date_range(self, data):
+        if data['new_end_date'] and data['new_start_date'] and data['new_end_date'] < data['new_start_date']:
+            raise serializers.ValidationError({
+                "end_date": _("End date must be on or after the start date.")
+            })
