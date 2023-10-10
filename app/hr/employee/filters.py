@@ -1,5 +1,5 @@
 import django_filters
-from common.enums.employee_enum import get_marital_status_choices
+from common.enums.employee_enum import get_marital_status_choices, get_employee_status_choices
 from django.db import models
 from django_filters import rest_framework as filters
 
@@ -8,6 +8,7 @@ from .models import BimaHrEmployee
 
 class BimaHrEmployeeFilter(filters.FilterSet):
     marital_status = django_filters.ChoiceFilter(choices=get_marital_status_choices())
+    employment_status = django_filters.ChoiceFilter(choices=get_employee_status_choices())
     position = django_filters.UUIDFilter(field_name='position__public_id')
 
     search = django_filters.CharFilter(

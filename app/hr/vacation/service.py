@@ -1,6 +1,7 @@
 from datetime import datetime
 from io import BytesIO
 
+import openpyxl
 import pandas as pd
 import pytz
 from common.enums.vacation import VacationStatus
@@ -13,7 +14,8 @@ from django.db.models.functions import Concat
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from hr.vacation.models import BimaHrVacation
-from openpyxl.styles import Border, Side
+from openpyxl.styles import Border, Side, Font, PatternFill
+from openpyxl.utils import get_column_letter
 
 
 def calculate_vacation_balances(employee):
@@ -192,7 +194,6 @@ class BimaHrVacationExportService:
 
         with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
             if employee:
-                # Export single employee data
                 data = {
                     _('Employee'): [employee.full_name],
                     _('Vacation Balance'): [employee.balance_vacation],
@@ -233,3 +234,163 @@ class BimaHrVacationExportService:
 
         buffer.seek(0)
         return buffer.getvalue()
+
+
+class ExcelExporter:
+    def __init__(self):
+        self.wb = openpyxl.Workbook()
+        self.border = Border(left=Side(style='thin'),
+                             right=Side(style='thin'),
+                             top=Side(style='thin'),
+                             bottom=Side(style='thin'))
+        self.header_font = Font(bold=True)
+        self.header_fill = PatternFill(start_color="FFC0C0C0",
+                                       end_color="FFC0C0C0", fill_type="solid")
+
+    def apply_border(self, sheet, cell_range):
+        rows = list(sheet[cell_range])
+        for row in rows:
+            for cell in row:
+                cell.border = self.border
+
+    def apply_header_style(self, sheet, cell_range):
+        rows = list(sheet[cell_range])
+        for row in rows:
+            for cell in row:
+                cell.font = self.header_font
+                cell.fill = self.header_fill
+
+    def auto_adjust_column_width(self, sheet):
+        for col in sheet.columns:
+            max_length = max(len(str(cell.value)) for cell in col)
+            sheet.column_dimensions[get_column_letter(col[0].column)].width = max_length + 2
+
+    def save(self, buffer):
+        self.wb.save(buffer)
+        buffer.seek(0)
+        return buffer.getvalue()
+
+
+class EmployeeExporter(ExcelExporter):
+    @staticmethod
+    def remove_timezone(dt):
+        return dt.replace(tzinfo=None) if dt else None
+
+    def __init__(self, employee):
+        super().__init__()
+        self.employee = employee
+
+    def export(self):
+        sheet = self.wb.active
+        sheet.title = 'Employee Info'
+
+        if self.employee:
+            self._export_single_employee(sheet)
+        else:
+            self._export_all_employees(sheet)
+
+    def _format_employee_data(self, employee):
+        return [
+            ['Unique ID', employee.unique_id],
+            ['First Name', employee.first_name],
+            ['Last Name', employee.last_name],
+            ['Date of Birth',
+             employee.date_of_birth.strftime('%Y-%m-%d') if employee.date_of_birth else None],
+            ['Place of Birth', employee.place_of_birth],
+            ['Country', str(employee.country) if employee.country else None],
+            ['Nationality', employee.nationality],
+            ['Identity Card Number', employee.identity_card_number],
+            ['Phone Number', employee.phone_number],
+            ['Second Phone Number', employee.second_phone_number],
+            ['Email', employee.email],
+            ['Gender', employee.gender],
+            ['Marital Status', employee.marital_status],
+            ['Number of Children', employee.num_children],
+            ['Education Level', employee.education_level],
+            ['Latest Degree', employee.latest_degree],
+            ['Latest Degree Date',
+             employee.latest_degree_date.strftime('%Y-%m-%d') if employee.latest_degree_date else None],
+            ['Institute', employee.institute],
+            ['Employment Type', employee.employment_type],
+            ['Work Mode', employee.work_mode],
+            ['Job Type', employee.job_type],
+            ['Employment Status', employee.employment_status],
+            ['Hiring Date', employee.hiring_date.strftime('%Y-%m-%d') if employee.hiring_date else None],
+            ['Probation End Date',
+             employee.probation_end_date.strftime('%Y-%m-%d') if employee.probation_end_date else None],
+            ['Last Performance Review', employee.last_performance_review.strftime(
+                '%Y-%m-%d') if employee.last_performance_review else None],
+            ['Salary', employee.salary],
+            ['Position', str(employee.position) if employee.position else None],
+            ['Balance Vacation', employee.balance_vacation],
+            ['Virtual Balance Vacation', employee.virtual_balance_vacation],
+        ]
+
+    def _export_single_employee(self, sheet):
+        # Employee details title
+        sheet.append(['Employee Details'])
+        self.apply_header_style(sheet, 'A1:A1')
+
+        # Employee details
+        employee_details = self._format_employee_data(self.employee)
+        for row in employee_details:
+            sheet.append(row)
+        self.apply_border(sheet, f'A2:B{len(employee_details) + 1}')
+
+        # Vacation balance title
+        sheet.append(['', ''])  # Empty row
+        sheet.append(['Employee Vacation Balance'])
+        self.apply_header_style(sheet, f'A{len(employee_details) + 3}:A{len(employee_details) + 3}')
+
+        # Vacation balance
+        vacation_balance = [
+            ['Vacation Balance', self.employee.balance_vacation],
+            ['Vacation Virtual Balance', self.employee.virtual_balance_vacation],
+        ]
+        for row in vacation_balance:
+            sheet.append(row)
+        self.apply_border(sheet, f'A{len(employee_details) + 4}:B{len(employee_details) + 5}')
+
+        # Employee vacations title
+        sheet.append(['', ''])  # Empty row
+        sheet.append(['Employee Vacation Details'])
+        self.apply_header_style(sheet, f'A{len(employee_details) + 7}:A{len(employee_details) + 7}')
+
+        # Employee vacations
+        vacations = self.employee.bimahrvacation_set.all().values(
+            'date_start', 'date_end', 'status', 'request_date', 'status_change_date'
+        )
+        sheet.append(['Start Date', 'End Date', 'Status', 'Request Date', 'Status Change Date'])
+        for vacation in vacations:
+            # Remove timezone info from datetime fields
+            vacation['request_date'] = self.remove_timezone(vacation['request_date'])
+            vacation['status_change_date'] = self.remove_timezone(vacation['status_change_date'])
+            sheet.append([vacation[field] for field in vacations[0].keys()])
+
+        self.apply_border(sheet, f'A{len(employee_details) + 8}:E{len(employee_details) + 8 + len(vacations)}')
+
+        self.auto_adjust_column_width(sheet)
+
+    def _employee_to_list(self, employee):
+        # Convert an employee to a list of data
+        formatted_data = self._format_employee_data(employee)
+        return [data[1] for data in formatted_data]  # Return only the values
+
+    def _export_all_employees(self, sheet):
+        from django.apps import apps
+
+        BimaHrEmployee = apps.get_model('hr', 'BimaHrEmployee')
+        employees = BimaHrEmployee.objects.all()
+
+        # Header
+        header = [data[0] for data in
+                  self._format_employee_data(self.employee or BimaHrEmployee())]  # Return only the keys
+        sheet.append(header)
+        self.apply_header_style(sheet, f'A1:AB1')
+
+        for employee in employees:
+            employee_data = self._employee_to_list(employee)
+            sheet.append(employee_data)
+
+        self.apply_border(sheet, f'A2:AB{len(employees) + 1}')
+        self.auto_adjust_column_width(sheet)

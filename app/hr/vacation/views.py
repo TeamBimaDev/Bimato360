@@ -1,4 +1,5 @@
 from datetime import datetime
+from io import BytesIO
 
 from common.enums.vacation import VacationStatus, get_vacation_type_list, get_vacation_status_list
 from common.permissions.action_base_permission import ActionBasedPermission
@@ -20,7 +21,7 @@ from .filters import BimaHrVacationFilter
 from .models import BimaHrVacation
 from .serializers import BimaHrVacationSerializer
 from .service import is_vacation_request_valid, update_vacation_status, calculate_vacation_balances, \
-    BimaHrVacationExportService
+    BimaHrVacationExportService, EmployeeExporter
 
 
 class BimaHrVacationViewSet(AbstractViewSet):
@@ -189,14 +190,17 @@ class BimaHrVacationViewSet(AbstractViewSet):
     def export_employee_vacation(self, request):
         employee_public_id = request.query_params.get('employee_public_id')
         employee = None
-        try:
-            if employee_public_id:
+        if employee_public_id:
+            try:
                 employee = BimaHrEmployee.objects.get_object_by_public_id(employee_public_id)
-        except Exception:
-            employee = None
+            except BimaHrEmployee.DoesNotExist:
+                pass  # Handle employee not found
 
-        service = BimaHrVacationExportService(None)
-        excel_data = service.export_employee_vacation_to_excel(employee)
+        exporter = EmployeeExporter(employee)
+        exporter.export()
+
+        buffer = BytesIO()
+        excel_data = exporter.save(buffer)
 
         response = HttpResponse(
             excel_data,
