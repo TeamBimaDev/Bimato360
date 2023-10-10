@@ -127,7 +127,7 @@ class BimaHrVacationExportService:
             'employee_full_name', 'employee__balance_vacation',
             'manager_full_name', 'date_start', 'date_end',
             'vacation_type', 'status',
-            'request_date', 'status_change_date'
+            'request_date', 'status_change_date', 'reason_refused'
         )
 
         df = pd.DataFrame.from_records(qs_values)
@@ -137,7 +137,7 @@ class BimaHrVacationExportService:
             'employee_full_name', 'employee__balance_vacation',
             'manager_full_name', 'date_start', 'date_end',
             'vacation_type', 'status',
-            'request_date', 'status_change_date'
+            'request_date', 'status_change_date', 'reason_refused'
         ]
         df = df[columns_order]
 
@@ -169,7 +169,7 @@ class BimaHrVacationExportService:
             _('Employee'), _('Vacation Balance'),
             _('Manager'), _('Start Date'), _('End Date'),
             _('Vacation Type'), _('Status'),
-            _('Request Date'), _('Date Approve/Refuse')
+            _('Request Date'), _('Date Approve/Refuse'), _('Reason Refuse')
         ]
         buffer = BytesIO()
         df.to_csv(buffer, index=False)
@@ -182,7 +182,7 @@ class BimaHrVacationExportService:
             _('Employee'), _('Vacation Balance'),
             _('Manager'), _('Start Date'), _('End Date'),
             _('Vacation Type'), _('Status'),
-            _('Request Date'), _('Date Approve/Refuse')
+            _('Request Date'), _('Date Approve/Refuse'), _('Reason Refuse')
         ]
         buffer = BytesIO()
         df.to_excel(buffer, index=False, engine='openpyxl')
