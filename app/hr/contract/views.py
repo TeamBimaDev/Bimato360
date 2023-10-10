@@ -13,7 +13,8 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from .models import BimaHrContract, BimaHrContractAmendment
-from .serializers import BimaHrContractSerializer, BimaHrContractAmendmentSerializer
+from .serializers import BimaHrContractSerializer, BimaHrContractAmendmentSerializer, BimaHrContractHistorySerializer
+from .service import BimaHrContractService
 
 
 class BimaHrContractFilter(django_filters.FilterSet):
@@ -161,3 +162,19 @@ class BimaHrContractViewSet(AbstractViewSet):
 
         serializer = BimaHrContractSerializer(contract)
         return Response(serializer.data)
+
+    @action(detail=True, methods=["GET"], url_path="get_employee_history")
+    def get_employee_history(self, request, pk=None):
+        employee = self.get_object()
+        history = employee.history.all()
+        if not history.exists():
+            return Response([], status=status.HTTP_200_OK)
+
+        serialized_history = BimaHrContractHistorySerializer(history, many=True).data
+        grouped_history = BimaHrContractService.group_by_date(
+            serialized_history
+        )
+        response_data = [
+            {"date": key, "changes": value} for key, value in grouped_history.items()
+        ]
+        return Response(response_data)

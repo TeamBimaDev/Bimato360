@@ -13,7 +13,7 @@ class BimaHrVacation(AbstractModel):
     reason = models.TextField(null=True, blank=True)
     vacation_type = models.CharField(max_length=20, choices=get_vacation_type_list())
     status = models.CharField(max_length=20, choices=get_vacation_status_list(),
-                              default=VacationStatus.PENDING.value)
+                              default=VacationStatus.PENDING.name)
     reason_refused = models.TextField(null=True, blank=True)
     request_date = models.DateTimeField(auto_now_add=True)
     status_change_date = models.DateTimeField(null=True, blank=True)

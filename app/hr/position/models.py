@@ -17,7 +17,7 @@ class BimaHrPosition(AbstractModel):
                                 on_delete=models.SET_NULL)
 
     def __str__(self) -> str:
-        return f"{self.id, self.name, self.description, self.responsibilities, self.requirements}"
+        return f"{self.title, self.department.name}"
 
     class Meta:
         ordering = ['title']

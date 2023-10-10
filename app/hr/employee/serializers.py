@@ -2,6 +2,7 @@ from datetime import datetime
 
 from core.abstract.serializers import AbstractSerializer
 from core.country.models import BimaCoreCountry
+from django.db.models import ForeignKey
 from hr.position.models import BimaHrPosition
 from rest_framework import serializers
 
@@ -93,7 +94,19 @@ class EmployeeHistorySerializer(serializers.ModelSerializer):
         return changes
 
     def get_readable_value(self, field, value):
-        return value
+        model_cls = self.Meta.model
+
+        field_obj = model_cls._meta.get_field(field)
+
+        if isinstance(field_obj, ForeignKey):
+            related_model_cls = field_obj.related_model
+            try:
+                related_obj = related_model_cls.objects.get(pk=value)
+                return str(related_obj)
+            except related_model_cls.DoesNotExist:
+                return ""
+        else:
+            return value
 
     def get_changed_by(self, instance):
         return instance.history_user.name if instance.history_user else None
