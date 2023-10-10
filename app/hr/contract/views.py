@@ -149,7 +149,7 @@ class BimaHrContractViewSet(AbstractViewSet):
             return Response({'detail': 'Invalid suspend_terminate value.'}, status=status.HTTP_400_BAD_REQUEST)
 
         contract.status = suspend_terminate
-        contract.manager_who_stopped = request.user
+        contract.manager_who_stopped = request.user.employee
         contract.reason_stopped = reason_stopped
 
         if stopped_at:
