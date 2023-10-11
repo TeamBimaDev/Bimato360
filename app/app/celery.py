@@ -40,5 +40,10 @@ app.conf.beat_schedule = {
         'schedule': crontab(minute='0', hour='0', day_of_month='1'),
         'args': ('celer_beat_security_key_to_access_to_update_employee_vacation_balance',)
     },
+    'update_expired_vacations_task': {
+        'task': 'hr.tasks.update_expired_vacations_task',
+        'schedule': crontab(hour='8', minute='00'),
+        'args': ('celer_beat_security_key_to_access_to_update_expired_vacations_tasks',)
+    },
 
 }

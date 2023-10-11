@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime
 from io import BytesIO
 
@@ -11,6 +12,7 @@ from company.models import BimaCompany
 from core.notification_template.models import BimaCoreNotificationTemplate
 from django.apps import apps
 from django.db import models
+from django.db import transaction, IntegrityError
 from django.db.models import Value, CharField
 from django.db.models.functions import Concat
 from django.utils import timezone
@@ -18,6 +20,8 @@ from django.utils.translation import gettext_lazy as _
 from hr.vacation.models import BimaHrVacation
 from openpyxl.styles import Border, Side, Font, PatternFill
 from openpyxl.utils import get_column_letter
+
+logger = logging.getLogger(__name__)
 
 
 def calculate_vacation_balances(employee):
@@ -103,6 +107,27 @@ def update_vacation_status(vacation, status_update, reason_refused=None, save=Tr
         vacation.save()
     calculate_vacation_balances(vacation.employee)
     return vacation
+
+
+def update_expired_vacations():
+    try:
+        with transaction.atomic():
+            today = timezone.localdate()
+            pending_vacations = BimaHrVacation.objects.filter(status=VacationStatus.PENDING.name)
+            updated_count = 0
+            for vacation in pending_vacations:
+                if vacation.date_end < today:
+                    vacation.status = VacationStatus.EXPIRED.name
+                    vacation.save()
+                    updated_count += 1
+
+            logger.info(f'Successfully updated {updated_count} vacation(s) to expired status.')
+
+    except IntegrityError as e:
+        logger.error(f'Database error while updating expired vacations: {e}')
+      
+    except Exception as e:
+        logger.error(f'Unexpected error while updating expired vacations: {e}')
 
 
 class BimaHrVacationExportService:

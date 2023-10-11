@@ -4,6 +4,7 @@ from celery import shared_task
 from django.db import transaction
 from hr.employee.models import BimaHrEmployee
 from hr.vacation.service import calculate_vacation_balances
+from hr.vacation.service import update_expired_vacations
 
 logger = logging.getLogger(__name__)
 
@@ -28,3 +29,11 @@ def update_all_employee_vacation_balances(secret_key=None):
                  "old_virtual_vacation_balance": employee_old_virtual_vacation_balance,
                  "new_virtual_vacation_balance": employee_new_virtual_vacation_balance
                  })
+
+
+@shared_task()
+def update_expired_vacations_task(secret_key=None):
+    if secret_key != 'celer_beat_security_key_to_access_to_update_expired_vacations_tasks':
+        logger.error("Unauthorized access attempt to verify_purchase_document_payment_status_task")
+        return
+    update_expired_vacations()

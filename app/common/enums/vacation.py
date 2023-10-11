@@ -14,6 +14,7 @@ class VacationStatus(Enum):
     PENDING = _("Pending")
     APPROVED = _("Approved")
     REFUSED = _("Refused")
+    EXPIRED = _("Expired")
 
 
 def get_vacation_type_list():
