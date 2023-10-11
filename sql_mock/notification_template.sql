@@ -53,3 +53,28 @@ ALTER SEQUENCE public.core_bimacorenotificationtemplate_id_seq RESTART WITH 4;
 SELECT pg_catalog.setval('public.core_bimacorenotificationtemplate_id_seq', 4, true);
 
 
+
+INSERT INTO public.core_bimacorenotificationtype (id, public_id, created, updated, name, active, code, is_system)
+VALUES (5, 'bc3b4823-0a24-4ab7-a44a-0c8c0e50ff9a', '2023-10-11 13:10:43.065253+01', '2023-10-11 13:10:43.065253+01',
+        'Notification: Congé approuver', true, 'NOTIFICATION_VACATION_APPROVAL', true),
+       (6, '806a764c-d50b-4dbd-b5b5-ed69f98b4d01', '2023-10-11 13:10:43.065253+01', '2023-10-11 13:10:43.065253+01',
+        'Notification: Congé réfuser', true, 'NOTIFICATION_VACATION_REFUSAL', true);
+
+ALTER SEQUENCE public.core_bimacorenotificationtype_id_seq RESTART WITH 7;
+SELECT pg_catalog.setval('public.core_bimacorenotificationtype_id_seq', 7, true);
+
+
+INSERT INTO public.core_bimacorenotificationtemplate (id, public_id, created, updated, name, company_id, subject,
+                                                      message, notification_type_id)
+VALUES (5, 'e116e286-50dd-4e9d-8e9b-164be71cda49', '2023-10-11 13:10:43.065253+01', '2023-10-11 13:10:43.065253+01',
+        'Notification : congé approuver', 1, 'Vacation Approval for {{employee_full_name}}',
+        'Dear {{employee_full_name}},<br/>We are happy to inform you that your vacation request for the period from {{vacation_date_start}} to {{vacation_date_end}} has been approved. Enjoy your time off!<br/><br/>Best regards,Your HR Team.',
+        5),
+       (6, 'fd832803-3254-48ef-93d0-4d62ee9b2b53', '2023-10-11 13:10:43.065253+01', '2023-10-11 13:10:43.065253+01',
+        'Notification : congé réfuser', 1, 'Vacation Refusal for {{employee_full_name}}',
+        'Dear {{employee_full_name}},<br/>Unfortunately, your vacation request for the period from {{vacation_date_start}} to {{vacation_date_end}} has been disapproved for the following reason: {{reason_refused}}. Please feel free to discuss this decision with your manager or HR representative.<br/><br/>Best regards,Your HR Team.',
+        6);
+
+ALTER SEQUENCE public.core_bimacorenotificationtemplate_id_seq RESTART WITH 7;
+SELECT pg_catalog.setval('public.core_bimacorenotificationtemplate_id_seq', 7, true);
+

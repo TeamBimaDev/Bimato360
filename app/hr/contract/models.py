@@ -1,4 +1,4 @@
-from common.enums.position import get_contract_type_choices, get_contract_status_choices, ContractType, ContractStatus
+from common.enums.position import get_contract_type_choices, get_contract_status_choices, ContractType
 from common.enums.position import get_termination_reason_choices, get_suspension_reason_choices
 from core.abstract.models import AbstractModel
 from django.db import models
@@ -43,12 +43,6 @@ class BimaHrContract(AbstractModel):
     def save(self, *args, **kwargs):
         if self.contract_type != ContractType.CDI.name and not self.end_date:
             raise ValidationError({"Date fin": _("End date must be provided for contract types other than CDI")})
-        if self.status == ContractStatus.TERMINATED.name:
-            self.reason.choices = get_termination_reason_choices()
-        elif self.status == ContractStatus.SUSPENDED.name:
-            self.reason.choices = get_suspension_reason_choices()
-        else:
-            self.reason.choices = []
         super().save(*args, **kwargs)
 
     class Meta:

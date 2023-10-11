@@ -401,10 +401,19 @@ class EmployeeExporter(ExcelExporter):
 class BimaVacationNotificationService:
 
     @staticmethod
-    def send_notification_request_vacation(notification_template_code, vacation, manager):
+    def send_notification_request_vacation(vacation):
         notification_template, data_to_send = BimaVacationNotificationService.get_and_format_template(
-            notification_template_code, vacation,
-            manager)
+            'NOTIFICATION_VACATION_REQUEST', vacation)
+        data = BimaVacationNotificationService.prepare_data(notification_template, vacation, data_to_send)
+        BimaTemplateNotificationService.send_email_and_save_notification.delay(data)
+
+    @staticmethod
+    def send_approval_refusal_notification(vacation):
+        notification_code = 'NOTIFICATION_VACATION_APPROVAL' if vacation.status == VacationStatus.APPROVED.name \
+            else 'NOTIFICATION_VACATION_REFUSAL'
+        notification_template, data_to_send = BimaVacationNotificationService.get_and_format_template(
+            notification_code, vacation
+        )
         data = BimaVacationNotificationService.prepare_data(notification_template, vacation, data_to_send)
         BimaTemplateNotificationService.send_email_and_save_notification.delay(data)
 
@@ -423,7 +432,7 @@ class BimaVacationNotificationService:
         }
 
     @staticmethod
-    def get_and_format_template(notification_code, vacation, manager):
+    def get_and_format_template(notification_code, vacation):
         template = BimaCoreNotificationTemplate.objects.filter(
             notification_type__code=notification_code
         ).first()
@@ -431,11 +440,12 @@ class BimaVacationNotificationService:
             raise ValueError("Notification template not found")
 
         data = {
-            'manager_full_name': manager.full_name,
+            'manager_full_name': vacation.manager.full_name,
             'employee_full_name': vacation.employee.full_name,
             'vacation_date_start': vacation.date_start,
             'vacation_date_end': vacation.date_end,
-            'vacation_reason': vacation.reason
+            'vacation_reason': vacation.reason,
+            'reason_refused': vacation.reason_refused or ''
         }
 
         formatted_message = BimaTemplateNotificationService.replace_variables_in_template(

@@ -59,7 +59,7 @@ class BimaHrVacationViewSet(AbstractViewSet):
             raise PermissionDenied(_("You are not authorized to request a vacation for another employee."))
 
         vacation = serializer.save(manager=manager, employee=employee)
-        self._send_vacation_request_notification(vacation, manager)
+        BimaVacationNotificationService.send_notification_request_vacation(vacation)
 
     def perform_update(self, serializer):
         vacation = self.get_object()
@@ -233,6 +233,8 @@ class BimaHrVacationViewSet(AbstractViewSet):
                 vacation = update_vacation_status(vacation, status, reason_refused, save=False)
             vacation.save()
 
+        BimaVacationNotificationService.send_approval_refusal_notification(vacation)
+
         serializer = self.get_serializer(vacation)
         return Response(serializer.data)
 
@@ -281,7 +283,3 @@ class BimaHrVacationViewSet(AbstractViewSet):
 
     def can_view_all_vacations(self):
         return self.request.user.has_perm('hr.vacation.can_view_all_vacation')
-
-    def _send_vacation_request_notification(self, vacation, manager):
-        BimaVacationNotificationService.send_notification_request_vacation(
-            'NOTIFICATION_VACATION_REQUEST', vacation, manager)
