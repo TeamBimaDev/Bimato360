@@ -21,7 +21,7 @@ from .filters import BimaHrVacationFilter
 from .models import BimaHrVacation
 from .serializers import BimaHrVacationSerializer
 from .service import is_vacation_request_valid, update_vacation_status, calculate_vacation_balances, \
-    BimaHrVacationExportService, EmployeeExporter
+    BimaHrVacationExportService, EmployeeExporter, BimaVacationNotificationService
 
 
 class BimaHrVacationViewSet(AbstractViewSet):
@@ -58,7 +58,8 @@ class BimaHrVacationViewSet(AbstractViewSet):
         if self.request.user != employee.user:
             raise PermissionDenied(_("You are not authorized to request a vacation for another employee."))
 
-        serializer.save(manager=manager, employee=employee)
+        vacation = serializer.save(manager=manager, employee=employee)
+        self._send_vacation_request_notification(vacation, manager)
 
     def perform_update(self, serializer):
         vacation = self.get_object()
@@ -280,3 +281,7 @@ class BimaHrVacationViewSet(AbstractViewSet):
 
     def can_view_all_vacations(self):
         return self.request.user.has_perm('hr.vacation.can_view_all_vacation')
+
+    def _send_vacation_request_notification(self, vacation, manager):
+        BimaVacationNotificationService.send_notification_request_vacation(
+            'NOTIFICATION_VACATION_REQUEST', vacation, manager)

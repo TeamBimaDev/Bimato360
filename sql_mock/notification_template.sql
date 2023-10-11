@@ -30,3 +30,26 @@ VALUES (2, 'ead43f11-9509-42aa-b7d9-01fb9b443853', '2023-09-14 13:10:43.065253+0
 
 ALTER SEQUENCE public.core_bimacorenotificationtemplate_id_seq RESTART WITH 3;
 SELECT pg_catalog.setval('public.core_bimacorenotificationtemplate_id_seq', 3, true);
+
+
+
+INSERT INTO public.core_bimacorenotificationtype (id, public_id, created, updated, name, active, code, is_system)
+VALUES (3, '2122f611-0cb8-43f3-a25c-6e0e96111e2c', '2023-10-11 13:10:43.065253+01', '2023-10-11 13:10:43.065253+01',
+        'Notification de demande de congé', true, 'NOTIFICATION_VACATION_REQUEST', true);
+
+ALTER SEQUENCE public.core_bimacorenotificationtype_id_seq RESTART WITH 4;
+SELECT pg_catalog.setval('public.core_bimacorenotificationtype_id_seq', 4, true);
+
+
+
+INSERT INTO public.core_bimacorenotificationtemplate (id, public_id, created, updated, name, company_id, subject,
+                                                      message, notification_type_id)
+VALUES (3, '12c77a2c-2523-4622-b2ac-efc2b2dfc211', '2023-10-11 13:10:43.065253+01', '2023-10-11 13:10:43.065253+01',
+        'Notification de demande de congé', 1, 'Notification de demande de congé {{employee_full_name}}',
+        'Cher {{manager_full_name}},<br/><br/> Une nouvelle demande de congé a été déposer par Mr {{employee_full_name}} pour la periode du {{vacation_date_start}} au {{vacation_date_end}} pour la rasion suivant : <br/> {{vacation_reason}} <br/><br/> Merci de connecter sur votre espace pour gérer ce demande.',
+        3);
+
+ALTER SEQUENCE public.core_bimacorenotificationtemplate_id_seq RESTART WITH 4;
+SELECT pg_catalog.setval('public.core_bimacorenotificationtemplate_id_seq', 4, true);
+
+

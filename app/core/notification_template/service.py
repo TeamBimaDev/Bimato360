@@ -1,5 +1,5 @@
 from common.enums.transaction_enum import PaymentTermType
-from core.notification.service import BimaErpNotificationService
+from common.service.template_notification_service import BimaTemplateNotificationService
 
 from .models import BimaCoreNotificationTemplate
 
@@ -28,8 +28,9 @@ class BimaCoreNotificationTemplateService:
             'total_amount': sale_document.total_amount,
             'amount_remaining': (sale_document.total_amount - amount_paid)
         }
-        message = BimaErpNotificationService.replace_variables_in_template(template.message, data_to_send)
-        subject = BimaErpNotificationService.replace_variables_in_template(template.subject,
-                                                                           {'invoice_number': sale_document.number})
+        message = BimaTemplateNotificationService.replace_variables_in_template(template.message, data_to_send)
+        subject = BimaTemplateNotificationService.replace_variables_in_template(template.subject,
+                                                                                {
+                                                                                    'invoice_number': sale_document.number})
 
         return subject, message

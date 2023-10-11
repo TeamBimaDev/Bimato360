@@ -142,9 +142,9 @@ class BimaHrContractViewSet(AbstractViewSet):
     @action(detail=True, methods=['post'], permission_classes=[], url_path='suspend-or-terminate')
     def suspend_or_terminate(self, request, pk=None):
         contract = self.get_object()
-        suspend_terminate = request.data.get('suspend_terminate', '').upper()
+        suspend_terminate = request.data.get('suspend_terminate', '')
         stopped_at = request.data.get('stopped_at')
-        reason_type = request.data.get('reason_type', None).upper()
+        reason_type = request.data.get('reason_type', None)
 
         if not request.user.has_perm('hr.contract.can_manage_others_contract'):
             return Response({'detail': 'Permission denied.'}, status=status.HTTP_403_FORBIDDEN)
@@ -155,18 +155,21 @@ class BimaHrContractViewSet(AbstractViewSet):
         if reason_type is None:
             return Response({'detail': 'Reason type is not provided.'}, status=status.HTTP_400_BAD_REQUEST)
 
-        if suspend_terminate not in ['SUSPENDED', 'TERMINATED']:
+        if suspend_terminate not in [ContractStatus.SUSPENDED.name, ContractStatus.TERMINATED.name]:
             return Response({'detail': 'Invalid suspend_terminate value.'}, status=status.HTTP_400_BAD_REQUEST)
 
-        if suspend_terminate == 'TERMINATED' and reason_type not in dict(get_termination_reason_choices()):
+        if suspend_terminate == ContractStatus.TERMINATED.name and reason_type not in dict(
+                get_termination_reason_choices()):
             return Response({'detail': 'Invalid termination reason type.'}, status=status.HTTP_400_BAD_REQUEST)
 
-        if suspend_terminate == 'SUSPENDED' and reason_type not in dict(get_suspension_reason_choices()):
+        if suspend_terminate == ContractStatus.SUSPENDED.name and reason_type not in dict(
+                get_suspension_reason_choices()):
             return Response({'detail': 'Invalid suspension reason type.'}, status=status.HTTP_400_BAD_REQUEST)
 
         contract.status = suspend_terminate
         contract.manager_who_stopped = request.user.employee
-        contract.reason_type = reason_type  # Renamed from reason_stopped to reason_type
+        contract.termination_reason_type = reason_type if suspend_terminate == ContractStatus.TERMINATED.name else None
+        contract.suspension_reason_type = reason_type if suspend_terminate == ContractStatus.SUSPENDED.name else None
 
         if stopped_at:
             try:

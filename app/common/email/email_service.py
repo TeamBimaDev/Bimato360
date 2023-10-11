@@ -37,12 +37,18 @@ class EmailService:
 
         if attachments:
             for attachment_url in attachments:
-                relative_path = attachment_url.replace(settings.MEDIA_URL, '')
-                if default_storage.exists(relative_path):
-                    with default_storage.open(relative_path, 'rb') as file:
-                        email.attach(os.path.basename(relative_path), file.read())
-                else:
-                    logger.warning(f"Attachment {attachment_url} does not exist and will be skipped.")
+                if attachment_url is None:
+                    continue
+                try:
+                    relative_path = attachment_url.replace(settings.MEDIA_URL, '')
+                    if default_storage.exists(relative_path):
+                        with default_storage.open(relative_path, 'rb') as file:
+                            email.attach(os.path.basename(relative_path), file.read())
+                    else:
+                        logger.warning(f"Attachment {attachment_url} does not exist and will be skipped.")
+                except (FileNotFoundError, PermissionError) as e:
+                    logger.warning(f"Error processing attachment {attachment_url}: {e}")
+                    continue  # Skip to the next attachment
 
         try:
             email.send(fail_silently=False)

@@ -6,7 +6,9 @@ import pandas as pd
 import pytz
 from common.enums.vacation import VacationStatus
 from common.service.bima_service import BimaService
+from common.service.template_notification_service import BimaTemplateNotificationService
 from company.models import BimaCompany
+from core.notification_template.models import BimaCoreNotificationTemplate
 from django.apps import apps
 from django.db import models
 from django.db.models import Value, CharField
@@ -394,3 +396,52 @@ class EmployeeExporter(ExcelExporter):
 
         self.apply_border(sheet, f'A2:AB{len(employees) + 1}')
         self.auto_adjust_column_width(sheet)
+
+
+class BimaVacationNotificationService:
+
+    @staticmethod
+    def send_notification_request_vacation(notification_template_code, vacation, manager):
+        notification_template, data_to_send = BimaVacationNotificationService.get_and_format_template(
+            notification_template_code, vacation,
+            manager)
+        data = BimaVacationNotificationService.prepare_data(notification_template, vacation, data_to_send)
+        BimaTemplateNotificationService.send_email_and_save_notification.delay(data)
+
+    @staticmethod
+    def prepare_data(notification_template, vacation, data_to_send):
+        return {
+            'subject': data_to_send['subject'],
+            'message': data_to_send['message'],
+            'receivers': [vacation.manager.email],
+            'attachments': [] if data_to_send['file_url'] is None else [data_to_send['file_url']],
+            'notification_type_id': notification_template.notification_type.id,
+            'sender': None,
+            'app_name': 'hr',
+            'model_name': 'bimahrvacation',
+            'parent_id': vacation.id
+        }
+
+    @staticmethod
+    def get_and_format_template(notification_code, vacation, manager):
+        template = BimaCoreNotificationTemplate.objects.filter(
+            notification_type__code=notification_code
+        ).first()
+        if not template:
+            raise ValueError("Notification template not found")
+
+        data = {
+            'manager_full_name': manager.full_name,
+            'employee_full_name': vacation.employee.full_name,
+            'vacation_date_start': vacation.date_start,
+            'vacation_date_end': vacation.date_end,
+            'vacation_reason': vacation.reason
+        }
+
+        formatted_message = BimaTemplateNotificationService.replace_variables_in_template(
+            template.message, data
+        )
+        formatted_subject = BimaTemplateNotificationService.replace_variables_in_template(
+            template.subject, data
+        )
+        return template, {'subject': formatted_subject, 'message': formatted_message, 'file_url': None}
