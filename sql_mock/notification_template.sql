@@ -78,3 +78,22 @@ VALUES (5, 'e116e286-50dd-4e9d-8e9b-164be71cda49', '2023-10-11 13:10:43.065253+0
 ALTER SEQUENCE public.core_bimacorenotificationtemplate_id_seq RESTART WITH 7;
 SELECT pg_catalog.setval('public.core_bimacorenotificationtemplate_id_seq', 7, true);
 
+
+
+INSERT INTO public.core_bimacorenotificationtype (id, public_id, created, updated, name, active, code, is_system)
+VALUES (8, '3a3f7620-92e0-4525-9c73-460317808e4b', '2023-10-11 13:10:43.065253+01', '2023-10-11 13:10:43.065253+01',
+        'Nofitication : Contract renew', true, 'NOTIFICATION_CONTRACT_EXPIRY_SOON', true);
+
+ALTER SEQUENCE public.core_bimacorenotificationtype_id_seq RESTART WITH 9;
+SELECT pg_catalog.setval('public.core_bimacorenotificationtype_id_seq', 9, true);
+
+INSERT INTO public.core_bimacorenotificationtemplate (id, public_id, created, updated, name, company_id, subject,
+                                                      message, notification_type_id)
+VALUES (8, '453cd1a4-962c-4905-b685-b63371e75da4', '2023-10-11 13:10:43.065253+01', '2023-10-11 13:10:43.065253+01',
+        'Notification : contract renew', 1,
+        'Contract Alert: {{employee_full_name}}''s contract ends in {{remaining_days}} days',
+        'Dear Team,<br/>This is a reminder that the contract of {{employee_full_name}} in the {{department_name}} department is set to end in {{remaining_days}} days on {{contract_end_date}}. <br/><br/>Please take the necessary steps to review and address this matter.<br/><br/>Best regards,<br/>Your HR Team',
+        8);
+
+ALTER SEQUENCE public.core_bimacorenotificationtemplate_id_seq RESTART WITH 9;
+SELECT pg_catalog.setval('public.core_bimacorenotificationtemplate_id_seq', 9, true);

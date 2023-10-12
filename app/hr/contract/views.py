@@ -14,7 +14,7 @@ from rest_framework.response import Response
 
 from .models import BimaHrContract, BimaHrContractAmendment
 from .serializers import BimaHrContractSerializer, BimaHrContractAmendmentSerializer, BimaHrContractHistorySerializer
-from .service import BimaHrContractService
+from .service import BimaHrContractService, BimaContractNotificationService
 
 
 class BimaHrContractFilter(django_filters.FilterSet):
@@ -184,6 +184,22 @@ class BimaHrContractViewSet(AbstractViewSet):
         serializer = BimaHrContractSerializer(contract)
         return Response(serializer.data)
 
+    @action(detail=True, methods=['post'], url_path='reactivate_contract')
+    def reactivate_contract(self, request, pk=None):
+        contract = self.get_object()
+
+        if not request.user.has_perm('hr.contract.can_manage_others_contract'):
+            return Response({'detail': 'Permission denied.'}, status=status.HTTP_403_FORBIDDEN)
+
+        if contract.status != ContractStatus.SUSPENDED.name:
+            return Response({'detail': 'Contract is not suspended.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        contract.status = ContractStatus.ACTIVE.name
+        contract.save()
+
+        serializer = BimaHrContractSerializer(contract)
+        return Response(serializer.data)
+
     @action(detail=True, methods=["GET"], url_path="get_employee_history")
     def get_employee_history(self, request, pk=None):
         employee = self.get_object()
@@ -199,3 +215,8 @@ class BimaHrContractViewSet(AbstractViewSet):
             {"date": key, "changes": value} for key, value in grouped_history.items()
         ]
         return Response(response_data)
+
+    @action(detail=False, methods=["GET"], url_path="send_contract_expiry_notifications")
+    def send_contract_expiry_notifications(self, request, pk=None):
+        BimaContractNotificationService.send_contract_expiry_notifications()
+        return Response({"ok"})

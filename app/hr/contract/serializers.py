@@ -185,8 +185,21 @@ class BimaHrContractAmendmentSerializer(AbstractSerializer):
     def validate_date_range(self, data):
         new_end_date = data.get('new_end_date', None)
         new_start_date = data.get('new_start_date', None)
+        contract = self.context['contract']
 
         if new_end_date and new_start_date and new_end_date < new_start_date:
             raise serializers.ValidationError({
                 "end_date": _("End date must be on or after the start date.")
             })
+
+        if new_start_date and new_start_date < contract.start_date:
+            raise serializers.ValidationError({
+                "new_start_date": _("New start date must be on or after the contract's start date.")
+            })
+
+        if new_end_date and new_end_date > contract.end_date:
+            raise serializers.ValidationError({
+                "new_end_date": _("New end date must be on or before the contract's end date.")
+            })
+
+        return data

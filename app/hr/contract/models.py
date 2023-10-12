@@ -1,7 +1,8 @@
 from common.enums.position import get_contract_type_choices, get_contract_status_choices, ContractType
-from common.enums.position import get_termination_reason_choices, get_suspension_reason_choices
+from common.enums.position import get_termination_reason_choices, get_suspension_reason_choices, ContractStatus
 from core.abstract.models import AbstractModel
 from django.db import models
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from rest_framework.exceptions import ValidationError
 from simple_history.models import HistoricalRecords
@@ -43,7 +44,12 @@ class BimaHrContract(AbstractModel):
     def save(self, *args, **kwargs):
         if self.contract_type != ContractType.CDI.name and not self.end_date:
             raise ValidationError({"Date fin": _("End date must be provided for contract types other than CDI")})
+        self._verify_if_date_expired_change_status_to_expired()
         super().save(*args, **kwargs)
+
+    def _verify_if_date_expired_change_status_to_expired(self):
+        if self.end_date and self.end_date < timezone.localdate() and self.status == ContractStatus.ACTIVE.name:
+            self.status = ContractStatus.EXPIRED.name
 
     class Meta:
         permissions = []
