@@ -19,6 +19,7 @@ class BimaHrContract(AbstractModel):
     department = models.ForeignKey('core.BimaCoreDepartment', on_delete=models.CASCADE, null=True, blank=True)
     status = models.CharField(choices=get_contract_status_choices())
     stopped_at = models.DateField(null=True, blank=True)
+    reactivated_at = models.DateField(null=True, blank=True)
     reason_stopped = models.CharField(max_length=255, null=True, blank=True)
     termination_reason_type = models.CharField(
         max_length=50,

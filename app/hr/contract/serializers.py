@@ -115,6 +115,17 @@ class BimaHrContractSerializer(AbstractSerializer):
                 "date": "The contract date range overlaps with an existing contract for this employee."
             })
 
+    def update(self, instance, validated_data):
+        if instance.status in [ContractStatus.TERMINATED.name, ContractStatus.SUSPENDED.name]:
+            if 'status' in validated_data and len(validated_data) == 1:
+                return super().update(instance, validated_data)
+            raise serializers.ValidationError({
+                'non_field_errors': [
+                    'Modification is not allowed for terminated or suspended contracts except for changing the status.'
+                ]
+            })
+        return super().update(instance, validated_data)
+
 
 class BimaHrContractHistorySerializer(serializers.ModelSerializer):
     changes = serializers.SerializerMethodField()
