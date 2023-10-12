@@ -11,6 +11,9 @@ from erp.partner.models import BimaErpPartner
 from company.factories import BimaCompanyFactory
 from company.models import BimaCompany
 
+from hr.employee.factories import BimaHrEmployeeFactory
+from hr.employee.models import BimaHrEmployee
+
 
 class BimaCoreDocumentTest(APITestCase):
 
@@ -63,7 +66,16 @@ class BimaCoreDocumentTest(APITestCase):
         response = self.client.post(url, self.document_data, format='multipart')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(BimaCoreDocument.objects.count(), 1)
-
+    def test_add_document_for_employee(self):
+        BimaHrEmployeeFactory.create()
+        self.employee = BimaHrEmployee.objects.first()
+        public_id = self.employee.public_id
+        url = reverse('hr:bimahremployee-list') + f'{public_id}/documents/'
+        self.document_data['parent_type'] = ContentType.objects.get_for_model(self.employee).id
+        self.document_data['parent_id'] = self.employee.id
+        response = self.client.post(url, self.document_data, format='multipart')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(BimaCoreDocument.objects.count(), 1)
     def test_update_document(self):
         self.test_create_document_with_partner()
         document = BimaCoreDocument.objects.first()

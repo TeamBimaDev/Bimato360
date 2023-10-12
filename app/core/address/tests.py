@@ -12,6 +12,8 @@ from rest_framework.test import APITestCase, APIClient
 from user.factories import UserFactory
 
 from .models import BimaCoreAddress
+from hr.employee.factories import BimaHrEmployeeFactory
+from hr.employee.models import BimaHrEmployee
 
 
 class BimaCoreAddressTest(APITestCase):
@@ -111,7 +113,17 @@ class BimaCoreAddressTest(APITestCase):
         response = self.client.post(url2, self.address_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(BimaCoreAddress.objects.count(), 1)
-
+    def test_add_address_for_employee(self):
+        BimaHrEmployeeFactory.create()
+        self.employee = BimaHrEmployee.objects.first()
+        public_id = self.employee.public_id
+        url1 = reverse('hr:bimahremployee-list') + f'{public_id}/addresses/'
+        self.address_data['parent_type'] = ContentType.objects.get_for_model(self.employee).id
+        self.address_data['parent_id'] = self.employee.id
+        print(self.address_data)
+        response = self.client.post(url1, self.address_data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(BimaCoreAddress.objects.count(), 1)
     def test_unauthenticated(self):
         self.client.logout()
         url = reverse('core:bimacoreaddress-list')

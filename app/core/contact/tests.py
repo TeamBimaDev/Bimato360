@@ -8,6 +8,8 @@ from rest_framework.test import APITestCase, APIClient
 from user.factories import UserFactory
 
 from .models import BimaCoreContact
+from hr.employee.factories import BimaHrEmployeeFactory
+from hr.employee.models import BimaHrEmployee
 
 
 class BimaCoreContactTest(APITestCase):
@@ -59,7 +61,16 @@ class BimaCoreContactTest(APITestCase):
         response = self.client.post(url2, self.contact_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(BimaCoreContact.objects.count(), 1)
-
+    def test_add_contact_for_employee(self):
+        BimaHrEmployeeFactory.create()
+        self.employee = BimaHrEmployee.objects.first()
+        public_id = self.employee.public_id
+        url2 = reverse('hr:bimahremployee-list') + f'{public_id}/contacts/'
+        self.contact_data['parent_type'] = ContentType.objects.get_for_model(self.employee).id
+        self.contact_data['parent_id'] = self.employee.id
+        response = self.client.post(url2, self.contact_data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(BimaCoreContact.objects.count(), 1)
     def test_update_contact(self):
         self.test_create_contact_with_partner()
         contact = BimaCoreContact.objects.first()
