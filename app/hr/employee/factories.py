@@ -7,6 +7,9 @@ from common.enums.employee_enum import (
     get_employee_status_choices,
 )
 
+from hr.position.factories import BimaHrPositionFactory
+from user.factories import UserFactory
+
 
 class BimaHrEmployeeFactory(factory.django.DjangoModelFactory):
     class Meta:
@@ -19,3 +22,7 @@ class BimaHrEmployeeFactory(factory.django.DjangoModelFactory):
     probation_end_date = factory.Faker('date_between', start_date='-30d', end_date='+30d')
     last_performance_review = factory.Faker('date_between', start_date='-365d', end_date='-30d')
     salary = factory.Faker('pydecimal', left_digits=6, right_digits=3, positive=True)
+    position = factory.SubFactory(BimaHrPositionFactory)
+    balance_vacation = factory.Faker('random_int', min=0, max=30)
+    virtual_balance_vacation = factory.Faker('random_int', min=0, max=30)
+    user = factory.SubFactory(UserFactory)
