@@ -125,7 +125,7 @@ def update_expired_vacations():
 
     except IntegrityError as e:
         logger.error(f'Database error while updating expired vacations: {e}')
-      
+
     except Exception as e:
         logger.error(f'Unexpected error while updating expired vacations: {e}')
 
@@ -439,15 +439,16 @@ class BimaVacationNotificationService:
         notification_template, data_to_send = BimaVacationNotificationService.get_and_format_template(
             notification_code, vacation
         )
-        data = BimaVacationNotificationService.prepare_data(notification_template, vacation, data_to_send)
+        data = BimaVacationNotificationService.prepare_data(notification_template, vacation, data_to_send,
+                                                            for_manager=False)
         BimaTemplateNotificationService.send_email_and_save_notification.delay(data)
 
     @staticmethod
-    def prepare_data(notification_template, vacation, data_to_send):
+    def prepare_data(notification_template, vacation, data_to_send, for_manager=True):
         return {
             'subject': data_to_send['subject'],
             'message': data_to_send['message'],
-            'receivers': [vacation.manager.email],
+            'receivers': [vacation.manager.email if for_manager else vacation.employee.email],
             'attachments': [] if data_to_send['file_url'] is None else [data_to_send['file_url']],
             'notification_type_id': notification_template.notification_type.id,
             'sender': None,
