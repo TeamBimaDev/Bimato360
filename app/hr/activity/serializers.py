@@ -20,7 +20,7 @@ class BimaHrActivitySerializer(AbstractSerializer):
     def get_organizer(self, obj):
         return {
             'id': obj.organizer.public_id.hex,
-            'name': obj.organizer.name,
+            'name': obj.organizer.full_name,
         }
 
     activity_type = serializers.SerializerMethodField(read_only=True)
