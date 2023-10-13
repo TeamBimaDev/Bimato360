@@ -11,7 +11,7 @@ from simple_history.models import HistoricalRecords
 
 class BimaHrActivity(AbstractModel):
     name = models.CharField(max_length=255, blank=False)
-    description = models.TextField()
+    description = models.TextField(null=True, blank=True)
     status = models.CharField(max_length=20, choices=get_activity_status_choices(), null=False, blank=False,
                               default=ActivityStatus.IN_PROGRESS.name)
     start_date = models.DateTimeField()
