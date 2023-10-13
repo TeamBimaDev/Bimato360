@@ -581,6 +581,8 @@ class PermissionsList:
     HR_ACTIVITY_UPDATE = ("hr.activity.can_update", "Can update activity", "HR_ACTIVITY")
     HR_ACTIVITY_DELETE = ("hr.activity.can_delete", "Can delete activity", "HR_ACTIVITY")
     HR_ACTIVITY_READ = ("hr.activity.can_read", "Can read activity", "HR_ACTIVITY")
+    HR_ACTIVITY_CAN_MANAGE_PARTICIPANTS = (
+    "hr.activity.can_manage_participants", "Can read manage participants", "HR_ACTIVITY")
 
     HR_ACTIVITY_TYPE_CREATE = ("hr.activity_type.can_create", "Can create activity type", "HR_ACTIVITY_TYPE")
     HR_ACTIVITY_TYPE_UPDATE = ("hr.activity_type.can_update", "Can update activity type", "HR_ACTIVITY_TYPE")
@@ -611,4 +613,4 @@ class PermissionsList:
     HR_CONTRACT_DELETE = ("hr.contract.can_delete", "Can delete contract", "HR_CONTRACT")
     HR_CONTRACT_READ = ("hr.contract.can_read", "Can read contract", "HR_CONTRACT")
     HR_CONTRACT_CAN_MANAGE_OTHERS_CONTRACT = (
-    "hr.contract.can_manage_others_contract", "Can manage other contract", "HR_CONTRACT")
+        "hr.contract.can_manage_others_contract", "Can manage other contract", "HR_CONTRACT")

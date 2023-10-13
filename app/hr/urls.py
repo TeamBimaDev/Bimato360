@@ -13,6 +13,6 @@ urlpatterns = [
     path('interview_step/', include('hr.interview_step.urls')),
     path('vacation/', include('hr.vacation.urls')),
     path('contract/', include('hr.contract.urls')),
-    # path('activity_type/', include('hr.activity_type.urls')),
-    # path('activity/', include('hr.activity.urls')),
+    path('activity_type/', include('hr.activity_type.urls')),
+    path('activity/', include('hr.activity.urls')),
 ]

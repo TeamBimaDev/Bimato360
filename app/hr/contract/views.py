@@ -191,7 +191,7 @@ class BimaHrContractViewSet(AbstractViewSet):
     @action(detail=True, methods=['post'], url_path='reactivate_contract')
     def reactivate_contract(self, request, pk=None):
         contract = self.get_object()
-        reactivated_at = request.data.get('reactivated_at')
+        reactivated_at_str = request.data.get('reactivated_at')
 
         if not request.user.has_perm('hr.contract.can_manage_others_contract'):
             return Response({'detail': 'Permission denied.'}, status=status.HTTP_403_FORBIDDEN)
@@ -200,18 +200,20 @@ class BimaHrContractViewSet(AbstractViewSet):
             return Response({'detail': 'Contract is not suspended.'}, status=status.HTTP_400_BAD_REQUEST)
 
         contract.status = ContractStatus.ACTIVE.name
-        if reactivated_at:
+        if reactivated_at_str:
             try:
-                contract.reactivated_at = timezone.datetime.strptime(reactivated_at, '%Y-%m-%d').date()
+                reactivated_at = timezone.datetime.strptime(reactivated_at_str, '%Y-%m-%d').date()
             except ValueError:
-                return Response({'detail': 'Invalid date format for stopped_at.'}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({'detail': 'Invalid date format for reactivated_at.'},
+                                status=status.HTTP_400_BAD_REQUEST)
         else:
-            contract.reactivated_at = timezone.now().date()
+            reactivated_at = timezone.now().date()
 
         if reactivated_at < contract.start_date:
-            return Response({'detail': 'stopped_at date cannot be before the contract start date.'},
+            return Response({'detail': 'reactivated_at date cannot be before the contract start date.'},
                             status=status.HTTP_400_BAD_REQUEST)
 
+        contract.reactivated_at = reactivated_at
         contract.save()
 
         serializer = BimaHrContractSerializer(contract)

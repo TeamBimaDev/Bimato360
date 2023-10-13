@@ -97,3 +97,23 @@ VALUES (8, '453cd1a4-962c-4905-b685-b63371e75da4', '2023-10-11 13:10:43.065253+0
 
 ALTER SEQUENCE public.core_bimacorenotificationtemplate_id_seq RESTART WITH 9;
 SELECT pg_catalog.setval('public.core_bimacorenotificationtemplate_id_seq', 9, true);
+
+
+INSERT INTO public.core_bimacorenotificationtype (id, public_id, created, updated, name, active, code, is_system)
+VALUES (9, '764bc066-db10-45ea-b69d-711e319e1fe7', '2023-10-13 13:10:43.065253+01', '2023-10-13 13:10:43.065253+01',
+        'Nofitication : Invitation to an activity', true, 'NOTIFICATION_ACTIVITY_INVITATION', true);
+
+ALTER SEQUENCE public.core_bimacorenotificationtype_id_seq RESTART WITH 10;
+SELECT pg_catalog.setval('public.core_bimacorenotificationtype_id_seq', 10, true);
+
+
+INSERT INTO public.core_bimacorenotificationtemplate (id, public_id, created, updated, name, company_id, subject,
+                                                      message, notification_type_id)
+VALUES (9, 'a785ab8b-90c5-43be-b7ec-94b1adfb2692', '2023-10-11 13:10:43.065253+01', '2023-10-11 13:10:43.065253+01',
+        'Notification : Invitation to an activity', 1,
+        'Invitation: Participation in {{activity_name}} from {{activity_start_date}} to {{activity_end_date}}',
+        'Dear {{person_full_name}},<br/><br/>We are pleased to invite you to participate in the activity titled "{{activity_name}}", which is scheduled to take place from {{activity_start_date}} to {{activity_end_date}}.<br/><br/>Here is a brief description of the activity:<br/>{activity_description}}<br/>Your involvement and contributions to the success of this activity are highly valued. We believe that your participation will add significant value and we look forward to your positive confirmation.<br/><br/>To confirm your participation, please log in to your account.<br/><br/>Should you have any questions or require further information, feel free to contact us at any time.<br/><br/>Thank you for your attention and cooperation.<br/><br/>Warmest regards',
+        9);
+
+ALTER SEQUENCE public.core_bimacorenotificationtemplate_id_seq RESTART WITH 10;
+SELECT pg_catalog.setval('public.core_bimacorenotificationtemplate_id_seq', 10, true);
