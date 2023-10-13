@@ -45,5 +45,15 @@ app.conf.beat_schedule = {
         'schedule': crontab(hour='8', minute='00'),
         'args': ('celer_beat_security_key_to_access_to_update_expired_vacations_tasks',)
     },
+    'update_expired_contract_task': {
+        'task': 'hr.tasks.update_expired_contract_task',
+        'schedule': crontab(hour='8', minute='00'),
+        'args': ('celer_beat_security_key_to_access_to_update_expired_contract_task',)
+    },
+    'send_contract_expiry_notifications_task': {
+        'task': 'hr.tasks.send_contract_expiry_notifications_task',
+        'schedule': crontab(hour='8', minute='00'),
+        'args': ('celer_beat_security_key_to_access_to_send_contract_expiry_notifications_task',)
+    },
 
 }

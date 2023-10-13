@@ -2,6 +2,7 @@ from common.enums.vacation import get_vacation_type_list, get_vacation_status_li
 from common.service.bima_service import BimaService
 from core.abstract.models import AbstractModel
 from django.db import models
+from django.utils import timezone
 
 
 class BimaHrVacation(AbstractModel):
@@ -20,6 +21,14 @@ class BimaHrVacation(AbstractModel):
 
     def __str__(self) -> str:
         return f"{self.employee} from {self.date_start} to {self.date_end}"
+
+    def save(self, *args, **kwargs):
+        # self._verify_if_date_expired_change_status_to_expired()
+        super().save(*args, **kwargs)
+
+    def _verify_if_date_expired_change_status_to_expired(self):
+        if self.end_date and self.end_date < timezone.localdate() and self.status == VacationStatus.ACTIVE.name:
+            self.status = VacationStatus.EXPIRED.name
 
     class Meta:
         permissions = []

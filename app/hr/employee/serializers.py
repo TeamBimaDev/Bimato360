@@ -10,6 +10,8 @@ from .models import BimaHrEmployee
 
 
 class BimaHrEmployeeSerializer(AbstractSerializer):
+    balance_vacation = serializers.ReadOnlyField()
+    virtual_balance_vacation = serializers.ReadOnlyField()
     full_name = serializers.ReadOnlyField()
     is_user_account_created = serializers.ReadOnlyField()
     country = serializers.SerializerMethodField(read_only=True)
@@ -58,7 +60,7 @@ class BimaHrEmployeeSerializer(AbstractSerializer):
             'full_name', 'identity_card_number', 'phone_number', 'second_phone_number', 'email', 'education_level',
             'latest_degree', 'latest_degree_date', 'institute', 'employment_type', 'work_mode', 'job_type',
             'employment_status', 'probation_end_date', 'salary', 'is_user_account_created', 'hiring_date',
-            'last_performance_review', 'created', 'updated'
+            'last_performance_review', 'balance_vacation', 'virtual_balance_vacation', 'created', 'updated'
         ]
 
     def validate(self, data):

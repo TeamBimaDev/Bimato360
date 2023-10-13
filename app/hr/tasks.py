@@ -41,6 +41,14 @@ def update_expired_vacations_task(secret_key=None):
 
 
 @shared_task()
+def update_expired_contract_task(secret_key=None):
+    if secret_key != 'celer_beat_security_key_to_access_to_update_expired_contract_task':
+        logger.error("Unauthorized access attempt to update_expired_contract_task")
+        return
+    BimaContractNotificationService.update_expired_contract()
+
+
+@shared_task()
 def send_contract_expiry_notifications_task(secret_key=None):
     if secret_key != 'celer_beat_security_key_to_access_to_send_contract_expiry_notifications_task':
         logger.error("Unauthorized access attempt to send_contract_expiry_notifications_task")

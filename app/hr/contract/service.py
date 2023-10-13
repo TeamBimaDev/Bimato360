@@ -6,6 +6,7 @@ from common.enums.position import ContractStatus
 from common.service.template_notification_service import BimaTemplateNotificationService
 from core.notification_template.models import BimaCoreNotificationTemplate
 from django.contrib.auth import get_user_model
+from django.db import transaction, IntegrityError
 from django.utils import timezone
 from hr.contract.models import BimaHrContract
 
@@ -87,3 +88,24 @@ class BimaContractNotificationService:
             template.subject, data
         )
         return template, {'subject': formatted_subject, 'message': formatted_message}
+
+    @staticmethod
+    def update_expired_vacations():
+        try:
+            with transaction.atomic():
+                today = timezone.localdate()
+                active_contracts = BimaHrContract.objects.filter(status=ContractStatus.ACTIVE.name)
+                updated_count = 0
+                for contract in active_contracts:
+                    if contract.end_date < today:
+                        contract.status = ContractStatus.EXPIRED.name
+                        contract.save()
+                        updated_count += 1
+
+                logger.info(f'Successfully updated {updated_count} vacation(s) to expired status.')
+
+        except IntegrityError as e:
+            logger.error(f'Database error while updating expired vacations: {e}')
+
+        except Exception as e:
+            logger.error(f'Unexpected error while updating expired vacations: {e}')
