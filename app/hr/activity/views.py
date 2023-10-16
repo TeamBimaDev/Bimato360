@@ -7,6 +7,7 @@ from core.document.models import get_documents_for_parent_entity, BimaCoreDocume
 from core.document.serializers import BimaCoreDocumentSerializer
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+from hr.employee.models import BimaHrEmployee
 from hr.models import BimaHrPerson
 from rest_framework import status
 from rest_framework.decorators import action
@@ -110,6 +111,21 @@ class BimaHrActivityViewSet(AbstractViewSet):
         participant.save()
 
         return Response({'message': 'Status updated successfully'}, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['GET'], url_path="my_activities")
+    def my_activities(self, request):
+        user = request.user
+
+        try:
+            employee = BimaHrEmployee.objects.get(user=user)
+        except BimaHrEmployee.DoesNotExist:
+            return Response({'error': 'The connected user is not linked to any employee.'},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        activities = BimaHrActivityParticipant.objects.filter(person=employee)
+
+        serializer = BimaHrActivityParticipantSerializer(activities, many=True)
+        return Response(serializer.data)
 
     def get_object(self):
         obj = BimaHrActivity.objects.get_object_by_public_id(self.kwargs['pk'])
