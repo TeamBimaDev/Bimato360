@@ -1,9 +1,13 @@
+from datetime import datetime
+
+from common.enums.activity_status import PresenceStatus
 from common.permissions.action_base_permission import ActionBasedPermission
 from core.abstract.views import AbstractViewSet
 from core.document.models import get_documents_for_parent_entity, BimaCoreDocument
 from core.document.serializers import BimaCoreDocumentSerializer
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+from hr.models import BimaHrPerson
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -81,6 +85,31 @@ class BimaHrActivityViewSet(AbstractViewSet):
             return Response(status=status.HTTP_204_NO_CONTENT)
         except BimaHrActivityParticipant.DoesNotExist:
             return Response({'error': 'Participant not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    @action(detail=True, methods=['POST'], url_path="change_participant_status")
+    def change_participant_status(self, request, pk=None):
+        activity = self.get_object()
+
+        if activity.end_date < datetime.now():
+            return Response({'error': 'Cannot change status for a past activity.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        person_public_id = request.data.get('person_public_id')
+        new_status = request.data.get('status')
+
+        if new_status not in PresenceStatus._member_names_:
+            return Response({'error': 'Invalid status.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        person = get_object_or_404(BimaHrPerson, public_id=person_public_id)
+
+        if not hasattr(person, 'employee') or request.user != person.employee.user:
+            return Response({'error': 'Not authorized.'}, status=status.HTTP_403_FORBIDDEN)
+
+        participant = get_object_or_404(BimaHrActivityParticipant, activity=activity, person=person)
+
+        participant.presence_status = new_status
+        participant.save()
+
+        return Response({'message': 'Status updated successfully'}, status=status.HTTP_200_OK)
 
     def get_object(self):
         obj = BimaHrActivity.objects.get_object_by_public_id(self.kwargs['pk'])
