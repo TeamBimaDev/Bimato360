@@ -58,6 +58,7 @@ RUN apt-get update && apt-get install -y \
 COPY --from=builder /venv /venv
 COPY ./app /app
 COPY ./scripts /scripts
+COPY ./sql_mock /sql_mock
 
 WORKDIR /app
 

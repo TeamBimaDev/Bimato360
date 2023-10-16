@@ -57,6 +57,14 @@ class BimaHrActivityViewSet(AbstractViewSet):
     @action(detail=True, methods=['POST'], url_path="add_participant")
     def add_participant(self, request, pk=None):
         activity = self.get_object()
+        person_public_id = request.data.get('person_public_id')
+        participant_exists = BimaHrActivityParticipant.objects.filter(activity=activity,
+                                                                      person__public_id=person_public_id).exists()
+
+        if participant_exists:
+            return Response({'error': 'This person is already a participant in the activity.'},
+                            status=status.HTTP_400_BAD_REQUEST)
+
         serializer = BimaHrActivityParticipantSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save(activity=activity)
