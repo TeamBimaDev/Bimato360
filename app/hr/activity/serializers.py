@@ -84,7 +84,7 @@ class BimaHrActivityHistorySerializer(serializers.ModelSerializer):
         return instance.history_user.name if instance.history_user else None
 
 
-class BimaHrActivityParticipantSerializer(serializers.ModelSerializer):
+class BimaHrActivityParticipantSerializer(AbstractSerializer):
     activity = serializers.SerializerMethodField(read_only=True)
     activity_public_id = serializers.SlugRelatedField(
         queryset=BimaHrActivity.objects.all(),
