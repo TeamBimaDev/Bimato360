@@ -34,7 +34,7 @@ class BimaHrSkillViewSet(AbstractViewSet):
     serializer_class = BimaHrSkillSerializer
     permission_classes = []
     filterset_class = BimaHrSkillFilter
-    permission_classes = (ActionBasedPermission,)
+    #permission_classes = (ActionBasedPermission,)
     action_permissions = {
         'list': ['skill.can_read'],
         'create': ['skill.can_create'],

@@ -43,6 +43,15 @@ class FileContract(FileType):
     CONTRACT_AMENDMENT = _('CONTRACT_AMENDMENT')
     RESIGNATION = _('RESIGNATION')
 
+class FileTypeCandidat(FileType):
+    CANDIDAT_CV = _('CANDIDAT_CV')
+    CANDIDAT_RESUME = _('CANDIDAT_RESUME')
+    CANDIDAT_PICTURE = _('CANDIDAT_PICTURE')
+    CANDIDAT_OTHER = _('CANDIDAT_OTHER')  
+
+def return_list_file_candidat():
+    return [(cand.name, cand.value) for cand in FileTypeCandidat]
+
 
 def get_file_type_choices():
     choices = []

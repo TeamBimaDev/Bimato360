@@ -13,6 +13,8 @@ from company.models import BimaCompany
 
 from hr.employee.factories import BimaHrEmployeeFactory
 from hr.employee.models import BimaHrEmployee
+from hr.candidat.models import BimaHrCandidat
+from hr.candidat.factories import BimaHrCandidatFactory
 from hr.activity.factories import BimaHrActivityFactory
 from hr.activity.models import BimaHrActivity
 
@@ -78,6 +80,19 @@ class BimaCoreDocumentTest(APITestCase):
         response = self.client.post(url, self.document_data, format='multipart')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(BimaCoreDocument.objects.count(), 1)
+
+    def test_add_document_for_candidat(self):
+        BimaHrCandidatFactory.create()
+        self.candidat = BimaHrCandidat.objects.first()
+        public_id = self.candidat.public_id
+        url = reverse('hr:bimahrcandidat-list') + f'{public_id}/documents/'
+        self.document_data['parent_type'] = ContentType.objects.get_for_model(self.candidat).id
+        print(self.document_data['parent_type'])
+        self.document_data['parent_id'] = self.candidat.id
+        response = self.client.post(url, self.document_data, format='multipart')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(BimaCoreDocument.objects.count(), 1)
+
     def test_add_document_for_activity(self):
         BimaHrActivityFactory.create()
         self.activity = BimaHrActivity.objects.first()
@@ -88,6 +103,7 @@ class BimaCoreDocumentTest(APITestCase):
         response = self.client.post(url, self.document_data, format='multipart')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(BimaCoreDocument.objects.count(), 1)
+        
     def test_update_document(self):
         self.test_create_document_with_partner()
         document = BimaCoreDocument.objects.first()

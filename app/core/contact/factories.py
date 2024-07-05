@@ -15,10 +15,10 @@ class BimaCoreContactFactory(factory.django.DjangoModelFactory):
     mobile = factory.Faker('phone_number')
     phone = factory.Faker('phone_number')
     gender = factory.Faker('random_element', elements=get_gender_choices())
-    parent_type = None
-    parent_id = None
+    parent_type = factory.LazyAttribute(lambda obj: ContentType.objects.get_for_model(obj.content_object))
+    parent_id = factory.SelfAttribute('content_object.id')
     content_object = None
 
     @classmethod
     def with_parent(cls, parent):
-        return cls(parent_type=ContentType.objects.get_for_model(parent), parent_id=parent.id)
+        return cls(content_object=parent)

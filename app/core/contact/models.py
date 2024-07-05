@@ -67,3 +67,4 @@ def get_contacts_for_parent_entity(parent):
         parent_type=ContentType.objects.get_for_model(parent),
         parent_id=parent.id
     )
+

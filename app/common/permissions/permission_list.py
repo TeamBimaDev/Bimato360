@@ -614,3 +614,29 @@ class PermissionsList:
     HR_CONTRACT_READ = ("hr.contract.can_read", "Can read contract", "HR_CONTRACT")
     HR_CONTRACT_CAN_MANAGE_OTHERS_CONTRACT = (
         "hr.contract.can_manage_others_contract", "Can manage other contract", "HR_CONTRACT")
+    
+    HR_QUESTION_CATEGORY_CREATE = ("hr.question_category.can_create", "Can create question category", "HR_QUESTION_CATEGORY",)
+    HR_QUESTION_CATEGORY_UPDATE = ("hr.question_category.can_update", "Can update question category", "HR_QUESTION_CATEGORY",)
+    HR_QUESTION_CATEGORY_DELETE = ("hr.question_category.can_delete", "Can delete question category", "HR_QUESTION_CATEGORY",)
+    HR_QUESTION_CATEGORY_READ = ("hr.question_category.can_read", "Can read question category", "HR_QUESTION_CATEGORY")
+
+    HR_QUESTION_CREATE = ("hr.question.can_create", "Can create question", "HR_QUESTION",)
+    HR_QUESTION_UPDATE = ("hr.question.can_update", "Can update question", "HR_QUESTION",)
+    HR_QUESTION_DELETE = ("hr.question.can_delete", "Can delete question", "HR_QUESTION",)
+    HR_QUESTION_READ = ("hr.question.can_read", "Can read question", "HR_QUESTION")
+
+    HR_CANDIDAT_CREATE = ("hr.candidate.can_create", "Can create candidate", "HR_CANDIDAT",)
+    HR_CANDIDAT_UPDATE = ("hr.candidate.can_update", "Can update candidate", "HR_CANDIDAT",)
+    HR_CANDIDAT_DELETE = ("hr.candidate.can_delete", "Can delete candidate", "HR_CANDIDAT",)
+    HR_CANDIDAT_READ = ("hr.candidate.can_read", "Can read candidate", "HR_CANDIDAT",)
+    HR_CANDIDAT_ADD_DOCUMENT = ("hr.candidate.can_add_document", "Can add document to candidate", "HR_CANDIDAT",)
+    HR_CANDIDAT_ADD_ADDRESS = ("hr.candidate.can_add_address", "Can add address to candidate", "HR_CANDIDAT",)
+    HR_CANDIDAT_ADD_CONTACT = ("hr.candidate.can_add_contact", "Can add contact to candidate", "HR_CANDIDAT",)
+    HR_CANDIDAT_MANAGE_SKILL = ("hr.candidate.can_manage_skill", "Can manage candidate skills", "HR_CANDIDAT",)
+    HR_CANDIDAT_MANAGE_EXPERIENCE = (
+        "hr.candidate.can_manage_experience", "Can manage candidate experience", "HR_CANDIDAT",)
+    
+    HR_VACANCIE_CREATE = ("hr.vacancie.can_create", "Can create vacancie", "HR_VACANCIE",)
+    HR_VACANCIE_UPDATE = ("hr.vacancie.can_update", "Can update vacancie", "HR_VACANCIE",)
+    HR_VACANCIE_DELETE = ("hr.vacancie.can_delete", "Can delete vacancie", "HR_VACANCIE",)
+    HR_VACANCIE_READ = ("hr.vacancie.can_read", "Can read vacancie", "HR_VACANCIE",)
