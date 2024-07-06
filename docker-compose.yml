@@ -1,0 +1,100 @@
+version: '3.8'
+
+services:
+  bima360_app:
+    container_name: bima360_app
+    build:
+      context: .
+    image: bima360_app_image
+    ports:
+      - "8500:8000"
+    volumes:
+      - ./media/:/app/media/
+    command: >
+      sh -c "
+             chmod -R 777 /app/media &&
+             chown -R 1000:1000 /app/media &&
+             python manage.py wait_for_db && 
+             python manage.py migrate &&
+             python manage.py runserver 0.0.0.0:8000"
+    env_file:
+      - app/prod.env
+    environment:
+      - DB_HOST=bima360_db
+      - DJANGO_ENV=prod
+    depends_on:
+      - bima360_db
+    networks:
+      - bima360-network
+    restart: always
+
+  bima360_db:
+    container_name: bima360_db
+    image: postgres:15
+    env_file:
+      - app/prod.env
+    environment:
+      - DJANGO_ENV=prod
+    ports:
+      - "5433:5432"
+    volumes:
+      - ./bima360_db/:/var/lib/postgresql/data/
+      - ./scripts/init_db.sh:/docker-entrypoint-initdb.d/init_db.sh
+      - ./sql_mock/20231016_bima360_db_backup.sql:/docker-entrypoint-initdb/bima360_db_backup.sql
+    networks:
+      - bima360-network
+    restart: always
+
+  bima360_db_admin:
+    container_name: bima360_db_admin
+    image: dpage/pgadmin4
+    restart: always
+    volumes:
+      - ./bima360_pgadmin/:/var/lib/pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@bima360.com
+      PGADMIN_DEFAULT_PASSWORD: bima_admin_pwd
+    ports:
+      - "8501:80"
+    networks:
+      - bima360-network
+
+  celery:
+    image: bima360_app_image
+    env_file:
+      - app/prod.env
+    environment:
+      - DB_HOST=bima360_db
+      - DJANGO_ENV=prod
+    volumes:
+      - .:/app
+    working_dir: /app/app
+    command: python -m celery -A app.celery worker -l info -E --pool=gevent
+    networks:
+      - bima360-network
+    depends_on:
+      - bima360_app
+    restart: always
+
+  celery_beat:
+    image: bima360_app_image
+    env_file:
+      - app/prod.env
+    environment:
+      - DB_HOST=bima360_db
+      - DJANGO_ENV=prod
+    volumes:
+      - .:/app
+      - ./celery_beat/:/var/lib/celery
+    working_dir: /app/app
+    command: python -m celery -A app.celery beat -l info
+    networks:
+      - bima360-network
+    depends_on:
+      - bima360_app
+    restart: always
+
+networks:
+  bima360-network:
+    name: bima360_network
+    driver: bridge

@@ -1,0 +1,373 @@
+{% load i18n custom_filters %}
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+
+        @page {
+            @bottom-left {
+                content: element(footer-left);
+                color: {{ company_data.company.default_color }};
+            }
+            @bottom-right {
+                content: "{% trans "Page" %}" counter(page) " {% trans "of" %} " counter(pages);
+                font-size: 13px;
+                color: {{ company_data.company.default_color }};
+            }
+            @top-left {
+                content: element(header-left);
+                color: {{ company_data.company.default_color }};
+            }
+            @top-right {
+                content: element(header-right);
+                color: {{ company_data.company.default_color }};
+            }
+
+        }
+
+        #footer-left {
+            position: absolute;
+            bottom: 0;
+            position: running(footer-left);
+            font-size: 13px;
+            border-top: 2px solid #efefef;
+            padding-top: 0.3rem;
+            padding-bottom: 0.3rem;
+            color: {{ company_data.company.default_color }};
+        }
+
+        .sale_main_body {
+            margin-left: 1rem;
+            margin-right: 1rem;
+            margin-bottom: 1rem;
+            font-family: {{ company_data.company.default_font_family }};
+            color: {{ company_data.company.default_color }};
+            position: relative;
+        }
+
+        .div_header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: {{ company_data.company.default_color }};
+        }
+
+        .company_name {
+            font-size: 20px;
+            font-weight: 500;
+            text-transform: uppercase;
+            color: {{ company_data.company.default_color }};
+        }
+
+        .company_logo {
+            width: 200px;
+            height: 100px;
+            object-fit: contain;
+        }
+
+        .div_partner_invoice_details {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-top: 1.5rem;
+            color: {{ company_data.company.default_color }};
+        }
+
+        .div_partner_invoice_details > * {
+            flex: 1 1 0px;
+            color: {{ company_data.company.default_color }};
+        }
+
+        .div_partner_details {
+            text-transform: uppercase;
+            font-size: 1rem;
+            font-weight: 500;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            color: {{ company_data.company.default_color }};
+        }
+
+        .span_partner_address, .span_partner_vat {
+            padding-top: 0.7rem;
+            color: {{ company_data.company.default_color }};
+        }
+
+        .div_invoice_details {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            color: {{ company_data.company.default_color }};
+            widht: 100%;
+
+
+        }
+
+        .invoice_type_and_number {
+            border-bottom: 2px solid #efefef;
+            font-size: 16px;
+            font-weight: 600;
+            font-style: italic;
+            color: {{ company_data.company.default_color }};
+            width: 310px;
+
+        }
+
+        .invoice_date_span_label {
+            width: 310px;
+        }
+
+        .invoice_date, .invoice_payment_date {
+            padding-top: .7rem;
+            color: {{ company_data.company.default_color }};
+            width: 310px;
+
+        }
+
+        .products_table {
+            margin-top: 3rem;
+            width: 100%;
+            border-collapse: collapse;
+            color: {{ company_data.company.default_color }};
+        }
+
+        .products_table tr {
+            border-bottom: 2px solid #efefef;
+            padding: 1rem 0 1rem 0;
+            color: {{ company_data.company.default_color }};
+        }
+
+        .products_table td {
+            padding: 1rem 0 1rem 0;
+            color: {{ company_data.company.default_color }};
+        }
+
+        .products_table th {
+            padding: 1rem 0 1rem 0;
+            font-style: italic;
+            color: {{ company_data.company.default_color }};
+        }
+
+        .text_right {
+            text-align: right;
+            color: {{ company_data.company.default_color }};
+        }
+
+        .text_center {
+            text-align: center;
+            color: {{ company_data.company.default_color }};
+        }
+
+        .text_left {
+            text-align: left;
+            color: {{ company_data.company.default_color }};
+        }
+
+        .product_name {
+            width: 50%;
+            text-transform: uppercase;
+            color: {{ company_data.company.default_color }};
+        }
+
+        .product_quantity {
+            width: 9%;
+            color: {{ company_data.company.default_color }};
+        }
+
+        .product_unit {
+            width: 9%;
+            color: {{ company_data.company.default_color }};
+        }
+
+        .table_totals {
+            margin-top: 2.5rem;
+            width: 100%;
+            color: {{ company_data.company.default_color }};
+        }
+
+        .table_totals td {
+            padding-bottom: 0.25rem;
+            padding-top: 0.25rem;
+            color: {{ company_data.company.default_color }};
+        }
+
+        .total_bold {
+            font-size: 18px;
+            font-weight: 800;
+            color: {{ company_data.company.default_color }};
+        }
+
+        .note {
+            margin-top: 1rem;
+            color: {{ company_data.company.default_color }};
+        }
+
+        .background_color_grey {
+            background-color: #E0E0E0;
+            vertical-align: middle;
+            padding: 0 0.5rem
+        }
+
+        .payment_details {
+            border: 1px solid{{ company_data.company.default_color }};
+            padding: 10px;
+            margin-top: 1rem;
+        }
+
+        .payment_status_span_label {
+            width: 100px;
+            font-weight: bold;
+            color: {{ company_data.company.default_color }};
+        }
+
+        .payment_status_span_value {
+            font-style: italic;
+            color: {{ company_data.company.default_color }};
+        }
+    </style>
+</head>
+<body class="sale_main_body">
+<div class="div_header">
+    <div class="company_name" id="header-left">
+        {{ company_data.company.name }}
+    </div>
+    {% if company_data.company.show_template_logo %}
+        <div class="company_logo" id="header-right">
+            <img src="{{ request.scheme }}://{{ request.get_host }}{{ MEDIA_URL }}{{ company_data.favorite_logo.file_path }}"
+                 alt="{% trans "Company Logo" %}" class="logo"/>
+        </div>
+    {% endif %}
+
+</div>
+
+<div class="div_partner_invoice_details">
+    <div class="div_partner_details">
+        {% if partner.partner_type == "INDIVIDUAL" %}
+            <div class="span_partner_name">{{ partner.first_name }} {{ partner.last_name }}</div>
+        {% else %}
+            <div class="span_partner_name">{{ partner.company_name }}</div>
+        {% endif %}
+        <div class="span_partner_address">{{ address.number }} {{ address.street }} {{ address.zip }}</div>
+        <div class="span_partner_address">{{ address.city }} {{ address.state.name }} {{ address.country.name }}</div>
+        {% if partner.partner_type == "INDIVIDUAL" %}
+            <div class="span_partner_vat">{{ partner.social_security_number }}</div>
+        {% else %}
+            <div class="span_partner_vat">{{ partner.vat_id_number }} {{ partner.company_siren }} {{ partner.company_siret }}</div>
+        {% endif %}
+
+    </div>
+    <div class="div_invoice_details">
+        <div class="invoice_type_and_number">
+            {{ translated_type|upper }}
+            {% if current_document.status != 'CONFIRMED' %}
+                {{ translated_status|upper }}
+            {% endif %}
+            {{ current_document.number }}
+        </div>
+        <div class="invoice_date">
+            <span class="invoice_date_span_label">{% trans "SALE_DOCUMENT_DATE" %}</span>
+            <span>{{ current_document.date }}</span>
+        </div>
+        <div class="invoice_payment_date">
+            <span class="invoice_date_span_label">{% trans "SALE_DOCUMENT_DUE_DATE" %}</span>
+            <span>{{ current_document.next_due_date }}</span>
+        </div>
+    </div>
+</div>
+
+<table class="products_table">
+    <tr>
+        <th class="text_left background_color_grey">&nbsp;&nbsp;{% trans "Name / Ref." %}</th>
+        <th class="background_color_grey">&nbsp;{% trans "Qte." %}</th>
+        <th class="background_color_grey">&nbsp;{% trans "Unit" %}</th>
+        {% if show_price %}
+            <th class="text_right background_color_grey">{% trans "U. Price" %}&nbsp;</th>
+            <th class="text_right background_color_grey">{% trans "Total" %}&nbsp;&nbsp;</th>
+        {% endif %}
+    </tr>
+
+    {% for product in products %}
+        <tr>
+            <td class="product_name">{{ product.name }} / {{ product.reference }}</td>
+            <td class="product_quantity text_center">{{ product.quantity }}</td>
+            <td class="product_unit text_center">{{ product.unit_of_measure }}</td>
+            {% if show_price %}
+                <td class="product_prix text_right">{{ product.unit_price }}</td>
+                <td class="product_montant text_right">{{ product.total_price }}</td>
+            {% endif %}
+        </tr>
+    {% endfor %}
+</table>
+{% if show_price %}
+    <table class="table_totals">
+        <tr>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th></th>
+        </tr>
+        <tr>
+            <th></th>
+            <th></th>
+            <th></th>
+            <td class="text_right background_color_grey">{% trans 'SUB-TOTAL_WITHOUT_VAT' %}</td>
+            <td class="text_right background_color_grey">{{ current_document.total_amount_without_vat }}</td>
+        </tr>
+
+        <tr>
+            <th></th>
+            <th></th>
+            <th></th>
+            <td class="text_right background_color_grey">{% trans 'DISCOUNT' %}</td>
+            <td class="text_right background_color_grey">{{ current_document.total_discount }}</td>
+        </tr>
+
+        <tr>
+            <th></th>
+            <th></th>
+            <th></th>
+            <td class="text_right background_color_grey">{% trans 'VAT_OF' %} {{ current_document.total_amount_without_vat }}</td>
+            <td class="text_right background_color_grey">{{ current_document.total_vat }}</td>
+        </tr>
+
+        <tr>
+            <th></th>
+            <th></th>
+            <th></th>
+            <td class="total_bold text_right background_color_grey">{% trans 'TOTAL_PRICE' %} EUR</td>
+            <td class="text_right total_bold background_color_grey">{{ current_document.total_amount }}</td>
+        </tr>
+    </table>
+{% endif %}
+
+{% if current_document.status == 'CONFIRMED' %}
+    {% if current_document.type == 'INVOICE' or current_document.type == 'CREDIT_NOTE' %}
+        <div class="payment_details">
+            <span class="payment_status_span_label">{% trans 'PAYMENT_STATUS' %} :</span>
+            <span class="payment_status_span_value">{{ current_document.translated_payment_status }}</span>
+            {% if current_document.amount_paid != current_document.total_amount %}
+                <br/>
+                <span class="payment_status_span_label">{% trans 'PAYMENT_AMOUNT_PAID' %} :</span>
+                <span class="payment_status_span_value payment_status_paid_value">{{ current_document.amount_paid }}</span>
+                <br/>
+                <span class="payment_status_span_label">{% trans 'PAYMENT_AMOUNT_REMAIN' %} :</span>
+                <span class="payment_status_span_value payment_status_remain_value">{{ current_document.remain_amount }}</span>
+
+            {% endif %}
+        </div>
+    {% endif %}
+{% endif %}
+
+<div class="note">{{ current_document.note }}</div>
+
+
+{% if company_data.company.show_template_footer %}
+    <div id="footer-left">
+        {{ company_data.company.footer_note|safe }}
+    </div>
+{% endif %}
+
+
+</body>
+</html>
