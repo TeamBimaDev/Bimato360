@@ -33,6 +33,7 @@ from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.exceptions import NotFound, ValidationError
 from rest_framework.response import Response
+import fitz
 
 logger = logging.getLogger(__name__)
 
@@ -111,14 +112,12 @@ class BimaHrVacancieViewSet(AbstractViewSet):
                 documents,
                 file_type='CANDIDAT_CV')
 
-            # Construct the file path using Django's default storage system
             file_pdf = default_storage.path(str(cv_candidat.file_path))
-            print(file_pdf)
-            # Open the file in binary mode
-            with open(file_pdf, 'rb') as pdf_file:
-                pdf_content = pdf_file.read()
-
-            return pdf_content
+            doc = fitz.open(file_pdf)
+            pdf_text = ""
+            for page in doc:
+                pdf_text += page.get_text()
+            return pdf_text
 
         except Exception as e:
             self.logger.error(f"An error occurred while reading the PDF: {e}")

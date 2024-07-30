@@ -23,5 +23,5 @@ class BimaHrQuestionSerializer(AbstractSerializer):
     class Meta:
         model = BimaHrQuestion
         fields = [
-            'id', 'name', 'question_category', 'question_category_public_id', 'created', 'updated'
+            'id', 'question', 'question_category', 'question_category_public_id', 'created', 'updated'
         ]

@@ -640,3 +640,8 @@ class PermissionsList:
     HR_VACANCIE_UPDATE = ("hr.vacancie.can_update", "Can update vacancie", "HR_VACANCIE",)
     HR_VACANCIE_DELETE = ("hr.vacancie.can_delete", "Can delete vacancie", "HR_VACANCIE",)
     HR_VACANCIE_READ = ("hr.vacancie.can_read", "Can read vacancie", "HR_VACANCIE",)
+
+    HR_INTERVIEW_QUESTION_CREATE = ("hr.interview_question.can_create", "Can create interview_question", "HR_INTERVIEW_QUESTION",)
+    HR_INTERVIEW_QUESTION_UPDATE = ("hr.interview_question.can_update", "Can update interview_question", "HR_INTERVIEW_QUESTION",)
+    HR_INTERVIEW_QUESTION_DELETE = ("hr.interview_question.can_delete", "Can delete interview_question", "HR_INTERVIEW_QUESTION",)
+    HR_INTERVIEW_QUESTION_READ = ("hr.interview_question.can_read", "Can read interview_question", "HR_INTERVIEW_QUESTION",)

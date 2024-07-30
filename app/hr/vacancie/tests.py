@@ -70,97 +70,97 @@ class BimaHrVacancieViewSetTests(APITestCase):
                 content_type=content_type,
             )
 
-    # def test_create_vacancie(self):
-    #     url = '/api/hr/vacancie/'
-    #     response = self.client.post(url, self.vacancie_data, format='json')
-    #     print(response.content)
-    #     self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-    #     self.assertEqual(BimaHrVacancie.objects.count(), 1)
+    def test_create_vacancie(self):
+        url = '/api/hr/vacancie/'
+        response = self.client.post(url, self.vacancie_data, format='json')
+        print(response.content)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(BimaHrVacancie.objects.count(), 1)
 
-    # def test_get_vacancies(self):
-    #     BimaHrVacancieFactory.create_batch(5)
-    #     url = '/api/hr/vacancie/'
-    #     response = self.client.get(url, format='json')
-    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
-    #     self.assertEqual(response.data['count'], 5)
-    #     self.assertEqual(len(response.data['results']), 5)
+    def test_get_vacancies(self):
+        BimaHrVacancieFactory.create_batch(5)
+        url = '/api/hr/vacancie/'
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['count'], 5)
+        self.assertEqual(len(response.data['results']), 5)
 
-    # def test_update_vacancie(self):
-    #     vacancie = BimaHrVacancieFactory()
-    #     url = f'/api/hr/vacancie/{vacancie.public_id}/'
-    #     data = {'title': 'Senior Software Engineer'}
-    #     response = self.client.patch(url, data, format='json')
-    #     print(response.content)
-    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
-    #     self.assertEqual(BimaHrVacancie.objects.get(pk=vacancie.pk).title, 'Senior Software Engineer')
+    def test_update_vacancie(self):
+        vacancie = BimaHrVacancieFactory()
+        url = f'/api/hr/vacancie/{vacancie.public_id}/'
+        data = {'title': 'Senior Software Engineer'}
+        response = self.client.patch(url, data, format='json')
+        print(response.content)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(BimaHrVacancie.objects.get(pk=vacancie.pk).title, 'Senior Software Engineer')
 
-    # def test_delete_vacancie(self):
-    #     vacancie = BimaHrVacancieFactory()
-    #     url = f'/api/hr/vacancie/{vacancie.public_id}/'
-    #     response = self.client.delete(url, format='json')
-    #     self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+    def test_delete_vacancie(self):
+        vacancie = BimaHrVacancieFactory()
+        url = f'/api/hr/vacancie/{vacancie.public_id}/'
+        response = self.client.delete(url, format='json')
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
-    # def test_unauthenticated_access(self):
-    #     self.client.logout()
-    #     url = '/api/hr/vacancie/'
-    #     response = self.client.get(url)
-    #     self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+    def test_unauthenticated_access(self):
+        self.client.logout()
+        url = '/api/hr/vacancie/'
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
-    # def test_unauthorized_create(self):
-    #     self.client.logout()
-    #     user_without_permission = UserFactory()
-    #     self.client.force_authenticate(user_without_permission)
-    #     url = '/api/hr/vacancie/'
-    #     response = self.client.post(url, self.vacancie_data, format='json')
-    #     self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+    def test_unauthorized_create(self):
+        self.client.logout()
+        user_without_permission = UserFactory()
+        self.client.force_authenticate(user_without_permission)
+        url = '/api/hr/vacancie/'
+        response = self.client.post(url, self.vacancie_data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    # def test_unauthorized_update(self):
-    #     self.client.logout()
-    #     user_without_permission = UserFactory()
-    #     self.client.force_authenticate(user_without_permission)
-    #     vacancie = BimaHrVacancieFactory()
-    #     url = f'/api/hr/vacancie/{vacancie.public_id}/'
-    #     data = {'title': 'Senior Developer'}
-    #     response = self.client.patch(url, data, format='json')
-    #     self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+    def test_unauthorized_update(self):
+        self.client.logout()
+        user_without_permission = UserFactory()
+        self.client.force_authenticate(user_without_permission)
+        vacancie = BimaHrVacancieFactory()
+        url = f'/api/hr/vacancie/{vacancie.public_id}/'
+        data = {'title': 'Senior Developer'}
+        response = self.client.patch(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    # def test_unauthorized_delete(self):
-    #     self.client.logout()
-    #     user_without_permission = UserFactory()
-    #     self.client.force_authenticate(user_without_permission)
-    #     vacancie = BimaHrVacancieFactory()
-    #     url = f'/api/hr/vacancie/{vacancie.public_id}/'
-    #     response = self.client.delete(url, format='json')
-    #     self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+    def test_unauthorized_delete(self):
+        self.client.logout()
+        user_without_permission = UserFactory()
+        self.client.force_authenticate(user_without_permission)
+        vacancie = BimaHrVacancieFactory()
+        url = f'/api/hr/vacancie/{vacancie.public_id}/'
+        response = self.client.delete(url, format='json')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
 
-    # def test_candidate_application(self):
-    #     vacancie = BimaHrVacancieFactory.create()
-    #     candidat_vacancie = BimaHrCandidatVacancieFactory.create(vacancie=vacancie)
-    #     url = f'/api/hr/vacancie/{vacancie.public_id}/candidat_applied/'
-    #     response = self.client.get(url,format="json")
-    #     print(response.content)
-    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
+    def test_candidate_application(self):
+        vacancie = BimaHrVacancieFactory.create()
+        candidat_vacancie = BimaHrCandidatVacancieFactory.create(vacancie=vacancie)
+        url = f'/api/hr/vacancie/{vacancie.public_id}/candidat_applied/'
+        response = self.client.get(url,format="json")
+        print(response.content)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    # def test_add_candidat(self):
-    #     vacancie = BimaHrVacancieFactory.create()
-    #     candidat = BimaHrCandidatFactory.create()
-    #     data_document= {
-    #         "file_path":"C:/Users/houssem/Desktop/projet/bima_work/bima360/back/app/media/uploads/documents/bimahrcandidat/",
-    #         "document_name":"d14df484-2646-4c3e-9eae-a8a959456e05.jpg",
-    #         "description":"",
-    #         "file_type":"CANDIDAT_CV"
-    #     }
-    #     data = {"candidat_public_id": candidat.public_id,
-    #             "expected_salary": 300,
-    #             "proposed_salary": 45000,
-    #             "accepted_salary": 48000,
-    #             "comments": "Looking forward to this opportunity."
-    #             }
-    #     url= f'/api/hr/vacancie/{vacancie.public_id}/add_candidat/'
-    #     response = self.client.post(url, data, format="json")
-    #     print(response.content)
-    #     self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+    def test_add_candidat(self):
+        vacancie = BimaHrVacancieFactory.create()
+        candidat = BimaHrCandidatFactory.create()
+        data_document= {
+            "file_path":"C:/Users/houssem/Desktop/projet/bima_work/bima360/back/app/media/uploads/documents/bimahrcandidat/",
+            "document_name":"d14df484-2646-4c3e-9eae-a8a959456e05.jpg",
+            "description":"",
+            "file_type":"CANDIDAT_CV"
+        }
+        data = {"candidat_public_id": candidat.public_id,
+                "expected_salary": 300,
+                "proposed_salary": 45000,
+                "accepted_salary": 48000,
+                "comments": "Looking forward to this opportunity."
+                }
+        url= f'/api/hr/vacancie/{vacancie.public_id}/add_candidat/'
+        response = self.client.post(url, data, format="json")
+        print(response.content)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     def test_delete_candidate_application(self):
         vacancy = BimaHrVacancieFactory.create()

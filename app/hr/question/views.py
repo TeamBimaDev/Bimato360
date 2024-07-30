@@ -3,9 +3,11 @@ from common.converters.default_converters import str_to_bool
 from common.permissions.action_base_permission import ActionBasedPermission
 from core.abstract.views import AbstractViewSet
 from django.db.models import Q
-
+from rest_framework.decorators import action
+from rest_framework.response import Response
 from .models import BimaHrQuestion
 from .serializers import BimaHrQuestionSerializer
+from hr.question_category.models import BimaHrQuestionCategory
 
 
 class BimaHrQuestionFilter(django_filters.FilterSet):
@@ -46,3 +48,15 @@ class BimaHrQuestionViewSet(AbstractViewSet):
     def get_object(self):
         obj = BimaHrQuestion.objects.get_object_by_public_id(self.kwargs['pk'])
         return obj
+
+
+    @action(detail=False, methods=['get'], url_path='get-question/(?P<category_name>[^/.]+)')
+    def get_question(self, request, category_name):
+        try:
+            question_category = BimaHrQuestionCategory.objects.get(name=category_name)
+        except BimaHrQuestionCategory.DoesNotExist:
+            return Response({"error": "Category not found."}, status=404)
+        queryset = BimaHrQuestion.objects.filter(question_category=question_category)
+        serializer = BimaHrQuestionSerializer(queryset, many=True)
+        return Response(serializer.data)
+        

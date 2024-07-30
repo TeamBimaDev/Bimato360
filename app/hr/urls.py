@@ -20,5 +20,5 @@ urlpatterns = [
     path('vacancie/', include('hr.vacancie.urls')),
     path('candidat/', include('hr.candidat.urls')),
     path('offer/', include('hr.offer.urls')),
-
+    path('interview_question/', include('hr.interview_question.urls'))
 ]

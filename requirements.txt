@@ -112,3 +112,5 @@ zopfli
 black
 python-json-logger
 bleach
+channels
+pymupdf

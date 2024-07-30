@@ -162,7 +162,6 @@ class BimaHrCandidatTest(APITestCase):
     @patch('hr.candidat.models.BimaHrCandidat.objects.get_object_by_public_id')
     @patch('core.document.models.BimaCoreDocument.create_document_for_parent')
     def test_create_document_failure(self, mock_create_document, mock_get_candidat):
-        # Setup
         mock_candidat = MagicMock()
         mock_candidat.public_id = 'test-public-id'
         mock_get_candidat.return_value = mock_candidat

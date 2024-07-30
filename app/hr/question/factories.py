@@ -7,6 +7,6 @@ class BimaHrQuestionFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = BimaHrQuestion
 
-    name = factory.Faker('word')
+    question = factory.Faker('word')
     question_category = factory.SubFactory(BimaHrQuestionCategoryFactory)
     active = factory.Faker('boolean')

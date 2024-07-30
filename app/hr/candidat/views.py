@@ -35,7 +35,7 @@ class BimaHrCandidatViewSet(AbstractViewSet):
     serializer_class = BimaHrCandidatSerializer
     ordering = ["-first_name"]
     permission_classes = []
-    permission_classes = (ActionBasedPermission,)
+    # permission_classes = (ActionBasedPermission,)
     filterset_class = BimaHrCandidatFilter
     action_permissions = {
         'list': ['candidat.can_read'],

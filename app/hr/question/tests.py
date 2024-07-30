@@ -18,7 +18,7 @@ class BimaHrPositionTest(APITestCase):
         self.user = UserFactory()
         self.question_category = BimaHrQuestionCategoryFactory.create()
         self.question_data = {
-            "name": "Question ",
+            "question": "Question ",
             "question_category_public_id": str(self.question_category.public_id),
             "active": True,
         }
@@ -52,10 +52,10 @@ class BimaHrPositionTest(APITestCase):
     def test_update_question(self):
         question = BimaHrQuestionFactory()
         url = reverse('hr:bimahrquestion-detail', kwargs={'pk': str(question.public_id)})
-        data = {'name': 'Updated Name'}
+        data = {'question': 'Updated question'}
         response = self.client.patch(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(BimaHrQuestion.objects.get(pk=question.pk).name, 'Updated Name')
+        self.assertEqual(BimaHrQuestion.objects.get(pk=question.pk).question, 'Updated question')
 
     def test_delete_question(self):
         question = BimaHrQuestionFactory()
@@ -82,7 +82,7 @@ class BimaHrPositionTest(APITestCase):
         self.client.force_authenticate(user_without_permission)
         question = BimaHrQuestionFactory()
         url = reverse('hr:bimahrquestion-detail', kwargs={'pk': str(question.public_id)})
-        data = {'name': 'Updated Name'}
+        data = {'question': 'Updated question'}
         response = self.client.patch(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
@@ -94,6 +94,14 @@ class BimaHrPositionTest(APITestCase):
         url = reverse('hr:bimahrquestion-detail', kwargs={'pk': str(question.public_id)})
         response = self.client.delete(url, format='json')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_get_question(self):
+        question_category = BimaHrQuestionCategoryFactory.create()
+        question = BimaHrQuestionFactory.create(question_category=question_category)
+        url = reverse('hr:bimahrquestion-get-question', kwargs={'category_name': question_category.name})
+        print(url)
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def create_permissions(self):
         permission_list = [

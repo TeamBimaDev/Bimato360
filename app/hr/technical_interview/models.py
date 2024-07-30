@@ -7,7 +7,7 @@ from hr.interview_step.models import BimaHrInterviewStep
 
 
 class BimaHrInterview(AbstractModel):
-    name = models.CharField(max_length=256, blank=True, null=True)
+    title = models.CharField(max_length=256, blank=True, null=True)
     due_date = models.CharField(max_length=64, blank=True, null=True, choices=get_interview_due_data_choices()) 
     scheduled_date = models.DateField(null=True, blank=True)
     score = models.FloatField(null=True, blank=True) 
