@@ -1,5 +1,5 @@
 import django_filters
-from common.enums.position import get_seniority_choices
+from common.enums.position import get_seniority_choices, get_position_status_choices
 from django.db import models
 from django_filters import rest_framework as filters
 
@@ -11,6 +11,7 @@ class BimaHrVacancieFilter(filters.FilterSet):
     job_category = django_filters.UUIDFilter(field_name='job_category__public_id')
     manager = django_filters.UUIDFilter(field_name='manager__public_id')
     seniority = django_filters.ChoiceFilter(choices=get_seniority_choices())
+    position_status = django_filters.ChoiceFilter(choices=get_position_status_choices())
 
     search = django_filters.CharFilter(
         method='filter_search',

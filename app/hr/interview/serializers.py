@@ -1,19 +1,29 @@
 from core.abstract.serializers import AbstractSerializer
-from hr.employee.models import BimaHrEmployee
+from hr.vacancie.models import BimaHrVacancie
+from hr.candidat.models import BimaHrCandidat
 from hr.interview.models import BimaHrInterview
 from hr.interview_step.models import BimaHrInterviewStep
 from rest_framework import serializers
+from hr.interview_step.models import BimaHrInterviewStep
 
 
 class BimaHrInterviewSerializer(AbstractSerializer):
-    interviewer = serializers.SerializerMethodField(read_only=True)
-    interviewer_public_id = serializers.SlugRelatedField(
-        queryset=BimaHrEmployee.objects.all(),
+    vacancie = serializers.SerializerMethodField(read_only=True)
+    vacancie_public_id = serializers.SlugRelatedField(
+        queryset=BimaHrVacancie.objects.all(),
         slug_field='public_id',
-        source='interviewer',
+        source='vacancie',
         write_only=True
     )
 
+    candidat = serializers.SerializerMethodField(read_only=True)
+    candidat_public_id = serializers.SlugRelatedField(
+        queryset=BimaHrCandidat.objects.all(),
+        slug_field='public_id',
+        source='candidat',
+        write_only=True
+    )
+    
     interview_step = serializers.SerializerMethodField(read_only=True)
     interview_step_public_id = serializers.SlugRelatedField(
         queryset=BimaHrInterviewStep.objects.all(),
@@ -21,22 +31,6 @@ class BimaHrInterviewSerializer(AbstractSerializer):
         source='interview_step',
         write_only=True
     )
-
-    refused_by = serializers.SerializerMethodField(read_only=True)
-    refused_by_public_id = serializers.SlugRelatedField(
-        queryset=BimaHrEmployee.objects.all(),
-        slug_field='public_id',
-        source='refused_by',
-        write_only=True
-    )
-
-    def get_interviewer(self, obj):
-        if obj.interviewer:
-            return {
-                'id': obj.interviewer.public_id.hex,
-                'name': obj.interviewer.full_name
-            }
-        return None
 
     def get_interview_step(self, obj):
         if obj.interview_step:
@@ -46,18 +40,28 @@ class BimaHrInterviewSerializer(AbstractSerializer):
             }
         return None
 
-    def get_refused_by(self, obj):
-        if obj.refused_by:
+
+    def get_vacancie(self, obj):
+        if obj.vacancie:
             return {
-                'id': obj.refused_by.public_id.hex,
-                'name': obj.refused_by.full_name
+                'id': obj.vacancie.public_id.hex,
+                'name': obj.vacancie.title
             }
         return None
+
+    def get_candidat(self, obj):
+        if obj.candidat:
+            return {
+                'id': obj.candidat.public_id.hex,
+                'name': obj.candidat.full_name
+            }
+        return None
+
+    
 
     class Meta:
         model = BimaHrInterview
         fields = [
-            'id', 'date', 'interviewer', 'interviewer_public_id', 'note', 'score', 'comments', 'status',
-            'interview_step', 'interview_step_public_id', 'applicant_post', 'applicant_post_public_id', 'created',
-            'updated'
+            'id', 'name','due_date', 'scheduled_date' ,  'score', 'candidat', 'status', 'vacancie', 'vacancie_public_id',
+            'candidat_public_id', 'link_interview','estimated_time' ,'interview_step', 'interview_step_public_id','created','updated'
         ]

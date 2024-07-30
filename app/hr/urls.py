@@ -18,5 +18,7 @@ urlpatterns = [
     path('offer/', include('hr.offer.urls')),
     path('candidat/', include('hr.candidat.urls')),
     path('vacancie/', include('hr.vacancie.urls')),
+    path('question/', include('hr.question.urls')),
+    path('question_category/', include('hr.question_category.urls')),
     
 ]

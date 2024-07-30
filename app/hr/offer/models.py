@@ -42,15 +42,7 @@ class BimaHrOffre(AbstractModel):
         self._verify_if_date_expired_change_status_to_expired()
         super().save(*args, **kwargs)
 
-    '''def _verify_if_date_expired_change_status_to_expired(self):
-        current_date = timezone.localdate()
-
-        if self.activated_at and current_date >= self.activated_at and self.status == 'Unpublished':
-            self.status = 'Published'
-
-        if self.stopped_at and current_date >= self.stopped_at and self.status == 'Published':
-            self.status = 'Unpublished'
-    '''
+  
     
     def _verify_if_date_expired_change_status_to_expired(self):
         current_date = timezone.localdate()
@@ -74,7 +66,5 @@ class BimaHrOffre(AbstractModel):
         ordering = ['title']
         permissions = []
         default_permissions = ()
-
-    
 
     

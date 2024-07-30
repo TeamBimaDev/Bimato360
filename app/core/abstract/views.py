@@ -101,7 +101,7 @@ class AbstractViewSet(viewsets.ModelViewSet):
     filter_backends = [filters.OrderingFilter, DjangoFilterBackend]
     filterset_class = BaseFilter
     ordering_fields = ['updated', 'created']
-    ordering = ['name']
+    ordering = ['-created']
     pagination_class = DefaultPagination
 
     def get_error_message(self, exc):

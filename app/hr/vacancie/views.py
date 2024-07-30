@@ -6,6 +6,8 @@ from django.http import Http404
 
 import logging
 from typing import Optional
+from hr.offer.serializers import BimaHrOffreSerializer
+from hr.offer.models import BimaHrOffre
 from core.document.models import BimaCoreDocument, get_documents_for_parent_entity
 from django.core.files.storage import default_storage
 
@@ -44,7 +46,7 @@ class BimaHrVacancieViewSet(AbstractViewSet):
     serializer_class = BimaHrVacancieSerializer
     ordering = ["-title"]
     permission_classes = []
-    permission_classes = (ActionBasedPermission,)
+    #permission_classes = (ActionBasedPermission,)
     ordering_fields = ['title', 'department__name']
     filterset_class = BimaHrVacancieFilter
 
@@ -164,6 +166,36 @@ class BimaHrVacancieViewSet(AbstractViewSet):
         formatted_response = {str(item[0]): str(item[1]) for item in get_position_status_choices()}
         return Response(formatted_response)
    
+    def get_offer(self, request, *args, **kwargs):
+        vacancie = BimaHrVacancie.objects.get_object_by_public_id(
+            self.kwargs["public_id"]
+        )
+        offer = get_object_or_404(
+            BimaHrOffre,
+            public_id=self.kwargs["offer_public_id"],
+            title=vacancie.id,
+        )
+        serialized_offer = BimaHrOffreSerializer(offer)
+        return Response(serialized_offer.data)    
+        
+    '''def list_contacts(self, request, *args, **kwargs):
+        employee = BimaHrEmployee.objects.get_object_by_public_id(
+            self.kwargs["public_id"]
+        )
+        contacts = get_contacts_for_parent_entity(employee)
+        serialized_contact = BimaCoreContactSerializer(contacts, many=True)
+        return Response(serialized_contact.data)
+
+    def create_contact(self, request, *args, **kwargs):
+        employee = BimaHrEmployee.objects.get_object_by_public_id(
+            self.kwargs["public_id"]
+        )
+        response = create_single_contact(request.data, employee)
+        if "error" in response:
+            return Response({"detail": response["error"]}, status=response["status"])
+        return Response(response["data"], status=response["status"])
+    '''
+    
     def get_object(self):
         obj = BimaHrVacancie.objects.get_object_by_public_id(self.kwargs['pk'])
         return obj
@@ -178,6 +210,30 @@ class BimaHrVacancieViewSet(AbstractViewSet):
         except BimaHrCandidatVacancie.DoesNotExist:
             return Response({"detail": "Vacancie not found."}, status=status.HTTP_404_NOT_FOUND)
         
+    @action(detail=True, methods=['get', 'post'])
+    def offers(self, request, pk=None):
+        vacancie = self.get_object()
+        if request.method == 'POST':
+            serializer = BimaHrOffreSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save(title=vacancie)
+                return Response(serializer.data, status=201)
+            return Response(serializer.errors, status=400)
+        elif request.method == 'GET':
+            offers = BimaHrOffre.objects.filter(title=vacancie)
+            serializer = BimaHrOffreSerializer(offers, many=True)
+            return Response(serializer.data)    
+    
+    
+    @action(detail=True, methods=['get'], url_path='offers/(?P<offer_public_id>[^/.]+)')
+    def get_offer(self, request, pk=None, offer_public_id=None):
+        vacancie = self.get_object()
+        try:
+            offer = BimaHrOffre.objects.get(title=vacancie, public_id=offer_public_id)
+        except BimaHrOffre.DoesNotExist:
+            return Response({'detail': 'Not found.'}, status=404)
+        serializer = BimaHrOffreSerializer(offer)
+        return Response(serializer.data)
         
         
         

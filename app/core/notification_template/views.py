@@ -34,7 +34,7 @@ class BimaCoreNotificationTemplateViewSet(AbstractViewSet):
     serializer_class = BimaCoreNotificationTemplateSerializer
     filterset_class = BimaCoreNotificationTemplateFilter
     permission_classes = []
-    permission_classes = (ActionBasedPermission,)
+    #permission_classes = (ActionBasedPermission,)
 
     action_permissions = {
         'list': ['notification_template.can_read'],

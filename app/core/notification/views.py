@@ -19,7 +19,7 @@ class BimaCoreNotificationViewSet(AbstractViewSet):
     filterset_class = BimaCoreNotificationFilter
     ordering = ["-date_sent"]
     permission_classes = []
-    permission_classes = (ActionBasedPermission,)
+    #permission_classes = (ActionBasedPermission,)
 
     action_permissions = {
         'list': ['notification.can_read'],
