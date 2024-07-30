@@ -636,12 +636,20 @@ class PermissionsList:
     HR_VACANCIE_READ = ("hr.vacancie.can_read", "Can read vacancie", "HR_VACANCIE")
     HR_VACANCIE_MANAGE_CANDIDAT = ("hr.vacancie.can_manage_candidat", "Can manage vacancie candidat", "HR_VACANCIE",)
 
-    
+    HR_INTERVIEW_QUESTION_CREATE = ("hr.interview_question.can_create", "Can create interview_question", "HR_INTERVIEW_QUESTION",)
+    HR_INTERVIEW_QUESTION_UPDATE = ("hr.interview_question.can_update", "Can update interview_question", "HR_INTERVIEW_QUESTION",)
+    HR_INTERVIEW_QUESTION_DELETE = ("hr.interview_question.can_delete", "Can delete interview_question", "HR_INTERVIEW_QUESTION",)
+    HR_INTERVIEW_QUESTION_READ = ("hr.interview_question.can_read", "Can read interview_question", "HR_INTERVIEW_QUESTION",)
     
     HR_OFFER_CREATE = ("hr.offre.can_create", "Can create offre", "HR_OFFER")
     HR_OFFER_UPDATE = ("hr.offre.can_update", "Can update offre", "HR_OFFER")
     HR_OFFER_DELETE = ("hr.offre.can_delete", "Can delete offre", "HR_OFFER")
     HR_OFFER_READ = ("hr.offre.can_read", "Can read offre", "HR_OFFER")
-    HR_OFFER_MANAGE_SKILL = ("hr.offre.can_generate_description", "Can generate_description", "HR_OFFER",)
+    HR_OFFER_GENERATE_DESCRIPTION = ("hr.offre.can_generate_description", "Can generate_description", "HR_OFFER",)
 
-    
+    HR_INTERVIEW_CREATE = ("hr.interview.can_create", "Can create interview", "HR_INTERVIEW")
+    HR_INTERVIEW_UPDATE = ("hr.interview.can_update", "Can update interview", "HR_INTREVIEW")
+    HR_INTERVIEW_DELETE = ("hr.interview.can_delete", "Can delete interview", "HR_INTERVIEW")
+    HR_INTERVIEW_READ = ("hr.interview.can_read", "Can read interview", "HR_INTERVIEW")
+   
+   

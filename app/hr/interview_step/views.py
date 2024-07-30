@@ -9,7 +9,7 @@ class BimaHrInterviewViewStepSet(AbstractViewSet):
     queryset = BimaHrInterviewStep.objects.all()
     serializer_class = BimaHrInterviewStepSerializer
     permission_classes = []
-    permission_classes = (ActionBasedPermission,)
+    #permission_classes = (ActionBasedPermission,)
     action_permissions = {
         'list': ['interview_step.can_read'],
         'create': ['interview_step.can_create'],
