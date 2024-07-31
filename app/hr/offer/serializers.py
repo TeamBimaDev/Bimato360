@@ -44,8 +44,11 @@ class BimaHrOffreSerializer(AbstractSerializer):
                 "end_date": _("End date must be on or after the start date.")
             })
             
+<<<<<<< HEAD
              
 
 
+=======
+>>>>>>> origin/ma-branch
 
 

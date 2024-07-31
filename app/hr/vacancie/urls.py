@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
@@ -24,3 +25,16 @@ urlpatterns = [
     path('vacancie/<str:pk>/offers/', BimaHrVacancieViewSet.as_view({'get': 'offers', 'post': 'offers'}), name='vacancie-offers'),
 
     '''
+=======
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+
+from .views import BimaHrVacancieViewSet
+
+router = DefaultRouter()
+router.register('', BimaHrVacancieViewSet)
+
+urlpatterns = [
+    path('', include(router.urls)),
+]
+>>>>>>> origin/ma-branch
