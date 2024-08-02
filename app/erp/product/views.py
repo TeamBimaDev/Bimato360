@@ -1,3 +1,5 @@
+
+
 import logging
 
 import django_filters
@@ -195,3 +197,5 @@ class BimaErpProductViewSet(AbstractViewSet):
         model_fields = BimaErpProduct._meta
         data_to_export = [self.get_object()]
         return generate_xls_file(data_to_export, model_fields)
+
+

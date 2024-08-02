@@ -112,3 +112,4 @@ class EmployeeHistorySerializer(serializers.ModelSerializer):
 
     def get_changed_by(self, instance):
         return instance.history_user.name if instance.history_user else None
+

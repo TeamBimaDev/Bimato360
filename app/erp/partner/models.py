@@ -177,3 +177,4 @@ class BimaErpPartner(AbstractModel):
             raise ValidationError(
                 _("N° identité et N° sécurité sociale doit être unique")
             )
+

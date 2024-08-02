@@ -1,3 +1,5 @@
+
+
 import django_filters
 from django.db.models import Q
 
@@ -20,3 +22,5 @@ class BimaCoreNotificationFilter(django_filters.FilterSet):
             Q(subject__icontains=value) |
             Q(message__icontains=value)
         )
+
+

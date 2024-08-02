@@ -1,6 +1,5 @@
 from django.core.exceptions import ValidationError
 
-
 class EmailRequiredValidation(ValidationError):
     default_detail = "Email is required"
 

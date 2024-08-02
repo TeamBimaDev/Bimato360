@@ -1,3 +1,5 @@
+
+
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import BimaErpCategoryViewSet
@@ -14,3 +16,5 @@ urlpatterns = [
          BimaErpCategoryViewSet.as_view({'get': 'get_tag'}),
          name='category-get-tag'),
 ]
+
+

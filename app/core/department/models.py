@@ -1,3 +1,5 @@
+
+
 from core.abstract.models import AbstractModel
 from django.db import models
 
@@ -16,3 +18,5 @@ class BimaCoreDepartment(AbstractModel):
         ordering = ['name']
         permissions = []
         default_permissions = ()
+
+

@@ -1,7 +1,6 @@
-from datetime import datetime
-
 from common.enums.activity_status import PresenceStatus
 from common.permissions.action_base_permission import ActionBasedPermission
+from core.abstract.pagination import DefaultPagination
 from core.abstract.views import AbstractViewSet
 from core.document.models import get_documents_for_parent_entity, BimaCoreDocument
 from core.document.serializers import BimaCoreDocumentSerializer
@@ -13,6 +12,7 @@ from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
+from .filters import BimaHrActivityFilter
 from .models import BimaHrActivity, BimaHrActivityParticipant
 from .serializers import BimaHrActivitySerializer, BimaHrActivityParticipantSerializer, BimaHrActivityHistorySerializer
 from .service import BimaHrActivityNotificationService, BimaHrActivityService
@@ -22,6 +22,7 @@ class BimaHrActivityViewSet(AbstractViewSet):
     queryset = BimaHrActivity.objects.all()
     serializer_class = BimaHrActivitySerializer
     ordering = ["-start_date"]
+    filterset_class = BimaHrActivityFilter
     permission_classes = []
     permission_classes = (ActionBasedPermission,)
     action_permissions = {
@@ -91,18 +92,19 @@ class BimaHrActivityViewSet(AbstractViewSet):
     def change_participant_status(self, request, pk=None):
         activity = self.get_object()
 
-        if activity.end_date < datetime.now():
+        if activity.end_date < timezone.now():
             return Response({'error': 'Cannot change status for a past activity.'}, status=status.HTTP_400_BAD_REQUEST)
 
         person_public_id = request.data.get('person_public_id')
         new_status = request.data.get('status')
 
-        if new_status not in PresenceStatus._member_names_:
+        if new_status not in [st.name for st in PresenceStatus]:
             return Response({'error': 'Invalid status.'}, status=status.HTTP_400_BAD_REQUEST)
 
         person = get_object_or_404(BimaHrPerson, public_id=person_public_id)
+        employee = get_object_or_404(BimaHrEmployee, public_id=person_public_id)
 
-        if not hasattr(person, 'employee') or request.user != person.employee.user:
+        if request.user != employee.user:
             return Response({'error': 'Not authorized.'}, status=status.HTTP_403_FORBIDDEN)
 
         participant = get_object_or_404(BimaHrActivityParticipant, activity=activity, person=person)
@@ -124,8 +126,14 @@ class BimaHrActivityViewSet(AbstractViewSet):
 
         activities = BimaHrActivityParticipant.objects.filter(person=employee)
 
-        serializer = BimaHrActivityParticipantSerializer(activities, many=True)
-        return Response(serializer.data)
+        filtered_activities = self.filterset_class(self.request.GET, queryset=activities).qs
+
+        paginator = DefaultPagination()
+        paginated_queryset = paginator.paginate_queryset(filtered_activities, request)
+
+        serializer = BimaHrActivityParticipantSerializer(paginated_queryset, many=True)
+
+        return paginator.get_paginated_response(serializer.data)
 
     def get_object(self):
         obj = BimaHrActivity.objects.get_object_by_public_id(self.kwargs['pk'])

@@ -1,3 +1,5 @@
+
+
 import os
 
 from django.conf import settings
@@ -43,3 +45,5 @@ def save_pdf_to_file(pdf_content, file_name="document.pdf"):
 
     file_url = os.path.join(settings.MEDIA_URL, pdf_path)
     return file_url
+
+

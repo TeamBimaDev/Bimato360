@@ -40,7 +40,7 @@ class BimaHrJobCategoryViewSet(AbstractViewSet):
     serializer_class = BimaHrJobCategorySerializer
     filterset_class = BimaHrJobCategoryFilter
     permission_classes = []
-    permission_classes = (ActionBasedPermission,)
+    #permission_classes = (ActionBasedPermission,)
     action_permissions = {
         'list': ['job_category.can_read'],
         'create': ['job_category.can_create'],

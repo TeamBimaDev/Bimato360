@@ -1,3 +1,5 @@
+
+
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
@@ -44,3 +46,5 @@ urlpatterns = [
          BimaErpPartnerViewSet.as_view({'get': 'get_bank_account'}),
          name='partner-bank_account'),
 ]
+
+

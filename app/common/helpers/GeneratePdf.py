@@ -1,3 +1,4 @@
+
 from reportlab.platypus import Frame, PageTemplate
 
 
@@ -20,3 +21,4 @@ class GeneratePdf:
         self.template.build(story)
 
         return self.response
+

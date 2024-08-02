@@ -1,3 +1,4 @@
+
 from core.abstract.serializers import AbstractSerializer
 from django.contrib.auth.models import Permission
 from rest_framework import serializers
@@ -15,3 +16,4 @@ class BimaUserRoleSerializer(AbstractSerializer):
     class Meta:
         model = BimaUserRole
         fields = ['id', 'created', 'updated', 'name', 'active', 'note', 'permissions']
+

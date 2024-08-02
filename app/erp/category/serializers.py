@@ -1,3 +1,5 @@
+
+
 from .models import BimaErpCategory
 from core.abstract.serializers import AbstractSerializer
 from rest_framework import serializers
@@ -67,3 +69,5 @@ class BimaErpCategorySerializer(AbstractSerializer):
                     self.is_descendant(child, category_to_check, visited):
                 return True
         return False
+
+

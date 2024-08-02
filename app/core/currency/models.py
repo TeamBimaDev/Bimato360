@@ -1,3 +1,4 @@
+
 from django.db import models
 
 from core.abstract.models import AbstractModel
@@ -18,3 +19,4 @@ class BimaCoreCurrency(AbstractModel):
         ordering = ['name']
         permissions = []
         default_permissions = ()
+

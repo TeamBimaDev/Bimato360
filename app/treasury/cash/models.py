@@ -1,3 +1,4 @@
+
 from company.models import BimaCompany
 from core.abstract.models import AbstractModel
 from django.db import models

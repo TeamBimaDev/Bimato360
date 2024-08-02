@@ -23,3 +23,4 @@ class BimaHrPosition(AbstractModel):
         ordering = ['title']
         permissions = []
         default_permissions = ()
+

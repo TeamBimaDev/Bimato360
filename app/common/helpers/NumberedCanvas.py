@@ -1,3 +1,4 @@
+
 from reportlab.platypus import BaseDocTemplate
 
 
@@ -23,3 +24,4 @@ class NumberedCanvas(BaseDocTemplate):
         canvas.setFont('Helvetica', 10)
         page_num = "%s/%s" % (pageNumber, total_pages)
         canvas.drawString(550, 30, page_num)
+

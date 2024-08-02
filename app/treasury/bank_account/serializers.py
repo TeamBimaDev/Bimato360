@@ -1,3 +1,5 @@
+
+
 from core.abstract.serializers import AbstractSerializer
 from core.bank.models import BimaCoreBank
 from core.currency.models import BimaCoreCurrency
@@ -42,3 +44,5 @@ class BimaTreasuryBankAccountSerializer(AbstractSerializer):
             'currency', 'currency_public_id', 'bank', 'bank_public_id', 'created', 'updated'
         ]
         read_only_fields = ('balance',)
+
+

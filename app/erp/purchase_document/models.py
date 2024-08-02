@@ -1,3 +1,4 @@
+
 from common.enums.purchase_document_enum import PurchaseDocumentStatus
 from common.enums.purchase_document_enum import PurchaseDocumentTypes
 from common.enums.purchase_document_enum import get_payment_status

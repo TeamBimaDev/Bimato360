@@ -7,8 +7,14 @@ from .models import BimaHrInterview
 
 
 class BimaHrInterviewFilter(filters.FilterSet):
+<<<<<<< HEAD
+    vacancie = django_filters.UUIDFilter(field_name='vacancie__public_id')
+    candidat = django_filters.UUIDFilter(field_name='candidat__public_id')
+    interview_step = django_filters.UUIDFilter(field_name='interview_step__public_id')
+=======
     vacancie = django_filters.UUIDFilter(field_name='vacancie__title')
     candidat = django_filters.UUIDFilter(field_name='candidat__public_id')
+>>>>>>> origin/ma-branch
     status = django_filters.ChoiceFilter(choices=get_interview_status_choices())
 
     search = django_filters.CharFilter(

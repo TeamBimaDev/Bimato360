@@ -1,3 +1,5 @@
+
+
 from common.enums.file_type import return_list_file_type_partner, return_list_file_purchase_document, \
     return_list_file_contract
 from common.enums.file_type import return_list_file_type_user, return_list_file_type_company, return_list_file_employee
@@ -64,3 +66,5 @@ class BimaCoreDocumentViewSet(AbstractViewSet):
     @action(detail=False, methods=['GET'], url_path='list_file_type_contract')
     def list_file_type_contract(self, request, *args, **kwargs):
         return Response(return_list_file_contract())
+
+

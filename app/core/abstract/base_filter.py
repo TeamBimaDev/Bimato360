@@ -1,3 +1,4 @@
+
 import django_filters
 from django import forms
 from django_filters import rest_framework as filters
@@ -8,6 +9,7 @@ class BaseFilter(django_filters.FilterSet):
 
     class Meta:
         abstract = True
+
 
 
 

@@ -1,3 +1,4 @@
+
 from core.abstract.models import AbstractModel
 from django.contrib.auth.models import Permission
 from django.db import models
@@ -16,3 +17,4 @@ class BimaUserRole(AbstractModel):
         ordering = ['name']
         permissions = []
         default_permissions = ()
+

@@ -1,3 +1,4 @@
+
 import django_filters
 
 from django.shortcuts import get_object_or_404
@@ -117,3 +118,4 @@ class BimaCoreBankViewSet(AbstractViewSet):
     def get_object(self):
         obj = BimaCoreBank.objects.get_object_by_public_id(self.kwargs['pk'])
         return obj
+

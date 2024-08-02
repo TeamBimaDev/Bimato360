@@ -58,6 +58,7 @@ class BimaHrVacancieSerializer(AbstractSerializer):
             }
         return None
 
+   
     class Meta:
         model = BimaHrVacancie
         fields = [
@@ -66,6 +67,27 @@ class BimaHrVacancieSerializer(AbstractSerializer):
             'work_location', 'manager', 'manager_public_id', 'position_status', 'created', 'updated', 'number_of_candidates'
         ]
 
+    def validate(self, data):
+                self.validate_date_range(data)
+                return data
+
+    def validate_date_range(self, data):
+                published_date = data.get('published_date')
+                date_expiration = data.get('date_expiration')
+                date_start_vacancie = data.get('date_start_vacancie')
+
+                if published_date and date_expiration:
+                    if published_date >= date_expiration:
+                        raise serializers.ValidationError({
+                            "published_date": "Published date must be before the expiration date."
+                        })
+
+                if date_expiration and date_start_vacancie:
+                    if date_expiration <= date_start_vacancie:
+                        raise serializers.ValidationError({
+                            "date_expiration": "Expiration date must be after the start date."
+                        })    
+    
 
 class BimaHrCandidatVacancieSerializer(AbstractSerializer):
     vacancie = BimaHrVacancieSerializer(read_only=True)
@@ -103,25 +125,5 @@ class BimaHrCandidatVacancieSerializer(AbstractSerializer):
             vacancie = self.context.get('vacancie')
         validated_data['vacancie'] = vacancie
         return super().create(validated_data)
-
-
-    def validate(self, data):
-            self.validate_date_range(data)
-            return data
-
-    def validate_date_range(self, data):
-        published_date = data.get('published_date')
-        date_expiration = data.get('date_expiration')
-        date_start_vacancie = data.get('date_start_vacancie')
-
-        if published_date and date_expiration:
-            if published_date >= date_expiration:
-                raise serializers.ValidationError({
-                    "published_date": "Published date must be before the expiration date."
-                })
-
-        if date_expiration and date_start_vacancie:
-            if date_expiration <= date_start_vacancie:
-                raise serializers.ValidationError({
-                    "date_expiration": "Expiration date must be after the start date."
-                })
+ 
+   

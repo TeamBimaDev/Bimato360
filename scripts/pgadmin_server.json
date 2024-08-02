@@ -1,0 +1,13 @@
+{
+  "Servers": {
+    "1": {
+      "Name": "bima360_db",
+      "Group": "Servers",
+      "Host": "bima360_db",
+      "Port": "5433",
+      "Username": "bima360_user",
+      "MaintenanceDB": "postgres",
+      "SSLMode": "prefer"
+    }
+  }
+}
