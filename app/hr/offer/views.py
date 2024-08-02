@@ -14,7 +14,6 @@ class BimaHrOffreViewSet(viewsets.ModelViewSet):
     queryset = BimaHrOffre.objects.all()
     serializer_class = BimaHrOffreSerializer
     permission_classes = []
-<<<<<<< HEAD
     permission_classes = (ActionBasedPermission,)
     action_permissions = {
         'list': ['offre.can_read'],
@@ -410,10 +409,6 @@ class BimaHrOffreViewSet(viewsets.ModelViewSet):
     }
     
     
-=======
-    #permission_classes = (ActionBasedPermission,)
-
->>>>>>> origin/ma-branch
     def generate_job_description(self, offre):
         # Load the Ollama model (replace with the actual model setup)
         llm = Ollama(model="llama2")
@@ -535,7 +530,6 @@ class BimaHrOffreViewSet(viewsets.ModelViewSet):
         offres = BimaHrOffre.objects.all().order_by('created')  
         serializer = BimaHrOffreSerializer(offres, many=True)
         return JsonResponse(serializer.data, safe=False)
-<<<<<<< HEAD
 '''
 
 
@@ -543,8 +537,6 @@ class BimaHrOffreViewSet(viewsets.ModelViewSet):
 
 
 
-=======
->>>>>>> origin/ma-branch
 
 
 
