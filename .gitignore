@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Django #
 *.log
 *.pot
@@ -318,4 +317,6 @@ bima360_db/
 /bima360_db/
 /bima360_db/*
 
->>>>>>> origin/ma-branch
+#Api_calender
+credentials.json
+token.pickle
