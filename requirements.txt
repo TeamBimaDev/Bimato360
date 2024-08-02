@@ -112,5 +112,6 @@ zopfli
 black
 python-json-logger
 bleach
-channels
 pymupdf
+langchain_community
+google-api-python-client google-auth-httplib2 google-auth-oauthlib

@@ -157,3 +157,6 @@ bima360_db/
 /bima360_db/
 /bima360_db/*
 
+#Api_calender
+credentials.json
+token.pickle

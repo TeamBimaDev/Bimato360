@@ -7,6 +7,7 @@ class BimaHrInterviewStatus(Enum):
     COMPLETED = _('Completed')
     EXPIRED = _('Expired')
     PLANNED = _('Planned')
+    CANCELED = _('Canceled')
 
 
 
@@ -24,6 +25,10 @@ class BimaHrInterviewTime(Enum):
     One_hour = _("1 h")
     One_hour_half = _('1h:30min')
 
+class BimaHrInterviewMode(Enum):
+    ONLINE = _("Online")
+    PHYSICAL = _("Physical")
+
 def get_interview_status_choices():
     return [(its.name, its.value) for its in BimaHrInterviewStatus]
 
@@ -36,3 +41,6 @@ def get_interview_due_data_choices():
 
 def get_interview_time_choices():
     return [(its.name, its.value) for its in BimaHrInterviewTime]
+
+def get_interview_mode_choices():
+    return [(its.name, its.value) for its in BimaHrInterviewMode]
