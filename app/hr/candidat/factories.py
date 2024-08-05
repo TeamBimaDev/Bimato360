@@ -1,17 +1,3 @@
-<<<<<<< HEAD
-import factory
-from .models import BimaHrCandidat
-
-
-
-class BimaHrCandidatFactory(factory.django.DjangoModelFactory):
-    class Meta:
-        model = BimaHrCandidat
-
-    availability_days = factory.Faker('random_int', min=1, max=7)
-    message = factory.Faker('text')
-    
-=======
 import factory
 from .models import BimaHrCandidat
 from core.document.models import BimaCoreDocument
@@ -50,4 +36,3 @@ class BimaCoreDocumentFactory(factory.django.DjangoModelFactory):
         if 'file_path' in kwargs:
             self.file_path = kwargs['file_path']
             self.save()
->>>>>>> origin/ma-branch
