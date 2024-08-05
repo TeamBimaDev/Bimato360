@@ -37,7 +37,7 @@ class BimaHrTechnicalInterviewViewSet(AbstractViewSet):
     serializer_class = BimaHrTechnicalInterviewSerializer
     filterset_class = BimaHrTechnicalInterviewFilter
     permission_classes = []
-    permission_classes = (ActionBasedPermission,)
+    #permission_classes = (ActionBasedPermission,)
     action_permissions = {
         'list': ['technical_interview.can_read'],
         'create': ['technical_interview.can_create'],
