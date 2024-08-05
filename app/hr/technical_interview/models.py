@@ -5,6 +5,8 @@ from hr.candidat.models import BimaHrCandidat
 from hr.vacancie.models import BimaHrVacancie
 from hr.interview_step.models import BimaHrInterviewStep
 from django.core.exceptions import ValidationError
+from .utils.google_calendar import delete_calendar_event
+
 
 
 
@@ -35,6 +37,17 @@ class BimaHrTechnicalInterview(AbstractModel):
                 'end_datetime': 'End date and time must be after start date and time.'
             })
 
+    def delete(self, *args, **kwargs):
+        # Delete associated calendar event if exists
+        if self.id_event:
+            try:
+                delete_calendar_event(self)
+                print(f"Calendar event with ID {self.id_event} successfully deleted.")
+            except Exception as e:
+                print(f"Error deleting calendar event: {str(e)}")
+
+        # Call the superclass method to handle the actual deletion of the model instance
+        super().delete(*args, **kwargs)
 
     class Meta:
         permissions = []

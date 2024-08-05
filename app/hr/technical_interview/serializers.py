@@ -75,6 +75,7 @@ class BimaHrTechnicalInterviewSerializer(AbstractSerializer):
 
     def create(self, validated_data):
         interviewers_data = validated_data.pop('interviewers', [])
+        validated_data['status'] = 'PLANNED'
         technical_interview = BimaHrTechnicalInterview.objects.create(**validated_data)
         technical_interview.interviewers.set(interviewers_data)
         
@@ -103,6 +104,8 @@ class BimaHrTechnicalInterviewSerializer(AbstractSerializer):
 
         return instance
     
+
+
     class Meta:
         model = BimaHrTechnicalInterview
         fields = [

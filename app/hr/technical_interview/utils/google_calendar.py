@@ -19,7 +19,7 @@ def get_google_calendar_service():
             creds.refresh(Request())
         else:
             flow = InstalledAppFlow.from_client_secrets_file(
-                'credentials.json', SCOPES)
+                'C:/Users/houssem/Desktop/projet/bima_work/bima360/back/app/hr/technical_interview/utils/credentials.json', SCOPES)
             creds = flow.run_local_server(port=0)
 
         with open('token.pickle', 'wb') as token:
@@ -31,7 +31,7 @@ def create_calendar_event(interview):
     service = get_google_calendar_service()
 
     # Prepare attendees list including interviewers and the candidate
-    attendees = [{'email': interviewer.user.email} for interviewer in interview.interviewers.all()]
+    attendees = [{'email': interviewer.email} for interviewer in interview.interviewers.all()]
     attendees.append({'email': interview.candidat.email})
 
     event = {
@@ -71,7 +71,7 @@ def update_calendar_event(interview):
     service = get_google_calendar_service()
 
     # Prepare attendees list including interviewers and the candidate
-    attendees = [{'email': interviewer.user.email} for interviewer in interview.interviewers.all()]
+    attendees = [{'email': interviewer.email} for interviewer in interview.interviewers.all()]
     attendees.append({'email': interview.candidat.email})
 
     event = {
@@ -101,4 +101,15 @@ def update_calendar_event(interview):
 
 def delete_calendar_event(interview):
     service = get_google_calendar_service()
-    service.events().delete(calendarId='primary', eventId=interview.id_event, sendUpdates='all').execute()
+    try:
+        # Check if the event ID is available
+        if not interview.id_event:
+            raise ValueError("No event ID provided for deletion.")
+        
+        # Attempt to delete the event
+        service.events().delete(calendarId='primary', eventId=interview.id_event, sendUpdates='all').execute()
+        print(f"Event with ID {interview.id_event} successfully deleted.")
+    except Exception as e:
+        # Log the error
+        print(f"Error deleting calendar event: {str(e)}")
+        raise

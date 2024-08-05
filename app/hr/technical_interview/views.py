@@ -25,6 +25,7 @@ from common.permissions.action_base_permission import ActionBasedPermission
 import logging 
 import fitz 
 import json
+from .utils.google_calendar import delete_calendar_event
 
 
 
@@ -53,7 +54,7 @@ class BimaHrTechnicalInterviewViewSet(AbstractViewSet):
     def get_object(self):
         obj = BimaHrTechnicalInterview.objects.get_object_by_public_id(self.kwargs['pk'])
         return obj  
-        
+
 
     
   
