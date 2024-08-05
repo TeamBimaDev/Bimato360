@@ -1,3 +1,5 @@
+
+
 from core.bank.models import BimaCoreBank
 from core.currency.models import BimaCoreCurrency
 from django.contrib.contenttypes.models import ContentType
@@ -47,3 +49,5 @@ class BimaTreasuryBankAccountService:
             return {"error": str(e), "status": status.HTTP_400_BAD_REQUEST}
         except Exception as e:
             return {"error": str(e), "status": status.HTTP_500_INTERNAL_SERVER_ERROR}
+
+

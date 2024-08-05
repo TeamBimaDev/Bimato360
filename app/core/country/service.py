@@ -1,3 +1,4 @@
+
 import csv
 from django.db.models import Q, ForeignKey
 from .models import BimaCoreCountry
@@ -146,3 +147,4 @@ def generate_xls_file(queryset):
     response['Content-Disposition'] = 'attachment; filename=export.xlsx'
 
     return response
+

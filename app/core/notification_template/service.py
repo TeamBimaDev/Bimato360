@@ -1,3 +1,5 @@
+
+
 from common.enums.transaction_enum import PaymentTermType
 from common.service.template_notification_service import BimaTemplateNotificationService
 
@@ -34,3 +36,5 @@ class BimaCoreNotificationTemplateService:
                                                                                     'invoice_number': sale_document.number})
 
         return subject, message
+
+

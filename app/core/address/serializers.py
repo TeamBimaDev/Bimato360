@@ -1,3 +1,5 @@
+
+
 from core.address.models import BimaCoreAddress
 from core.abstract.serializers import AbstractSerializer
 from core.country.models import BimaCoreCountry
@@ -42,3 +44,4 @@ class BimaCoreAddressSerializer(AbstractSerializer):
             'can_deliver', 'latitude', 'longitude', 'note',
             'country', 'country_public_id', 'state_public_id', 'created', 'updated'
         ]
+

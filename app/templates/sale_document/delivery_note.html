@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 {% load i18n %}
 <!DOCTYPE html>
 <html>
@@ -261,3 +262,268 @@
 
 </body>
 </html>
+=======
+{% load i18n %}
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        @page {
+            @top-left {
+                content: element(header-left);
+            }
+            @top-right {
+                content: element(header-right);
+            }
+            @bottom-left {
+                content: element(footer-left);
+            }
+            @bottom-right {
+                content: "Page " counter(page) " of " counter(pages);
+            }
+
+        }
+
+        #header-left {
+            position: running(header-left);
+
+        }
+
+        #header-right {
+            position: running(header-right);
+        }
+
+        #footer-left {
+            position: running(footer-left);
+        }
+
+
+        .logo {
+            width: 200px;
+            height: 100px;
+            object-fit: contain;
+        }
+
+        .sale_document_type_div {
+            background-color: #59981A;
+            padding: 1rem 2rem;
+            width: 80px;
+            color: #f2f2f2;
+            letter-spacing: 2px;
+            font-weight: bold;
+        }
+
+        .sale_document_number_div {
+            margin-top: 2rem;
+            letter-spacing: 2px;
+            font-size: 1.2em;
+        }
+
+        .sale_document_date_div {
+            margin-top: 0.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .invoice_number_span {
+            letter-spacing: 0px;
+        }
+
+        .partner_div_details {
+            margin-top: 1rem;
+            margin-bottom: 1rem;
+            border-top: 2px solid #59981A;
+            border-bottom: 2px solid #59981A;
+        }
+
+        .partner_div_details div {
+            padding: 0.2rem 0;
+        }
+
+        .partner_secondary_item {
+            font-size: 0.8em;
+        }
+
+        .table_product_detail {
+            margin-top: 3rem;
+            width: 100%;
+            border-top: 2px solid #59981A;
+            border-bottom: 2px solid #59981A;
+        }
+
+        .table_product_header {
+            border-bottom: 2px solid #59981A;
+        }
+
+        .table_product_detail:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        .table_product_detail:nth-child(odd) {
+            background-color: #ffffff;
+        }
+
+        .table_product_detail th {
+            padding: 1.5rem 0 1.5rem 0;
+        }
+
+        .table_product_detail td {
+            padding: 1.5rem 0 1.5rem 0;
+        }
+
+        .center {
+            text-align: center;
+        }
+
+        .right {
+            text-align: right;
+        }
+
+        .total {
+            font-weight: bold;
+        }
+
+        .totals_div {
+            margin-top: 1rem;
+            width: 260px;
+            margin-left: auto;
+
+        }
+
+        .totals_div_item {
+            width: 260px;
+            border-bottom: 2px solid #59981A;
+            display: flex;
+            justify-content: space-between;
+            padding: 1rem 0 1rem 0;
+        }
+
+        .total_span_item_text {
+            display: inline-block;
+            width: 130px;
+        }
+
+        .total_span_item_value {
+            display: inline-block;
+        }
+
+        .total_span_item_value.grand_total, .total_span_item_text.grand_total {
+            color: #59981A;
+        }
+
+        .note {
+            margin-top: 1rem;
+            max-width: 350px;
+            font-size: 0.8em;
+
+        }
+
+        .content-wrapper {
+            display: flex;
+            justify-content: end;
+        }
+
+        .colored {
+            color: #718152;
+        }
+    </style>
+</head>
+<body>
+<div id="header-left">
+    <img src="{{ request.scheme }}://{{ request.get_host }}{{ MEDIA_URL }}{{ company_data.favorite_logo.file_path }}"
+         alt="<th> {% trans "Company Logo" %} </th>" class="logo"/>
+</div>
+<div id="header-right">
+    {{ company_data.company.header_note|safe }}
+</div>
+
+<div class="sale_document_details">
+    <div class="sale_document_type_div">
+        {{ document_title|capfirst }}
+    </div>
+    <div class="sale_document_number_div">
+        {{ document_title|upper }} NUMBER <br/>
+        <span class="invoice_number_span">{{ sale_document.number }}</span>
+    </div>
+    <div class="sale_document_date_div">
+        <span class="invoice_number_span">{{ sale_document.date }}</span>
+    </div>
+</div>
+
+
+<div class="partner_div_details">
+    <!-- Partner data -->
+    {% if partner.partner_type == "INDIVIDUAL" %}
+        <div class="data-row"><span class="bold colored"> {{ partner.first_name }} {{ partner.last_name }}</span></div>
+        <div class="partner_secondary_item">{{ partner.social_security_number }}</div>
+    {% else %}
+        <div class="partner_secondary_item">{{ partner.company_name }}</div>
+        <div class="partner_secondary_item">{{ partner.vat_id_number }}</div>
+        <div class="partner_secondary_item">{{ partner.company_siren }}</div>
+        <div class="partner_secondary_item">{{ partner.company_siret }}</div>
+    {% endif %}
+    <div class="partner_secondary_item"> {{ partner.email }}</div>
+    <div class="partner_secondary_item"> {{ partner.phone }}</div>
+
+    <div class="partner_address">
+        <span> {{ address.number }} {{ address.street }} {{ address.zip }}</span>
+        <br/>
+        <span> {{ address.city }} {{ address.state.name }} {{ address.country.name }}</span>
+
+    </div>
+</div>
+
+
+<!-- SaleDocumentProducts table -->
+<table class="table_product_detail">
+    <tr class="table_product_header">
+        <th>{% trans "Name / Ref." %}</th>
+        <th class="center">{% trans "Qte." %}</th>
+        <th class="right">{% trans "U. Price" %}</th>
+        <th class="right">{% trans "VAT" %}</th>
+        <th class="right">{% trans "Disc." %}</th>
+        <th class="right total">{% trans "Total" %}</th>
+    </tr>
+    {% for product in products %}
+        <tr>
+            <td style="width: 25%">{{ product.name }} / {{ product.reference }}</td>
+            <td style="width: 15%" class="center">{{ product.quantity }}</td>
+            <td style="width: 15%" class="right">{{ product.unit_price }}</td>
+            <td style="width: 10%" class="right">{{ product.vat }}</td>
+            <td style="width: 10%" class="right">{{ product.discount }}</td>
+            <td style="width: 25%" class="right total">{{ product.total_price }}</td>
+        </tr>
+    {% endfor %}
+</table>
+<div class="content-wrapper">
+    <div class="totals_div">
+        <div class="totals_div_item">
+            <span class="total_span_item_text"><th class="right">{% trans "Total Without VAT" %}</th>:</span>
+            <span class="total_span_item_value total">{{ sale_document.total_amount_without_vat }}</span>
+        </div>
+
+        <div class="totals_div_item">
+            <span class="total_span_item_text">{% trans "Total Discount" %}: </span>
+            <span class="total_span_item_value total">{{ sale_document.total_discount }}</span>
+
+        </div>
+        <div class="totals_div_item">
+            <span class="total_span_item_text">{% trans "Total VAT" %}:</span>
+            <span class="total_span_item_value total">{{ sale_document.total_vat }}</span>
+        </div>
+        <div class="totals_div_item">
+            <span class="total_span_item_text grand_total">{% trans "Total Amount" %}: </span>
+            <span class="total_span_item_value grand_total total">{{ sale_document.total_amount }}</span>
+        </div>
+    </div>
+</div>
+
+<!-- Note -->
+<div class="note">{{ sale_document.note }}</div>
+<div id="footer-left">
+    {{ company_data.company.footer_note|safe }}
+</div>
+
+
+</body>
+</html>
+>>>>>>> origin/ma-branch

@@ -6,6 +6,8 @@ from django.http import Http404
 
 import logging
 from typing import Optional
+from hr.offer.serializers import BimaHrOffreSerializer
+from hr.offer.models import BimaHrOffre
 from core.document.models import BimaCoreDocument, get_documents_for_parent_entity
 from django.core.files.storage import default_storage
 
@@ -33,7 +35,7 @@ from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.exceptions import NotFound, ValidationError
 from rest_framework.response import Response
-import fitz
+from common.enums.position import get_position_status_choices
 
 logger = logging.getLogger(__name__)
 
@@ -44,7 +46,7 @@ class BimaHrVacancieViewSet(AbstractViewSet):
     serializer_class = BimaHrVacancieSerializer
     ordering = ["-title"]
     permission_classes = []
-    permission_classes = (ActionBasedPermission,)
+    #permission_classes = (ActionBasedPermission,)
     ordering_fields = ['title', 'department__name']
     filterset_class = BimaHrVacancieFilter
 
@@ -55,6 +57,8 @@ class BimaHrVacancieViewSet(AbstractViewSet):
         'update': ['vacancie.can_update'],
         'partial_update': ['vacancie.can_update'],
         'destroy': ['vacancie.can_delete'],
+        'delete-candidat': ['vacancie.can_manage_candidat'],
+        'add_candidat': ['vacancie.can_manage_candidat'],
     }
     
     def __init__(self, *args, **kwargs):
@@ -112,12 +116,14 @@ class BimaHrVacancieViewSet(AbstractViewSet):
                 documents,
                 file_type='CANDIDAT_CV')
 
+            # Construct the file path using Django's default storage system
             file_pdf = default_storage.path(str(cv_candidat.file_path))
-            doc = fitz.open(file_pdf)
-            pdf_text = ""
-            for page in doc:
-                pdf_text += page.get_text()
-            return pdf_text
+            print(file_pdf)
+            # Open the file in binary mode
+            with open(file_pdf, 'rb') as pdf_file:
+                pdf_content = pdf_file.read()
+
+            return pdf_content
 
         except Exception as e:
             self.logger.error(f"An error occurred while reading the PDF: {e}")
@@ -151,16 +157,88 @@ class BimaHrVacancieViewSet(AbstractViewSet):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
-    @action(detail=True, methods=['DELETE'], url_path='delete-candidat/(?P<candidat_vacancie_public_id>[^/.]+)')
-    def delete_candidat(self, request, pk=None):
-        candidat_vacancie_public_id = request.data.get('candidat_vacancie_public_id')
+
+
+
+
+    @action(detail=False, methods=['get'], url_path='list_vacancie_status')
+    def list_vacancie_status(self, request):
+        formatted_response = {str(item[0]): str(item[1]) for item in get_position_status_choices()}
+        return Response(formatted_response)
+   
+    def get_offer(self, request, *args, **kwargs):
+        vacancie = BimaHrVacancie.objects.get_object_by_public_id(
+            self.kwargs["public_id"]
+        )
+        offer = get_object_or_404(
+            BimaHrOffre,
+            public_id=self.kwargs["offer_public_id"],
+            title=vacancie.id,
+        )
+        serialized_offer = BimaHrOffreSerializer(offer)
+        return Response(serialized_offer.data)    
+        
+    '''def list_contacts(self, request, *args, **kwargs):
+        employee = BimaHrEmployee.objects.get_object_by_public_id(
+            self.kwargs["public_id"]
+        )
+        contacts = get_contacts_for_parent_entity(employee)
+        serialized_contact = BimaCoreContactSerializer(contacts, many=True)
+        return Response(serialized_contact.data)
+
+    def create_contact(self, request, *args, **kwargs):
+        employee = BimaHrEmployee.objects.get_object_by_public_id(
+            self.kwargs["public_id"]
+        )
+        response = create_single_contact(request.data, employee)
+        if "error" in response:
+            return Response({"detail": response["error"]}, status=response["status"])
+        return Response(response["data"], status=response["status"])
+    '''
+    
+    def get_object(self):
+        obj = BimaHrVacancie.objects.get_object_by_public_id(self.kwargs['pk'])
+        return obj
+    
+    
+    @action(detail=True, methods=['delete'], url_path='delete-candidat/(?P<candidat_vacancie_public_id>[^/.]+)')
+    def delete_candidat(self, request, pk=None, candidat_vacancie_public_id=None):
         try:
             vacancie_post = BimaHrCandidatVacancie.objects.get(public_id=candidat_vacancie_public_id)
             vacancie_post.delete()
             return Response({"detail": "Vacancie application deleted."}, status=status.HTTP_204_NO_CONTENT)
         except BimaHrCandidatVacancie.DoesNotExist:
             return Response({"detail": "Vacancie not found."}, status=status.HTTP_404_NOT_FOUND)
-
-    def get_object(self):
-        obj = BimaHrVacancie.objects.get_object_by_public_id(self.kwargs['pk'])
-        return obj
+        
+    @action(detail=True, methods=['get', 'post'])
+    def offers(self, request, pk=None):
+        vacancie = self.get_object()
+        if request.method == 'POST':
+            serializer = BimaHrOffreSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save(title=vacancie)
+                return Response(serializer.data, status=201)
+            return Response(serializer.errors, status=400)
+        elif request.method == 'GET':
+            offers = BimaHrOffre.objects.filter(title=vacancie)
+            serializer = BimaHrOffreSerializer(offers, many=True)
+            return Response(serializer.data)    
+    
+    
+    @action(detail=True, methods=['get'], url_path='offers/(?P<offer_public_id>[^/.]+)')
+    def get_offer(self, request, pk=None, offer_public_id=None):
+        vacancie = self.get_object()
+        try:
+            offer = BimaHrOffre.objects.get(title=vacancie, public_id=offer_public_id)
+        except BimaHrOffre.DoesNotExist:
+            return Response({'detail': 'Not found.'}, status=404)
+        serializer = BimaHrOffreSerializer(offer)
+        return Response(serializer.data)
+        
+        
+        
+        
+        
+        
+        
+        

@@ -1,3 +1,5 @@
+
+
 from core.entity_tag.models import BimaCoreEntityTag
 from core.abstract.serializers import AbstractSerializer
 from rest_framework import serializers
@@ -23,3 +25,5 @@ class BimaCoreEntityTagSerializer(AbstractSerializer):
     class Meta:
         model = BimaCoreEntityTag
         fields = ['id', 'id_manager', 'tag', 'tag_public_id', 'created', 'updated', 'order']
+
+

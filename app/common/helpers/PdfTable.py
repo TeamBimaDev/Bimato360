@@ -1,3 +1,4 @@
+
 from reportlab.platypus import Table, TableStyle
 from django.apps import apps
 from reportlab.lib import colors
@@ -38,3 +39,4 @@ class PdfTable:
     def chunks(self, lst, n):
         for i in range(0, len(lst), n):
             yield lst[i:i + n]
+

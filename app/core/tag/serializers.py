@@ -1,3 +1,5 @@
+
+
 from .models import BimaCoreTag
 from core.abstract.serializers import AbstractSerializer
 from rest_framework import serializers
@@ -96,3 +98,4 @@ class BimaCoreTagSerializer(AbstractSerializer):
                 BimaCoreTag.objects.get(color=color)
             except ObjectDoesNotExist:
                 return color
+

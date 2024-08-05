@@ -93,3 +93,4 @@ def get_sale_document_validity():
 
 def get_payment_status():
     return [(ps.name, ps.value) for ps in SaleDocumentPaymentStatus]
+

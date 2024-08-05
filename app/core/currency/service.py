@@ -1,3 +1,4 @@
+
 from .models import BimaCoreCurrency
 import csv
 from core.currency.models import BimaCoreCurrency
@@ -119,3 +120,4 @@ def generate_xls_file(queryset):
     response['Content-Disposition'] = 'attachment; filename=export.xlsx'
 
     return response
+

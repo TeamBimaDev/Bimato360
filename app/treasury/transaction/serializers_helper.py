@@ -1,3 +1,5 @@
+
+
 from django.utils.encoding import force_str
 from rest_framework import serializers
 
@@ -48,3 +50,5 @@ class SimpleTransactionPurchaseDocumentPaymentSerializer(serializers.ModelSerial
     class Meta:
         model = TransactionPurchaseDocumentPayment
         fields = ['amount_paid', 'transaction_public_id', 'transaction_number']
+
+

@@ -105,6 +105,10 @@ class BimaHrActivityParticipantSerializer(AbstractSerializer):
         return {
             'id': obj.activity.public_id.hex,
             'name': obj.activity.name,
+            'status': obj.activity.status,
+            'start_date': obj.activity.start_date,
+            'end_date': obj.activity.end_date,
+            'activity_type': obj.activity.activity_type.name,
         }
 
     def get_person(self, obj):

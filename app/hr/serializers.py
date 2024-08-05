@@ -58,7 +58,7 @@ class BimaHrPersonExperienceSerializer(AbstractSerializer):
         return super().save(**kwargs)
 
     def validate(self, data):
-        if data['date_end'] < data['date_begin']:
+        if data['date_end'] and data['date_end'] < data['date_begin']:
             raise serializers.ValidationError({
                 "date_end": _("End date must be on or after the start date.")
             })

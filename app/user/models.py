@@ -1,3 +1,4 @@
+
 import uuid
 
 from django.contrib.auth.base_user import BaseUserManager, AbstractBaseUser
@@ -77,3 +78,4 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def is_employee(self):
         return hasattr(self, 'employee')
+

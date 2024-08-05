@@ -1,3 +1,4 @@
+
 import logging
 
 from django.contrib.auth.models import Permission
@@ -15,3 +16,4 @@ def filter_passed_permission_return_only_available(permissions):
         return list(existing_permissions)
 
     return []
+

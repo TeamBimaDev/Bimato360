@@ -7,3 +7,4 @@ register = template.Library()
 @register.filter
 def trans(value):
     return _(value)
+

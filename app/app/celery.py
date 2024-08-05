@@ -1,3 +1,4 @@
+
 import os
 
 from celery import Celery
@@ -57,3 +58,4 @@ app.conf.beat_schedule = {
     },
 
 }
+

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 version: '3.8'
 
 services:
@@ -16,3 +17,23 @@ networks:
   bima360_network-external:
     external:
       name: bima360-network
+=======
+version: '3.8'
+
+services:
+  rabbitmq:
+    container_name: bima360_rabbitmq
+    build:
+      context: .
+    networks:
+      - bima360_network-external
+    restart: always
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+
+networks:
+  bima360_network-external:
+    external:
+      name: bima360-network
+>>>>>>> origin/ma-branch

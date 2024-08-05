@@ -1,3 +1,5 @@
+
+
 from core.abstract.serializers import AbstractSerializer
 from django.apps import apps
 from django.core.exceptions import ObjectDoesNotExist
@@ -310,3 +312,5 @@ class BimaErpSaleDocumentProductHistorySerializer(serializers.ModelSerializer):
             'description', 'discount', 'discount_amount', 'total_without_vat', 'unit_of_measure',
             'total_after_discount', 'total_price', 'history_type', 'history_date'
         ]
+
+

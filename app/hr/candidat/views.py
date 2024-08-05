@@ -1,7 +1,17 @@
-
 import logging
-
 from common.permissions.action_base_permission import ActionBasedPermission
+from langchain_community.chat_models import ChatOllama
+from langchain_core.output_parsers import StrOutputParser
+from langchain_core.prompts import ChatPromptTemplate
+from core.abstract.views import AbstractViewSet
+import re
+from django.http import Http404
+
+from typing import Optional
+
+from django.core.files.storage import default_storage
+
+
 from core.abstract.views import AbstractViewSet
 from core.address.models import get_addresses_for_parent, create_single_address, BimaCoreAddress
 from core.address.serializers import BimaCoreAddressSerializer
@@ -35,7 +45,7 @@ class BimaHrCandidatViewSet(AbstractViewSet):
     serializer_class = BimaHrCandidatSerializer
     ordering = ["-first_name"]
     permission_classes = []
-    # permission_classes = (ActionBasedPermission,)
+    #permission_classes = (ActionBasedPermission,)
     filterset_class = BimaHrCandidatFilter
     action_permissions = {
         'list': ['candidat.can_read'],
@@ -57,6 +67,7 @@ class BimaHrCandidatViewSet(AbstractViewSet):
     }
     
     logger = logging.getLogger(__name__)
+    
     
     
     def list_documents(self, request, *args, **kwargs):
@@ -149,7 +160,7 @@ class BimaHrCandidatViewSet(AbstractViewSet):
         return Response(serialized_contact.data)
 
     @action(detail=True, methods=['POST'], url_path='add_update_skill')
-    def add_update_skill(self, request, pk=None):
+    def add_update_skill(self, request, public_id=None):
         candidat = self.get_object()
         skill_public_id = request.data.get('skill_public_id')
         level = request.data.get('level')
@@ -164,7 +175,7 @@ class BimaHrCandidatViewSet(AbstractViewSet):
             return Response(e.detail, status=status.HTTP_404_NOT_FOUND)
 
     @action(detail=True, methods=['DELETE'], url_path='delete_skill')
-    def delete_skill(self, request, pk=None):
+    def delete_skill(self, request, public_id=None):
         candidat = self.get_object()
         skill_public_id = request.data.get('skill_public_id')
 
@@ -175,13 +186,12 @@ class BimaHrCandidatViewSet(AbstractViewSet):
             return Response(e.detail, status=status.HTTP_404_NOT_FOUND)
 
     @action(detail=True, methods=['POST', 'PUT'], url_path='add_update_experience')
-    def add_update_experience(self, request, pk=None):
-        candidat = self.get_object()
-        print(candidat)
+    def add_update_experience(self, request, public_id=None):
+        person = self.get_object()
         experience_data = request.data
 
         try:
-            experience, created = add_or_update_person_experience(candidat, experience_data)
+            experience, created = add_or_update_person_experience(person, experience_data)
             if created:
                 return Response({'status': 'Experience added', 'experience': experience},
                                 status=status.HTTP_201_CREATED)
@@ -194,7 +204,7 @@ class BimaHrCandidatViewSet(AbstractViewSet):
             return Response(e.detail, status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=True, methods=['DELETE'], url_path='delete_experience')
-    def delete_experience(self, request, pk=None):
+    def delete_experience(self, request, public_id=None):
         person = self.get_object()
         experience_public_id = request.data.get('experience_public_id')
 
@@ -205,14 +215,14 @@ class BimaHrCandidatViewSet(AbstractViewSet):
             return Response(e.detail, status=status.HTTP_404_NOT_FOUND)
 
     @action(detail=True, methods=['GET'], url_path='get_skills')
-    def get_skills(self, request, pk=None):
+    def get_skills(self, request, public_id=None):
         person = self.get_object()
         person_skills = BimaHrPersonSkill.objects.filter(person=person)
         serializer = BimaHrPersonSkillSerializer(person_skills, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['GET'], url_path='get_experiences')
-    def get_experiences(self, request, pk=None):
+    def get_experiences(self, request, public_id=None):
         person = self.get_object()
         person_experiences = BimaHrPersonExperience.objects.filter(person=person)
         serializer = BimaHrPersonExperienceSerializer(person_experiences, many=True)
@@ -230,6 +240,129 @@ class BimaHrCandidatViewSet(AbstractViewSet):
 
 
 
+'''
+
+def calculate_score(self, vacancie_public_id: str, candidat_public_id: str) -> Optional[float]:
+        try:
+            llm = ChatOllama(model="llama3", temperature=0.01)
+        except Exception as e:
+            self.logger.error(f"Failed to initialize LLM: {e}")
+            return None
+
+        try:
+            vacancie = get_object_or_404(BimaHrVacancie, public_id=vacancie_public_id)
+            vacancie_description = vacancie.description
+        except Http404:
+            self.logger.error("Vacancie not found.")
+            return None
+
+        cv_content = self.read_pdf_content(candidat_public_id)
+        if cv_content is not None:
+            try:
+                resume_prompt = ChatPromptTemplate.from_template(
+                    "From this resume: {resume}, extract the keywords that are most relevant to identifying the candidate’s qualifications and expertise. Focus on specific skills, technologies, certifications, job titles, and significant achievements. These keywords should help recruiters quickly understand the candidate’s skills and experiences."
+                )
+                score_prompt = ChatPromptTemplate.from_template(
+                    "Evaluate the compatibility of the candidate with the job offer by generating a score between 0 and 100. To determine this score, compare the candidate's resume keywords: {resume_keywords} with the job description: {job_description}. Consider the following factors: relevance of skills, technologies, job titles, qualifications, and key responsibilities. A higher score indicates a better match. Display the final score as a number between dashes, for example, --50--."
+                )
+
+                resume_chain = resume_prompt | llm | StrOutputParser()
+                score_chain = score_prompt | llm | StrOutputParser()
+
+                resume_keywords = resume_chain.invoke({"resume": cv_content})
+                score_interpretation = score_chain.invoke({"resume_keywords": resume_keywords, "job_description": vacancie_description})
+
+                score = self.extract_score(score_interpretation)
+                return score
+                    
+            except Exception as e:
+                self.logger.error(f"Failed to invoke LLM or parse output: {e}")
+                return None
+        else:
+            return None
+
+    def read_pdf_content(self, candidat_public_id):
+        try:
+            candidat = BimaHrCandidat.objects.get_object_by_public_id(candidat_public_id)
+            documents = get_documents_for_parent_entity(candidat)
+
+            cv_candidat = get_object_or_404(
+                documents,
+                file_type='CANDIDAT_CV')
+
+            # Construct the file path using Django's default storage system
+            file_pdf = default_storage.path(str(cv_candidat.file_path))
+            print(file_pdf)
+            # Open the file in binary mode
+            with open(file_pdf, 'rb') as pdf_file:
+                pdf_content = pdf_file.read()
+
+            return pdf_content
+
+        except Exception as e:
+            self.logger.error(f"An error occurred while reading the PDF: {e}")
+            return None
+
+    def extract_score(self, text):
+        match = re.search(r'--(\d{1,3})--', text)
+        if match:
+            return int(match.group(1))
+        else:
+            return None
+
+    @action(detail=True, methods=['GET'], url_path='vacancie_applied')
+    def vacancie_applied(self, request, pk=None):
+        candidat = self.get_object()
+        candidat_vacancie = candidat.candidat_vacancie.all()
+        serializer = BimaHrCandidatVacancieSerializer(candidat_vacancie, many=True)
+        return Response(serializer.data)
+
+    @action(detail=True, methods=['POST'], url_path='add_vacancie')
+    def add_vacancie(self, request, pk=None):
+        candidat = self.get_object()
+        data = request.data.copy()
+        vacancie_public_id = data.get('vacancie_public_id')
+        data['candidat_public_id'] = candidat.public_id  # Ajouter l'ID du candidat aux données
+        score = self.calculate_score(vacancie_public_id, candidat.public_id)
+        data['score'] = score
+        serializer = BimaHrCandidatVacancieSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+   
+
+    @action(detail=True, methods=['PUT'], url_path='update-vacancie/(?P<candidat_vacancie_public_id>[^/.]+)')
+    def update_vacancie(self, request, pk=None):
+        candidat_vacancie_public_id = request.data.get('candidat_vacancie_public_id')
+        if not candidat_vacancie_public_id:
+            raise ValidationError({'id': 'Vacancie post ID is required for update.'})
+
+        try:
+            vacancie_post = BimaHrCandidatVacancie.objects.get(public_id=candidat_vacancie_public_id)
+        except BimaHrCandidatVacancie.DoesNotExist:
+            return Response({"detail": "Vacancie not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = BimaHrCandidatVacancieSerializer(vacancie_post, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=True, methods=['DELETE'], url_path='delete-vacancie/(?P<candidat_vacancie_public_id>[^/.]+)')
+    def delete_vacancie(self, request, pk=None):
+        candidat_vacancie_public_id = request.data.get('candidat_vacancie_public_id')
+        try:
+            vacancie_post = BimaHrCandidatVacancie.objects.get(public_id=candidat_vacancie_public_id)
+            vacancie_post.delete()
+            return Response({"detail": "Vacancie application deleted."}, status=status.HTTP_204_NO_CONTENT)
+        except BimaHrCandidatVacancie.DoesNotExist:
+            return Response({"detail": "Vacancie not found."}, status=status.HTTP_404_NOT_FOUND)
+
+
+
+'''
 
 
 

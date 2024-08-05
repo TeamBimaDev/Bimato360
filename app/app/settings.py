@@ -1,3 +1,4 @@
+
 import os
 from datetime import timedelta
 from pathlib import Path
@@ -53,7 +54,7 @@ INSTALLED_APPS = [
     "treasury",
     "analysis",
     "hr",
-
+   
 ]
 
 MIDDLEWARE = [

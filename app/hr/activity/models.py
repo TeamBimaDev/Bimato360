@@ -24,7 +24,7 @@ class BimaHrActivity(AbstractModel):
         return f"{self.name, self.activity_type.name}"
 
     def save(self, *args, **kwargs):
-        if self.end_date <= self.start_date:
+        if self.end_date < self.start_date:
             raise ValidationError("End Date must be greater than Start Date")
         super().save(*args, **kwargs)
 

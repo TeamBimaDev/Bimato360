@@ -1,3 +1,4 @@
+
 from rest_framework import serializers
 from core.abstract.serializers import AbstractSerializer
 from core.country.models import BimaCoreCountry
@@ -26,3 +27,4 @@ class BimaCoreCountrySerializer(AbstractSerializer):
             'phone_code', 'vat_label', 'zip_required',
             'currency', 'currency_public_id', 'created', 'updated'
         ]
+

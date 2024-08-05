@@ -1,3 +1,4 @@
+
 from core.abstract.views import AbstractViewSet
 from core.state.models import BimaCoreState
 from core.state.serializers import BimaCoreStateSerializer
@@ -24,3 +25,4 @@ class BimaCoreStateViewSet(AbstractViewSet):
     def get_object(self):
         obj = BimaCoreState.objects.get_object_by_public_id(self.kwargs['pk'])
         return obj
+

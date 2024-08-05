@@ -1,3 +1,5 @@
+
+
 from core.abstract.serializers import AbstractSerializer
 from django.apps import apps
 from django.utils.translation import gettext_lazy as _
@@ -245,3 +247,5 @@ class BimaErpPurchaseDocumentUnpaidSerializer(AbstractSerializer):
             'payment_terms_public_id',
         ]
         read_only_fields = ('total_vat', 'total_amount', 'total_discount', 'amount_paid', 'transactions')
+
+

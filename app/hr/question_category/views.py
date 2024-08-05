@@ -40,7 +40,7 @@ class BimaHrQuestionCategoryViewSet(AbstractViewSet):
     serializer_class = BimaHrQuestionCategorySerializer
     filterset_class = BimaHrQuestionCategoryFilter
     permission_classes = []
-    permission_classes = (ActionBasedPermission,)
+    #permission_classes = (ActionBasedPermission,)
     action_permissions = {
         'list': ['question_category.can_read'],
         'create': ['question_category.can_create'],

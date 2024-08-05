@@ -1,3 +1,4 @@
+
 from core.abstract.serializers import AbstractSerializer
 
 from core.document.models import BimaCoreDocument

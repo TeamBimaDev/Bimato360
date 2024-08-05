@@ -1,3 +1,5 @@
+
+
 import random
 
 import faker
@@ -151,3 +153,5 @@ def generate_fake_data():
         'address': fake_address,
         'products': fake_products
     }
+
+

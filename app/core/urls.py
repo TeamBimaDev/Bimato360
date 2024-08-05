@@ -1,3 +1,4 @@
+
 from django.urls import path, include
 
 from .views import CoreView
@@ -21,3 +22,4 @@ urlpatterns = [
     path('notification_type/', include('core.notification_type.urls')),
     path('utils/<str:action>/', CoreView.as_view(), name='utility'),
 ]
+

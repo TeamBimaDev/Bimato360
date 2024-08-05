@@ -1,3 +1,5 @@
+
+
 import csv
 import logging
 from datetime import datetime
@@ -550,3 +552,5 @@ class CreditNoteValidator:
 
         if parent_product.quantity < Decimal(quantity):
             raise ValidationError(_('Exceeding quantity from the parent document'))
+
+

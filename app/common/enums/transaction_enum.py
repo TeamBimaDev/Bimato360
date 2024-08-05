@@ -82,3 +82,4 @@ class PaymentTermCustomType(Enum):
 
 def get_payment_term_custom_type():
     return [(ptd.name, ptd.value) for ptd in PaymentTermCustomType]
+
