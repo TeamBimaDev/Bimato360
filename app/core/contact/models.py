@@ -1,4 +1,3 @@
-
 from django.db import models
 from core.abstract.models import AbstractModel
 from django.contrib.contenttypes.fields import GenericForeignKey

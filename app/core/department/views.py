@@ -1,5 +1,3 @@
-
-
 from common.permissions.action_base_permission import ActionBasedPermission
 from core.abstract.views import AbstractViewSet
 from rest_framework.decorators import action
@@ -79,5 +77,3 @@ class BimaCoreDepartmentViewSet(AbstractViewSet):
         children = department.children.all()
         serializer = self.get_serializer(children, many=True)
         return Response(serializer.data)
-
-

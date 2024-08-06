@@ -1,4 +1,3 @@
-
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import BimaCoreContactViewSet
@@ -9,5 +8,3 @@ router.register('', BimaCoreContactViewSet)
 urlpatterns = [
     path('', include(router.urls)),
 ]
-
-

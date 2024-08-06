@@ -1,5 +1,3 @@
-
-
 from rest_framework import serializers
 from core.abstract.serializers import AbstractSerializer
 from .models import BimaCoreDepartment
@@ -68,5 +66,3 @@ class BimaCoreDepartmentSerializer(AbstractSerializer):
                     self.is_descendant(child, department_to_check, visited):
                 return True
         return False
-
-
