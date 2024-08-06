@@ -321,5 +321,6 @@ bima360_db/
 credentials.json
 token.pickle
 
-# Ignore migration files
+# Ignore files
 */migrations/
+*/Bimato360/
