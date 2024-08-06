@@ -5,7 +5,7 @@ from core.abstract.views import AbstractViewSet
 from hr.interview.models import BimaHrInterview
 from hr.interview.serializers import BimaHrInterviewSerializer
 from hr.vacancie.models import BimaHrVacancie
-#from hr.interview_question.models import BimaHrInterviewQuestion
+from hr.interview_question.models import BimaHrInterviewQuestion
 from rest_framework.decorators import action
 from rest_framework import status
 from common.enums.interview import get_interview_status_choices
@@ -163,7 +163,7 @@ class BimaHrInterviewViewSet(AbstractViewSet):
         else:
             return None
 
-    '''@action(detail=True, methods=['POST'], url_path='generate_questions')
+    @action(detail=True, methods=['POST'], url_path='generate_questions')
     def generate_questions(self, request, pk=None):
         try:
             interview = self.get_object()
@@ -188,4 +188,3 @@ class BimaHrInterviewViewSet(AbstractViewSet):
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-'''
