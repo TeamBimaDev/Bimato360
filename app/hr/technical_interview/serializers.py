@@ -1,13 +1,12 @@
 from core.abstract.serializers import AbstractSerializer
 from hr.vacancie.models import BimaHrVacancie
 from hr.candidat.models import BimaHrCandidat
-from .models import BimaHrTechnicalInterview, BimaHrEmployeeinterviewer
+from .models import BimaHrTechnicalInterview
 from hr.employee.models import BimaHrEmployee
-from hr.employee.serializers import BimaHrEmployeeSerializer
 from hr.interview_step.models import BimaHrInterviewStep
 from rest_framework import serializers
 from hr.interview_step.models import BimaHrInterviewStep
-from .utils.google_calendar import create_calendar_event, update_calendar_event, delete_calendar_event
+from .utils.google_calendar import create_calendar_event, update_calendar_event
 from rest_framework.exceptions import ValidationError
 
 

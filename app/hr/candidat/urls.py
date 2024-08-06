@@ -30,5 +30,7 @@ urlpatterns = [
          BimaHrCandidatViewSet.as_view({'get': 'get_contact'}),
          name='candidat-contact'),
 
+     
+
 ]
 
