@@ -65,3 +65,4 @@ class EmailService:
             logger.error(f'Unexpected error sending email: {e}')
             self.update_state(state=states.FAILURE, meta={'exc': str(e)})
             return False
+

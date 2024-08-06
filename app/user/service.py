@@ -79,3 +79,4 @@ def verify_user_credential_when_change_password(uidb64, token, public_id):
         }, status.HTTP_400_BAD_REQUEST
 
     return {"detail": "Valid token."}, status.HTTP_200_OK
+

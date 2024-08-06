@@ -1,3 +1,4 @@
+
 from datetime import date
 
 from common.enums.employee_enum import get_marital_status_choices
@@ -64,3 +65,4 @@ class BimaHrPersonExperience(AbstractModel):
 
     def __str__(self):
         return f"{self.person} at {self.company_name} : {self.experience_duration}"
+

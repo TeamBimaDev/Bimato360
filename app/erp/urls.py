@@ -1,3 +1,5 @@
+
+
 from django.urls import path, include
 
 app_name = 'erp'
@@ -11,3 +13,5 @@ urlpatterns = [
         path('sale_document/', include('erp.sale_document.urls')),
         path('purchase_document/', include('erp.purchase_document.urls')),
 ]
+
+

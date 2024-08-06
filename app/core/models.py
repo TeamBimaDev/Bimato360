@@ -1,3 +1,5 @@
+
+
 from django.db import models
 
 
@@ -9,3 +11,5 @@ class GlobalPermission(models.Model):
 
     class Meta:
         default_permissions = ()
+
+

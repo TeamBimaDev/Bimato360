@@ -12,6 +12,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
+from common.enums.file_type import FileTypeCandidat
 
 
 from .service import resize_image, verify_is_favorite_item_exist

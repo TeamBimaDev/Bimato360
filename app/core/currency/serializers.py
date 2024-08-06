@@ -1,3 +1,4 @@
+
 from core.abstract.serializers import AbstractSerializer
 from core.currency.models import BimaCoreCurrency
 
@@ -10,3 +11,4 @@ class BimaCoreCurrencySerializer(AbstractSerializer):
             'currency_unit_label', 'currency_subunit_label',
             'created', 'updated'
             ]
+

@@ -513,3 +513,4 @@ def update_sale_document_totals(sale_document, re_save=True):
     )
     if re_save:
         sale_document.save()
+

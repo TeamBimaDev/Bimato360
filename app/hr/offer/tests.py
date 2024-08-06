@@ -4,8 +4,11 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase, APIClient
 from user.factories import UserFactory
+<<<<<<< HEAD
 from datetime import timedelta
 from django.utils import timezone
+=======
+>>>>>>> origin/ma-branch
 
 from.factories import BimaHrVacancieFactory, BimaHrOfferFactory
 from.models import BimaHrOffre
@@ -17,14 +20,21 @@ class BimaHrOffreViewSetTest(APITestCase):
         self.user = UserFactory()
         self.vacancie = BimaHrVacancieFactory.create()
         self.offer_data = {
+<<<<<<< HEAD
             #"title": self.vacancie.title.id,
+=======
+>>>>>>> origin/ma-branch
             "title": str(self.vacancie.title),
             "title_public_id":str(self.vacancie.public_id) ,
             "work_location": "become",
             "description": "entreprise IT en zarzis",
             "seniority": "JUNIOR",
             "tone": "Professional",
+<<<<<<< HEAD
             "salary": "5000.00",
+=======
+            "salary": "50k-60k",
+>>>>>>> origin/ma-branch
             "selected_hard_skills": "Python, Django",
             "selected_soft_skills": "communication, leadership",
             "inclusive_emojis": True,
@@ -33,6 +43,7 @@ class BimaHrOffreViewSetTest(APITestCase):
             "inclusive_contact": "bima@gmail.com",
             "inclusive_location": True,
             "inclusive_experience": True,
+<<<<<<< HEAD
             "activated_at": "2023-10-01",
             "stopped_at":"2024-04-01",
             "status":'Unpublished'
@@ -164,16 +175,43 @@ class BimaHrOffreViewSetTest(APITestCase):
         self.assertEqual(BimaHrOffre.objects.count(), 1)
         
     
+=======
+        }
+
+        self.client.force_authenticate(self.user)
+
+    def test_create_offre(self):
+        url = '/api/hr/offer/create-offre/'
+        response = self.client.post(url, self.offer_data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(BimaHrOffre.objects.count(), 1)
+>>>>>>> origin/ma-branch
 
     def test_get_offres(self):
         BimaHrOfferFactory.create_batch(5)
         url = f'/api/hr/offer/'
+<<<<<<< HEAD
         print(url)
         response = self.client.get(url, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         #print(response.data)
        
   
+=======
+        response = self.client.get(url, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+
+    # def test_update_offre(self):
+    #     offer = BimaHrOfferFactory()
+    #     url = f'/api/hr/offer/{offer.pk}/update-offre/'
+    #     updated_data = {"description": "Updated Description"}
+    #     response = self.client.put(url, updated_data, format='json')
+    #     print(response.content)
+    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
+    #     self.assertEqual(offer.description, "Updated Description")
+
+>>>>>>> origin/ma-branch
     def test_read_offer(self):
         offer = BimaHrOfferFactory()
         url = f'/api/hr/offer/{offer.pk}/read-offre/'
@@ -193,6 +231,7 @@ class BimaHrOffreViewSetTest(APITestCase):
         response = self.client.post(url, {}, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIsNotNone(offre.generated_content)
+<<<<<<< HEAD
         
     
     def test_status_change_on_activation_date(self):
@@ -272,4 +311,6 @@ class BimaHrOffreViewSetTest(APITestCase):
 
     
         
+=======
+>>>>>>> origin/ma-branch
 

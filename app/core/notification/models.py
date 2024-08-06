@@ -1,3 +1,5 @@
+
+
 from core.abstract.models import AbstractModel
 from core.notification_type.models import BimaCoreNotificationType
 from django.contrib.auth import get_user_model
@@ -32,3 +34,5 @@ class BimaCoreNotification(AbstractModel):
         if self.message:
             self.message = strip_tags(self.message)
         super().save(*args, **kwargs)
+
+

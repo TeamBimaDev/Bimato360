@@ -1,3 +1,4 @@
+
 from common.permissions.action_base_permission import ActionBasedPermission
 from core.abstract.views import AbstractViewSet
 from core.notification_type.models import BimaCoreNotificationType
@@ -19,7 +20,7 @@ class BimaCoreNotificationViewSet(AbstractViewSet):
     filterset_class = BimaCoreNotificationFilter
     ordering = ["-date_sent"]
     permission_classes = []
-    #permission_classes = (ActionBasedPermission,)
+    permission_classes = (ActionBasedPermission,)
 
     action_permissions = {
         'list': ['notification.can_read'],
@@ -145,3 +146,5 @@ class BimaCoreNotificationViewSet(AbstractViewSet):
         BimaErpNotificationService.send_notification_for_payment_late_sale_documents()
         BimaErpNotificationService.send_notification_for_payment_reminder_sale_documents()
         return Response(_("NOTIFICATION_SALE_DOCUMENT_PAYMENT_LATE_SENT_SUCCESSFUL"))
+
+

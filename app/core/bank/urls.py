@@ -1,3 +1,4 @@
+
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import BimaCoreBankViewSet
@@ -15,3 +16,4 @@ urlpatterns = [
          BimaCoreBankViewSet.as_view({'get': 'get_address'}),
          name='bank-get-address'),
 ]
+

@@ -1,3 +1,4 @@
+
 from django.db import models
 from core.abstract.models import AbstractModel
 from django.contrib.contenttypes.fields import GenericForeignKey
@@ -67,3 +68,4 @@ def get_contacts_for_parent_entity(parent):
         parent_type=ContentType.objects.get_for_model(parent),
         parent_id=parent.id
     )
+

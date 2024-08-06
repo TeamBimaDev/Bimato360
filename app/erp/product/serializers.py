@@ -1,3 +1,5 @@
+
+
 from rest_framework import serializers
 from .models import BimaErpProduct
 from core.abstract.serializers import AbstractSerializer
@@ -63,3 +65,5 @@ class BimaErpProductSerializer(AbstractSerializer):
             'quantity', 'virtual_quantity'
         ]
         read_only_fields = ('quantity', 'virtual_quantity',)
+
+

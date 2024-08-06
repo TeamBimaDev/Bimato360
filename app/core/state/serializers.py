@@ -1,3 +1,4 @@
+
 from core.abstract.serializers import AbstractSerializer
 from core.state.models import BimaCoreState
 from rest_framework import serializers
@@ -23,3 +24,4 @@ class BimaCoreStateSerializer(AbstractSerializer):
     class Meta:
         model = BimaCoreState
         fields = ['id', 'name', 'code', 'country', 'created', 'updated', 'country_public_id']
+

@@ -15,10 +15,12 @@ urlpatterns = [
     path('contract/', include('hr.contract.urls')),
     path('activity_type/', include('hr.activity_type.urls')),
     path('activity/', include('hr.activity.urls')),
-    path('offer/', include('hr.offer.urls')),
-    path('candidat/', include('hr.candidat.urls')),
-    path('vacancie/', include('hr.vacancie.urls')),
-    path('question/', include('hr.question.urls')),
     path('question_category/', include('hr.question_category.urls')),
-    
+    path('question/', include('hr.question.urls')),
+    path('vacancie/', include('hr.vacancie.urls')),
+    path('candidat/', include('hr.candidat.urls')),
+    path('offer/', include('hr.offer.urls')),
+    path('interview_question/', include('hr.interview_question.urls')),
+    path('technical_interview/', include('hr.technical_interview.urls')),
+    path('Te_interview_question/', include('hr.Te_interview_question.urls')),
 ]

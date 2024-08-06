@@ -1,3 +1,4 @@
+
 import logging
 import os
 from os.path import exists
@@ -178,3 +179,5 @@ class BimaCompanyViewSet(AbstractViewSet):
             'show_template_footer': show_template_footer,
             'show_template_logo': show_template_logo,
         }
+
+

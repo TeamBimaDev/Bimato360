@@ -1,3 +1,5 @@
+
+
 import django_filters
 from common.permissions.action_base_permission import ActionBasedPermission
 from core.abstract.views import AbstractViewSet
@@ -34,7 +36,7 @@ class BimaCoreNotificationTemplateViewSet(AbstractViewSet):
     serializer_class = BimaCoreNotificationTemplateSerializer
     filterset_class = BimaCoreNotificationTemplateFilter
     permission_classes = []
-    #permission_classes = (ActionBasedPermission,)
+    permission_classes = (ActionBasedPermission,)
 
     action_permissions = {
         'list': ['notification_template.can_read'],
@@ -74,3 +76,5 @@ class BimaCoreNotificationTemplateViewSet(AbstractViewSet):
         subject, message = BimaCoreNotificationTemplateService.get_rendered_template_for_sale_document(sale_document,
                                                                                                        template)
         return Response({'message': message, 'subject': subject})
+
+

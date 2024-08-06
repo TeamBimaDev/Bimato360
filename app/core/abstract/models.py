@@ -1,3 +1,4 @@
+
 import uuid
 from logging import getLogger
 from django.db import models
@@ -53,3 +54,4 @@ class AbstractModel(models.Model):
             super().delete(*args, **kwargs)
         except ProtectedError:
             raise ValidationError({"Delete": _("Impossible de supprimer cet élément car il est lié à un autre élément.")})
+

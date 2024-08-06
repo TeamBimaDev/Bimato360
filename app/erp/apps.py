@@ -1,3 +1,5 @@
+
+
 from django.apps import AppConfig
 
 
@@ -9,3 +11,4 @@ class ErpConfig(AppConfig):
         from .sale_document import signals
         from .purchase_document import signals
         from .partner import signals
+

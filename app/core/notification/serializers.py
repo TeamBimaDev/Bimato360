@@ -1,3 +1,5 @@
+
+
 from core.abstract.serializers import AbstractSerializer
 from core.notification_type.models import BimaCoreNotificationType
 from rest_framework import serializers
@@ -27,3 +29,5 @@ class BimaCoreNotificationSerializer(AbstractSerializer):
             'id', 'sender', 'receivers_email', 'subject', 'message', 'attachments', 'date_sent',
             'notification_type', 'notification_type_public_id', 'created', 'updated',
         )
+
+

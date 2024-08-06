@@ -1,3 +1,5 @@
+
+
 from common.enums.file_type import FileTypeCompany
 from core.document.models import BimaCoreDocument
 from core.document.serializers import BimaCoreDocumentSerializer
@@ -48,3 +50,5 @@ def get_context(request, request_data):
     context['request'] = request
     context['company_data'] = fetch_company_data(company)
     return context
+
+

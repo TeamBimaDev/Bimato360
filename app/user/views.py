@@ -430,3 +430,4 @@ class CreateUserPasswordForFirstTime(APIView):
             return Response({"detail": _("Creation of the new password succeed.")})
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+

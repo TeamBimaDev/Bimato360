@@ -1,3 +1,5 @@
+
+
 from core.abstract.views import AbstractViewSet
 from core.address.models import BimaCoreAddress
 from core.address.serializers import BimaCoreAddressSerializer
@@ -25,3 +27,5 @@ class BimaCoreAddressViewSet(AbstractViewSet):
         obj = BimaCoreAddress.objects. \
             get_object_by_public_id(self.kwargs['pk'])
         return obj
+
+

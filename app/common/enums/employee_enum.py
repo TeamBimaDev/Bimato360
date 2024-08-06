@@ -1,3 +1,4 @@
+
 from enum import Enum
 
 from django.utils.translation import gettext_lazy as _
@@ -51,3 +52,4 @@ def get_employee_status_choices():
 
 def get_marital_status_choices():
     return [(ms.name, ms.value) for ms in MaritalStatusType]
+

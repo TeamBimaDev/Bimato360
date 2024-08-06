@@ -1,3 +1,4 @@
+
 import pytz
 from common.enums.font_family import get_font_family_list
 from common.enums.language import LanguageEnum
@@ -57,3 +58,4 @@ class BimaCompany(AbstractModel):
         ordering = ['name']
         permissions = []
         default_permissions = ()
+

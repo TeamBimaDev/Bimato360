@@ -1,3 +1,5 @@
+
+
 from company.models import BimaCompany
 from core.abstract.models import AbstractModel
 from core.notification_type.models import BimaCoreNotificationType
@@ -22,3 +24,5 @@ class BimaCoreNotificationTemplate(AbstractModel):
 
     def __str__(self) -> str:
         return self.name
+
+

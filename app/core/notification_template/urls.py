@@ -1,3 +1,5 @@
+
+
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
@@ -9,3 +11,5 @@ router.register('', BimaCoreNotificationTemplateViewSet)
 urlpatterns = [
     path('', include(router.urls)),
 ]
+
+

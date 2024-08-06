@@ -1,3 +1,5 @@
+
+
 import bleach
 from company.models import BimaCompany
 from core.abstract.serializers import AbstractSerializer
@@ -49,3 +51,5 @@ class BimaCoreNotificationTemplateSerializer(AbstractSerializer):
             'id', 'name', 'subject', 'raw_html_message', 'notification_type', 'notification_type_public_id', 'company',
             'company_public_id', 'created', 'updated',
         )
+
+

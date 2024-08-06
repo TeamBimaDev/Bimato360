@@ -7,6 +7,7 @@ class BimaHrInterviewStatus(Enum):
     COMPLETED = _('Completed')
     EXPIRED = _('Expired')
     PLANNED = _('Planned')
+    CANCELED = _('Canceled')
 
 
 class BimaHrInterviewType(Enum):
@@ -31,9 +32,22 @@ def get_interview_time_choices():
 def get_interview_due_data_choices():   
     return [(its.name, its.value) for its in BimaHrInterviewDueDate]
 
+class BimaHrInterviewMode(Enum):
+    ONLINE = _("Online")
+    PHYSICAL = _("Physical")
+
 def get_interview_status_choices():
     return [(its.name, its.value) for its in BimaHrInterviewStatus]
 
 
 def get_interview_type_choices():
     return [(cp.name, cp.value) for cp in BimaHrInterviewType]
+
+def get_interview_due_data_choices():
+    return [(its.name, its.value) for its in BimaHrInterviewDueDate]
+
+def get_interview_time_choices():
+    return [(its.name, its.value) for its in BimaHrInterviewTime]
+
+def get_interview_mode_choices():
+    return [(its.name, its.value) for its in BimaHrInterviewMode]

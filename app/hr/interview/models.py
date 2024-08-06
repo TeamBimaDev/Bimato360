@@ -17,6 +17,8 @@ class BimaHrInterview(AbstractModel):
     link_interview = models.URLField(max_length=200, blank=True, null=True)
     estimated_time = models.CharField(max_length=64, blank=True, null=True, choices=get_interview_time_choices())
     interview_step = models.ForeignKey(BimaHrInterviewStep, null=True, blank=True, on_delete=models.PROTECT)
+    comments = models.TextField(blank=True)
+
 
 
     def save(self, *args, **kwargs):
@@ -25,7 +27,6 @@ class BimaHrInterview(AbstractModel):
         super(BimaHrInterview, self).save(*args, **kwargs)
 
     def generate_link(self):
-        # Générer un lien basé sur le nom du candidat et le nom de la vacance
         base_url = "https://interview.example.com/"
         vacancie_name = self.vacancie.title.replace(" ", "-").lower()
         candidate_name = self.candidat.first_name.replace(" ", "-").lower()

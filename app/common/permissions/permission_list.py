@@ -615,41 +615,48 @@ class PermissionsList:
     HR_CONTRACT_CAN_MANAGE_OTHERS_CONTRACT = (
         "hr.contract.can_manage_others_contract", "Can manage other contract", "HR_CONTRACT")
     
-    
-    HR_CANDIDAT_CREATE = ("hr.candidat.can_create", "Can create candidat", "HR_CANDIDAT",)
-    HR_CANDIDAT_UPDATE = ("hr.candidat.can_update", "Can update candidat", "HR_CANDIDAT",)
-    HR_CANDIDAT_DELETE = ("hr.candidat.can_delete", "Can delete candidat", "HR_CANDIDAT",)
-    HR_CANDIDAT_READ = ("hr.candidat.can_read", "Can read candidat", "HR_CANDIDAT",)
-    HR_CANDIDAT_ADD_DOCUMENT = ("hr.candidat.can_add_document", "Can add document to candidat", "HR_CANDIDAT",)
-    HR_CANDIDAT_ADD_ADDRESS = ("hr.candidat.can_add_address", "Can add address to candidat", "HR_CANDIDAT",)
-    HR_CANDIDAT_ADD_CONTACT = ("hr.candidat.can_add_address", "Can add address to candidat", "HR_CANDIDAT",)
+    HR_QUESTION_CATEGORY_CREATE = ("hr.question_category.can_create", "Can create question category", "HR_QUESTION_CATEGORY",)
+    HR_QUESTION_CATEGORY_UPDATE = ("hr.question_category.can_update", "Can update question category", "HR_QUESTION_CATEGORY",)
+    HR_QUESTION_CATEGORY_DELETE = ("hr.question_category.can_delete", "Can delete question category", "HR_QUESTION_CATEGORY",)
+    HR_QUESTION_CATEGORY_READ = ("hr.question_category.can_read", "Can read question category", "HR_QUESTION_CATEGORY")
 
-    HR_CANDIDAT_MANAGE_SKILL = ("hr.candidat.can_manage_skill", "Can manage candidat skills", "HR_CANDIDAT",)
+    HR_QUESTION_CREATE = ("hr.question.can_create", "Can create question", "HR_QUESTION",)
+    HR_QUESTION_UPDATE = ("hr.question.can_update", "Can update question", "HR_QUESTION",)
+    HR_QUESTION_DELETE = ("hr.question.can_delete", "Can delete question", "HR_QUESTION",)
+    HR_QUESTION_READ = ("hr.question.can_read", "Can read question", "HR_QUESTION")
+
+    HR_CANDIDAT_CREATE = ("hr.candidate.can_create", "Can create candidate", "HR_CANDIDAT",)
+    HR_CANDIDAT_UPDATE = ("hr.candidate.can_update", "Can update candidate", "HR_CANDIDAT",)
+    HR_CANDIDAT_DELETE = ("hr.candidate.can_delete", "Can delete candidate", "HR_CANDIDAT",)
+    HR_CANDIDAT_READ = ("hr.candidate.can_read", "Can read candidate", "HR_CANDIDAT",)
+    HR_CANDIDAT_ADD_DOCUMENT = ("hr.candidate.can_add_document", "Can add document to candidate", "HR_CANDIDAT",)
+    HR_CANDIDAT_ADD_ADDRESS = ("hr.candidate.can_add_address", "Can add address to candidate", "HR_CANDIDAT",)
+    HR_CANDIDAT_ADD_CONTACT = ("hr.candidate.can_add_contact", "Can add contact to candidate", "HR_CANDIDAT",)
+    HR_CANDIDAT_MANAGE_SKILL = ("hr.candidate.can_manage_skill", "Can manage candidate skills", "HR_CANDIDAT",)
     HR_CANDIDAT_MANAGE_EXPERIENCE = (
-        "hr.candidat.can_manage_experience", "Can manage candidat experience", "HR_CANDIDAT",)
-
-
-
-    HR_VACANCIE_CREATE = ("hr.vacancie.can_create", "Can create vacancie", "HR_VACANCIE")
-    HR_VACANCIE_UPDATE = ("hr.vacancie.can_update", "Can update vacancie", "HR_VACANCIE")
-    HR_VACANCIE_DELETE = ("hr.vacancie.can_delete", "Can delete vacancie", "HR_VACANCIE")
-    HR_VACANCIE_READ = ("hr.vacancie.can_read", "Can read vacancie", "HR_VACANCIE")
-    HR_VACANCIE_MANAGE_CANDIDAT = ("hr.vacancie.can_manage_candidat", "Can manage vacancie candidat", "HR_VACANCIE",)
+        "hr.candidate.can_manage_experience", "Can manage candidate experience", "HR_CANDIDAT",)
+    
+    HR_VACANCIE_CREATE = ("hr.vacancie.can_create", "Can create vacancie", "HR_VACANCIE",)
+    HR_VACANCIE_UPDATE = ("hr.vacancie.can_update", "Can update vacancie", "HR_VACANCIE",)
+    HR_VACANCIE_DELETE = ("hr.vacancie.can_delete", "Can delete vacancie", "HR_VACANCIE",)
+    HR_VACANCIE_READ = ("hr.vacancie.can_read", "Can read vacancie", "HR_VACANCIE",)
 
     HR_INTERVIEW_QUESTION_CREATE = ("hr.interview_question.can_create", "Can create interview_question", "HR_INTERVIEW_QUESTION",)
     HR_INTERVIEW_QUESTION_UPDATE = ("hr.interview_question.can_update", "Can update interview_question", "HR_INTERVIEW_QUESTION",)
     HR_INTERVIEW_QUESTION_DELETE = ("hr.interview_question.can_delete", "Can delete interview_question", "HR_INTERVIEW_QUESTION",)
     HR_INTERVIEW_QUESTION_READ = ("hr.interview_question.can_read", "Can read interview_question", "HR_INTERVIEW_QUESTION",)
-    
-    HR_OFFER_CREATE = ("hr.offre.can_create", "Can create offre", "HR_OFFER")
-    HR_OFFER_UPDATE = ("hr.offre.can_update", "Can update offre", "HR_OFFER")
-    HR_OFFER_DELETE = ("hr.offre.can_delete", "Can delete offre", "HR_OFFER")
-    HR_OFFER_READ = ("hr.offre.can_read", "Can read offre", "HR_OFFER")
-    HR_OFFER_GENERATE_DESCRIPTION = ("hr.offre.can_generate_description", "Can generate_description", "HR_OFFER",)
 
     HR_INTERVIEW_CREATE = ("hr.interview.can_create", "Can create interview", "HR_INTERVIEW")
     HR_INTERVIEW_UPDATE = ("hr.interview.can_update", "Can update interview", "HR_INTREVIEW")
     HR_INTERVIEW_DELETE = ("hr.interview.can_delete", "Can delete interview", "HR_INTERVIEW")
     HR_INTERVIEW_READ = ("hr.interview.can_read", "Can read interview", "HR_INTERVIEW")
-   
-   
+
+    HR_TECHNICAL_INTERVIEW_CREATE = ("hr.technical_interview.can_create", "Can create technical interview", "HR_TECHNICAL_INTERVIEW")
+    HR_TECHNICAL_INTERVIEW_UPDATE = ("hr.technical_interview.can_update", "Can update technical interview", "HR_TECHNICAL_INTERVIEW")
+    HR_TECHNICAL_INTERVIEW_DELETE = ("hr.technical_interview.can_delete", "Can delete technical interview", "HR_TECHNICAL_INTERVIEW")
+    HR_TECHNICAL_INTERVIEW_READ = ("hr.technical_interview.can_read", "Can read technical interview", "HR_TECHNICAL_INTERVIEW")
+
+    HR_TECHNICAL_INTERVIEW_QUESTION_CREATE = ("hr.interview_te_question.can_create", "Can create interview_te_question", "HR_TECHNICAL_INTERVIEW_QUESTION",)
+    HR_TECHNICAL_INTERVIEW_QUESTION_UPDATE = ("hr.interview_te_question.can_update", "Can update interview_te_question", "HR_TECHNICAL_INTERVIEW_QUESTION",)
+    HR_TECHNICAL_INTERVIEW_QUESTION_DELETE = ("hr.interview_te_question.can_delete", "Can delete interview_te_question", "HR_TECHNICAL_INTERVIEW_QUESTION",)
+    HR_TECHNICAL_INTERVIEW_QUESTION_READ = ("hr.interview_te_question.can_read", "Can read interview_te_question", "HR_TECHNICAL_INTERVIEW_QUESTION",)

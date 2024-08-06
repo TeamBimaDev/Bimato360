@@ -1,3 +1,5 @@
+
+
 import django_filters
 from common.converters.default_converters import str_to_bool
 from common.permissions.action_base_permission import ActionBasedPermission
@@ -33,7 +35,7 @@ class BimaCoreNotificationTypeViewSet(AbstractViewSet):
     serializer_class = BimaCoreNotificationTypeSerializer
     filterset_class = BimaCoreNotificationTypeFilter
     permission_classes = []
-    #permission_classes = (ActionBasedPermission,)
+    permission_classes = (ActionBasedPermission,)
 
     action_permissions = {
         'list': ['notification_type.can_read'],
@@ -47,3 +49,5 @@ class BimaCoreNotificationTypeViewSet(AbstractViewSet):
     def get_object(self):
         obj = BimaCoreNotificationType.objects.get_object_by_public_id(self.kwargs['pk'])
         return obj
+
+

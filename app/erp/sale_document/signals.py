@@ -68,3 +68,4 @@ def pre_save_sale_document(sender, instance, **kwargs):
 def check_products_before_delete(sender, instance, **kwargs):
     if instance.sale_document_products.count() > 0:
         raise ValidationError(_("Cannot delete item because it contains products."))
+
