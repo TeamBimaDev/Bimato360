@@ -655,3 +655,8 @@ class PermissionsList:
     HR_TECHNICAL_INTERVIEW_UPDATE = ("hr.technical_interview.can_update", "Can update technical interview", "HR_TECHNICAL_INTERVIEW")
     HR_TECHNICAL_INTERVIEW_DELETE = ("hr.technical_interview.can_delete", "Can delete technical interview", "HR_TECHNICAL_INTERVIEW")
     HR_TECHNICAL_INTERVIEW_READ = ("hr.technical_interview.can_read", "Can read technical interview", "HR_TECHNICAL_INTERVIEW")
+
+    HR_TECHNICAL_INTERVIEW_QUESTION_CREATE = ("hr.interview_te_question.can_create", "Can create interview_te_question", "HR_TECHNICAL_INTERVIEW_QUESTION",)
+    HR_TECHNICAL_INTERVIEW_QUESTION_UPDATE = ("hr.interview_te_question.can_update", "Can update interview_te_question", "HR_TECHNICAL_INTERVIEW_QUESTION",)
+    HR_TECHNICAL_INTERVIEW_QUESTION_DELETE = ("hr.interview_te_question.can_delete", "Can delete interview_te_question", "HR_TECHNICAL_INTERVIEW_QUESTION",)
+    HR_TECHNICAL_INTERVIEW_QUESTION_READ = ("hr.interview_te_question.can_read", "Can read interview_te_question", "HR_TECHNICAL_INTERVIEW_QUESTION",)
